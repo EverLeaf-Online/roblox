@@ -66,7 +66,7 @@ end
 
 function EnemySpawnerService.Init()
     if RunService:IsStudio() and GameConfig.Development.SpawnTrainingDummyInStudio then
-        spawnStudioDummy(Vector3.new(12, 4, GameConfig.Movement.DefaultPlaneZ))
+        spawnStudioDummy(Vector3.new(8, 4, GameConfig.Movement.DefaultPlaneZ))
     end
 end
 
