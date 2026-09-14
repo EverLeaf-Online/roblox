@@ -66,22 +66,35 @@ local function makeDrop(itemId, quantity, position, ownerPlayer)
 
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "LootLabel"
-    billboard.Size = UDim2.fromOffset(180, 34)
-    billboard.StudsOffsetWorldSpace = Vector3.new(0, 1.55, 0)
+    billboard.Size = UDim2.fromOffset(196, 38)
+    billboard.StudsOffsetWorldSpace = Vector3.new(0, 1.7, 0)
     billboard.AlwaysOnTop = true
     billboard.MaxDistance = 55
     billboard.Parent = orb
 
     local label = Instance.new("TextLabel")
     label.Size = UDim2.fromScale(1, 1)
-    label.BackgroundTransparency = 1
-    label.Text = string.format("%s  x%d", definition.DisplayName, quantity)
+    label.BackgroundTransparency = 0.12
+    label.BackgroundColor3 = Color3.fromRGB(16, 24, 22)
+    label.Text = string.format("%s   ×%d", definition.DisplayName, quantity)
     label.TextColor3 = Color3.fromRGB(242, 248, 241)
     label.TextStrokeColor3 = Color3.fromRGB(24, 35, 30)
     label.TextStrokeTransparency = 0.2
     label.Font = Enum.Font.GothamBold
     label.TextScaled = true
     label.Parent = billboard
+    local labelCorner = Instance.new("UICorner")
+    labelCorner.CornerRadius = UDim.new(0, 8)
+    labelCorner.Parent = label
+    local labelStroke = Instance.new("UIStroke")
+    labelStroke.Color = orb.Color
+    labelStroke.Transparency = 0.32
+    labelStroke.Thickness = 1
+    labelStroke.Parent = label
+    local labelPadding = Instance.new("UIPadding")
+    labelPadding.PaddingLeft = UDim.new(0, 8)
+    labelPadding.PaddingRight = UDim.new(0, 8)
+    labelPadding.Parent = label
 
     local prompt = Instance.new("ProximityPrompt")
     prompt.Name = "CollectPrompt"

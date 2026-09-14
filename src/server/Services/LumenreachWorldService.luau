@@ -2056,7 +2056,8 @@ local function makeGuide(parent, position, yaw)
 
     local nameLabel = Instance.new("TextLabel")
     nameLabel.Size = UDim2.fromScale(1, 1)
-    nameLabel.BackgroundTransparency = 1
+    nameLabel.BackgroundTransparency = 0.18
+    nameLabel.BackgroundColor3 = Color3.fromRGB(17, 27, 24)
     nameLabel.Text = "ILYRA · WAYFARER GUIDE"
     nameLabel.TextColor3 = Color3.fromRGB(215, 243, 226)
     nameLabel.TextStrokeColor3 = Color3.fromRGB(24, 39, 34)
@@ -2064,6 +2065,14 @@ local function makeGuide(parent, position, yaw)
     nameLabel.Font = Enum.Font.GothamBold
     nameLabel.TextScaled = true
     nameLabel.Parent = nameplate
+    local nameCorner = Instance.new("UICorner")
+    nameCorner.CornerRadius = UDim.new(0, 8)
+    nameCorner.Parent = nameLabel
+    local nameStroke = Instance.new("UIStroke")
+    nameStroke.Color = Color3.fromRGB(87, 142, 112)
+    nameStroke.Transparency = 0.35
+    nameStroke.Thickness = 1
+    nameStroke.Parent = nameLabel
 
     model.PrimaryPart = root
     WorldObjectService.Register(model, "Npc", "lumen_guide")
@@ -2235,13 +2244,22 @@ local function makeCampNpc(parent, npcId, displayName, position, yaw, palette, r
     nameplate.Parent = head
     local label = Instance.new("TextLabel")
     label.Size = UDim2.fromScale(1, 1)
-    label.BackgroundTransparency = 1
+    label.BackgroundTransparency = 0.18
+    label.BackgroundColor3 = Color3.fromRGB(17, 27, 24)
     label.Text = displayName
     label.TextColor3 = Color3.fromRGB(226, 243, 230)
     label.TextStrokeTransparency = 0.25
     label.Font = Enum.Font.GothamBold
     label.TextScaled = true
     label.Parent = nameplate
+    local labelCorner = Instance.new("UICorner")
+    labelCorner.CornerRadius = UDim.new(0, 8)
+    labelCorner.Parent = label
+    local labelStroke = Instance.new("UIStroke")
+    labelStroke.Color = Color3.fromRGB(78, 126, 104)
+    labelStroke.Transparency = 0.42
+    labelStroke.Thickness = 1
+    labelStroke.Parent = label
 
     model.PrimaryPart = root
     WorldObjectService.Register(model, "Npc", npcId)
@@ -2406,7 +2424,8 @@ local function makeLandmarkLabel(parent, position, text)
 
     local label = Instance.new("TextLabel")
     label.Size = UDim2.fromScale(1, 1)
-    label.BackgroundTransparency = 1
+    label.BackgroundTransparency = 0.28
+    label.BackgroundColor3 = Color3.fromRGB(14, 23, 21)
     label.Text = text
     label.TextColor3 = Color3.fromRGB(226, 244, 230)
     label.TextStrokeTransparency = 0.45
@@ -2414,6 +2433,14 @@ local function makeLandmarkLabel(parent, position, text)
     label.TextScaled = true
     label.TextWrapped = false
     label.Parent = billboard
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = label
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(84, 134, 111)
+    stroke.Transparency = 0.5
+    stroke.Thickness = 1
+    stroke.Parent = label
 end
 
 local function prepareGround(world)

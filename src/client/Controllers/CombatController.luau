@@ -46,32 +46,60 @@ local function getFeedbackLabel()
     local label = Instance.new("TextLabel")
     label.Name = "Message"
     label.AnchorPoint = Vector2.new(0.5, 1)
-    label.Position = UDim2.fromScale(0.5, 0.88)
-    label.Size = UDim2.fromOffset(360, 42)
-    label.BackgroundTransparency = 0.25
-    label.BackgroundColor3 = Color3.fromRGB(20, 22, 28)
-    label.TextColor3 = Color3.new(1, 1, 1)
-    label.TextStrokeTransparency = 0.65
+    label.Position = UDim2.fromScale(0.5, 0.84)
+    label.Size = UDim2.fromOffset(320, 38)
+    label.BackgroundTransparency = 0.08
+    label.BackgroundColor3 = Color3.fromRGB(17, 25, 23)
+    label.TextColor3 = Color3.fromRGB(235, 244, 239)
+    label.TextStrokeTransparency = 1
     label.Font = Enum.Font.GothamBold
-    label.TextSize = 20
+    label.TextSize = 15
     label.Visible = false
     label.ZIndex = 20
     label.Parent = getCombatGui()
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 10)
+    corner.Parent = label
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(91, 129, 113)
+    stroke.Transparency = 0.35
+    stroke.Thickness = 1
+    stroke.Parent = label
+    local padding = Instance.new("UIPadding")
+    padding.PaddingLeft = UDim.new(0, 12)
+    padding.PaddingRight = UDim.new(0, 12)
+    padding.Parent = label
 
     feedbackLabel = label
     return label
 end
 
-local function showFeedback(text)
+local function showFeedback(text, tone)
     feedbackGeneration += 1
     local generation = feedbackGeneration
     local label = getFeedbackLabel()
     label.Text = text
+    label.TextTransparency = 0
+    label.BackgroundTransparency = 0.08
+    label.TextColor3 = if tone == "success"
+        then Color3.fromRGB(151, 232, 183)
+        else if tone == "warning"
+            then Color3.fromRGB(235, 188, 105)
+            else Color3.fromRGB(235, 244, 239)
     label.Visible = true
 
-    task.delay(0.9, function()
+    task.delay(0.72, function()
         if generation == feedbackGeneration and label.Parent then
-            label.Visible = false
+            TweenService:Create(label, TweenInfo.new(0.18), {
+                TextTransparency = 1,
+                BackgroundTransparency = 1,
+            }):Play()
+            task.delay(0.2, function()
+                if generation == feedbackGeneration and label.Parent then
+                    label.Visible = false
+                end
+            end)
         end
     end)
 end
@@ -245,15 +273,15 @@ local function performAttack()
         end)
 
         if not invokeOk then
-            showFeedback("Attack request failed")
+            showFeedback("Attack request failed", "warning")
         elseif not attackOk then
-            showFeedback(reasonText[resultOrReason] or tostring(resultOrReason))
+            showFeedback(reasonText[resultOrReason] or tostring(resultOrReason), "warning")
         else
             local damage = resultOrReason and resultOrReason.Damage
             if damage then
-                showFeedback(string.format("Hit for %d", damage))
+                showFeedback(string.format("Hit · %d damage", damage), "success")
             else
-                showFeedback("Hit")
+                showFeedback("Hit", "success")
             end
         end
 
@@ -272,16 +300,24 @@ local function createTouchAttackButton()
     button.Name = "AttackButton"
     button.AnchorPoint = Vector2.new(1, 1)
     button.Position = UDim2.fromScale(0.97, 0.92)
-    button.Size = UDim2.fromOffset(160, 54)
-    button.BackgroundColor3 = Color3.fromRGB(31, 35, 45)
-    button.BackgroundTransparency = 0.08
-    button.TextColor3 = Color3.new(1, 1, 1)
+    button.Size = UDim2.fromOffset(144, 52)
+    button.BackgroundColor3 = Color3.fromRGB(37, 80, 61)
+    button.BackgroundTransparency = 0.04
+    button.TextColor3 = Color3.fromRGB(226, 245, 235)
     button.Font = Enum.Font.GothamBold
-    button.TextSize = 18
+    button.TextSize = 15
     button.Text = "ATTACK"
     button.AutoButtonColor = true
     button.ZIndex = 20
     button.Parent = getCombatGui()
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 12)
+    corner.Parent = button
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(102, 155, 130)
+    stroke.Transparency = 0.28
+    stroke.Thickness = 1
+    stroke.Parent = button
     button.Activated:Connect(performAttack)
     attackButton = button
 end

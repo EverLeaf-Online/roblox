@@ -91,16 +91,16 @@ local function makeHealthBar(monster, definition)
     local gui = Instance.new("BillboardGui")
     gui.Name = "MonsterHealthBar"
     gui.Size = if definition.Boss
-        then UDim2.fromOffset(190, 38)
-        else if definition.Elite then UDim2.fromOffset(140, 32) else UDim2.fromOffset(110, 28)
-    gui.StudsOffsetWorldSpace = Vector3.new(0, if definition.Boss then 7 else 4.5, 0)
+        then UDim2.fromOffset(230, 48)
+        else if definition.Elite then UDim2.fromOffset(170, 38) else UDim2.fromOffset(132, 34)
+    gui.StudsOffsetWorldSpace = Vector3.new(0, if definition.Boss then 7.6 else 4.8, 0)
     gui.AlwaysOnTop = true
     gui.MaxDistance = 85
     gui.Parent = root
 
     local name = Instance.new("TextLabel")
     name.Name = "Name"
-    name.Size = UDim2.fromScale(1, 0.5)
+    name.Size = UDim2.fromScale(1, 0.48)
     name.BackgroundTransparency = 1
     name.Text = definition.DisplayName or monster.Name
     name.TextColor3 = if definition.Boss
@@ -108,18 +108,31 @@ local function makeHealthBar(monster, definition)
         else if definition.Elite
             then Color3.fromRGB(210, 177, 255)
             else Color3.fromRGB(238, 244, 236)
-    name.TextStrokeTransparency = 0.35
-    name.Font = Enum.Font.GothamMedium
+    name.TextStrokeColor3 = Color3.fromRGB(16, 25, 22)
+    name.TextStrokeTransparency = 0.2
+    name.Font = if definition.Boss then Enum.Font.GothamBold else Enum.Font.GothamMedium
     name.TextScaled = true
     name.Parent = gui
 
     local back = Instance.new("Frame")
     back.Name = "Back"
     back.Position = UDim2.fromScale(0.08, 0.58)
-    back.Size = UDim2.fromScale(0.84, 0.25)
-    back.BackgroundColor3 = Color3.fromRGB(34, 37, 35)
+    back.Size = UDim2.fromScale(0.84, 0.24)
+    back.BackgroundColor3 = Color3.fromRGB(17, 24, 23)
     back.BorderSizePixel = 0
     back.Parent = gui
+    local backCorner = Instance.new("UICorner")
+    backCorner.CornerRadius = UDim.new(1, 0)
+    backCorner.Parent = back
+    local backStroke = Instance.new("UIStroke")
+    backStroke.Color = if definition.Boss
+        then Color3.fromRGB(211, 163, 93)
+        else if definition.Elite
+            then Color3.fromRGB(159, 124, 203)
+            else Color3.fromRGB(83, 126, 108)
+    backStroke.Transparency = 0.35
+    backStroke.Thickness = 1
+    backStroke.Parent = back
 
     local fill = Instance.new("Frame")
     fill.Name = "Fill"
@@ -131,10 +144,17 @@ local function makeHealthBar(monster, definition)
             else Color3.fromRGB(103, 211, 122)
     fill.BorderSizePixel = 0
     fill.Parent = back
+    local fillCorner = Instance.new("UICorner")
+    fillCorner.CornerRadius = UDim.new(1, 0)
+    fillCorner.Parent = fill
 
     local function update()
         local ratio = if humanoid.MaxHealth > 0 then humanoid.Health / humanoid.MaxHealth else 0
-        fill.Size = UDim2.fromScale(math.clamp(ratio, 0, 1), 1)
+        TweenService:Create(
+            fill,
+            TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+            { Size = UDim2.fromScale(math.clamp(ratio, 0, 1), 1) }
+        ):Play()
     end
     update()
     humanoid.HealthChanged:Connect(update)
@@ -147,8 +167,8 @@ local function showDamage(monster, amount, text, color)
     end
     local gui = Instance.new("BillboardGui")
     gui.Name = "MonsterDamageNumber"
-    gui.Size = UDim2.fromOffset(120, 44)
-    gui.StudsOffsetWorldSpace = Vector3.new(rng:NextNumber(-0.8, 0.8), 4.4, 0)
+    gui.Size = UDim2.fromOffset(132, 48)
+    gui.StudsOffsetWorldSpace = Vector3.new(rng:NextNumber(-0.8, 0.8), 4.7, 0)
     gui.AlwaysOnTop = true
     gui.Parent = root
 
@@ -157,7 +177,8 @@ local function showDamage(monster, amount, text, color)
     label.BackgroundTransparency = 1
     label.Text = text or tostring(math.floor(amount or 0))
     label.TextColor3 = color or Color3.fromRGB(255, 227, 132)
-    label.TextStrokeTransparency = 0.25
+    label.TextStrokeColor3 = Color3.fromRGB(22, 24, 23)
+    label.TextStrokeTransparency = 0.14
     label.Font = Enum.Font.GothamBold
     label.TextScaled = true
     label.Parent = gui
