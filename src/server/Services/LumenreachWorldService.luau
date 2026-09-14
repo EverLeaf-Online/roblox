@@ -1,3 +1,4 @@
+local CollectionService = game:GetService("CollectionService")
 local Workspace = game:GetService("Workspace")
 
 local EnemySpawnerService = require(script.Parent.EnemySpawnerService)
@@ -41,7 +42,7 @@ local function makeTree(parent, position, scale)
         Enum.Material.Wood,
         Color3.fromRGB(78, 55, 39)
     )
-    makeBall(
+    local crownLower = makeBall(
         model,
         "CrownLower",
         Vector3.new(9, 7, 9) * scale,
@@ -49,7 +50,7 @@ local function makeTree(parent, position, scale)
         Enum.Material.Grass,
         Color3.fromRGB(65, 112, 62)
     )
-    makeBall(
+    local crownUpper = makeBall(
         model,
         "CrownUpper",
         Vector3.new(7, 6, 7) * scale,
@@ -57,6 +58,8 @@ local function makeTree(parent, position, scale)
         Enum.Material.Grass,
         Color3.fromRGB(83, 137, 72)
     )
+    CollectionService:AddTag(crownLower, "EverLeafWindSway")
+    CollectionService:AddTag(crownUpper, "EverLeafWindSway")
     model.PrimaryPart = trunk
     return model
 end
@@ -114,6 +117,7 @@ local function makeGrassTuft(parent, position, scale)
         )
         blade.CanCollide = false
         blade.CastShadow = false
+        CollectionService:AddTag(blade, "EverLeafWindSway")
     end
     return model
 end
@@ -140,6 +144,7 @@ local function makeBush(parent, position, scale)
             colors[((index - 1) % #colors) + 1]
         )
         leaf.CanCollide = false
+        CollectionService:AddTag(leaf, "EverLeafWindSway")
     end
     return model
 end
@@ -415,6 +420,7 @@ local function makeFireflyCluster(parent, center)
         )
         glow.CanCollide = false
         glow.CastShadow = false
+        CollectionService:AddTag(glow, "EverLeafFirefly")
         local light = Instance.new("PointLight")
         light.Color = glow.Color
         light.Brightness = 0.5
