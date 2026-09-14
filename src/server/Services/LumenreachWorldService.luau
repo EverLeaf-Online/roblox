@@ -10,9 +10,19 @@ local WorldObjectService = require(script.Parent.WorldObjectService)
 local LumenreachWorldService = {}
 
 local GENERATED_NAME = "EverLeafGeneratedWorld"
-local WORLD_WIDTH = 620
-local WORLD_DEPTH = 560
+local WORLD_WIDTH = 900
+local WORLD_DEPTH = 760
 local FOLIAGE_MATERIAL = Enum.Material.SmoothPlastic
+
+local WORLD_ZONES = table.freeze({
+    Camp = Vector3.new(-250, 0, 120),
+    Crossroads = Vector3.new(-80, 0, 28),
+    Ruins = Vector3.new(78, 0, -92),
+    CombatGrove = Vector3.new(220, 0, 82),
+    Waterfall = Vector3.new(-255, 0, -178),
+    Glowmere = Vector3.new(22, 0, 176),
+    Overlook = Vector3.new(155, 0, -225),
+})
 
 local function makePart(parent, name, size, cframe, material, color)
     local part = Instance.new("Part")
@@ -593,18 +603,23 @@ local function makeTrailStones(parent)
     model.Parent = parent
 
     local stones = {
-        { Vector3.new(-45, 0.28, 27), math.rad(-58), Vector3.new(5.4, 0.35, 2.8) },
-        { Vector3.new(-35, 0.28, 21), math.rad(-66), Vector3.new(4.6, 0.3, 2.5) },
-        { Vector3.new(-24, 0.28, 15), math.rad(-61), Vector3.new(5.0, 0.32, 2.6) },
-        { Vector3.new(-12, 0.28, 10), math.rad(-78), Vector3.new(4.4, 0.3, 2.4) },
-        { Vector3.new(1, 0.28, 6), math.rad(-86), Vector3.new(5.2, 0.34, 2.7) },
-        { Vector3.new(14, 0.28, 3), math.rad(-88), Vector3.new(4.7, 0.3, 2.5) },
-        { Vector3.new(27, 0.28, -4), math.rad(-38), Vector3.new(5.1, 0.32, 2.7) },
-        { Vector3.new(38, 0.28, -14), math.rad(-31), Vector3.new(4.6, 0.3, 2.4) },
-        { Vector3.new(71, 0.28, 21), math.rad(-87), Vector3.new(5.5, 0.34, 2.8) },
-        { Vector3.new(91, 0.28, 24), math.rad(-88), Vector3.new(5.0, 0.32, 2.6) },
-        { Vector3.new(111, 0.28, 29), math.rad(-82), Vector3.new(4.8, 0.3, 2.5) },
-        { Vector3.new(130, 0.28, 37), math.rad(-73), Vector3.new(5.4, 0.34, 2.8) },
+        { Vector3.new(-214, 0.28, 103), math.rad(-57), Vector3.new(5.2, 0.32, 2.6) },
+        { Vector3.new(-189, 0.28, 87), math.rad(-58), Vector3.new(4.7, 0.3, 2.4) },
+        { Vector3.new(-164, 0.28, 72), math.rad(-60), Vector3.new(5.0, 0.32, 2.6) },
+        { Vector3.new(-137, 0.28, 57), math.rad(-61), Vector3.new(4.5, 0.3, 2.4) },
+        { Vector3.new(-108, 0.28, 42), math.rad(-66), Vector3.new(5.1, 0.33, 2.7) },
+        { Vector3.new(-63, 0.28, 35), math.rad(-82), Vector3.new(4.8, 0.3, 2.5) },
+        { Vector3.new(-31, 0.28, 47), math.rad(-72), Vector3.new(5.3, 0.34, 2.7) },
+        { Vector3.new(6, 0.28, 59), math.rad(-78), Vector3.new(4.6, 0.3, 2.5) },
+        { Vector3.new(48, 0.28, 67), math.rad(-84), Vector3.new(5.0, 0.32, 2.6) },
+        { Vector3.new(89, 0.28, 74), math.rad(-85), Vector3.new(4.8, 0.3, 2.5) },
+        { Vector3.new(132, 0.28, 79), math.rad(-87), Vector3.new(5.4, 0.34, 2.8) },
+        { Vector3.new(173, 0.28, 81), math.rad(-88), Vector3.new(4.9, 0.31, 2.5) },
+        { Vector3.new(-70, 0.28, 6), math.rad(-25), Vector3.new(4.8, 0.3, 2.5) },
+        { Vector3.new(-39, 0.28, -14), math.rad(-35), Vector3.new(5.0, 0.32, 2.6) },
+        { Vector3.new(-6, 0.28, -32), math.rad(-56), Vector3.new(4.6, 0.3, 2.4) },
+        { Vector3.new(27, 0.28, -50), math.rad(-63), Vector3.new(5.1, 0.32, 2.7) },
+        { Vector3.new(54, 0.28, -70), math.rad(-44), Vector3.new(4.8, 0.3, 2.5) },
     }
 
     for index, entry in stones do
@@ -1349,41 +1364,59 @@ local function makeLantern(parent, position)
     return model
 end
 
-local function makeBridge(parent, position)
+local function makeBridge(parent, position, yaw, length, width)
     local model = Instance.new("Model")
     model.Name = "LumenFootbridge"
     model.Parent = parent
+
+    yaw = yaw or 0
+    length = length or 14
+    width = width or 5
+    local base = CFrame.new(position) * CFrame.Angles(0, yaw, 0)
     local wood = Color3.fromRGB(101, 73, 49)
-    for index = -5, 5 do
-        makePart(
+    local darkWood = Color3.fromRGB(69, 50, 35)
+    local plankCount = math.max(7, math.floor(length / 1.15))
+    local spacing = length / plankCount
+
+    for index = 0, plankCount do
+        local z = -length * 0.5 + index * spacing
+        local rise = math.sin((index / plankCount) * math.pi) * 0.55
+        local plank = makePart(
             model,
             "Plank",
-            Vector3.new(4.8, 0.35, 1.15),
-            CFrame.new(position + Vector3.new(0, 0.7 + math.cos(index * 0.3) * 0.22, index * 1.1)),
-            Enum.Material.WoodPlanks,
-            wood
+            Vector3.new(width, 0.34, math.max(0.82, spacing * 0.9)),
+            base
+                * CFrame.new(0, 0.75 + rise, z)
+                * CFrame.Angles(0, math.rad((index % 3 - 1) * 0.7), 0),
+            Enum.Material.Wood,
+            if index % 4 == 0 then darkWood else wood
         )
+        plank.CanTouch = false
     end
+
     for _, side in { -1, 1 } do
         makePart(
             model,
             "Rail",
-            Vector3.new(0.22, 0.22, 13),
-            CFrame.new(position + Vector3.new(side * 2.45, 2.1, 0)),
+            Vector3.new(0.24, 0.24, length + 0.5),
+            base * CFrame.new(side * (width * 0.5 - 0.1), 2.25, 0),
             Enum.Material.Wood,
-            wood
+            darkWood
         )
-        for index = -5, 5, 2 do
+        local postCount = math.max(4, math.floor(length / 4))
+        for index = 0, postCount do
+            local z = -length * 0.5 + (length / postCount) * index
             makePart(
                 model,
                 "RailPost",
-                Vector3.new(0.25, 2.4, 0.25),
-                CFrame.new(position + Vector3.new(side * 2.45, 1.3, index * 1.1)),
+                Vector3.new(0.28, 2.7, 0.28),
+                base * CFrame.new(side * (width * 0.5 - 0.1), 1.45, z),
                 Enum.Material.Wood,
-                wood
+                darkWood
             )
         end
     end
+
     return model
 end
 
@@ -1503,65 +1536,81 @@ local function makeRockSpire(parent, position, scale)
     return model
 end
 
-local function makeRuins(parent)
-    local stone = Color3.fromRGB(116, 123, 117)
-    makePart(
-        parent,
-        "RuinPillar",
-        Vector3.new(4, 14, 4),
-        CFrame.new(29, 7, -31),
-        Enum.Material.Rock,
-        stone
+local function makeRuins(parent, origin)
+    local model = Instance.new("Model")
+    model.Name = "ShatteredLumenArch"
+    model.Parent = parent
+    origin = origin or Vector3.zero
+
+    local stone = Color3.fromRGB(108, 117, 111)
+    local darkStone = Color3.fromRGB(78, 87, 83)
+
+    local function ruinPart(name, size, offset, rotation, color)
+        return makePart(
+            model,
+            name,
+            size,
+            CFrame.new(origin + offset) * (rotation or CFrame.new()),
+            Enum.Material.Rock,
+            color or stone
+        )
+    end
+
+    ruinPart(
+        "WestPillar",
+        Vector3.new(5, 18, 5),
+        Vector3.new(-11, 9, 0),
+        CFrame.Angles(0, 0, math.rad(-2))
     )
-    makePart(
-        parent,
-        "RuinPillar",
-        Vector3.new(4, 11, 4),
-        CFrame.new(43, 5.5, -31),
-        Enum.Material.Rock,
-        stone
+    ruinPart(
+        "EastPillar",
+        Vector3.new(5, 15, 5),
+        Vector3.new(11, 7.5, 0),
+        CFrame.Angles(0, 0, math.rad(3))
     )
-    makePart(
-        parent,
-        "RuinLintel",
-        Vector3.new(18, 3, 4),
-        CFrame.new(36, 13, -31),
-        Enum.Material.Rock,
-        stone
+    ruinPart(
+        "ArchLintel",
+        Vector3.new(27, 3.5, 5),
+        Vector3.new(0, 16.2, 0),
+        CFrame.Angles(0, 0, math.rad(1))
     )
-    makePart(
-        parent,
-        "RuinWall",
-        Vector3.new(3, 7, 18),
-        CFrame.new(50, 3.5, -22) * CFrame.Angles(0, math.rad(-7), math.rad(2)),
-        Enum.Material.Rock,
-        Color3.fromRGB(89, 96, 91)
+    ruinPart(
+        "WestWall",
+        Vector3.new(4, 8, 20),
+        Vector3.new(-18, 4, 7),
+        CFrame.Angles(0, math.rad(10), math.rad(-2)),
+        darkStone
     )
-    makePart(
-        parent,
+    ruinPart(
+        "EastWall",
+        Vector3.new(4, 7, 17),
+        Vector3.new(18, 3.5, 9),
+        CFrame.Angles(0, math.rad(-13), math.rad(2)),
+        darkStone
+    )
+    ruinPart(
         "BrokenLintel",
-        Vector3.new(9, 2.2, 3.4),
-        CFrame.new(22, 1.5, -26) * CFrame.Angles(math.rad(8), math.rad(27), math.rad(17)),
-        Enum.Material.Rock,
-        Color3.fromRGB(105, 112, 106)
+        Vector3.new(11, 2.7, 4),
+        Vector3.new(-17, 1.7, -11),
+        CFrame.Angles(math.rad(8), math.rad(32), math.rad(15))
     )
-    makePart(
-        parent,
+    ruinPart(
         "FallenPillar",
-        Vector3.new(3.2, 10, 3.2),
-        CFrame.new(45, 1.9, -37) * CFrame.Angles(math.rad(82), math.rad(14), math.rad(4)),
-        Enum.Material.Rock,
-        Color3.fromRGB(102, 110, 105)
+        Vector3.new(3.8, 13, 3.8),
+        Vector3.new(14, 2.2, -14),
+        CFrame.Angles(math.rad(82), math.rad(17), math.rad(5))
     )
-    makeRockCluster(parent, Vector3.new(20, 0.2, -36), 0.7, 6)
-    makeRockCluster(parent, Vector3.new(52, 0.2, -37), 0.65, 7)
-    makeCrystal(parent, Vector3.new(36, 3.2, -25))
+
+    makeRockCluster(model, origin + Vector3.new(-23, 0.2, -12), 0.9, 6)
+    makeRockCluster(model, origin + Vector3.new(24, 0.2, -14), 0.82, 7)
+    makeCrystal(model, origin + Vector3.new(-7, 3.4, -8))
+    makeCrystal(model, origin + Vector3.new(9, 2.7, 7))
 
     local gate = makePart(
-        parent,
+        model,
         "BrasshavenGate",
-        Vector3.new(10, 9, 0.8),
-        CFrame.new(36, 5.2, -30.4),
+        Vector3.new(13, 11, 0.9),
+        CFrame.new(origin + Vector3.new(0, 6.1, 0.7)),
         Enum.Material.ForceField,
         Color3.fromRGB(91, 195, 181)
     )
@@ -1573,27 +1622,29 @@ local function makeRuins(parent)
     prompt.Name = "SealedGatePrompt"
     prompt.ActionText = "Sealed"
     prompt.ObjectText = "Brasshaven Gate · Level 20"
-    prompt.MaxActivationDistance = 9
+    prompt.MaxActivationDistance = 10
     prompt.RequiresLineOfSight = false
     prompt.Enabled = false
     prompt.Parent = gate
+
+    return model
 end
 
-local function makeCombatGrove(parent)
+local function makeCombatGrove(parent, center)
     local model = Instance.new("Model")
     model.Name = "MossglenCombatGrove"
     model.Parent = parent
-    local center = Vector3.new(149, 0, 41)
+    center = center or Vector3.zero
 
-    for index = 1, 12 do
-        local angle = (index - 1) * math.pi * 2 / 12
-        local radius = if index % 2 == 0 then 25 else 23
+    for index = 1, 14 do
+        local angle = (index - 1) * math.pi * 2 / 14
+        local radius = if index % 2 == 0 then 34 else 31
         local position = center
             + Vector3.new(math.cos(angle) * radius, 0.6, math.sin(angle) * radius)
         local stone = makeRock(
             model,
             position,
-            Vector3.new(3.2 + (index % 3) * 0.45, 1.4 + (index % 2) * 0.35, 2.8),
+            Vector3.new(3.4 + (index % 3) * 0.5, 1.5 + (index % 2) * 0.4, 3.0),
             Vector3.new(math.rad(index % 3 * 3), angle * 0.35, math.rad((index % 4 - 2) * 4))
         )
         stone.CanCollide = false
@@ -1601,49 +1652,49 @@ local function makeCombatGrove(parent)
 
     for _, entry in
         {
-            { Vector3.new(126, 0, 52), math.rad(62), 0.72 },
-            { Vector3.new(171, 0, 53), math.rad(-58), 0.72 },
-            { Vector3.new(149, 0, 67), math.rad(180), 0.82 },
+            { Vector3.new(-30, 0, 17), math.rad(68), 0.76 },
+            { Vector3.new(30, 0, 17), math.rad(-68), 0.76 },
+            { Vector3.new(0, 0, 35), math.rad(180), 0.86 },
         }
     do
-        makeWaystone(model, entry[1], entry[2], entry[3])
+        makeWaystone(model, center + entry[1], entry[2], entry[3])
     end
 
-    local totemBase = CFrame.new(149, 0, 68)
+    local totemBase = CFrame.new(center + Vector3.new(0, 0, 37))
     makePart(
         model,
         "GroveTotem",
-        Vector3.new(1.8, 7.2, 1.8),
-        totemBase * CFrame.new(0, 3.6, 0),
+        Vector3.new(2.0, 8.4, 2.0),
+        totemBase * CFrame.new(0, 4.2, 0),
         Enum.Material.Wood,
         Color3.fromRGB(65, 50, 35)
     )
     local rune = makePart(
         model,
         "GroveRune",
-        Vector3.new(0.8, 2.3, 0.1),
-        totemBase * CFrame.new(0, 4.25, -0.96) * CFrame.Angles(0, 0, math.rad(45)),
+        Vector3.new(0.9, 2.7, 0.1),
+        totemBase * CFrame.new(0, 4.8, -1.06) * CFrame.Angles(0, 0, math.rad(45)),
         Enum.Material.Neon,
         Color3.fromRGB(101, 226, 182)
     )
     rune.CanCollide = false
     local glow = Instance.new("PointLight")
     glow.Color = rune.Color
-    glow.Brightness = 0.65
-    glow.Range = 10
+    glow.Brightness = 0.7
+    glow.Range = 12
     glow.Parent = rune
 
-    for _, entry in
+    for _, offset in
         {
-            { Vector3.new(132, 0, 21), math.rad(4) },
-            { Vector3.new(165, 0, 22), math.rad(-6) },
+            Vector3.new(-18, 0, -31),
+            Vector3.new(18, 0, -31),
         }
     do
         local marker = makePart(
             model,
             "GroveMarker",
-            Vector3.new(3.8, 0.28, 1.2),
-            CFrame.new(entry[1] + Vector3.new(0, 0.18, 0)) * CFrame.Angles(0, entry[2], 0),
+            Vector3.new(4.2, 0.3, 1.4),
+            CFrame.new(center + offset + Vector3.new(0, 0.18, 0)),
             Enum.Material.Wood,
             Color3.fromRGB(83, 61, 42)
         )
@@ -2017,144 +2068,195 @@ local function prepareGround(world)
             Enum.Material.Grass
         )
 
-        -- Rebuilt world floor: distinct readable clearings connected by a deliberate trail network.
-        terrain:FillBlock(CFrame.new(-62, -0.7, 35), Vector3.new(92, 2.8, 74), Enum.Material.Ground)
-        terrain:FillBlock(CFrame.new(37, -0.82, -30), Vector3.new(76, 2.5, 62), Enum.Material.Grass)
-        terrain:FillBlock(
-            CFrame.new(148, -0.82, 42),
-            Vector3.new(104, 2.6, 86),
-            Enum.Material.Grass
-        )
-        terrain:FillBlock(
-            CFrame.new(-79, -0.86, -48),
-            Vector3.new(58, 2.5, 52),
-            Enum.Material.Grass
-        )
-
-        local perimeterRidges = {
-            { Vector3.new(-292, -18, 150), Enum.Material.Grass, Vector3.new(0, 0, 1) },
-            { Vector3.new(-292, -18, -90), Enum.Material.Basalt, Vector3.new(0, 0, 1) },
-            { Vector3.new(-160, -20, -248), Enum.Material.Grass, Vector3.new(1, 0, 0) },
-            { Vector3.new(75, -20, -255), Enum.Material.Basalt, Vector3.new(1, 0, 0) },
-            { Vector3.new(286, -18, -105), Enum.Material.Basalt, Vector3.new(0, 0, 1) },
-            { Vector3.new(288, -18, 155), Enum.Material.Grass, Vector3.new(0, 0, 1) },
-            { Vector3.new(110, -20, 255), Enum.Material.Grass, Vector3.new(1, 0, 0) },
-            { Vector3.new(-155, -20, 250), Enum.Material.Basalt, Vector3.new(1, 0, 0) },
-        }
-        for _, ridge in perimeterRidges do
-            local center = ridge[1]
-            local material = ridge[2]
-            local axis = ridge[3]
-            terrain:FillBall(center - axis * 34, 38, material)
-            terrain:FillBall(center + Vector3.new(0, 5, 0), 48, material)
-            terrain:FillBall(center + axis * 38 + Vector3.new(0, -2, 0), 40, material)
+        local function fillClearing(center, size, material)
+            terrain:FillBlock(
+                CFrame.new(center + Vector3.new(0, -0.62, 0)),
+                Vector3.new(size.X, 2.6, size.Z),
+                material
+            )
         end
 
-        -- Low interior terrain masses create depth without stealing walkable space.
-        for _, mound in
-            {
-                { Vector3.new(-128, -22, 94), 25, Enum.Material.Grass },
-                { Vector3.new(-132, -22, -82), 24, Enum.Material.Basalt },
-                { Vector3.new(119, -23, -83), 26, Enum.Material.Basalt },
-                { Vector3.new(194, -22, 105), 25, Enum.Material.Grass },
-                { Vector3.new(205, -23, -38), 24, Enum.Material.Basalt },
-            }
-        do
+        local function fillTrail(a, b, width)
+            local startPoint = Vector3.new(a.X, 0.28, a.Z)
+            local endPoint = Vector3.new(b.X, 0.28, b.Z)
+            local delta = endPoint - startPoint
+            local length = delta.Magnitude
+            if length < 0.1 then
+                return
+            end
+            local midpoint = (startPoint + endPoint) * 0.5
+            terrain:FillBlock(
+                CFrame.lookAt(midpoint, endPoint),
+                Vector3.new(width, 1.25, length + 3),
+                Enum.Material.Ground
+            )
+        end
+
+        fillClearing(WORLD_ZONES.Camp, Vector3.new(150, 0, 108), Enum.Material.Ground)
+        fillClearing(WORLD_ZONES.Crossroads, Vector3.new(88, 0, 70), Enum.Material.Ground)
+        fillClearing(WORLD_ZONES.Ruins, Vector3.new(132, 0, 106), Enum.Material.Grass)
+        fillClearing(WORLD_ZONES.CombatGrove, Vector3.new(170, 0, 138), Enum.Material.Grass)
+        fillClearing(WORLD_ZONES.Glowmere, Vector3.new(148, 0, 120), Enum.Material.Grass)
+        fillClearing(WORLD_ZONES.Waterfall, Vector3.new(126, 0, 104), Enum.Material.Grass)
+        fillClearing(WORLD_ZONES.Overlook, Vector3.new(132, 0, 94), Enum.Material.Grass)
+
+        local trails = {
+            { WORLD_ZONES.Camp + Vector3.new(46, 0, -8), Vector3.new(-182, 0, 86), 16 },
+            { Vector3.new(-182, 0, 86), WORLD_ZONES.Crossroads, 15 },
+            { WORLD_ZONES.Crossroads, Vector3.new(-12, 0, -18), 14 },
+            { Vector3.new(-12, 0, -18), WORLD_ZONES.Ruins + Vector3.new(-34, 0, 18), 13 },
+            { WORLD_ZONES.Crossroads + Vector3.new(16, 0, 8), Vector3.new(28, 0, 63), 15 },
+            { Vector3.new(28, 0, 63), Vector3.new(125, 0, 79), 15 },
+            { Vector3.new(125, 0, 79), WORLD_ZONES.CombatGrove + Vector3.new(-47, 0, -3), 16 },
+            { WORLD_ZONES.Crossroads + Vector3.new(-20, 0, -13), Vector3.new(-144, 0, -60), 12 },
+            { Vector3.new(-144, 0, -60), Vector3.new(-210, 0, -126), 12 },
+            { Vector3.new(-210, 0, -126), WORLD_ZONES.Waterfall + Vector3.new(24, 0, 28), 11 },
+            { WORLD_ZONES.Camp + Vector3.new(30, 0, 36), Vector3.new(-155, 0, 157), 13 },
+            { Vector3.new(-155, 0, 157), Vector3.new(-62, 0, 177), 13 },
+            { Vector3.new(-62, 0, 177), WORLD_ZONES.Glowmere + Vector3.new(-50, 0, 0), 13 },
+            { WORLD_ZONES.Glowmere + Vector3.new(45, 0, -14), Vector3.new(122, 0, 143), 13 },
+            { Vector3.new(122, 0, 143), WORLD_ZONES.CombatGrove + Vector3.new(-28, 0, 36), 14 },
+            { WORLD_ZONES.Ruins + Vector3.new(25, 0, -28), Vector3.new(112, 0, -160), 12 },
+            { Vector3.new(112, 0, -160), WORLD_ZONES.Overlook + Vector3.new(-20, 0, 23), 12 },
+            { WORLD_ZONES.Overlook + Vector3.new(36, 0, 18), Vector3.new(245, 0, -132), 11 },
+            { Vector3.new(245, 0, -132), WORLD_ZONES.CombatGrove + Vector3.new(35, 0, -43), 12 },
+        }
+        for _, trail in trails do
+            fillTrail(trail[1], trail[2], trail[3])
+        end
+
+        local perimeterRidges = {
+            { Vector3.new(-425, -24, -275), 58, Enum.Material.Basalt },
+            { Vector3.new(-430, -24, -125), 54, Enum.Material.Grass },
+            { Vector3.new(-426, -23, 35), 57, Enum.Material.Grass },
+            { Vector3.new(-420, -24, 205), 60, Enum.Material.Basalt },
+            { Vector3.new(-340, -25, 335), 58, Enum.Material.Grass },
+            { Vector3.new(-170, -24, 350), 60, Enum.Material.Grass },
+            { Vector3.new(10, -25, 354), 62, Enum.Material.Basalt },
+            { Vector3.new(195, -24, 348), 60, Enum.Material.Grass },
+            { Vector3.new(355, -25, 320), 57, Enum.Material.Basalt },
+            { Vector3.new(425, -24, 210), 60, Enum.Material.Grass },
+            { Vector3.new(432, -24, 45), 56, Enum.Material.Basalt },
+            { Vector3.new(428, -24, -125), 60, Enum.Material.Basalt },
+            { Vector3.new(415, -24, -285), 58, Enum.Material.Grass },
+            { Vector3.new(295, -25, -350), 62, Enum.Material.Basalt },
+            { Vector3.new(105, -24, -355), 60, Enum.Material.Grass },
+            { Vector3.new(-85, -24, -356), 62, Enum.Material.Basalt },
+            { Vector3.new(-270, -25, -342), 60, Enum.Material.Grass },
+        }
+        for _, ridge in perimeterRidges do
+            terrain:FillBall(ridge[1], ridge[2], ridge[3])
+        end
+
+        local interiorMasses = {
+            { Vector3.new(-337, -22, 42), 32, Enum.Material.Grass },
+            { Vector3.new(-338, -22, -72), 29, Enum.Material.Basalt },
+            { Vector3.new(-330, -23, 244), 33, Enum.Material.Grass },
+            { Vector3.new(-175, -22, 256), 31, Enum.Material.Grass },
+            { Vector3.new(-55, -22, 270), 30, Enum.Material.Basalt },
+            { Vector3.new(115, -22, 260), 32, Enum.Material.Grass },
+            { Vector3.new(287, -22, 235), 34, Enum.Material.Grass },
+            { Vector3.new(330, -22, 118), 30, Enum.Material.Basalt },
+            { Vector3.new(330, -22, -42), 34, Enum.Material.Basalt },
+            { Vector3.new(292, -22, -204), 31, Enum.Material.Grass },
+            { Vector3.new(30, -22, -275), 32, Enum.Material.Basalt },
+            { Vector3.new(-135, -22, -265), 31, Enum.Material.Grass },
+            { Vector3.new(-320, -22, -212), 34, Enum.Material.Basalt },
+        }
+        for _, mound in interiorMasses do
             terrain:FillBall(mound[1], mound[2], mound[3])
         end
 
-        local pathSegments = {
-            -- Spawn/camp approach.
-            {
-                CFrame.new(-58, 0.2, 48) * CFrame.Angles(0, math.rad(-23), 0),
-                Vector3.new(15, 1.1, 38),
-            },
-            -- Camp exit toward the central fork.
-            {
-                CFrame.new(-41, 0.2, 27) * CFrame.Angles(0, math.rad(-58), 0),
-                Vector3.new(13, 1.1, 50),
-            },
-            {
-                CFrame.new(0, 0.25, 5) * CFrame.Angles(0, math.rad(-90), 0),
-                Vector3.new(13, 1.1, 64),
-            },
-            -- Ruins branch.
-            {
-                CFrame.new(30, 0.3, -19) * CFrame.Angles(0, math.rad(-30), 0),
-                Vector3.new(11, 1.1, 45),
-            },
-            -- Main trail bends into Mossglen instead of jumping across empty grass.
-            {
-                CFrame.new(51, 0.26, 7) * CFrame.Angles(0, math.rad(-62), 0),
-                Vector3.new(12, 1.1, 48),
-            },
-            {
-                CFrame.new(91, 0.25, 23) * CFrame.Angles(0, math.rad(-88), 0),
-                Vector3.new(14, 1.1, 62),
-            },
-            {
-                CFrame.new(132, 0.25, 35) * CFrame.Angles(0, math.rad(-73), 0),
-                Vector3.new(15, 1.1, 62),
-            },
-            {
-                CFrame.new(167, 0.25, 50) * CFrame.Angles(0, math.rad(-62), 0),
-                Vector3.new(14, 1.1, 44),
-            },
-            -- Waterfall side trail.
-            {
-                CFrame.new(-35, 0.22, -12) * CFrame.Angles(0, math.rad(32), 0),
-                Vector3.new(10, 1.0, 38),
-            },
-            {
-                CFrame.new(-65, 0.22, -39) * CFrame.Angles(0, math.rad(47), 0),
-                Vector3.new(10, 1.0, 46),
-            },
+        -- Glowmere is a real water landmark instead of another grass clearing.
+        terrain:FillBlock(
+            CFrame.new(WORLD_ZONES.Glowmere + Vector3.new(0, -4.0, 0)),
+            Vector3.new(84, 6, 61),
+            Enum.Material.Rock
+        )
+        terrain:FillBlock(
+            CFrame.new(WORLD_ZONES.Glowmere + Vector3.new(0, -1.25, 0)),
+            Vector3.new(78, 3.2, 55),
+            Enum.Material.Water
+        )
+        terrain:FillBall(WORLD_ZONES.Glowmere + Vector3.new(-27, -4, 19), 9, Enum.Material.Rock)
+        terrain:FillBall(WORLD_ZONES.Glowmere + Vector3.new(24, -4, -17), 7, Enum.Material.Rock)
+
+        -- Veilfall basin and stream carve a second, visually separate water space.
+        local fallPool = WORLD_ZONES.Waterfall + Vector3.new(0, 0, 25)
+        terrain:FillBlock(
+            CFrame.new(fallPool + Vector3.new(0, -4.2, 0)),
+            Vector3.new(74, 6, 54),
+            Enum.Material.Rock
+        )
+        terrain:FillBlock(
+            CFrame.new(fallPool + Vector3.new(0, -1.35, 0)),
+            Vector3.new(66, 3.2, 46),
+            Enum.Material.Water
+        )
+        local streamPoints = {
+            fallPool + Vector3.new(28, 0, 16),
+            Vector3.new(-192, 0, -116),
+            Vector3.new(-157, 0, -91),
         }
-        for _, segment in pathSegments do
-            terrain:FillBlock(segment[1], segment[2], Enum.Material.Ground)
+        for index = 1, #streamPoints - 1 do
+            local a = streamPoints[index]
+            local b = streamPoints[index + 1]
+            local startPoint = Vector3.new(a.X, -1.2, a.Z)
+            local endPoint = Vector3.new(b.X, -1.2, b.Z)
+            local length = (endPoint - startPoint).Magnitude
+            terrain:FillBlock(
+                CFrame.lookAt((startPoint + endPoint) * 0.5, endPoint),
+                Vector3.new(9, 2.2, length + 2),
+                Enum.Material.Water
+            )
         end
 
-        terrain:FillBlock(CFrame.new(-18, -1.5, -43), Vector3.new(46, 4, 33), Enum.Material.Water)
-        terrain:FillBlock(CFrame.new(-18, -3.5, -43), Vector3.new(50, 3, 37), Enum.Material.Rock)
+        -- The overlook rises gently in walkable terraces rather than a single inaccessible hill.
+        for step = 1, 5 do
+            local offset = Vector3.new((step - 3) * 7, (step - 1) * 0.45 - 0.5, (step - 3) * -5)
+            terrain:FillBlock(
+                CFrame.new(WORLD_ZONES.Overlook + offset),
+                Vector3.new(78 - step * 5, 1.2, 54 - step * 3),
+                if step >= 4 then Enum.Material.Rock else Enum.Material.Grass
+            )
+        end
     end
 
     local foundation = makePart(
         world,
         "InvisibleFoundation",
         Vector3.new(WORLD_WIDTH, 2, WORLD_DEPTH),
-        CFrame.new(0, -9, 0),
+        CFrame.new(0, -12, 0),
         Enum.Material.SmoothPlastic,
         Color3.new(0, 0, 0)
     )
     foundation.Transparency = 1
 
     local boundaryThickness = 8
-    local boundaryHeight = 90
-    -- Keep only a small safety inset so all visible grass remains playable.
-    -- The terrain ridges themselves provide the natural visual boundary.
-    local boundaryInset = 12
+    local boundaryHeight = 120
+    local boundaryInset = 9
     local halfWidth = WORLD_WIDTH * 0.5 - boundaryInset
     local halfDepth = WORLD_DEPTH * 0.5 - boundaryInset
     local boundarySpecs = {
         {
             "NorthBoundary",
             Vector3.new(WORLD_WIDTH, boundaryHeight, boundaryThickness),
-            CFrame.new(0, boundaryHeight * 0.5 - 2, -halfDepth),
+            CFrame.new(0, boundaryHeight * 0.5 - 4, -halfDepth),
         },
         {
             "SouthBoundary",
             Vector3.new(WORLD_WIDTH, boundaryHeight, boundaryThickness),
-            CFrame.new(0, boundaryHeight * 0.5 - 2, halfDepth),
+            CFrame.new(0, boundaryHeight * 0.5 - 4, halfDepth),
         },
         {
             "WestBoundary",
             Vector3.new(boundaryThickness, boundaryHeight, WORLD_DEPTH),
-            CFrame.new(-halfWidth, boundaryHeight * 0.5 - 2, 0),
+            CFrame.new(-halfWidth, boundaryHeight * 0.5 - 4, 0),
         },
         {
             "EastBoundary",
             Vector3.new(boundaryThickness, boundaryHeight, WORLD_DEPTH),
-            CFrame.new(halfWidth, boundaryHeight * 0.5 - 2, 0),
+            CFrame.new(halfWidth, boundaryHeight * 0.5 - 4, 0),
         },
     }
     for _, spec in boundarySpecs do
@@ -2173,299 +2275,214 @@ local function prepareGround(world)
     end
 end
 
+local function placeTreeArc(
+    parent,
+    center,
+    radiusX,
+    radiusZ,
+    count,
+    startDegrees,
+    spanDegrees,
+    seed
+)
+    for index = 1, count do
+        local alpha = if count <= 1 then 0 else (index - 1) / (count - 1)
+        local angle = math.rad(startDegrees + spanDegrees * alpha)
+        local wobble = math.sin((index + seed) * 2.37) * 5
+        local position = center
+            + Vector3.new(
+                math.cos(angle) * (radiusX + wobble),
+                0,
+                math.sin(angle) * (radiusZ + wobble * 0.7)
+            )
+        local scale = 0.78 + ((index + seed) % 5) * 0.075
+        makeTree(parent, position, scale, ((index + seed) % 3) + 1)
+    end
+end
+
+local function dressZoneEdge(parent, center, radiusX, radiusZ, count, seed)
+    for index = 1, count do
+        local angle = (index - 1) * math.pi * 2 / count + seed * 0.17
+        local position = center
+            + Vector3.new(math.cos(angle) * radiusX, 0, math.sin(angle) * radiusZ)
+        local scale = 0.62 + ((index + seed) % 4) * 0.09
+        local selector = (index + seed) % 6
+        if selector == 0 then
+            makeBush(parent, position, scale)
+        elseif selector == 1 then
+            makeFern(parent, position, scale)
+        elseif selector == 2 then
+            makeGrassTuft(parent, position, scale)
+        elseif selector == 3 then
+            makeMushroomCluster(parent, position, scale * 0.8, index + seed)
+        elseif selector == 4 then
+            makeFlowerPatch(parent, position, scale * 0.75, index % 2 == 0)
+        else
+            makeFern(parent, position, scale * 0.86)
+        end
+    end
+end
+
 local function decorate(world)
-    local trees = {
-        { Vector3.new(-104, 0, 61), 1.15, 1 },
-        { Vector3.new(-108, 0, 70), 0.95, 2 },
-        { Vector3.new(-107, 0, 23), 1.05, 3 },
-        { Vector3.new(-94, 0, 1), 0.82, 1 },
-        { Vector3.new(-72, 0, -18), 0.92, 2 },
-        { Vector3.new(-53, 0, -43), 1.05, 3 },
-        { Vector3.new(-29, 0, -74), 0.88, 1 },
-        { Vector3.new(-2, 0, -76), 1.12, 2 },
-        { Vector3.new(24, 0, -72), 0.9, 3 },
-        { Vector3.new(50, 0, -66), 1.0, 1 },
-        { Vector3.new(75, 0, -55), 1.08, 2 },
-        { Vector3.new(94, 0, -31), 0.9, 3 },
-        { Vector3.new(101, 0, -2), 1.0, 1 },
-        { Vector3.new(96, 0, 31), 0.86, 2 },
-        { Vector3.new(91, 0, 61), 1.08, 3 },
-        { Vector3.new(67, 0, 78), 0.92, 1 },
-        { Vector3.new(36, 0, 86), 1.02, 2 },
-        { Vector3.new(7, 0, 84), 1.08, 3 },
-        { Vector3.new(-22, 0, 88), 0.9, 1 },
-        { Vector3.new(-50, 0, 82), 1.02, 2 },
-        { Vector3.new(-77, 0, 76), 0.88, 3 },
-    }
-    for _, entry in trees do
-        makeTree(world, entry[1], entry[2], entry[3])
-    end
+    -- A forest belt frames the whole map. Major clearings stay readable instead of being carpeted with props.
+    placeTreeArc(world, Vector3.zero, 365, 305, 44, 0, 360, 2)
+    placeTreeArc(world, WORLD_ZONES.Camp, 87, 69, 13, 112, 248, 7)
+    placeTreeArc(world, WORLD_ZONES.Ruins, 78, 65, 12, -45, 285, 11)
+    placeTreeArc(world, WORLD_ZONES.CombatGrove, 96, 78, 15, 35, 285, 17)
+    placeTreeArc(world, WORLD_ZONES.Glowmere, 91, 72, 12, 5, 320, 23)
+    placeTreeArc(world, WORLD_ZONES.Waterfall, 82, 68, 11, 100, 250, 31)
+    placeTreeArc(world, WORLD_ZONES.Overlook, 82, 62, 10, 10, 315, 37)
 
-    local outerTrees = {
-        { Vector3.new(-225, 0, 168), 1.05, 1 },
-        { Vector3.new(-205, 0, 126), 0.9, 2 },
-        { Vector3.new(-218, 0, 62), 1.08, 3 },
-        { Vector3.new(-222, 0, -12), 0.94, 1 },
-        { Vector3.new(-214, 0, -86), 1.02, 2 },
-        { Vector3.new(-188, 0, -156), 0.92, 3 },
-        { Vector3.new(-134, 0, -196), 1.05, 1 },
-        { Vector3.new(-70, 0, -212), 0.9, 2 },
-        { Vector3.new(8, 0, -218), 1.08, 3 },
-        { Vector3.new(84, 0, -208), 0.94, 1 },
-        { Vector3.new(148, 0, -184), 1.04, 2 },
-        { Vector3.new(202, 0, -142), 0.92, 3 },
-        { Vector3.new(224, 0, -72), 1.05, 1 },
-        { Vector3.new(226, 0, 6), 0.9, 2 },
-        { Vector3.new(218, 0, 82), 1.08, 3 },
-        { Vector3.new(198, 0, 148), 0.94, 1 },
-        { Vector3.new(150, 0, 198), 1.04, 2 },
-        { Vector3.new(82, 0, 214), 0.92, 3 },
-        { Vector3.new(8, 0, 220), 1.05, 1 },
-        { Vector3.new(-72, 0, 214), 0.9, 2 },
-        { Vector3.new(-142, 0, 202), 1.08, 3 },
-        { Vector3.new(-198, 0, 182), 0.94, 1 },
-        { Vector3.new(122, 0, 95), 0.86, 2 },
-        { Vector3.new(154, 0, 68), 0.92, 3 },
-        { Vector3.new(174, 0, 42), 0.82, 1 },
-        { Vector3.new(144, 0, 12), 0.9, 2 },
-        { Vector3.new(118, 0, -28), 0.86, 3 },
-    }
-    for _, entry in outerTrees do
-        makeTree(world, entry[1], entry[2], entry[3])
-    end
+    dressZoneEdge(world, WORLD_ZONES.Camp, 70, 52, 13, 3)
+    dressZoneEdge(world, WORLD_ZONES.Crossroads, 50, 39, 9, 7)
+    dressZoneEdge(world, WORLD_ZONES.Ruins, 61, 48, 12, 11)
+    dressZoneEdge(world, WORLD_ZONES.CombatGrove, 72, 58, 14, 15)
+    dressZoneEdge(world, WORLD_ZONES.Glowmere, 67, 52, 15, 19)
+    dressZoneEdge(world, WORLD_ZONES.Waterfall, 61, 48, 13, 23)
+    dressZoneEdge(world, WORLD_ZONES.Overlook, 60, 44, 10, 29)
 
-    local rockClusters = {
-        { Vector3.new(-58, 0, -21), 0.95, 1 },
-        { Vector3.new(-30, 0, -62), 0.78, 2 },
-        { Vector3.new(12, 0, -56), 1.0, 3 },
-        { Vector3.new(74, 0, 9), 0.92, 4 },
-        { Vector3.new(58, 0, 61), 0.86, 5 },
-        { Vector3.new(-90, 0, 11), 0.72, 8 },
-    }
-    for _, entry in rockClusters do
-        makeRockCluster(world, entry[1], entry[2], entry[3])
-    end
-
-    makeTrailStones(world)
-
-    for _, position in
+    -- Wayfarer Camp is now one district in the world, not the world itself.
+    makeCampfire(world, WORLD_ZONES.Camp + Vector3.new(10, 0, -3))
+    makeTent(world, WORLD_ZONES.Camp + Vector3.new(-28, 0.2, -23), math.rad(25))
+    makeTent(world, WORLD_ZONES.Camp + Vector3.new(-31, 0.2, 28), math.rad(-20))
+    makeCampBench(world, WORLD_ZONES.Camp + Vector3.new(12, 0, -14), math.rad(7))
+    makeCampBench(world, WORLD_ZONES.Camp + Vector3.new(24, 0, 8), math.rad(78))
+    makeMapTable(world, WORLD_ZONES.Camp + Vector3.new(-10, 0, 9), math.rad(10))
+    makeSupplyStack(world, WORLD_ZONES.Camp + Vector3.new(-43, 0, 3), math.rad(-8))
+    makeSupplyStack(world, WORLD_ZONES.Camp + Vector3.new(-21, 0, 43), math.rad(18))
+    makeCampBanner(world, WORLD_ZONES.Camp + Vector3.new(-9, 0, 51), math.rad(3))
+    makeSignpost(world, WORLD_ZONES.Camp + Vector3.new(62, 0, -22), math.rad(-56))
+    for _, offset in
         {
-            Vector3.new(-46, 2.1, -33),
-            Vector3.new(-6, 2.1, -58),
-            Vector3.new(55, 2.1, -14),
-            Vector3.new(82, 2.1, 37),
+            Vector3.new(31, 0, -22),
+            Vector3.new(36, 0, 17),
+            Vector3.new(-5, 0, 47),
+            Vector3.new(-41, 0, -36),
         }
     do
-        makeCrystal(world, position)
+        makeLantern(world, WORLD_ZONES.Camp + offset)
     end
 
-    local bushPositions = {
-        Vector3.new(-103, 0, 74),
-        Vector3.new(-99, 0, 39),
-        Vector3.new(-96, 0, 15),
-        Vector3.new(-61, 0, -18),
-        Vector3.new(-51, 0, -31),
-        Vector3.new(-34, 0, -36),
-        Vector3.new(-23, 0, -34),
-        Vector3.new(-8, 0, -48),
-        Vector3.new(16, 0, -41),
-        Vector3.new(30, 0, 52),
-        Vector3.new(44, 0, 60),
-        Vector3.new(64, 0, 45),
-        Vector3.new(76, 0, 5),
-        Vector3.new(82, 0, 24),
-        Vector3.new(44, 0, -50),
-    }
-    for index, position in bushPositions do
-        makeBush(world, position, 0.6 + (index % 4) * 0.1)
-    end
+    -- Lumenwood Crossroads establishes the main navigation fork.
+    makeSignpost(world, WORLD_ZONES.Crossroads + Vector3.new(-3, 0, 1), math.rad(-82))
+    makeWaystone(world, WORLD_ZONES.Crossroads + Vector3.new(16, 0, -14), math.rad(18), 0.82)
+    makeWaystone(world, WORLD_ZONES.Crossroads + Vector3.new(-18, 0, 12), math.rad(-38), 0.74)
+    makeLantern(world, WORLD_ZONES.Crossroads + Vector3.new(-24, 0, -17))
+    makeLantern(world, WORLD_ZONES.Crossroads + Vector3.new(25, 0, 17))
+    makeRockCluster(world, WORLD_ZONES.Crossroads + Vector3.new(31, 0, -26), 0.65, 12)
 
-    local grassPositions = {
-        Vector3.new(-98, 0, 33),
-        Vector3.new(-95, 0, 43),
-        Vector3.new(-99, 0, 56),
-        Vector3.new(-83, 0, 4),
-        Vector3.new(-59, 0, 4),
-        Vector3.new(-36, 0, 13),
-        Vector3.new(-18, 0, -27),
-        Vector3.new(-8, 0, -33),
-        Vector3.new(5, 0, -18),
-        Vector3.new(18, 0, 18),
-        Vector3.new(27, 0, 29),
-        Vector3.new(37, 0, 41),
-        Vector3.new(48, 0, 48),
-        Vector3.new(58, 0, 25),
-        Vector3.new(66, 0, 18),
-        Vector3.new(74, 0, 33),
-        Vector3.new(81, 0, -17),
-        Vector3.new(31, 0, -56),
-        Vector3.new(-96, 0, -4),
-        Vector3.new(-66, 0, -51),
-        Vector3.new(10, 0, 63),
-        Vector3.new(54, 0, -37),
-        Vector3.new(88, 0, 55),
-        Vector3.new(-36, 0, 69),
-    }
-    for index, position in grassPositions do
-        makeGrassTuft(world, position, 0.65 + (index % 4) * 0.1)
+    -- Veilfall is a rocky wet forest with a basin, stream, deadwood, and cliff dressing.
+    makeWaterfall(world, WORLD_ZONES.Waterfall)
+    makeRockFace(world, WORLD_ZONES.Waterfall + Vector3.new(-31, 0, -10), math.rad(18), 1.25)
+    makeRockFace(world, WORLD_ZONES.Waterfall + Vector3.new(34, 0, -5), math.rad(-22), 1.1)
+    makeMossyRockSet(world, WORLD_ZONES.Waterfall + Vector3.new(-29, 0, 39), math.rad(27), 1.0)
+    makeMossyRockSet(world, WORLD_ZONES.Waterfall + Vector3.new(30, 0, 41), math.rad(-35), 0.88)
+    makeFallenLog(world, WORLD_ZONES.Waterfall + Vector3.new(41, 0.2, -36), math.rad(61), 0.9, 2)
+    makePineRoots(world, WORLD_ZONES.Waterfall + Vector3.new(-45, 0, 27), math.rad(-24), 0.82)
+    for index, offset in
+        {
+            Vector3.new(-23, 0, 43),
+            Vector3.new(-9, 0, 48),
+            Vector3.new(15, 0, 46),
+            Vector3.new(31, 0, 35),
+        }
+    do
+        makeCattailCluster(world, WORLD_ZONES.Waterfall + offset, 0.82 + index * 0.03, index)
     end
+    makeFireflyCluster(world, WORLD_ZONES.Waterfall + Vector3.new(-24, 0, 27))
+    makeFireflyCluster(world, WORLD_ZONES.Waterfall + Vector3.new(29, 0, 18))
 
-    local fernPositions = {
-        Vector3.new(-103, 0, 52),
-        Vector3.new(-101, 0, 43),
-        Vector3.new(-66, 0, -22),
-        Vector3.new(-42, 0, -40),
-        Vector3.new(-15, 0, -55),
-        Vector3.new(9, 0, -61),
-        Vector3.new(30, 0, -61),
-        Vector3.new(69, 0, -44),
-        Vector3.new(84, 0, -2),
-        Vector3.new(78, 0, 48),
-        Vector3.new(55, 0, 67),
-        Vector3.new(21, 0, 73),
-        Vector3.new(-8, 0, 72),
-        Vector3.new(-43, 0, 74),
-        Vector3.new(-73, 0, 66),
-    }
-    for index, position in fernPositions do
-        makeFern(world, position, 0.72 + (index % 3) * 0.12)
+    -- Glowmere is a calmer exploration landmark with bridge, reeds, crystals, and fireflies.
+    makeBridge(world, WORLD_ZONES.Glowmere + Vector3.new(-8, 0.2, 0), math.rad(2), 60, 6.5)
+    makeWaystone(world, WORLD_ZONES.Glowmere + Vector3.new(-48, 0, -24), math.rad(-56), 0.75)
+    makeMossyRockSet(world, WORLD_ZONES.Glowmere + Vector3.new(45, 0, -26), math.rad(33), 0.9)
+    makeFallenLog(world, WORLD_ZONES.Glowmere + Vector3.new(39, 0.2, 33), math.rad(-38), 0.82, 1)
+    for index, offset in
+        {
+            Vector3.new(-34, 0, -21),
+            Vector3.new(-39, 0, 10),
+            Vector3.new(-25, 0, 27),
+            Vector3.new(24, 0, 27),
+            Vector3.new(38, 0, 11),
+            Vector3.new(35, 0, -20),
+        }
+    do
+        makeCattailCluster(
+            world,
+            WORLD_ZONES.Glowmere + offset,
+            0.75 + (index % 3) * 0.08,
+            index + 10
+        )
     end
+    makeCrystal(world, WORLD_ZONES.Glowmere + Vector3.new(-28, 2.1, 9))
+    makeCrystal(world, WORLD_ZONES.Glowmere + Vector3.new(31, 2.1, -6))
+    makeFireflyCluster(world, WORLD_ZONES.Glowmere + Vector3.new(-18, 0, -30))
+    makeFireflyCluster(world, WORLD_ZONES.Glowmere + Vector3.new(25, 0, 24))
 
-    local importedFernPositions = {
-        { Vector3.new(-108, 0, 47), math.rad(12), 0.9 },
-        { Vector3.new(-97, 0, -27), math.rad(78), 0.82 },
-        { Vector3.new(-58, 0, -58), math.rad(-24), 0.94 },
-        { Vector3.new(-39, 0, -29), math.rad(41), 0.78 },
-        { Vector3.new(-3, 0, -65), math.rad(-67), 0.88 },
-        { Vector3.new(51, 0, -58), math.rad(22), 0.95 },
-        { Vector3.new(91, 0, -20), math.rad(103), 0.84 },
-        { Vector3.new(101, 0, 43), math.rad(-38), 0.92 },
-        { Vector3.new(67, 0, 73), math.rad(61), 0.86 },
-        { Vector3.new(17, 0, 78), math.rad(-11), 0.8 },
-        { Vector3.new(-58, 0, 77), math.rad(34), 0.9 },
-        { Vector3.new(-89, 0, 67), math.rad(-82), 0.82 },
-    }
-    for _, entry in importedFernPositions do
-        makeFern(world, entry[1], entry[3], entry[2])
-    end
+    -- The Shattered Arch is now a destination in its own clearing.
+    makeRuins(world, WORLD_ZONES.Ruins)
+    makeRockFace(world, WORLD_ZONES.Ruins + Vector3.new(57, 0, -37), math.rad(-67), 1.05)
+    makeMossyRockSet(world, WORLD_ZONES.Ruins + Vector3.new(-51, 0, 31), math.rad(28), 0.9)
+    makeDryBranches(world, WORLD_ZONES.Ruins + Vector3.new(37, 0.1, 34), math.rad(-31), 0.8)
+    makeStump(world, WORLD_ZONES.Ruins + Vector3.new(-39, 0, -33), 0.82, 2)
+    makeWaystone(world, WORLD_ZONES.Ruins + Vector3.new(-46, 0, -3), math.rad(76), 0.72)
 
-    local flowerPatches = {
-        { Vector3.new(-94, 0, 67), 0.9, true },
-        { Vector3.new(-55, 0, 7), 0.8, false },
-        { Vector3.new(-26, 0, -44), 0.85, true },
-        { Vector3.new(18, 0, -48), 0.78, false },
-        { Vector3.new(45, 0, 54), 0.9, true },
-        { Vector3.new(72, 0, 42), 0.82, false },
-        { Vector3.new(25, 0, 62), 0.75, false },
-        { Vector3.new(-35, 0, 68), 0.88, true },
-    }
-    for _, entry in flowerPatches do
-        makeFlowerPatch(world, entry[1], entry[2], entry[3])
-    end
+    -- Mossglen is a large combat arena with space around enemy spawns.
+    makeCombatGrove(world, WORLD_ZONES.CombatGrove)
+    makeMossyRockSet(world, WORLD_ZONES.CombatGrove + Vector3.new(-60, 0, -39), math.rad(21), 0.92)
+    makeMossyRockSet(world, WORLD_ZONES.CombatGrove + Vector3.new(61, 0, 31), math.rad(-44), 0.86)
+    makeFallenLog(world, WORLD_ZONES.CombatGrove + Vector3.new(-55, 0.2, 41), math.rad(48), 0.84, 2)
+    makeStump(world, WORLD_ZONES.CombatGrove + Vector3.new(57, 0, -34), 0.78, 1)
+    makeFireflyCluster(world, WORLD_ZONES.CombatGrove + Vector3.new(0, 0, 47))
 
-    local mossyRockSets = {
-        { Vector3.new(-113, 0, 37), math.rad(24), 0.92 },
-        { Vector3.new(-101, 0, -46), math.rad(-31), 0.82 },
-        { Vector3.new(107, 0, 13), math.rad(62), 0.88 },
-        { Vector3.new(116, 0, 74), math.rad(-18), 0.96 },
-        { Vector3.new(173, 0, 62), math.rad(41), 0.84 },
-    }
-    for _, entry in mossyRockSets do
-        makeMossyRockSet(world, entry[1], entry[2], entry[3])
-    end
+    -- Sunmoss Overlook finishes the northern loop with large silhouettes instead of another flat clearing.
+    makeRockSpire(world, WORLD_ZONES.Overlook + Vector3.new(-31, 0, 8), 1.15)
+    makeRockSpire(world, WORLD_ZONES.Overlook + Vector3.new(35, 0, -8), 0.94)
+    makeRockFace(world, WORLD_ZONES.Overlook + Vector3.new(0, 0, -39), math.rad(178), 1.35)
+    makeWaystone(world, WORLD_ZONES.Overlook + Vector3.new(-5, 2.2, 19), math.rad(8), 0.86)
+    makeCrystal(world, WORLD_ZONES.Overlook + Vector3.new(20, 5.0, 12))
+    makeDryBranches(world, WORLD_ZONES.Overlook + Vector3.new(-46, 0.1, -22), math.rad(56), 0.9)
 
-    local deadwood = {
-        { Vector3.new(-97, 0.1, -24), math.rad(28), 0.9 },
-        { Vector3.new(-18, 0.1, -70), math.rad(-41), 0.82 },
-        { Vector3.new(58, 0.1, 82), math.rad(67), 0.78 },
-        { Vector3.new(96, 0.1, -43), math.rad(-16), 0.86 },
-        { Vector3.new(133, 0.1, 69), math.rad(35), 0.72 },
-    }
-    for _, entry in deadwood do
+    -- The imported forest kit is used between destinations rather than stacked in one location.
+    for _, entry in
+        {
+            { Vector3.new(-175, 0, 121), math.rad(25), 0.8 },
+            { Vector3.new(-128, 0, 75), math.rad(-42), 0.76 },
+            { Vector3.new(-35, 0, 72), math.rad(63), 0.82 },
+            { Vector3.new(58, 0, 72), math.rad(-14), 0.78 },
+            { Vector3.new(138, 0, 123), math.rad(37), 0.84 },
+            { Vector3.new(166, 0, -37), math.rad(-58), 0.82 },
+            { Vector3.new(19, 0, -166), math.rad(24), 0.86 },
+            { Vector3.new(-112, 0, -149), math.rad(-36), 0.8 },
+            { Vector3.new(-206, 0, -63), math.rad(72), 0.82 },
+        }
+    do
         makeDryBranches(world, entry[1], entry[2], entry[3])
     end
 
-    local rockFaces = {
-        { Vector3.new(-102, 0, -76), math.rad(8), 1.05 },
-        { Vector3.new(197, 0, -96), math.rad(-72), 1.25 },
-        { Vector3.new(184, 0, 158), math.rad(-138), 1.18 },
-        { Vector3.new(-188, 0, 153), math.rad(128), 1.12 },
-    }
-    for _, entry in rockFaces do
-        makeRockFace(world, entry[1], entry[2], entry[3])
+    for _, entry in
+        {
+            { Vector3.new(-157, 0, 109), math.rad(-31), 0.9 },
+            { Vector3.new(-101, 0, 111), math.rad(43), 0.82 },
+            { Vector3.new(-6, 0, 89), math.rad(17), 0.86 },
+            { Vector3.new(91, 0, 125), math.rad(-44), 0.92 },
+            { Vector3.new(160, 0, -84), math.rad(28), 0.88 },
+            { Vector3.new(31, 0, -139), math.rad(-62), 0.9 },
+            { Vector3.new(-124, 0, -118), math.rad(47), 0.85 },
+        }
+    do
+        makeMossyRockSet(world, entry[1], entry[2], entry[3])
     end
 
-    local mushroomPatches = {
-        { Vector3.new(-37, 0, -59), 0.95, 1 },
-        { Vector3.new(-8, 0, -64), 0.8, 2 },
-        { Vector3.new(32, 0, -17), 0.76, 3 },
-        { Vector3.new(63, 0, 68), 0.86, 4 },
-        { Vector3.new(99, 0, 58), 0.82, 5 },
-        { Vector3.new(-72, 0, 74), 0.9, 6 },
-        { Vector3.new(127, 0, 7), 0.72, 7 },
-    }
-    for _, entry in mushroomPatches do
-        makeMushroomCluster(world, entry[1], entry[2], entry[3])
-    end
-
-    local cattails = {
-        { Vector3.new(-39, 0, -56), 0.9, 1 },
-        { Vector3.new(-31, 0, -59), 0.82, 2 },
-        { Vector3.new(-5, 0, -58), 0.88, 3 },
-        { Vector3.new(1, 0, -34), 0.8, 4 },
-        { Vector3.new(-39, 0, -31), 0.86, 5 },
-    }
-    for _, entry in cattails do
-        makeCattailCluster(world, entry[1], entry[2], entry[3])
-    end
-
-    makeWaystone(world, Vector3.new(-46, 0, 17), math.rad(-58), 0.78)
-    makeWaystone(world, Vector3.new(51, 0, 2), math.rad(16), 0.72)
-    makeWaystone(world, Vector3.new(118, 0, 19), math.rad(-24), 0.76)
-
-    makeFallenLog(world, Vector3.new(-79, 0.2, -3), math.rad(33), 0.9, 1)
-    makeFallenLog(world, Vector3.new(71, 0.2, -28), math.rad(-52), 0.82, 2)
-    makeFallenLog(world, Vector3.new(42, 0.2, 69), math.rad(74), 0.76, 2)
-    makeStump(world, Vector3.new(-62, 0, 67), 0.9, 2)
-    makeStump(world, Vector3.new(83, 0, 17), 0.72, 1)
-    makeStump(world, Vector3.new(12, 0, -66), 0.8, 2)
-    makePineRoots(world, Vector3.new(-84, 0, -18), math.rad(24), 0.78)
-    makePineRoots(world, Vector3.new(76, 0, 57), math.rad(-38), 0.72)
-    makePineRoots(world, Vector3.new(31, 0, -63), math.rad(71), 0.66)
-
-    -- Rebuilt starter camp: large readable shelters around a clear social center.
-    makeCampfire(world, Vector3.new(-57, 0, 33))
-    makeTent(world, Vector3.new(-79, 0.2, 21), math.rad(21))
-    makeTent(world, Vector3.new(-81, 0.2, 49), math.rad(-18))
-    makeCampBench(world, Vector3.new(-59, 0, 25), math.rad(4))
-    makeCampBench(world, Vector3.new(-50, 0, 38), math.rad(72))
-    makeMapTable(world, Vector3.new(-69, 0, 35), math.rad(9))
-    makeSupplyStack(world, Vector3.new(-88, 0, 35), math.rad(-8))
-    makeSupplyStack(world, Vector3.new(-69, 0, 54), math.rad(19))
-    makeCampBanner(world, Vector3.new(-73, 0, 62), math.rad(2))
-    makeSignpost(world, Vector3.new(-38, 0, 26), math.rad(-58))
-    makeLantern(world, Vector3.new(-48, 0, 28))
-    makeLantern(world, Vector3.new(-45, 0, 43))
-    makeLantern(world, Vector3.new(-63, 0, 58))
-    makeLantern(world, Vector3.new(-29, 0, 22))
-    makeLantern(world, Vector3.new(-8, 0, 10))
-    makeLantern(world, Vector3.new(17, 0, 4))
-    makeBridge(world, Vector3.new(-17, 0.2, -44))
-    makeWaterfall(world, Vector3.new(-92, 0, -66))
-    makeRockSpire(world, Vector3.new(104, 0, -68), 1.05)
-    makeRockSpire(world, Vector3.new(108, 0, 72), 0.82)
-    makeFireflyCluster(world, Vector3.new(-44, 0, -26))
-    makeFireflyCluster(world, Vector3.new(29, 0, -46))
-    makeFireflyCluster(world, Vector3.new(67, 0, 50))
-    makeCombatGrove(world)
-    makeRuins(world)
+    makeTrailStones(world)
 end
 
 local function makeSpawn(world)
     local spawn = Instance.new("SpawnLocation")
     spawn.Name = "LumenreachSpawn"
     spawn.Size = Vector3.new(8, 1, 8)
-    spawn.CFrame = CFrame.new(-63, 4, 57) * CFrame.Angles(0, math.rad(155), 0)
+    spawn.CFrame = CFrame.new(WORLD_ZONES.Camp + Vector3.new(-48, 4, 31))
+        * CFrame.Angles(0, math.rad(128), 0)
     spawn.Anchored = true
     spawn.Neutral = true
     spawn.Material = Enum.Material.Slate
@@ -2489,17 +2506,40 @@ function LumenreachWorldService.Init()
     decorate(world)
     PBRMaterialService.ApplyGeneratedWorld(world)
     makeSpawn(world)
-    makeGuide(world, Vector3.new(-47, 0, 35), math.rad(113))
+    makeGuide(world, WORLD_ZONES.Camp + Vector3.new(31, 0, 8), math.rad(102))
 
-    makeLandmarkLabel(world, Vector3.new(-57, 13, 34), "LUMENREACH WAYFARER CAMP")
-    makeLandmarkLabel(world, Vector3.new(148, 9, 42), "MOSSGLEN COMBAT GROVE")
-    makeLandmarkLabel(world, Vector3.new(37, 18, -31), "SHATTERED LUMEN ARCH")
-    makeLandmarkLabel(world, Vector3.new(-92, 30, -59), "VEILFALL CASCADE")
+    makeLandmarkLabel(world, WORLD_ZONES.Camp + Vector3.new(8, 15, 4), "LUMENREACH WAYFARER CAMP")
+    makeLandmarkLabel(world, WORLD_ZONES.Crossroads + Vector3.new(0, 11, 0), "LUMENWOOD CROSSROADS")
+    makeLandmarkLabel(
+        world,
+        WORLD_ZONES.CombatGrove + Vector3.new(0, 13, 3),
+        "MOSSGLEN COMBAT GROVE"
+    )
+    makeLandmarkLabel(world, WORLD_ZONES.Ruins + Vector3.new(0, 21, -2), "SHATTERED LUMEN ARCH")
+    makeLandmarkLabel(world, WORLD_ZONES.Waterfall + Vector3.new(0, 31, 4), "VEILFALL CASCADE")
+    makeLandmarkLabel(world, WORLD_ZONES.Glowmere + Vector3.new(0, 11, 0), "GLOWMERE POOL")
+    makeLandmarkLabel(world, WORLD_ZONES.Overlook + Vector3.new(0, 19, 0), "SUNMOSS OVERLOOK")
 
-    EnemySpawnerService.Spawn("training_dummy", Vector3.new(-29, 4, 33), world)
-    EnemySpawnerService.Spawn("lumen_mossling", Vector3.new(132, 3, 34), world)
-    EnemySpawnerService.Spawn("lumen_mossling", Vector3.new(151, 3, 48), world)
-    EnemySpawnerService.Spawn("lumen_mossling", Vector3.new(166, 3, 29), world)
+    EnemySpawnerService.Spawn("training_dummy", WORLD_ZONES.Camp + Vector3.new(51, 4, -7), world)
+
+    for _, offset in
+        {
+            Vector3.new(-24, 3, -9),
+            Vector3.new(1, 3, -19),
+            Vector3.new(27, 3, -4),
+            Vector3.new(-14, 3, 21),
+            Vector3.new(21, 3, 23),
+        }
+    do
+        EnemySpawnerService.Spawn("lumen_mossling", WORLD_ZONES.CombatGrove + offset, world)
+    end
+
+    EnemySpawnerService.Spawn("lumen_mossling", WORLD_ZONES.Ruins + Vector3.new(-33, 3, 28), world)
+    EnemySpawnerService.Spawn(
+        "lumen_mossling",
+        WORLD_ZONES.Glowmere + Vector3.new(51, 3, -29),
+        world
+    )
 end
 
 return LumenreachWorldService
