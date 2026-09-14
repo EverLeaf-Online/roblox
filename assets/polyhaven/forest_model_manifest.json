@@ -38,6 +38,60 @@
       "optimized_glb": "assets/polyhaven/models/pine_roots/pine_roots_roblox.glb",
       "optimized_polygons": 13951,
       "optimized_glb_bytes": 3308888
+    },
+    "fern_02": {
+      "role": "FernPrimary",
+      "roblox_model_asset_id": 83253621583897,
+      "source_url": "https://polyhaven.com/a/fern_02",
+      "optimized_glb": "assets/polyhaven/models/fern_02/fern_02_roblox.glb",
+      "optimized_glb_bytes": 1760772,
+      "max_triangles": 8000,
+      "status": "Approved optimized textured GLB"
+    },
+    "dry_branches_medium_01": {
+      "role": "DryBranches",
+      "roblox_model_asset_id": 139771786412178,
+      "source_url": "https://polyhaven.com/a/dry_branches_medium_01",
+      "optimized_glb": "assets/polyhaven/models/dry_branches_medium_01/dry_branches_medium_01_roblox.glb",
+      "optimized_glb_bytes": 3254600,
+      "max_triangles": 18000,
+      "status": "Approved optimized textured GLB"
+    },
+    "rock_moss_set_01": {
+      "role": "MossyRockSet",
+      "roblox_model_asset_id": 124462747468201,
+      "source_url": "https://polyhaven.com/a/rock_moss_set_01",
+      "optimized_glb": "assets/polyhaven/models/rock_moss_set_01/rock_moss_set_01_roblox.glb",
+      "optimized_glb_bytes": 1157896,
+      "max_triangles": 28000,
+      "status": "Approved optimized textured GLB"
+    },
+    "rock_face_02": {
+      "role": "RockFace",
+      "roblox_model_asset_id": 94934760591384,
+      "source_url": "https://polyhaven.com/a/rock_face_02",
+      "optimized_glb": "assets/polyhaven/models/rock_face_02/rock_face_02_roblox.glb",
+      "optimized_glb_bytes": 3492332,
+      "max_triangles": 28000,
+      "status": "Approved optimized textured GLB"
+    },
+    "tree_stump_02": {
+      "role": "TreeStump2",
+      "roblox_model_asset_id": 131840024158767,
+      "source_url": "https://polyhaven.com/a/tree_stump_02",
+      "optimized_glb": "assets/polyhaven/models/tree_stump_02/tree_stump_02_roblox.glb",
+      "optimized_glb_bytes": 3706460,
+      "max_triangles": 28000,
+      "status": "Approved optimized textured GLB"
+    },
+    "dead_tree_trunk_02": {
+      "role": "FallenTreeTrunk2",
+      "roblox_model_asset_id": 87429317329728,
+      "source_url": "https://polyhaven.com/a/dead_tree_trunk_02",
+      "optimized_glb": "assets/polyhaven/models/dead_tree_trunk_02/dead_tree_trunk_02_roblox.glb",
+      "optimized_glb_bytes": 3662428,
+      "max_triangles": 28000,
+      "status": "Approved optimized textured GLB"
     }
   }
 }

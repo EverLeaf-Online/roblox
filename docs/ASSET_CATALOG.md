@@ -19,9 +19,9 @@ This catalog tracks third-party environment assets before they are allowed into 
 5. Record attribution/license requirements before shipping.
 6. Never call `InsertService:LoadAsset()` for marketplace environment content during live gameplay.
 
-## Phase 1 Pine Forest kit — active
+## Phase 1 forest kit — active
 
-Source collection: Poly Haven **Pine Forest** (CC0). The downloaded high/working source files are not committed; `assets/polyhaven/forest_model_manifest.json` records reproducible source URLs and Roblox asset IDs.
+Primary source: Poly Haven CC0 forest assets, including the **Pine Forest** collection and compatible individual nature models. High/working source files are not committed; `assets/polyhaven/forest_model_manifest.json` records reproducible source URLs, optimized GLB metadata, and Roblox asset IDs.
 
 | EverLeaf role | Poly Haven source | Roblox asset ID | Status |
 |---|---|---:|---|
@@ -29,5 +29,15 @@ Source collection: Poly Haven **Pine Forest** (CC0). The downloaded high/working
 | `TreeStump` | `tree_stump_01` | `111453055456477` | Approved, optimized textured GLB |
 | `FallenTreeTrunk` | `dead_tree_trunk` | `76250166585487` | Approved, optimized textured GLB |
 | `PineRoots` | `pine_roots` | `71542327988536` | Approved, optimized textured GLB |
+| `FernPrimary` | `fern_02` | `83253621583897` | Approved, 6.2K-triangle textured GLB |
+| `DryBranches` | `dry_branches_medium_01` | `139771786412178` | Approved, 16.8K-triangle textured GLB |
+| `MossyRockSet` | `rock_moss_set_01` | `124462747468201` | Approved, six-rock set decimated to 28K triangles |
+| `RockFace` | `rock_face_02` | `94934760591384` | Approved, cliff-face mesh decimated to 28K triangles |
+| `TreeStump2` | `tree_stump_02` | `131840024158767` | Approved, second stump variant decimated to 28K triangles |
+| `FallenTreeTrunk2` | `dead_tree_trunk_02` | `87429317329728` | Approved, second fallen-log variant decimated to 28K triangles |
 
-All four models are EverLeaf-owned Roblox uploads sourced from CC0 files. Each active forest prefab is now a self-contained textured GLB; the loader sanitizes it before prefab registration. `TreePrimary` replaces the broken Creator Store tree `580221169`; that old asset is no longer an active Lumenreach dependency. Procedural geometry remains only as a fail-safe when a trusted prefab cannot be loaded.
+These models are EverLeaf-owned Roblox uploads derived from CC0 source files. The loader sanitizes every imported model before prefab registration. The old broken Creator Store tree `580221169` is not an active Lumenreach dependency. Procedural geometry remains as a fail-safe where practical.
+
+### Original in-project environment props
+
+Lumenreach also includes code-built props that have no external asset dependency: wildflower patches, grass/bush fallbacks, mushroom clusters, cattail clusters, Lumen waystones, crystals, camp furniture, lanterns, bridge pieces, ruins, fireflies, and fallback deadwood/rock geometry. These are intentionally lightweight and keep the map readable if a remote prefab fails to load.

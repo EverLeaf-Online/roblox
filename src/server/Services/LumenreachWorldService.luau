@@ -180,12 +180,13 @@ local function makeTree(parent, position, scale, variant)
     return model
 end
 
-local function makeFallenLog(parent, position, yaw, scale)
+local function makeFallenLog(parent, position, yaw, scale, variant)
+    local prefabName = if variant == 2 then "FallenTreeTrunk2" else "FallenTreeTrunk"
     local prefab = EnvironmentPrefabService.Place(
-        "FallenTreeTrunk",
+        prefabName,
         parent,
         CFrame.new(position) * CFrame.Angles(0, yaw, 0),
-        prefabScaleForLongest("FallenTreeTrunk", 10, scale)
+        prefabScaleForLongest(prefabName, 10, scale)
     )
     if prefab then
         return prefab
@@ -220,12 +221,13 @@ local function makeFallenLog(parent, position, yaw, scale)
     return model
 end
 
-local function makeStump(parent, position, scale)
+local function makeStump(parent, position, scale, variant)
+    local prefabName = if variant == 2 then "TreeStump2" else "TreeStump"
     local prefab = EnvironmentPrefabService.Place(
-        "TreeStump",
+        prefabName,
         parent,
-        CFrame.new(position) * CFrame.Angles(0, math.rad(17), 0),
-        prefabScaleForHeight("TreeStump", 3, scale)
+        CFrame.new(position) * CFrame.Angles(0, math.rad(17 + (variant or 1) * 23), 0),
+        prefabScaleForHeight(prefabName, 3, scale)
     )
     if prefab then
         return prefab
@@ -268,7 +270,18 @@ local function makePineRoots(parent, position, yaw, scale)
     return nil
 end
 
-local function makeFern(parent, position, scale)
+local function makeFern(parent, position, scale, yaw)
+    local prefab = EnvironmentPrefabService.Place(
+        "FernPrimary",
+        parent,
+        CFrame.new(position)
+            * CFrame.Angles(0, yaw or math.rad((math.floor(position.X + position.Z) * 37) % 360), 0),
+        prefabScaleForLongest("FernPrimary", 4.2, scale)
+    )
+    if prefab then
+        return prefab
+    end
+
     local model = Instance.new("Model")
     model.Name = "LumenFern"
     model.Parent = parent
@@ -373,6 +386,204 @@ local function makeRockCluster(parent, position, scale, seed)
         ).CanCollide =
             false
     end
+    return model
+end
+
+local function setInstanceCollision(instance, enabled)
+    if instance:IsA("BasePart") then
+        instance.CanCollide = enabled
+    end
+    for _, descendant in instance:GetDescendants() do
+        if descendant:IsA("BasePart") then
+            descendant.CanCollide = enabled
+            descendant.CanTouch = false
+        end
+    end
+end
+
+local function makeDryBranches(parent, position, yaw, scale)
+    local prefab = EnvironmentPrefabService.Place(
+        "DryBranches",
+        parent,
+        CFrame.new(position) * CFrame.Angles(0, yaw, 0),
+        prefabScaleForLongest("DryBranches", 6.5, scale)
+    )
+    if prefab then
+        setInstanceCollision(prefab, false)
+        return prefab
+    end
+
+    local model = Instance.new("Model")
+    model.Name = "DryBranchesFallback"
+    model.Parent = parent
+    local base = CFrame.new(position) * CFrame.Angles(0, yaw, 0)
+    local branchColor = Color3.fromRGB(79, 58, 42)
+    for index, spec in
+        {
+            { Vector3.new(0, 0.28, 0), Vector3.new(0.28, 0.28, 5.8), math.rad(7) },
+            { Vector3.new(1.2, 0.35, -0.4), Vector3.new(0.22, 0.22, 4.2), math.rad(-24) },
+            { Vector3.new(-1.1, 0.32, 0.6), Vector3.new(0.2, 0.2, 3.6), math.rad(31) },
+        }
+    do
+        local branch = makePart(
+            model,
+            "Branch" .. index,
+            spec[2] * scale,
+            base * CFrame.new(spec[1] * scale) * CFrame.Angles(0, spec[3], math.rad(index * 3 - 5)),
+            Enum.Material.Wood,
+            branchColor
+        )
+        branch.CanCollide = false
+    end
+    return model
+end
+
+local function makeMossyRockSet(parent, position, yaw, scale)
+    local prefab = EnvironmentPrefabService.Place(
+        "MossyRockSet",
+        parent,
+        CFrame.new(position) * CFrame.Angles(0, yaw, 0),
+        prefabScaleForLongest("MossyRockSet", 9, scale)
+    )
+    if prefab then
+        setInstanceCollision(prefab, true)
+        return prefab
+    end
+    return makeRockCluster(parent, position, 0.9 * scale, math.max(1, math.floor(scale * 9)))
+end
+
+local function makeRockFace(parent, position, yaw, scale)
+    local prefab = EnvironmentPrefabService.Place(
+        "RockFace",
+        parent,
+        CFrame.new(position) * CFrame.Angles(0, yaw, 0),
+        prefabScaleForLongest("RockFace", 22, scale)
+    )
+    if prefab then
+        setInstanceCollision(prefab, true)
+        return prefab
+    end
+    return makeRockCluster(parent, position, 1.8 * scale, math.max(1, math.floor(scale * 7)))
+end
+
+local function makeMushroomCluster(parent, position, scale, seed)
+    local model = Instance.new("Model")
+    model.Name = "LumenMushroomCluster"
+    model.Parent = parent
+
+    local stemColor = Color3.fromRGB(211, 199, 166)
+    local caps = {
+        Color3.fromRGB(100, 151, 121),
+        Color3.fromRGB(124, 105, 166),
+        Color3.fromRGB(191, 126, 87),
+    }
+    local offsets = {
+        Vector3.new(-0.7, 0, -0.3),
+        Vector3.new(0.45, 0, 0.25),
+        Vector3.new(1.05, 0, -0.5),
+        Vector3.new(-0.15, 0, 0.9),
+        Vector3.new(-1.05, 0, 0.75),
+    }
+    for index, offset in offsets do
+        local height = (0.75 + ((index + seed) % 3) * 0.22) * scale
+        local stem = makePart(
+            model,
+            "Stem" .. index,
+            Vector3.new(0.22, height, 0.22),
+            CFrame.new(position + offset * scale + Vector3.new(0, height * 0.5, 0)),
+            Enum.Material.SmoothPlastic,
+            stemColor
+        )
+        stem.CanCollide = false
+        stem.CastShadow = false
+        local cap = makeBall(
+            model,
+            "Cap" .. index,
+            Vector3.new(0.82, 0.32, 0.82) * (scale * (0.86 + (index % 2) * 0.16)),
+            CFrame.new(position + offset * scale + Vector3.new(0, height + 0.08 * scale, 0)),
+            Enum.Material.SmoothPlastic,
+            caps[((index + seed - 2) % #caps) + 1]
+        )
+        cap.CanCollide = false
+        cap.CastShadow = false
+    end
+    return model
+end
+
+local function makeCattailCluster(parent, position, scale, seed)
+    local model = Instance.new("Model")
+    model.Name = "LumenCattails"
+    model.Parent = parent
+    local offsets = {
+        Vector3.new(-0.8, 0, -0.3),
+        Vector3.new(0.1, 0, 0.4),
+        Vector3.new(0.85, 0, -0.2),
+        Vector3.new(-0.2, 0, -0.9),
+        Vector3.new(0.7, 0, 0.9),
+    }
+    for index, offset in offsets do
+        local height = (2.4 + ((index + seed) % 3) * 0.35) * scale
+        local stem = makePart(
+            model,
+            "ReedStem" .. index,
+            Vector3.new(0.12, height, 0.12),
+            CFrame.new(position + offset * scale + Vector3.new(0, height * 0.5, 0)),
+            FOLIAGE_MATERIAL,
+            Color3.fromRGB(75, 118, 64)
+        )
+        stem.CanCollide = false
+        stem.CastShadow = false
+        local head = makePart(
+            model,
+            "Cattail" .. index,
+            Vector3.new(0.28, 0.72 * scale, 0.28),
+            CFrame.new(position + offset * scale + Vector3.new(0, height + 0.24 * scale, 0)),
+            Enum.Material.SmoothPlastic,
+            Color3.fromRGB(95, 67, 43)
+        )
+        head.CanCollide = false
+        head.CastShadow = false
+    end
+    return model
+end
+
+local function makeWaystone(parent, position, yaw, scale)
+    local model = Instance.new("Model")
+    model.Name = "LumenWaystone"
+    model.Parent = parent
+    local base = CFrame.new(position) * CFrame.Angles(0, yaw, 0)
+    local foot = makeBall(
+        model,
+        "MossyFoot",
+        Vector3.new(3.2, 1.1, 2.7) * scale,
+        base * CFrame.new(0, 0.5 * scale, 0),
+        Enum.Material.Rock,
+        Color3.fromRGB(78, 88, 82)
+    )
+    useMaterialVariant(foot, "MossyRock")
+    local pillar = makePart(
+        model,
+        "Waystone",
+        Vector3.new(1.8, 4.6, 1.2) * scale,
+        base * CFrame.new(0, 2.65 * scale, 0) * CFrame.Angles(math.rad(-2), 0, math.rad(3)),
+        Enum.Material.Slate,
+        Color3.fromRGB(76, 86, 82)
+    )
+    local rune = makePart(
+        model,
+        "LumenRune",
+        Vector3.new(0.55, 1.45, 0.08) * scale,
+        base * CFrame.new(0, 2.95 * scale, -0.64 * scale),
+        Enum.Material.Neon,
+        Color3.fromRGB(97, 218, 181)
+    )
+    rune.CanCollide = false
+    local light = Instance.new("PointLight")
+    light.Color = rune.Color
+    light.Brightness = 0.45
+    light.Range = 7 * scale
+    light.Parent = rune
+    pillar.CanTouch = false
     return model
 end
 
@@ -1485,6 +1696,24 @@ local function decorate(world)
         makeFern(world, position, 0.72 + (index % 3) * 0.12)
     end
 
+    local importedFernPositions = {
+        { Vector3.new(-108, 0, 47), math.rad(12), 0.9 },
+        { Vector3.new(-97, 0, -27), math.rad(78), 0.82 },
+        { Vector3.new(-58, 0, -58), math.rad(-24), 0.94 },
+        { Vector3.new(-39, 0, -29), math.rad(41), 0.78 },
+        { Vector3.new(-3, 0, -65), math.rad(-67), 0.88 },
+        { Vector3.new(51, 0, -58), math.rad(22), 0.95 },
+        { Vector3.new(91, 0, -20), math.rad(103), 0.84 },
+        { Vector3.new(101, 0, 43), math.rad(-38), 0.92 },
+        { Vector3.new(67, 0, 73), math.rad(61), 0.86 },
+        { Vector3.new(17, 0, 78), math.rad(-11), 0.8 },
+        { Vector3.new(-58, 0, 77), math.rad(34), 0.9 },
+        { Vector3.new(-89, 0, 67), math.rad(-82), 0.82 },
+    }
+    for _, entry in importedFernPositions do
+        makeFern(world, entry[1], entry[3], entry[2])
+    end
+
     local flowerPatches = {
         { Vector3.new(-71, 0, 55), 0.9, true },
         { Vector3.new(-55, 0, 7), 0.8, false },
@@ -1499,12 +1728,72 @@ local function decorate(world)
         makeFlowerPatch(world, entry[1], entry[2], entry[3])
     end
 
-    makeFallenLog(world, Vector3.new(-79, 0.2, -3), math.rad(33), 0.9)
-    makeFallenLog(world, Vector3.new(71, 0.2, -28), math.rad(-52), 0.82)
-    makeFallenLog(world, Vector3.new(42, 0.2, 69), math.rad(74), 0.76)
-    makeStump(world, Vector3.new(-62, 0, 67), 0.9)
-    makeStump(world, Vector3.new(83, 0, 17), 0.72)
-    makeStump(world, Vector3.new(12, 0, -66), 0.8)
+    local mossyRockSets = {
+        { Vector3.new(-113, 0, 37), math.rad(24), 0.92 },
+        { Vector3.new(-101, 0, -46), math.rad(-31), 0.82 },
+        { Vector3.new(107, 0, 13), math.rad(62), 0.88 },
+        { Vector3.new(116, 0, 74), math.rad(-18), 0.96 },
+        { Vector3.new(173, 0, 62), math.rad(41), 0.84 },
+    }
+    for _, entry in mossyRockSets do
+        makeMossyRockSet(world, entry[1], entry[2], entry[3])
+    end
+
+    local deadwood = {
+        { Vector3.new(-97, 0.1, -24), math.rad(28), 0.9 },
+        { Vector3.new(-18, 0.1, -70), math.rad(-41), 0.82 },
+        { Vector3.new(58, 0.1, 82), math.rad(67), 0.78 },
+        { Vector3.new(96, 0.1, -43), math.rad(-16), 0.86 },
+        { Vector3.new(133, 0.1, 69), math.rad(35), 0.72 },
+    }
+    for _, entry in deadwood do
+        makeDryBranches(world, entry[1], entry[2], entry[3])
+    end
+
+    local rockFaces = {
+        { Vector3.new(-102, 0, -76), math.rad(8), 1.05 },
+        { Vector3.new(197, 0, -96), math.rad(-72), 1.25 },
+        { Vector3.new(184, 0, 158), math.rad(-138), 1.18 },
+        { Vector3.new(-188, 0, 153), math.rad(128), 1.12 },
+    }
+    for _, entry in rockFaces do
+        makeRockFace(world, entry[1], entry[2], entry[3])
+    end
+
+    local mushroomPatches = {
+        { Vector3.new(-37, 0, -59), 0.95, 1 },
+        { Vector3.new(-8, 0, -64), 0.8, 2 },
+        { Vector3.new(32, 0, -17), 0.76, 3 },
+        { Vector3.new(63, 0, 68), 0.86, 4 },
+        { Vector3.new(99, 0, 58), 0.82, 5 },
+        { Vector3.new(-72, 0, 74), 0.9, 6 },
+        { Vector3.new(127, 0, 7), 0.72, 7 },
+    }
+    for _, entry in mushroomPatches do
+        makeMushroomCluster(world, entry[1], entry[2], entry[3])
+    end
+
+    local cattails = {
+        { Vector3.new(-39, 0, -56), 0.9, 1 },
+        { Vector3.new(-31, 0, -59), 0.82, 2 },
+        { Vector3.new(-5, 0, -58), 0.88, 3 },
+        { Vector3.new(1, 0, -34), 0.8, 4 },
+        { Vector3.new(-39, 0, -31), 0.86, 5 },
+    }
+    for _, entry in cattails do
+        makeCattailCluster(world, entry[1], entry[2], entry[3])
+    end
+
+    makeWaystone(world, Vector3.new(-46, 0, 17), math.rad(-58), 0.78)
+    makeWaystone(world, Vector3.new(51, 0, 2), math.rad(16), 0.72)
+    makeWaystone(world, Vector3.new(118, 0, 19), math.rad(-24), 0.76)
+
+    makeFallenLog(world, Vector3.new(-79, 0.2, -3), math.rad(33), 0.9, 1)
+    makeFallenLog(world, Vector3.new(71, 0.2, -28), math.rad(-52), 0.82, 2)
+    makeFallenLog(world, Vector3.new(42, 0.2, 69), math.rad(74), 0.76, 2)
+    makeStump(world, Vector3.new(-62, 0, 67), 0.9, 2)
+    makeStump(world, Vector3.new(83, 0, 17), 0.72, 1)
+    makeStump(world, Vector3.new(12, 0, -66), 0.8, 2)
     makePineRoots(world, Vector3.new(-84, 0, -18), math.rad(24), 0.78)
     makePineRoots(world, Vector3.new(76, 0, 57), math.rad(-38), 0.72)
     makePineRoots(world, Vector3.new(31, 0, -63), math.rad(71), 0.66)
