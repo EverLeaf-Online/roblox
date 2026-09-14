@@ -388,7 +388,7 @@ local function HUD(props)
 
     return React.createElement(React.Fragment, nil, {
         Status = React.createElement(Panel, {
-            Position = UDim2.fromOffset(24, 24),
+            Position = UDim2.fromOffset(24, 52),
             Size = UDim2.fromOffset(306, 112),
             BackgroundColor3 = COLORS.PanelDeep,
             BackgroundTransparency = 0.08,
@@ -436,20 +436,46 @@ local function HUD(props)
         }),
         Currency = React.createElement(Panel, {
             AnchorPoint = Vector2.new(1, 0),
-            Position = UDim2.new(1, -24, 0, 24),
+            Position = UDim2.new(1, -24, 0, 52),
             Size = UDim2.fromOffset(214, 70),
             BackgroundColor3 = COLORS.PanelDeep,
             BackgroundTransparency = 0.1,
             Visible = compactVisible,
             Children = {
-                ShardsIcon = React.createElement(Pill, {
-                    Position = UDim2.fromOffset(12, 10),
-                    Size = UDim2.fromOffset(28, 22),
-                    Text = "◇",
-                    Color = COLORS.AccentDark,
-                    TextColor = COLORS.Accent,
-                    ZIndex = 3,
-                }),
+                ShardsIcon = React.createElement(
+                    "Frame",
+                    {
+                        Position = UDim2.fromOffset(13, 9),
+                        Size = UDim2.fromOffset(28, 24),
+                        BackgroundColor3 = COLORS.AccentDark,
+                        BorderSizePixel = 0,
+                        ZIndex = 3,
+                    },
+                    withChrome({
+                        Crystal = React.createElement(
+                            "Frame",
+                            {
+                                AnchorPoint = Vector2.new(0.5, 0.5),
+                                Position = UDim2.fromScale(0.5, 0.5),
+                                Size = UDim2.fromOffset(9, 9),
+                                Rotation = 45,
+                                BackgroundColor3 = COLORS.Accent,
+                                BorderSizePixel = 0,
+                                ZIndex = 4,
+                            },
+                            withChrome({
+                                Core = React.createElement("Frame", {
+                                    AnchorPoint = Vector2.new(0.5, 0.5),
+                                    Position = UDim2.fromScale(0.5, 0.5),
+                                    Size = UDim2.fromOffset(4, 4),
+                                    BackgroundColor3 = Color3.fromRGB(213, 250, 228),
+                                    BorderSizePixel = 0,
+                                    ZIndex = 5,
+                                }, withChrome(nil, 1)),
+                            }, 2, COLORS.Accent, 0.15, 1)
+                        ),
+                    }, 999, COLORS.BorderStrong, 0.55, 1)
+                ),
                 Shards = React.createElement(Label, {
                     Position = UDim2.fromOffset(48, 9),
                     Size = UDim2.new(1, -60, 0, 24),
@@ -458,14 +484,39 @@ local function HUD(props)
                     TextSize = 12,
                     ZIndex = 3,
                 }),
-                MarksIcon = React.createElement(Pill, {
-                    Position = UDim2.fromOffset(12, 38),
-                    Size = UDim2.fromOffset(28, 22),
-                    Text = "✦",
-                    Color = Color3.fromRGB(92, 72, 45),
-                    TextColor = COLORS.Gold,
-                    ZIndex = 3,
-                }),
+                MarksIcon = React.createElement(
+                    "Frame",
+                    {
+                        Position = UDim2.fromOffset(13, 37),
+                        Size = UDim2.fromOffset(28, 24),
+                        BackgroundColor3 = Color3.fromRGB(92, 72, 45),
+                        BorderSizePixel = 0,
+                        ZIndex = 3,
+                    },
+                    withChrome({
+                        Coin = React.createElement(
+                            "Frame",
+                            {
+                                AnchorPoint = Vector2.new(0.5, 0.5),
+                                Position = UDim2.fromScale(0.5, 0.5),
+                                Size = UDim2.fromOffset(11, 11),
+                                BackgroundColor3 = COLORS.Gold,
+                                BorderSizePixel = 0,
+                                ZIndex = 4,
+                            },
+                            withChrome({
+                                Center = React.createElement("Frame", {
+                                    AnchorPoint = Vector2.new(0.5, 0.5),
+                                    Position = UDim2.fromScale(0.5, 0.5),
+                                    Size = UDim2.fromOffset(5, 5),
+                                    BackgroundColor3 = Color3.fromRGB(92, 72, 45),
+                                    BorderSizePixel = 0,
+                                    ZIndex = 5,
+                                }, withChrome(nil, 999)),
+                            }, 999, Color3.fromRGB(255, 226, 137), 0.12, 1)
+                        ),
+                    }, 999, Color3.fromRGB(142, 111, 63), 0.45, 1)
+                ),
                 Marks = React.createElement(Label, {
                     Position = UDim2.fromOffset(48, 37),
                     Size = UDim2.new(1, -60, 0, 24),
