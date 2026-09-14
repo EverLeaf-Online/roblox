@@ -161,12 +161,44 @@ def main():
     parser.add_argument("--env-file", default="/etc/everleaf-roblox.env")
     parser.add_argument("--test", action="store_true", help="Upload only the first texture")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--ui-icons", action="store_true", help="Upload original EverLeaf UI icon PNGs")
     args = parser.parse_args()
     load_env_file(Path(args.env_file))
     api_key = os.environ.get("ROBLOX_OPEN_CLOUD_API_KEY", "").strip()
     if not api_key:
         raise SystemExit("ROBLOX_OPEN_CLOUD_API_KEY is missing")
     creator = creator_context()
+    if args.ui_icons:
+        icon_dir = ROOT / "assets/ui/icons"
+        out_json = ROOT / "assets/roblox/ui_icon_asset_ids.json"
+        out_luau = ROOT / "src/client/UI/EverLeafIcons.luau"
+        current = {}
+        if out_json.exists():
+            try:
+                current = json.loads(out_json.read_text())
+            except Exception:
+                current = {}
+        for path in sorted(icon_dir.glob("*.png")):
+            name = path.stem
+            if int(current.get(name, 0) or 0) > 0:
+                print(f"SKIP {name}: asset {current[name]}")
+                continue
+            display = f"EverLeaf UI {name.replace('_', ' ').title()}"
+            print(f"UPLOAD {display}: {path.relative_to(ROOT)}")
+            op_id = upload_image(api_key, creator, path, display)
+            asset_id, response = poll_operation(api_key, op_id)
+            state = response.get("moderationResult", {}).get("moderationState", "unknown")
+            print(f"OK {display}: asset {asset_id} moderation={state}")
+            current[name] = asset_id
+            out_json.parent.mkdir(parents=True, exist_ok=True)
+            out_json.write_text(json.dumps(current, indent=2, sort_keys=True) + "\n")
+        lines = ["-- Generated from original EverLeaf UI artwork.", "return table.freeze({"]
+        for name, asset_id in sorted(current.items()):
+            key_name = "".join(part[:1].upper() + part[1:] for part in name.split("_"))
+            lines.append(f'    {key_name} = "rbxassetid://{int(asset_id)}",')
+        lines.append("})")
+        out_luau.write_text("\n".join(lines) + "\n")
+        return
     entries = load_source_entries()
     if not entries:
         raise SystemExit("No Poly Haven source textures found")
