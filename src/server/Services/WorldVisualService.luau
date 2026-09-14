@@ -1,6 +1,5 @@
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Workspace = game:GetService("Workspace")
 
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
 
@@ -16,24 +15,40 @@ local function ensureAtmosphere()
     return atmosphere
 end
 
+local function safeSet(instance, propertyName, value)
+    local ok, err = pcall(function()
+        instance[propertyName] = value
+    end)
+    if not ok then
+        warn(
+            string.format(
+                "[WorldVisualService] Could not set %s.%s: %s",
+                instance:GetFullName(),
+                propertyName,
+                tostring(err)
+            )
+        )
+    end
+    return ok
+end
+
 function WorldVisualService.Init()
     local graphics = GameConfig.Graphics
-    Lighting.GlobalShadows = true
-    Lighting.Brightness = graphics.Brightness
-    Lighting.ClockTime = graphics.ClockTime
-    Lighting.ExposureCompensation = graphics.ExposureCompensation
-    Lighting.EnvironmentDiffuseScale = graphics.EnvironmentDiffuseScale
-    Lighting.EnvironmentSpecularScale = graphics.EnvironmentSpecularScale
-    Lighting.ShadowSoftness = graphics.ShadowSoftness
+
+    safeSet(Lighting, "GlobalShadows", true)
+    safeSet(Lighting, "Brightness", graphics.Brightness)
+    safeSet(Lighting, "ClockTime", graphics.ClockTime)
+    safeSet(Lighting, "ExposureCompensation", graphics.ExposureCompensation)
+    safeSet(Lighting, "EnvironmentDiffuseScale", graphics.EnvironmentDiffuseScale)
+    safeSet(Lighting, "EnvironmentSpecularScale", graphics.EnvironmentSpecularScale)
+    safeSet(Lighting, "ShadowSoftness", graphics.ShadowSoftness)
 
     local atmosphere = ensureAtmosphere()
-    atmosphere.Density = graphics.AtmosphereDensity
-    atmosphere.Haze = graphics.AtmosphereHaze
-    atmosphere.Glare = graphics.AtmosphereGlare
-    atmosphere.Color = Color3.fromRGB(199, 220, 255)
-    atmosphere.Decay = Color3.fromRGB(106, 112, 125)
-
-    Workspace.Terrain.Decoration = true
+    safeSet(atmosphere, "Density", graphics.AtmosphereDensity)
+    safeSet(atmosphere, "Haze", graphics.AtmosphereHaze)
+    safeSet(atmosphere, "Glare", graphics.AtmosphereGlare)
+    safeSet(atmosphere, "Color", Color3.fromRGB(199, 220, 255))
+    safeSet(atmosphere, "Decay", Color3.fromRGB(106, 112, 125))
 end
 
 return WorldVisualService
