@@ -628,33 +628,111 @@ local function makeSupplyStack(parent, position, yaw)
     local model = Instance.new("Model")
     model.Name = "WayfarerSupplies"
     model.Parent = parent
+
     local base = CFrame.new(position) * CFrame.Angles(0, yaw, 0)
-    local wood = Color3.fromRGB(105, 77, 50)
-    makePart(
+    local wood = Color3.fromRGB(112, 82, 51)
+    local woodDark = Color3.fromRGB(76, 55, 38)
+    local canvas = Color3.fromRGB(126, 111, 78)
+
+    local function makeCrate(name, localOffset, localYaw, scale)
+        local crate = Instance.new("Model")
+        crate.Name = name
+        crate.Parent = model
+        local crateBase = base * CFrame.new(localOffset) * CFrame.Angles(0, localYaw, 0)
+        local width = 3.6 * scale
+        local height = 2.7 * scale
+        local depth = 3.1 * scale
+
+        makePart(
+            crate,
+            "Bottom",
+            Vector3.new(width, 0.2 * scale, depth),
+            crateBase * CFrame.new(0, 0.12 * scale, 0),
+            Enum.Material.Wood,
+            woodDark
+        )
+
+        for _, x in { -1, 1 } do
+            for _, z in { -1, 1 } do
+                makePart(
+                    crate,
+                    "CornerPost",
+                    Vector3.new(0.22, height, 0.22) * scale,
+                    crateBase * CFrame.new(x * width * 0.46, height * 0.5, z * depth * 0.46),
+                    Enum.Material.Wood,
+                    woodDark
+                )
+            end
+        end
+
+        for row = 1, 3 do
+            local y = (0.48 + (row - 1) * 0.73) * scale
+            for _, z in { -1, 1 } do
+                makePart(
+                    crate,
+                    "FrontBackSlat",
+                    Vector3.new(width * 0.88, 0.46 * scale, 0.18 * scale),
+                    crateBase * CFrame.new(0, y, z * depth * 0.48),
+                    Enum.Material.Wood,
+                    if row == 2 then woodDark else wood
+                )
+            end
+            for _, x in { -1, 1 } do
+                makePart(
+                    crate,
+                    "SideSlat",
+                    Vector3.new(0.18 * scale, 0.46 * scale, depth * 0.82),
+                    crateBase * CFrame.new(x * width * 0.48, y, 0),
+                    Enum.Material.Wood,
+                    wood
+                )
+            end
+        end
+        return crate
+    end
+
+    makeCrate("ProvisionCrate", Vector3.new(0, 0, 0), 0, 1)
+    makeCrate("ToolCrate", Vector3.new(3.8, 0, 1.15), math.rad(12), 0.72)
+
+    for index, offset in
+        {
+            Vector3.new(-2.25, 0, 0.75),
+            Vector3.new(-2.8, 0, -0.8),
+        }
+    do
+        local sack = makeBall(
+            model,
+            "SupplySack" .. index,
+            Vector3.new(1.65, 2.15, 1.5),
+            base * CFrame.new(offset + Vector3.new(0, 1.0, 0)),
+            Enum.Material.Fabric,
+            if index == 1 then canvas else Color3.fromRGB(103, 94, 69)
+        )
+        sack.CanCollide = false
+    end
+
+    local bedroll = makePart(
         model,
-        "CrateA",
-        Vector3.new(3.6, 2.5, 3.2),
-        base * CFrame.new(0, 1.25, 0),
-        Enum.Material.Wood,
-        wood
-    )
-    makePart(
-        model,
-        "CrateB",
-        Vector3.new(2.7, 2.1, 2.5),
-        base * CFrame.new(2.8, 1.05, 0.4),
-        Enum.Material.Wood,
-        Color3.fromRGB(91, 67, 45)
-    )
-    local sack = makeBall(
-        model,
-        "SupplySack",
-        Vector3.new(2.0, 2.5, 1.8),
-        base * CFrame.new(-2.2, 1.25, 0.8),
+        "RolledBedroll",
+        Vector3.new(2.7, 0.85, 1.05),
+        base * CFrame.new(3.6, 2.35, 1.1) * CFrame.Angles(0, math.rad(12), math.rad(5)),
         Enum.Material.Fabric,
-        Color3.fromRGB(118, 103, 76)
+        Color3.fromRGB(73, 111, 96)
     )
-    sack.CanCollide = false
+    bedroll.CanCollide = false
+
+    for _, x in { -0.9, 0.9 } do
+        local strap = makePart(
+            model,
+            "BedrollStrap",
+            Vector3.new(0.16, 0.92, 1.1),
+            bedroll.CFrame * CFrame.new(x, 0, 0),
+            Enum.Material.Fabric,
+            Color3.fromRGB(70, 48, 32)
+        )
+        strap.CanCollide = false
+    end
+
     return model
 end
 
@@ -662,34 +740,84 @@ local function makeSignpost(parent, position, yaw)
     local model = Instance.new("Model")
     model.Name = "WayfarerSignpost"
     model.Parent = parent
+
     local base = CFrame.new(position) * CFrame.Angles(0, yaw, 0)
     local wood = Color3.fromRGB(78, 56, 38)
+    local boardWood = Color3.fromRGB(119, 85, 49)
+
+    local foot = makeBall(
+        model,
+        "MossyBase",
+        Vector3.new(2.6, 0.8, 2.2),
+        base * CFrame.new(0, 0.35, 0),
+        Enum.Material.Rock,
+        Color3.fromRGB(82, 91, 79)
+    )
+    foot.CanCollide = false
+    useMaterialVariant(foot, "MossyRock")
+
     makePart(
         model,
         "Post",
-        Vector3.new(0.5, 5.5, 0.5),
-        base * CFrame.new(0, 2.75, 0),
+        Vector3.new(0.62, 9.2, 0.62),
+        base * CFrame.new(0, 4.6, 0),
         Enum.Material.Wood,
         wood
     )
-    local armA = makePart(
+
+    local function addBoard(name, text, offset, width, reverse)
+        local board = makePart(
+            model,
+            name,
+            Vector3.new(width, 1.25, 0.34),
+            base
+                * CFrame.new(offset)
+                * CFrame.Angles(0, reverse and math.pi or 0, math.rad(reverse and -2 or 2)),
+            Enum.Material.Wood,
+            boardWood
+        )
+        board.CanCollide = false
+
+        for _, face in { Enum.NormalId.Front, Enum.NormalId.Back } do
+            local surface = Instance.new("SurfaceGui")
+            surface.Name = "DirectionLabel"
+            surface.Face = face
+            surface.CanvasSize = Vector2.new(520, 120)
+            surface.LightInfluence = 0.35
+            surface.Parent = board
+
+            local label = Instance.new("TextLabel")
+            label.Size = UDim2.fromScale(1, 1)
+            label.BackgroundTransparency = 1
+            label.Text = text
+            label.TextColor3 = Color3.fromRGB(236, 222, 180)
+            label.TextStrokeColor3 = Color3.fromRGB(54, 39, 28)
+            label.TextStrokeTransparency = 0.2
+            label.Font = Enum.Font.GothamBold
+            label.TextScaled = true
+            label.Parent = surface
+        end
+        return board
+    end
+
+    addBoard("CampBoard", "WAYFARER CAMP", Vector3.new(1.95, 7.25, 0), 5.1, false)
+    addBoard("RuinsBoard", "LUMEN ARCH", Vector3.new(-1.75, 5.75, 0), 4.6, true)
+
+    local cap = makeBall(
         model,
-        "ArrowCamp",
-        Vector3.new(4.3, 0.8, 0.35),
-        base * CFrame.new(1.55, 4.35, 0),
-        Enum.Material.Wood,
-        Color3.fromRGB(111, 80, 48)
+        "LumenMarker",
+        Vector3.new(0.75, 0.75, 0.75),
+        base * CFrame.new(0, 9.35, 0),
+        Enum.Material.Neon,
+        Color3.fromRGB(114, 232, 194)
     )
-    local armB = makePart(
-        model,
-        "ArrowRuins",
-        Vector3.new(3.8, 0.8, 0.35),
-        base * CFrame.new(-1.35, 3.3, 0) * CFrame.Angles(0, math.pi, 0),
-        Enum.Material.Wood,
-        Color3.fromRGB(99, 71, 45)
-    )
-    armA.CanCollide = false
-    armB.CanCollide = false
+    cap.CanCollide = false
+    local light = Instance.new("PointLight")
+    light.Color = cap.Color
+    light.Brightness = 0.55
+    light.Range = 7
+    light.Parent = cap
+
     return model
 end
 
@@ -858,14 +986,15 @@ local function makeTent(parent, position, yaw)
     model.Parent = parent
 
     local base = CFrame.new(position) * CFrame.Angles(0, yaw, 0)
-    local cloth = Color3.fromRGB(68, 98, 86)
-    local clothDark = Color3.fromRGB(43, 66, 58)
-    local poleColor = Color3.fromRGB(92, 66, 43)
-    local ropeColor = Color3.fromRGB(146, 129, 94)
-    local halfWidth = 3.8
-    local ridgeHeight = 4.45
-    local eaveHeight = 0.48
-    local canvasLength = 8.8
+    local cloth = Color3.fromRGB(54, 91, 79)
+    local clothDark = Color3.fromRGB(34, 61, 54)
+    local clothTrim = Color3.fromRGB(117, 91, 59)
+    local poleColor = Color3.fromRGB(88, 62, 40)
+    local ropeColor = Color3.fromRGB(151, 135, 97)
+    local halfWidth = 6.0
+    local ridgeHeight = 7.2
+    local eaveHeight = 0.7
+    local canvasLength = 14.5
     local panelWidth =
         math.sqrt(halfWidth * halfWidth + (ridgeHeight - eaveHeight) * (ridgeHeight - eaveHeight))
     local slope = math.atan2(ridgeHeight - eaveHeight, halfWidth)
@@ -873,17 +1002,17 @@ local function makeTent(parent, position, yaw)
     local groundSheet = makePart(
         model,
         "GroundSheet",
-        Vector3.new(6.2, 0.12, 7.1),
-        base * CFrame.new(0, 0.14, 0.25),
+        Vector3.new(10.6, 0.14, 12.8),
+        base * CFrame.new(0, 0.16, 0.35),
         Enum.Material.Fabric,
-        Color3.fromRGB(72, 67, 56)
+        Color3.fromRGB(71, 67, 54)
     )
     groundSheet.CanCollide = false
 
     local leftCanvas = makePart(
         model,
         "CanvasLeft",
-        Vector3.new(panelWidth, 0.18, canvasLength),
+        Vector3.new(panelWidth, 0.22, canvasLength),
         base
             * CFrame.new(-halfWidth * 0.5, (ridgeHeight + eaveHeight) * 0.5, 0)
             * CFrame.Angles(0, 0, slope),
@@ -893,7 +1022,7 @@ local function makeTent(parent, position, yaw)
     local rightCanvas = makePart(
         model,
         "CanvasRight",
-        Vector3.new(panelWidth, 0.18, canvasLength),
+        Vector3.new(panelWidth, 0.22, canvasLength),
         base
             * CFrame.new(halfWidth * 0.5, (ridgeHeight + eaveHeight) * 0.5, 0)
             * CFrame.Angles(0, 0, -slope),
@@ -903,62 +1032,130 @@ local function makeTent(parent, position, yaw)
     leftCanvas.CanCollide = false
     rightCanvas.CanCollide = false
 
-    makePart(
+    local ridge = makePart(
         model,
         "RidgePole",
-        Vector3.new(0.28, 0.28, canvasLength + 0.6),
-        base * CFrame.new(0, ridgeHeight + 0.05, 0),
+        Vector3.new(0.34, 0.34, canvasLength + 1.0),
+        base * CFrame.new(0, ridgeHeight + 0.06, 0),
         Enum.Material.Wood,
         poleColor
-    ).CanCollide =
-        false
+    )
+    ridge.CanCollide = false
 
     for _, z in { -canvasLength * 0.5, canvasLength * 0.5 } do
-        makePart(
+        local support = makePart(
             model,
             "SupportPole",
-            Vector3.new(0.3, ridgeHeight + 0.25, 0.3),
-            base * CFrame.new(0, (ridgeHeight + 0.25) * 0.5, z),
+            Vector3.new(0.36, ridgeHeight + 0.45, 0.36),
+            base * CFrame.new(0, (ridgeHeight + 0.45) * 0.5, z),
             Enum.Material.Wood,
             poleColor
-        ).CanCollide =
-            false
+        )
+        support.CanCollide = false
     end
 
-    local bedroll = makePart(
-        model,
-        "Bedroll",
-        Vector3.new(2.35, 0.28, 4.6),
-        base * CFrame.new(0.85, 0.34, 0.2),
-        Enum.Material.Fabric,
-        Color3.fromRGB(112, 83, 69)
-    )
-    bedroll.CanCollide = false
+    for _, side in { -1, 1 } do
+        local trim = makePart(
+            model,
+            "CanvasEdgeTrim",
+            Vector3.new(0.18, 0.18, canvasLength),
+            base
+                * CFrame.new(side * halfWidth, eaveHeight + 0.05, 0)
+                * CFrame.Angles(0, 0, math.rad(side * 2)),
+            Enum.Material.Fabric,
+            clothTrim
+        )
+        trim.CanCollide = false
+    end
 
-    local blanket = makePart(
+    local entranceZ = -canvasLength * 0.5 - 0.04
+    for _, side in { -1, 1 } do
+        local flap = makePart(
+            model,
+            if side < 0 then "EntranceFlapLeft" else "EntranceFlapRight",
+            Vector3.new(3.25, 5.15, 0.16),
+            base
+                * CFrame.new(side * 2.2, 2.9, entranceZ)
+                * CFrame.Angles(0, math.rad(side * 23), math.rad(side * -8)),
+            Enum.Material.Fabric,
+            if side < 0 then cloth else clothDark
+        )
+        flap.CanCollide = false
+    end
+
+    local awning = makePart(
         model,
-        "Blanket",
-        Vector3.new(2.2, 0.12, 2.0),
-        base * CFrame.new(0.85, 0.51, 0.8),
+        "EntranceAwning",
+        Vector3.new(6.8, 0.16, 3.8),
+        base * CFrame.new(0, 5.2, entranceZ - 1.65) * CFrame.Angles(math.rad(-7), 0, 0),
         Enum.Material.Fabric,
-        Color3.fromRGB(91, 119, 102)
+        cloth
     )
-    blanket.CanCollide = false
+    awning.CanCollide = false
+
+    for _, side in { -1, 1 } do
+        local awningPole = makePart(
+            model,
+            "AwningPole",
+            Vector3.new(0.26, 4.6, 0.26),
+            base * CFrame.new(side * 3.15, 2.3, entranceZ - 3.1),
+            Enum.Material.Wood,
+            poleColor
+        )
+        awningPole.CanCollide = false
+    end
+
+    for _, bed in
+        {
+            { Vector3.new(-2.45, 0.38, 1.8), Color3.fromRGB(116, 86, 65) },
+            { Vector3.new(2.45, 0.38, 1.8), Color3.fromRGB(83, 111, 94) },
+        }
+    do
+        local bedroll = makePart(
+            model,
+            "Bedroll",
+            Vector3.new(3.25, 0.34, 5.4),
+            base * CFrame.new(bed[1]),
+            Enum.Material.Fabric,
+            bed[2]
+        )
+        bedroll.CanCollide = false
+        local pillow = makePart(
+            model,
+            "Pillow",
+            Vector3.new(2.5, 0.42, 1.0),
+            base * CFrame.new(bed[1] + Vector3.new(0, 0.35, 1.95)),
+            Enum.Material.Fabric,
+            Color3.fromRGB(139, 126, 93)
+        )
+        pillow.CanCollide = false
+    end
+
+    local emblem = makePart(
+        model,
+        "LumenEmblem",
+        Vector3.new(1.0, 0.08, 1.8),
+        base * CFrame.new(-3.05, 4.6, -1.2) * CFrame.Angles(0, 0, slope),
+        Enum.Material.Neon,
+        Color3.fromRGB(91, 213, 176)
+    )
+    emblem.CanCollide = false
+    emblem.Transparency = 0.15
 
     local stakeOffsets = {
-        Vector3.new(-halfWidth - 0.8, 0.18, -canvasLength * 0.5 - 0.65),
-        Vector3.new(halfWidth + 0.8, 0.18, -canvasLength * 0.5 - 0.65),
-        Vector3.new(-halfWidth - 0.8, 0.18, canvasLength * 0.5 + 0.65),
-        Vector3.new(halfWidth + 0.8, 0.18, canvasLength * 0.5 + 0.65),
+        Vector3.new(-halfWidth - 1.0, 0.2, -canvasLength * 0.5 - 0.8),
+        Vector3.new(halfWidth + 1.0, 0.2, -canvasLength * 0.5 - 0.8),
+        Vector3.new(-halfWidth - 1.0, 0.2, canvasLength * 0.5 + 0.8),
+        Vector3.new(halfWidth + 1.0, 0.2, canvasLength * 0.5 + 0.8),
     }
     for index, offset in stakeOffsets do
         local worldStake = (base * CFrame.new(offset)).Position
         local stake = makePart(
             model,
             "Stake" .. index,
-            Vector3.new(0.22, 0.7, 0.22),
-            CFrame.new(worldStake + Vector3.new(0, 0.22, 0))
-                * CFrame.Angles(math.rad(9), 0, math.rad(8)),
+            Vector3.new(0.24, 0.8, 0.24),
+            CFrame.new(worldStake + Vector3.new(0, 0.25, 0))
+                * CFrame.Angles(math.rad(10), 0, math.rad(8)),
             Enum.Material.Wood,
             poleColor
         )
@@ -966,18 +1163,150 @@ local function makeTent(parent, position, yaw)
 
         local side = if index % 2 == 1 then -1 else 1
         local endZ = if index <= 2 then -canvasLength * 0.5 else canvasLength * 0.5
-        local ropeStart = (base * CFrame.new(side * 0.15, ridgeHeight - 0.15, endZ)).Position
+        local ropeStart = (base * CFrame.new(side * 0.18, ridgeHeight - 0.2, endZ)).Position
         makeRodBetween(
             model,
             "GuyRope" .. index,
             ropeStart,
-            worldStake + Vector3.new(0, 0.45, 0),
-            0.07,
+            worldStake + Vector3.new(0, 0.5, 0),
+            0.075,
             Enum.Material.Fabric,
             ropeColor
         )
     end
 
+    return model
+end
+
+local function makeCampBench(parent, position, yaw)
+    local model = Instance.new("Model")
+    model.Name = "WayfarerBench"
+    model.Parent = parent
+    local base = CFrame.new(position) * CFrame.Angles(0, yaw, 0)
+    local wood = Color3.fromRGB(91, 65, 42)
+
+    makePart(
+        model,
+        "Seat",
+        Vector3.new(5.6, 0.42, 1.5),
+        base * CFrame.new(0, 1.25, 0),
+        Enum.Material.Wood,
+        wood
+    )
+    for _, x in { -2.05, 2.05 } do
+        makePart(
+            model,
+            "Leg",
+            Vector3.new(0.44, 1.35, 1.15),
+            base * CFrame.new(x, 0.65, 0),
+            Enum.Material.Wood,
+            Color3.fromRGB(69, 50, 35)
+        )
+    end
+    return model
+end
+
+local function makeMapTable(parent, position, yaw)
+    local model = Instance.new("Model")
+    model.Name = "WayfarerMapTable"
+    model.Parent = parent
+    local base = CFrame.new(position) * CFrame.Angles(0, yaw, 0)
+
+    makePart(
+        model,
+        "TableTop",
+        Vector3.new(6.2, 0.42, 3.8),
+        base * CFrame.new(0, 3.0, 0),
+        Enum.Material.Wood,
+        Color3.fromRGB(100, 72, 46)
+    )
+    for _, x in { -2.45, 2.45 } do
+        for _, z in { -1.25, 1.25 } do
+            makePart(
+                model,
+                "TableLeg",
+                Vector3.new(0.42, 3.0, 0.42),
+                base * CFrame.new(x, 1.5, z),
+                Enum.Material.Wood,
+                Color3.fromRGB(70, 50, 35)
+            )
+        end
+    end
+
+    local map = makePart(
+        model,
+        "TrailMap",
+        Vector3.new(4.8, 0.05, 2.65),
+        base * CFrame.new(0, 3.24, 0) * CFrame.Angles(0, math.rad(-4), 0),
+        Enum.Material.Fabric,
+        Color3.fromRGB(194, 174, 126)
+    )
+    map.CanCollide = false
+
+    for index, offset in
+        {
+            Vector3.new(-1.45, 3.32, -0.55),
+            Vector3.new(0.2, 3.32, 0.6),
+            Vector3.new(1.5, 3.32, -0.15),
+        }
+    do
+        local marker = makeBall(
+            model,
+            "MapMarker" .. index,
+            Vector3.new(0.2, 0.2, 0.2),
+            base * CFrame.new(offset),
+            Enum.Material.Neon,
+            Color3.fromRGB(89, 218, 181)
+        )
+        marker.CanCollide = false
+    end
+    return model
+end
+
+local function makeCampBanner(parent, position, yaw)
+    local model = Instance.new("Model")
+    model.Name = "WayfarerBanner"
+    model.Parent = parent
+    local base = CFrame.new(position) * CFrame.Angles(0, yaw, 0)
+    local wood = Color3.fromRGB(73, 52, 35)
+
+    for _, x in { -2.7, 2.7 } do
+        makePart(
+            model,
+            "BannerPost",
+            Vector3.new(0.34, 7.6, 0.34),
+            base * CFrame.new(x, 3.8, 0),
+            Enum.Material.Wood,
+            wood
+        )
+    end
+    makePart(
+        model,
+        "BannerTop",
+        Vector3.new(5.8, 0.34, 0.34),
+        base * CFrame.new(0, 7.25, 0),
+        Enum.Material.Wood,
+        wood
+    )
+
+    local banner = makePart(
+        model,
+        "BannerCloth",
+        Vector3.new(4.9, 3.6, 0.12),
+        base * CFrame.new(0, 5.25, 0),
+        Enum.Material.Fabric,
+        Color3.fromRGB(45, 91, 78)
+    )
+    banner.CanCollide = false
+    local rune = makePart(
+        model,
+        "BannerRune",
+        Vector3.new(0.65, 2.25, 0.08),
+        base * CFrame.new(0, 5.3, -0.08) * CFrame.Angles(0, 0, math.rad(25)),
+        Enum.Material.Neon,
+        Color3.fromRGB(97, 218, 181)
+    )
+    rune.CanCollide = false
     return model
 end
 
@@ -1250,114 +1579,372 @@ local function makeRuins(parent)
     prompt.Parent = gate
 end
 
-local function makeGuide(parent, position)
+local function makeCombatGrove(parent)
+    local model = Instance.new("Model")
+    model.Name = "MossglenCombatGrove"
+    model.Parent = parent
+    local center = Vector3.new(149, 0, 41)
+
+    for index = 1, 12 do
+        local angle = (index - 1) * math.pi * 2 / 12
+        local radius = if index % 2 == 0 then 25 else 23
+        local position = center
+            + Vector3.new(math.cos(angle) * radius, 0.6, math.sin(angle) * radius)
+        local stone = makeRock(
+            model,
+            position,
+            Vector3.new(3.2 + (index % 3) * 0.45, 1.4 + (index % 2) * 0.35, 2.8),
+            Vector3.new(math.rad(index % 3 * 3), angle * 0.35, math.rad((index % 4 - 2) * 4))
+        )
+        stone.CanCollide = false
+    end
+
+    for _, entry in
+        {
+            { Vector3.new(126, 0, 52), math.rad(62), 0.72 },
+            { Vector3.new(171, 0, 53), math.rad(-58), 0.72 },
+            { Vector3.new(149, 0, 67), math.rad(180), 0.82 },
+        }
+    do
+        makeWaystone(model, entry[1], entry[2], entry[3])
+    end
+
+    local totemBase = CFrame.new(149, 0, 68)
+    makePart(
+        model,
+        "GroveTotem",
+        Vector3.new(1.8, 7.2, 1.8),
+        totemBase * CFrame.new(0, 3.6, 0),
+        Enum.Material.Wood,
+        Color3.fromRGB(65, 50, 35)
+    )
+    local rune = makePart(
+        model,
+        "GroveRune",
+        Vector3.new(0.8, 2.3, 0.1),
+        totemBase * CFrame.new(0, 4.25, -0.96) * CFrame.Angles(0, 0, math.rad(45)),
+        Enum.Material.Neon,
+        Color3.fromRGB(101, 226, 182)
+    )
+    rune.CanCollide = false
+    local glow = Instance.new("PointLight")
+    glow.Color = rune.Color
+    glow.Brightness = 0.65
+    glow.Range = 10
+    glow.Parent = rune
+
+    for _, entry in
+        {
+            { Vector3.new(132, 0, 21), math.rad(4) },
+            { Vector3.new(165, 0, 22), math.rad(-6) },
+        }
+    do
+        local marker = makePart(
+            model,
+            "GroveMarker",
+            Vector3.new(3.8, 0.28, 1.2),
+            CFrame.new(entry[1] + Vector3.new(0, 0.18, 0)) * CFrame.Angles(0, entry[2], 0),
+            Enum.Material.Wood,
+            Color3.fromRGB(83, 61, 42)
+        )
+        marker.CanCollide = false
+    end
+
+    return model
+end
+
+local function makeGuide(parent, position, yaw)
     local model = Instance.new("Model")
     model.Name = "LumenGuide"
     model.Parent = parent
 
-    local root = makePart(
-        model,
-        "HumanoidRootPart",
-        Vector3.new(2, 5.5, 2),
-        CFrame.new(position + Vector3.new(0, 2.75, 0)),
-        Enum.Material.SmoothPlastic,
-        Color3.fromRGB(48, 72, 68)
-    )
-    root.Transparency = 1
-    root.CanCollide = false
+    local base = CFrame.new(position) * CFrame.Angles(0, yaw or 0, 0)
+    local skin = Color3.fromRGB(218, 187, 153)
+    local coat = Color3.fromRGB(48, 91, 80)
+    local coatDark = Color3.fromRGB(29, 58, 53)
+    local clothLight = Color3.fromRGB(125, 139, 111)
+    local leather = Color3.fromRGB(91, 61, 39)
+    local leatherDark = Color3.fromRGB(58, 42, 31)
+    local brass = Color3.fromRGB(166, 132, 67)
+    local lumen = Color3.fromRGB(105, 231, 194)
 
-    local robe = makePart(
-        model,
-        "Robe",
-        Vector3.new(2.8, 2.5, 1.65),
-        CFrame.new(position + Vector3.new(0, 1.7, 0)),
-        Enum.Material.Fabric,
-        Color3.fromRGB(55, 95, 88)
-    )
-    robe.CanCollide = false
-
-    local torso = makePart(
-        model,
-        "Torso",
-        Vector3.new(2.45, 2.35, 1.5),
-        CFrame.new(position + Vector3.new(0, 3.6, 0)),
-        Enum.Material.Fabric,
-        Color3.fromRGB(83, 126, 116)
-    )
-    torso.CanCollide = false
-
-    local belt = makePart(
-        model,
-        "Belt",
-        Vector3.new(2.58, 0.32, 1.58),
-        CFrame.new(position + Vector3.new(0, 2.55, 0)),
-        Enum.Material.Fabric,
-        Color3.fromRGB(74, 51, 35)
-    )
-    belt.CanCollide = false
-
-    for side = -1, 1, 2 do
-        local arm = makePart(
+    local function guidePart(name, size, offset, material, color, rotation)
+        local part = makePart(
             model,
-            if side < 0 then "LeftArm" else "RightArm",
-            Vector3.new(0.72, 2.45, 0.78),
-            CFrame.new(position + Vector3.new(side * 1.55, 3.35, 0))
-                * CFrame.Angles(0, 0, math.rad(side * -8)),
-            Enum.Material.Fabric,
-            Color3.fromRGB(65, 106, 98)
+            name,
+            size,
+            base * CFrame.new(offset) * (rotation or CFrame.new()),
+            material,
+            color
         )
-        arm.CanCollide = false
-
-        local hand = makeBall(
-            model,
-            if side < 0 then "LeftHand" else "RightHand",
-            Vector3.new(0.74, 0.74, 0.74),
-            CFrame.new(position + Vector3.new(side * 1.7, 2.05, 0)),
-            Enum.Material.SmoothPlastic,
-            Color3.fromRGB(215, 184, 156)
-        )
-        hand.CanCollide = false
+        part.CanCollide = false
+        part.CanTouch = false
+        return part
     end
 
-    local head = makeBall(
-        model,
+    local root = guidePart(
+        "HumanoidRootPart",
+        Vector3.new(2.2, 7.4, 2.0),
+        Vector3.new(0, 3.7, 0),
+        Enum.Material.SmoothPlastic,
+        Color3.new(0, 0, 0)
+    )
+    root.Transparency = 1
+
+    for _, leg in
+        {
+            { "LeftLeg", Vector3.new(-0.58, 1.45, 0), math.rad(-2) },
+            { "RightLeg", Vector3.new(0.58, 1.45, 0), math.rad(2) },
+        }
+    do
+        guidePart(
+            leg[1],
+            Vector3.new(0.82, 1.85, 0.92),
+            leg[2],
+            Enum.Material.Fabric,
+            Color3.fromRGB(57, 66, 61),
+            CFrame.Angles(0, 0, leg[3])
+        )
+    end
+
+    for _, boot in
+        {
+            { "LeftBoot", Vector3.new(-0.58, 0.48, -0.12) },
+            { "RightBoot", Vector3.new(0.58, 0.48, -0.12) },
+        }
+    do
+        guidePart(
+            boot[1],
+            Vector3.new(0.95, 0.82, 1.35),
+            boot[2],
+            Enum.Material.SmoothPlastic,
+            leatherDark
+        )
+    end
+
+    guidePart(
+        "CoatSkirt",
+        Vector3.new(2.65, 1.8, 1.45),
+        Vector3.new(0, 2.55, 0.08),
+        Enum.Material.Fabric,
+        coatDark
+    )
+    guidePart(
+        "Torso",
+        Vector3.new(2.55, 2.3, 1.5),
+        Vector3.new(0, 4.05, 0),
+        Enum.Material.Fabric,
+        coat
+    )
+    guidePart(
+        "ChestPanel",
+        Vector3.new(1.75, 1.55, 0.14),
+        Vector3.new(0, 4.15, -0.82),
+        Enum.Material.Fabric,
+        clothLight,
+        CFrame.Angles(0, 0, math.rad(-5))
+    )
+    guidePart(
+        "Belt",
+        Vector3.new(2.72, 0.32, 1.62),
+        Vector3.new(0, 3.05, 0),
+        Enum.Material.Fabric,
+        leather
+    )
+    guidePart(
+        "BeltBuckle",
+        Vector3.new(0.42, 0.44, 0.12),
+        Vector3.new(0, 3.03, -0.86),
+        Enum.Material.Metal,
+        brass
+    )
+
+    guidePart(
+        "Cape",
+        Vector3.new(2.5, 3.25, 0.18),
+        Vector3.new(0, 3.55, 0.9),
+        Enum.Material.Fabric,
+        Color3.fromRGB(35, 69, 61),
+        CFrame.Angles(math.rad(-5), 0, 0)
+    )
+
+    for _, shoulder in
+        {
+            { "LeftShoulder", Vector3.new(-1.48, 4.65, 0) },
+            { "RightShoulder", Vector3.new(1.48, 4.65, 0) },
+        }
+    do
+        local pad = makeBall(
+            model,
+            shoulder[1],
+            Vector3.new(1.05, 0.72, 1.08),
+            base * CFrame.new(shoulder[2]),
+            Enum.Material.Fabric,
+            coatDark
+        )
+        pad.CanCollide = false
+    end
+
+    for _, arm in
+        {
+            { "LeftArm", Vector3.new(-1.48, 3.65, -0.03), math.rad(-9) },
+            { "RightArm", Vector3.new(1.52, 3.68, -0.05), math.rad(8) },
+        }
+    do
+        guidePart(
+            arm[1],
+            Vector3.new(0.78, 2.15, 0.82),
+            arm[2],
+            Enum.Material.Fabric,
+            coat,
+            CFrame.Angles(0, 0, arm[3])
+        )
+    end
+
+    for _, hand in
+        {
+            { "LeftHand", Vector3.new(-1.67, 2.45, -0.05) },
+            { "RightHand", Vector3.new(1.7, 2.48, -0.02) },
+        }
+    do
+        local handPart = makeBall(
+            model,
+            hand[1],
+            Vector3.new(0.72, 0.72, 0.72),
+            base * CFrame.new(hand[2]),
+            Enum.Material.SmoothPlastic,
+            skin
+        )
+        handPart.CanCollide = false
+    end
+
+    guidePart(
+        "NeckWrap",
+        Vector3.new(1.85, 0.5, 1.55),
+        Vector3.new(0, 5.15, 0),
+        Enum.Material.Fabric,
+        Color3.fromRGB(153, 108, 62)
+    )
+
+    local head = guidePart(
         "Head",
-        Vector3.new(2.0, 2.0, 2.0),
-        CFrame.new(position + Vector3.new(0, 5.55, 0)),
+        Vector3.new(1.72, 1.78, 1.62),
+        Vector3.new(0, 6.05, -0.02),
         Enum.Material.SmoothPlastic,
-        Color3.fromRGB(218, 190, 163)
+        skin
     )
-    head.CanCollide = false
 
-    local hair = makeBall(
-        model,
-        "Hair",
-        Vector3.new(2.08, 1.05, 2.08),
-        CFrame.new(position + Vector3.new(0, 6.15, 0.08)),
-        Enum.Material.SmoothPlastic,
-        Color3.fromRGB(62, 47, 37)
-    )
-    hair.CanCollide = false
-
-    local scarf = makePart(
-        model,
-        "Scarf",
-        Vector3.new(2.15, 0.42, 1.62),
-        CFrame.new(position + Vector3.new(0, 4.65, 0)),
+    guidePart(
+        "HoodTop",
+        Vector3.new(1.92, 0.48, 1.76),
+        Vector3.new(0, 6.82, 0.03),
         Enum.Material.Fabric,
-        Color3.fromRGB(146, 101, 63)
+        coatDark
     )
-    scarf.CanCollide = false
+    for _, side in { -1, 1 } do
+        guidePart(
+            if side < 0 then "HoodLeft" else "HoodRight",
+            Vector3.new(0.34, 1.18, 1.72),
+            Vector3.new(side * 0.86, 6.12, 0.04),
+            Enum.Material.Fabric,
+            coatDark,
+            CFrame.Angles(0, 0, math.rad(side * 4))
+        )
+    end
 
-    local satchel = makePart(
-        model,
+    for _, eye in
+        {
+            { "LeftEye", Vector3.new(-0.34, 6.18, -0.85) },
+            { "RightEye", Vector3.new(0.34, 6.18, -0.85) },
+        }
+    do
+        guidePart(
+            eye[1],
+            Vector3.new(0.16, 0.16, 0.08),
+            eye[2],
+            Enum.Material.SmoothPlastic,
+            Color3.fromRGB(38, 46, 42)
+        )
+    end
+    guidePart(
+        "Mouth",
+        Vector3.new(0.48, 0.08, 0.07),
+        Vector3.new(0, 5.78, -0.86),
+        Enum.Material.SmoothPlastic,
+        Color3.fromRGB(120, 74, 62)
+    )
+
+    guidePart(
         "Satchel",
-        Vector3.new(1.15, 1.35, 0.55),
-        CFrame.new(position + Vector3.new(1.15, 2.85, 0.78)) * CFrame.Angles(0, 0, math.rad(-8)),
+        Vector3.new(1.3, 1.55, 0.62),
+        Vector3.new(-1.3, 3.15, 0.78),
         Enum.Material.Fabric,
-        Color3.fromRGB(92, 61, 39)
+        leather,
+        CFrame.Angles(0, 0, math.rad(7))
     )
-    satchel.CanCollide = false
+    guidePart(
+        "SatchelFlap",
+        Vector3.new(1.12, 0.55, 0.12),
+        Vector3.new(-1.3, 3.55, 0.43),
+        Enum.Material.Fabric,
+        leatherDark,
+        CFrame.Angles(math.rad(10), 0, math.rad(7))
+    )
+
+    local staffBottom = (base * CFrame.new(2.05, 0.35, 0.2)).Position
+    local staffTop = (base * CFrame.new(2.05, 6.95, 0.2)).Position
+    makeRodBetween(
+        model,
+        "WayfinderStaff",
+        staffBottom,
+        staffTop,
+        0.24,
+        Enum.Material.Wood,
+        Color3.fromRGB(74, 52, 34)
+    )
+    local staffCrystal = makeBall(
+        model,
+        "StaffLumen",
+        Vector3.new(0.72, 0.92, 0.72),
+        CFrame.new(staffTop + Vector3.new(0, 0.28, 0)),
+        Enum.Material.Neon,
+        lumen
+    )
+    staffCrystal.CanCollide = false
+    local staffLight = Instance.new("PointLight")
+    staffLight.Color = lumen
+    staffLight.Brightness = 0.8
+    staffLight.Range = 9
+    staffLight.Parent = staffCrystal
+
+    local badge = guidePart(
+        "WayfarerBadge",
+        Vector3.new(0.42, 0.42, 0.08),
+        Vector3.new(0.72, 4.45, -0.87),
+        Enum.Material.Neon,
+        lumen,
+        CFrame.Angles(0, 0, math.rad(45))
+    )
+    badge.Transparency = 0.08
+
+    local nameplate = Instance.new("BillboardGui")
+    nameplate.Name = "GuideNameplate"
+    nameplate.Size = UDim2.fromOffset(190, 34)
+    nameplate.StudsOffsetWorldSpace = Vector3.new(0, 1.75, 0)
+    nameplate.AlwaysOnTop = false
+    nameplate.MaxDistance = 48
+    nameplate.Parent = head
+
+    local nameLabel = Instance.new("TextLabel")
+    nameLabel.Size = UDim2.fromScale(1, 1)
+    nameLabel.BackgroundTransparency = 1
+    nameLabel.Text = "ILYRA · WAYFARER GUIDE"
+    nameLabel.TextColor3 = Color3.fromRGB(215, 243, 226)
+    nameLabel.TextStrokeColor3 = Color3.fromRGB(24, 39, 34)
+    nameLabel.TextStrokeTransparency = 0.25
+    nameLabel.Font = Enum.Font.GothamBold
+    nameLabel.TextScaled = true
+    nameLabel.Parent = nameplate
 
     model.PrimaryPart = root
     WorldObjectService.Register(model, "Npc", "lumen_guide")
@@ -1365,9 +1952,9 @@ local function makeGuide(parent, position)
     local prompt = Instance.new("ProximityPrompt")
     prompt.Name = "TalkPrompt"
     prompt.ActionText = "Talk"
-    prompt.ObjectText = "Lumen Guide"
+    prompt.ObjectText = "Ilyra · Lumen Guide"
     prompt.KeyboardKeyCode = Enum.KeyCode.E
-    prompt.MaxActivationDistance = 10
+    prompt.MaxActivationDistance = 11
     prompt.RequiresLineOfSight = false
     prompt.Parent = root
     prompt.Triggered:Connect(function(player)
@@ -1430,9 +2017,19 @@ local function prepareGround(world)
             Enum.Material.Grass
         )
 
-        -- Keep the playable core readable and mostly level. Terrain masses live on the perimeter.
-        terrain:FillBlock(CFrame.new(-55, -0.75, 34), Vector3.new(72, 3, 58), Enum.Material.Ground)
-        terrain:FillBlock(CFrame.new(48, -0.85, 28), Vector3.new(76, 2.8, 66), Enum.Material.Grass)
+        -- Rebuilt world floor: distinct readable clearings connected by a deliberate trail network.
+        terrain:FillBlock(CFrame.new(-62, -0.7, 35), Vector3.new(92, 2.8, 74), Enum.Material.Ground)
+        terrain:FillBlock(CFrame.new(37, -0.82, -30), Vector3.new(76, 2.5, 62), Enum.Material.Grass)
+        terrain:FillBlock(
+            CFrame.new(148, -0.82, 42),
+            Vector3.new(104, 2.6, 86),
+            Enum.Material.Grass
+        )
+        terrain:FillBlock(
+            CFrame.new(-79, -0.86, -48),
+            Vector3.new(58, 2.5, 52),
+            Enum.Material.Grass
+        )
 
         local perimeterRidges = {
             { Vector3.new(-292, -18, 150), Enum.Material.Grass, Vector3.new(0, 0, 1) },
@@ -1453,26 +2050,64 @@ local function prepareGround(world)
             terrain:FillBall(center + axis * 38 + Vector3.new(0, -2, 0), 40, material)
         end
 
-        local pathSegments = {
+        -- Low interior terrain masses create depth without stealing walkable space.
+        for _, mound in
             {
-                CFrame.new(-42, 0.2, 28) * CFrame.Angles(0, math.rad(-58), 0),
+                { Vector3.new(-128, -22, 94), 25, Enum.Material.Grass },
+                { Vector3.new(-132, -22, -82), 24, Enum.Material.Basalt },
+                { Vector3.new(119, -23, -83), 26, Enum.Material.Basalt },
+                { Vector3.new(194, -22, 105), 25, Enum.Material.Grass },
+                { Vector3.new(205, -23, -38), 24, Enum.Material.Basalt },
+            }
+        do
+            terrain:FillBall(mound[1], mound[2], mound[3])
+        end
+
+        local pathSegments = {
+            -- Spawn/camp approach.
+            {
+                CFrame.new(-58, 0.2, 48) * CFrame.Angles(0, math.rad(-23), 0),
+                Vector3.new(15, 1.1, 38),
+            },
+            -- Camp exit toward the central fork.
+            {
+                CFrame.new(-41, 0.2, 27) * CFrame.Angles(0, math.rad(-58), 0),
+                Vector3.new(13, 1.1, 50),
+            },
+            {
+                CFrame.new(0, 0.25, 5) * CFrame.Angles(0, math.rad(-90), 0),
+                Vector3.new(13, 1.1, 64),
+            },
+            -- Ruins branch.
+            {
+                CFrame.new(30, 0.3, -19) * CFrame.Angles(0, math.rad(-30), 0),
+                Vector3.new(11, 1.1, 45),
+            },
+            -- Main trail bends into Mossglen instead of jumping across empty grass.
+            {
+                CFrame.new(51, 0.26, 7) * CFrame.Angles(0, math.rad(-62), 0),
                 Vector3.new(12, 1.1, 48),
             },
             {
-                CFrame.new(1, 0.25, 5) * CFrame.Angles(0, math.rad(-90), 0),
-                Vector3.new(12, 1.1, 62),
+                CFrame.new(91, 0.25, 23) * CFrame.Angles(0, math.rad(-88), 0),
+                Vector3.new(14, 1.1, 62),
             },
             {
-                CFrame.new(30, 0.3, -19) * CFrame.Angles(0, math.rad(-30), 0),
-                Vector3.new(10, 1.1, 44),
+                CFrame.new(132, 0.25, 35) * CFrame.Angles(0, math.rad(-73), 0),
+                Vector3.new(15, 1.1, 62),
             },
             {
-                CFrame.new(92, 0.25, 24) * CFrame.Angles(0, math.rad(-88), 0),
-                Vector3.new(14, 1.1, 118),
+                CFrame.new(167, 0.25, 50) * CFrame.Angles(0, math.rad(-62), 0),
+                Vector3.new(14, 1.1, 44),
+            },
+            -- Waterfall side trail.
+            {
+                CFrame.new(-35, 0.22, -12) * CFrame.Angles(0, math.rad(32), 0),
+                Vector3.new(10, 1.0, 38),
             },
             {
-                CFrame.new(154, 0.25, 47) * CFrame.Angles(0, math.rad(-68), 0),
-                Vector3.new(14, 1.1, 76),
+                CFrame.new(-65, 0.22, -39) * CFrame.Angles(0, math.rad(47), 0),
+                Vector3.new(10, 1.0, 46),
             },
         }
         for _, segment in pathSegments do
@@ -1541,9 +2176,9 @@ end
 local function decorate(world)
     local trees = {
         { Vector3.new(-104, 0, 61), 1.15, 1 },
-        { Vector3.new(-94, 0, 53), 0.95, 2 },
-        { Vector3.new(-91, 0, 21), 1.05, 3 },
-        { Vector3.new(-84, 0, 8), 0.82, 1 },
+        { Vector3.new(-108, 0, 70), 0.95, 2 },
+        { Vector3.new(-107, 0, 23), 1.05, 3 },
+        { Vector3.new(-94, 0, 1), 0.82, 1 },
         { Vector3.new(-72, 0, -18), 0.92, 2 },
         { Vector3.new(-53, 0, -43), 1.05, 3 },
         { Vector3.new(-29, 0, -74), 0.88, 1 },
@@ -1625,9 +2260,9 @@ local function decorate(world)
     end
 
     local bushPositions = {
-        Vector3.new(-86, 0, 58),
-        Vector3.new(-79, 0, 42),
-        Vector3.new(-72, 0, 24),
+        Vector3.new(-103, 0, 74),
+        Vector3.new(-99, 0, 39),
+        Vector3.new(-96, 0, 15),
         Vector3.new(-61, 0, -18),
         Vector3.new(-51, 0, -31),
         Vector3.new(-34, 0, -36),
@@ -1646,11 +2281,11 @@ local function decorate(world)
     end
 
     local grassPositions = {
-        Vector3.new(-87, 0, 39),
-        Vector3.new(-79, 0, 34),
-        Vector3.new(-71, 0, 51),
-        Vector3.new(-61, 0, 18),
-        Vector3.new(-48, 0, 9),
+        Vector3.new(-98, 0, 33),
+        Vector3.new(-95, 0, 43),
+        Vector3.new(-99, 0, 56),
+        Vector3.new(-83, 0, 4),
+        Vector3.new(-59, 0, 4),
         Vector3.new(-36, 0, 13),
         Vector3.new(-18, 0, -27),
         Vector3.new(-8, 0, -33),
@@ -1676,8 +2311,8 @@ local function decorate(world)
     end
 
     local fernPositions = {
-        Vector3.new(-82, 0, 50),
-        Vector3.new(-75, 0, 46),
+        Vector3.new(-103, 0, 52),
+        Vector3.new(-101, 0, 43),
         Vector3.new(-66, 0, -22),
         Vector3.new(-42, 0, -40),
         Vector3.new(-15, 0, -55),
@@ -1715,7 +2350,7 @@ local function decorate(world)
     end
 
     local flowerPatches = {
-        { Vector3.new(-71, 0, 55), 0.9, true },
+        { Vector3.new(-94, 0, 67), 0.9, true },
         { Vector3.new(-55, 0, 7), 0.8, false },
         { Vector3.new(-26, 0, -44), 0.85, true },
         { Vector3.new(18, 0, -48), 0.78, false },
@@ -1798,13 +2433,20 @@ local function decorate(world)
     makePineRoots(world, Vector3.new(76, 0, 57), math.rad(-38), 0.72)
     makePineRoots(world, Vector3.new(31, 0, -63), math.rad(71), 0.66)
 
-    makeCampfire(world, Vector3.new(-59, 0, 31))
-    makeTent(world, Vector3.new(-72, 0.2, 28), math.rad(18))
-    makeTent(world, Vector3.new(-66, 0.2, 17), math.rad(-24))
-    makeSupplyStack(world, Vector3.new(-77, 0, 36), math.rad(-15))
-    makeSupplyStack(world, Vector3.new(-61, 0, 45), math.rad(24))
-    makeSignpost(world, Vector3.new(-38, 0, 25), math.rad(-58))
-    makeLantern(world, Vector3.new(-47, 0, 30))
+    -- Rebuilt starter camp: large readable shelters around a clear social center.
+    makeCampfire(world, Vector3.new(-57, 0, 33))
+    makeTent(world, Vector3.new(-79, 0.2, 21), math.rad(21))
+    makeTent(world, Vector3.new(-81, 0.2, 49), math.rad(-18))
+    makeCampBench(world, Vector3.new(-59, 0, 25), math.rad(4))
+    makeCampBench(world, Vector3.new(-50, 0, 38), math.rad(72))
+    makeMapTable(world, Vector3.new(-69, 0, 35), math.rad(9))
+    makeSupplyStack(world, Vector3.new(-88, 0, 35), math.rad(-8))
+    makeSupplyStack(world, Vector3.new(-69, 0, 54), math.rad(19))
+    makeCampBanner(world, Vector3.new(-73, 0, 62), math.rad(2))
+    makeSignpost(world, Vector3.new(-38, 0, 26), math.rad(-58))
+    makeLantern(world, Vector3.new(-48, 0, 28))
+    makeLantern(world, Vector3.new(-45, 0, 43))
+    makeLantern(world, Vector3.new(-63, 0, 58))
     makeLantern(world, Vector3.new(-29, 0, 22))
     makeLantern(world, Vector3.new(-8, 0, 10))
     makeLantern(world, Vector3.new(17, 0, 4))
@@ -1815,6 +2457,7 @@ local function decorate(world)
     makeFireflyCluster(world, Vector3.new(-44, 0, -26))
     makeFireflyCluster(world, Vector3.new(29, 0, -46))
     makeFireflyCluster(world, Vector3.new(67, 0, 50))
+    makeCombatGrove(world)
     makeRuins(world)
 end
 
@@ -1822,7 +2465,7 @@ local function makeSpawn(world)
     local spawn = Instance.new("SpawnLocation")
     spawn.Name = "LumenreachSpawn"
     spawn.Size = Vector3.new(8, 1, 8)
-    spawn.CFrame = CFrame.new(-68, 4, 42)
+    spawn.CFrame = CFrame.new(-63, 4, 57) * CFrame.Angles(0, math.rad(155), 0)
     spawn.Anchored = true
     spawn.Neutral = true
     spawn.Material = Enum.Material.Slate
@@ -1846,9 +2489,9 @@ function LumenreachWorldService.Init()
     decorate(world)
     PBRMaterialService.ApplyGeneratedWorld(world)
     makeSpawn(world)
-    makeGuide(world, Vector3.new(-48, 2, 35))
+    makeGuide(world, Vector3.new(-47, 0, 35), math.rad(113))
 
-    makeLandmarkLabel(world, Vector3.new(-49, 11, 35), "LUMENREACH WAYFARER CAMP")
+    makeLandmarkLabel(world, Vector3.new(-57, 13, 34), "LUMENREACH WAYFARER CAMP")
     makeLandmarkLabel(world, Vector3.new(148, 9, 42), "MOSSGLEN COMBAT GROVE")
     makeLandmarkLabel(world, Vector3.new(37, 18, -31), "SHATTERED LUMEN ARCH")
     makeLandmarkLabel(world, Vector3.new(-92, 30, -59), "VEILFALL CASCADE")
