@@ -96,50 +96,42 @@ function CombatController.Start()
     local remotes = ReplicatedStorage:WaitForChild(Net.RemoteFolderName)
     local basicAttack = remotes:WaitForChild(Net.Functions.BasicAttack)
 
-    ContextActionService:BindAction(
-        "EverLeafBasicAttack",
-        function(_, inputState)
-            if inputState ~= Enum.UserInputState.Begin then
-                return Enum.ContextActionResult.Sink
-            end
+    ContextActionService:BindAction("EverLeafBasicAttack", function(_, inputState)
+        if inputState ~= Enum.UserInputState.Begin then
+            return Enum.ContextActionResult.Sink
+        end
 
-            local target = findNearestEnemy()
-            if not target then
-                showFeedback("No enemy in range")
-                return Enum.ContextActionResult.Sink
-            end
+        local target = findNearestEnemy()
+        if not target then
+            showFeedback("No enemy in range")
+            return Enum.ContextActionResult.Sink
+        end
 
-            task.spawn(function()
-                local invokeOk, attackOk, resultOrReason = pcall(function()
-                    return basicAttack:InvokeServer(target)
-                end)
-
-                if not invokeOk then
-                    showFeedback("Attack request failed")
-                    return
-                end
-
-                if not attackOk then
-                    showFeedback(reasonText[resultOrReason] or tostring(resultOrReason))
-                    return
-                end
-
-                local damage = resultOrReason and resultOrReason.Damage
-                if damage then
-                    showFeedback(string.format("Hit for %d", damage))
-                else
-                    showFeedback("Hit")
-                end
+        task.spawn(function()
+            local invokeOk, attackOk, resultOrReason = pcall(function()
+                return basicAttack:InvokeServer(target)
             end)
 
-            return Enum.ContextActionResult.Sink
-        end,
-        true,
-        Enum.KeyCode.LeftControl,
-        Enum.KeyCode.RightControl,
-        Enum.KeyCode.F,
-        Enum.KeyCode.ButtonR2
-    )
+            if not invokeOk then
+                showFeedback("Attack request failed")
+                return
+            end
+
+            if not attackOk then
+                showFeedback(reasonText[resultOrReason] or tostring(resultOrReason))
+                return
+            end
+
+            local damage = resultOrReason and resultOrReason.Damage
+            if damage then
+                showFeedback(string.format("Hit for %d", damage))
+            else
+                showFeedback("Hit")
+            end
+        end)
+
+        return Enum.ContextActionResult.Sink
+    end, true, Enum.KeyCode.Z, Enum.KeyCode.ButtonR2)
 
     ContextActionService:SetTitle("EverLeafBasicAttack", "Attack")
     ContextActionService:SetPosition("EverLeafBasicAttack", UDim2.fromScale(0.78, 0.78))
