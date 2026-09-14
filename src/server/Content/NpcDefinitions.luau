@@ -96,6 +96,28 @@ return table.freeze({
             "eastworks_smelter_golem",
         }),
     }),
+    belforge_marshal = table.freeze({
+        DisplayName = "Rook · Belforge Marshal",
+        RegionId = "brasshaven",
+        Dialogue = table.freeze({
+            "Tamsin cleared you for the upper foundry. From here on, every machine you break is one step closer to the Belforge door.",
+            "Forge Specters are bleeding out of the flux vaults. Bring me residue so I can prove the grid is being driven from below.",
+            "The Enforcers just reinstated an authority protocol nobody has used in decades. Strip their badges before they lock the district down.",
+            "Molten Drakes are crawling the runoff channels. Their scales will tell us how hot the lower furnace really is.",
+            "Three systems are feeding the same furnace now. Clear all three lines before the pressure becomes irreversible.",
+            "The Bellows Titan is the last heavy machine between us and the Belforge gate. Break its core.",
+            "One Sentinel still holds the authority key. Take it down and the antechamber is yours.",
+            "You made Level 30 and opened the Belforge approach. The Colossus is beyond the next seal; prepare before you challenge it.",
+        }),
+        QuestOffers = table.freeze({
+            "belforge_flux_ghosts",
+            "belforge_enforcer_protocol",
+            "belforge_molten_runoff",
+            "belforge_triple_lock",
+            "belforge_bellows_titan",
+            "belforge_gate_sentinel",
+        }),
+    }),
     belforge_foreman = table.freeze({
         DisplayName = "Vale · Belforge Foreman",
         RegionId = "brasshaven",

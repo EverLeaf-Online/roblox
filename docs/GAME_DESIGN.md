@@ -36,9 +36,9 @@ This repository is a clean, original Roblox RPG built from scratch.
 
 ## World/content baseline
 
-- Early world progression is structured as Lumenreach roughly levels 1–10, then Brasshaven roughly levels 10–30.
-- Belforge Colossus is a planned boss encounter.
-- Phase 1 exposes a sealed Belforge Eastworks entrance and foreman in Brasshaven; the actual Colossus instance is a later Level-30 content milestone.
+- Early world progression is structured as Lumenreach roughly levels 1–10, then Brasshaven levels 10–30. The authored quest route is regression-tested for continuous level-gate progression.
+- Brasshaven progression is divided between Vale (10–20), Tamsin (20–24), and Rook (24–30), ending at a Level-30 Belforge gate.
+- Belforge Colossus is a planned boss encounter. Level 30 currently opens a physical Belforge antechamber with a sealed inner Colossus door; the actual boss encounter remains a later milestone.
 - Core non-Robux currencies include Shards and Marks.
 
 ## Milestone 1

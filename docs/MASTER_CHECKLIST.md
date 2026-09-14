@@ -1,7 +1,7 @@
 # EverLeaf Roblox — Master Checklist
 
 **Canonical status:** 2026-09-14
-**Latest gameplay checkpoint:** combat consequence/recovery — monster knockback/stagger plus out-of-combat HP/MP regeneration
+**Latest gameplay checkpoint:** source-complete Level 1–30 progression route — Lumenreach 1–10, Brasshaven 10–30, Rook upper-foundry arc, Level-30 Belforge gate, and antechamber continuity
 **Purpose:** detailed implementation/status tracker for the entire project.
 **Roadmap:** [`ROADMAP.md`](ROADMAP.md)
 
@@ -99,13 +99,13 @@
 - [x] Hidden Whisperroot Hollow and persistent one-time Wayfarer cache reward implemented.
 - [x] First Lumenreach field boss implemented: Mosswarden, Root of the Old Grove.
 - [x] Lumenreach → Brasshaven progression gate is functional and region unlock rewards are supported.
-- [x] Brasshaven now has a regression-tested Level 10–24 route: Vale carries 10–20, Tamsin carries 20–24, with distinct encounter districts, drops, elites, and progression rewards.
+- [x] Brasshaven now has a regression-tested Level 10–30 route: Vale carries 10–20, Tamsin carries 20–24, and Rook carries 24–30 through the upper foundry to the Belforge gate.
 - [x] Brasshaven Foundry Threshold starter shell is physically reachable with a working return gate.
 - [x] Region travel now moves the character transactionally and updates the saved/current respawn target.
 - [x] Dedicated full buy/sell shop screen implemented beyond dialogue preview buttons; Studio interaction/balance QA remains.
-- [ ] Level-up feedback is implemented; Lumenreach 1–10 pacing is regression-tested; Brasshaven 10–30 tuning remains.
+- [x] Level-up feedback is implemented and the source-authored Lumenreach 1–10 + Brasshaven 10–30 quest route has no mandatory grind gap in regression tests; Studio combat/economy tuning remains.
 - [x] First advancement hook/location/quest flow implemented with Seren, the Proving Circle, The Five Paths, and five permanent family choices.
-- [x] Belforge boss-entry shell exists in Brasshaven with a sealed industrial entrance and Vale the foreman; the actual Level-30 Colossus encounter remains future Brasshaven content.
+- [x] Level-30 Belforge approach is functional: Sentinel completion + Level 30 unlocks a safe antechamber/return route; the inner Colossus seal remains closed until the real boss encounter is implemented.
 
 ### F. Phase 1 exit validation
 
@@ -256,8 +256,8 @@
 - [x] Derived-stat headless tests.
 - [ ] Finalize all stat effects and scaling curves.
 - [ ] Define defense/accuracy/evasion/crit or consciously reject them.
-- [ ] Add HP/MP regeneration rules.
-- [ ] Add resource UI.
+- [x] Out-of-combat HP/MP regeneration rules implemented with tested shared recovery math and combat-delay gating.
+- [x] HP/MP resources are represented in the canonical React HUD and replicated snapshots.
 
 ## 6. Classes / advancements
 
@@ -480,7 +480,7 @@
 - [x] Wayfarer environmental-story remnants added around the region.
 - [x] Major landmark exploration triggers wired into quests.
 - [x] Brasshaven portal world object is active and gated by profile region unlock/minimum-level rules.
-- [ ] First advancement location.
+- [x] First advancement location: Wayfarer Proving Circle with Seren the Pathkeeper and The Five Paths trial.
 - [ ] Full player-height collision/asset-placement QA across the entire rebuilt region.
 - [ ] Final lighting/atmosphere tuning.
 - [ ] Ambient audio/music.
@@ -489,17 +489,17 @@
 
 ## 17. World — Brasshaven
 
-- [ ] Visual direction.
-- [ ] Graybox.
-- [ ] Lumenreach connection.
-- [ ] Platforms/terrain.
-- [ ] Portals/transitions.
-- [ ] NPCs.
-- [ ] Monsters.
-- [ ] Quests.
-- [ ] Shops/services.
-- [ ] Level-30 progression destination.
-- [ ] Original environment assets/audio.
+- [x] Industrial-fantasy visual direction established in source: basalt/brick/metal, brass trim, heat/arc emissives, smoke, foundry machinery, and distinct district silhouettes.
+- [x] Playable procedural graybox/content shell expanded through the full Level 10–30 route; Studio player-height art/collision QA remains.
+- [x] Functional Lumenreach connection with transactional travel and saved regional respawn behavior.
+- [x] Foundry roads, service spine, district floors/walls, encounter yards, vents, rails, dynamos, crucibles, flux vaults, runoff channels, and upper-foundry structures implemented.
+- [x] Lumenreach return transition plus gated Belforge antechamber/return transition implemented.
+- [x] Brasshaven progression NPCs/services implemented: Vale, Tamsin, Rook, Nera, and Cale.
+- [x] Level 10–30 Brasshaven monster roster and spawn pockets implemented, including multiple elites.
+- [x] Sequential Level 10–30 Brasshaven quest route implemented and regression-tested for level-gate continuity.
+- [x] Foundry Supply and Belforge Mark Exchange implemented as Shard/Mark sinks.
+- [x] Level-30 progression destination implemented as the Belforge antechamber with inner Colossus seal.
+- [ ] Replace/augment procedural Brasshaven props with final original/approved production environment assets and add regional audio/music.
 
 ## 18. Boss — Belforge Colossus
 
@@ -651,12 +651,12 @@
 
 1. [ ] Full in-Studio walk-through of the rebuilt Lumenreach from player height; fix floating, buried, oversized, incomplete, or obstructive assets.
 2. [ ] Exercise every monster wave/elite/boss trigger in Studio, including emergence height, pathfinding, attack timing, dodge, leash, death, cooldown, and leave/re-enter behavior.
-3. [ ] Complete a fresh-profile starter quest chain through Mosswarden and the Brasshaven unlock without developer intervention.
-4. [ ] Verify visible loot pickup, Collect objectives, equipment rewards, all three shops, and the Whisperroot one-time cache across death/rejoin.
+3. [ ] Complete a fresh-profile Studio run from Lumenreach spawn through first advancement, Brasshaven Level 10–30 progression, Sentinel turn-in, and Belforge antechamber without developer intervention.
+4. [ ] Verify visible loot pickup, Collect objectives, equipment rewards, Lumenreach + Brasshaven shops, Whisperroot cache, and regional/Belforge travel across death/rejoin.
 5. [ ] Multiplayer smoke test: target selection, damage ownership, loot ownership, simultaneous trigger activation, and party/network behavior.
 6. [x] Dedicated shop UX, item detail cards, reward/quest/level-up notifications, and field-boss HUD implemented; complete Studio UX QA remains.
 7. [x] Five first families, Seren the Pathkeeper, Wayfarer Proving Circle, The Five Paths trial, permanent family selection, and starter-skill grants implemented; Studio UX/progression QA remains.
-8. [ ] Lumenreach 1–10 EXP pacing now regression-tested; continue Brasshaven 10–30 EXP, monster stats, spawn density, drop rates, Shard/Mark sinks, and boss rewards.
+8. [ ] Source-authored Level 1–30 pacing and Shard/Mark sinks are regression-tested; perform Studio tuning for monster stats, spawn density, drop rates, time-to-kill, currency flow, and elite rewards.
 9. [ ] Performance profile the dense Lumenreach build for frame time, memory, streaming, and listener leaks.
 10. [ ] Complete keyboard/mouse + controller blocking-flow QA and the full no-red-Output Phase 1 run.
 

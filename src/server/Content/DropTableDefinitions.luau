@@ -77,6 +77,27 @@ return table.freeze({
         table.freeze({ ItemId = "furnace_plate", Chance = 1, Min = 3, Max = 5 }),
         table.freeze({ ItemId = "flux_lens", Chance = 0.6, Min = 1, Max = 2 }),
     }),
+    forge_specter = table.freeze({
+        table.freeze({ ItemId = "specter_residue", Chance = 0.86, Min = 1, Max = 2 }),
+        table.freeze({ ItemId = "flux_lens", Chance = 0.2, Min = 1, Max = 1 }),
+    }),
+    ironclad_enforcer = table.freeze({
+        table.freeze({ ItemId = "enforcer_badge", Chance = 0.88, Min = 1, Max = 2 }),
+        table.freeze({ ItemId = "field_tonic", Chance = 0.1, Min = 1, Max = 1 }),
+    }),
+    molten_drake = table.freeze({
+        table.freeze({ ItemId = "drake_scale", Chance = 0.86, Min = 1, Max = 2 }),
+        table.freeze({ ItemId = "furnace_plate", Chance = 0.24, Min = 1, Max = 1 }),
+    }),
+    bellows_titan = table.freeze({
+        table.freeze({ ItemId = "bellows_core", Chance = 1, Min = 1, Max = 1 }),
+        table.freeze({ ItemId = "drake_scale", Chance = 1, Min = 2, Max = 4 }),
+    }),
+    belforge_sentinel = table.freeze({
+        table.freeze({ ItemId = "belforge_gate_key", Chance = 1, Min = 1, Max = 1 }),
+        table.freeze({ ItemId = "enforcer_badge", Chance = 1, Min = 2, Max = 4 }),
+        table.freeze({ ItemId = "specter_residue", Chance = 0.7, Min = 1, Max = 2 }),
+    }),
     mosswarden = table.freeze({
         table.freeze({ ItemId = "mosswarden_core", Chance = 1, Min = 1, Max = 1 }),
         table.freeze({ ItemId = "lumen_fragment", Chance = 1, Min = 5, Max = 8 }),

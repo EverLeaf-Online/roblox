@@ -358,4 +358,96 @@ return table.freeze({
             Currencies = table.freeze({ Shards = 110, Marks = 1 }),
         }),
     }),
+    belforge_flux_ghosts = table.freeze({
+        DisplayName = "Ghosts in the Flux",
+        MinimumLevel = 24,
+        MinimumAdvancementTier = 1,
+        StartNpcId = "belforge_marshal",
+        PrerequisiteQuests = table.freeze({ "eastworks_smelter_golem" }),
+        Objectives = table.freeze({
+            table.freeze({ Type = "Defeat", Target = "forge_specter", Required = 5 }),
+            table.freeze({ Type = "Collect", Target = "specter_residue", Required = 4 }),
+        }),
+        Reward = table.freeze({
+            Exp = 3300,
+            Currencies = table.freeze({ Shards = 120 }),
+        }),
+    }),
+    belforge_enforcer_protocol = table.freeze({
+        DisplayName = "Enforcer Protocol",
+        MinimumLevel = 25,
+        MinimumAdvancementTier = 1,
+        StartNpcId = "belforge_marshal",
+        PrerequisiteQuests = table.freeze({ "belforge_flux_ghosts" }),
+        Objectives = table.freeze({
+            table.freeze({ Type = "Defeat", Target = "ironclad_enforcer", Required = 5 }),
+            table.freeze({ Type = "Collect", Target = "enforcer_badge", Required = 4 }),
+        }),
+        Reward = table.freeze({
+            Exp = 3500,
+            Currencies = table.freeze({ Shards = 132 }),
+        }),
+    }),
+    belforge_molten_runoff = table.freeze({
+        DisplayName = "Molten Runoff",
+        MinimumLevel = 26,
+        MinimumAdvancementTier = 1,
+        StartNpcId = "belforge_marshal",
+        PrerequisiteQuests = table.freeze({ "belforge_enforcer_protocol" }),
+        Objectives = table.freeze({
+            table.freeze({ Type = "Defeat", Target = "molten_drake", Required = 5 }),
+            table.freeze({ Type = "Collect", Target = "drake_scale", Required = 4 }),
+        }),
+        Reward = table.freeze({
+            Exp = 3700,
+            Currencies = table.freeze({ Shards = 145 }),
+        }),
+    }),
+    belforge_triple_lock = table.freeze({
+        DisplayName = "Three Locks, One Furnace",
+        MinimumLevel = 27,
+        MinimumAdvancementTier = 1,
+        StartNpcId = "belforge_marshal",
+        PrerequisiteQuests = table.freeze({ "belforge_molten_runoff" }),
+        Objectives = table.freeze({
+            table.freeze({ Type = "Defeat", Target = "forge_specter", Required = 3 }),
+            table.freeze({ Type = "Defeat", Target = "ironclad_enforcer", Required = 3 }),
+            table.freeze({ Type = "Defeat", Target = "molten_drake", Required = 3 }),
+        }),
+        Reward = table.freeze({
+            Exp = 3300,
+            Currencies = table.freeze({ Shards = 160 }),
+            Items = table.freeze({ field_tonic = 3 }),
+        }),
+    }),
+    belforge_bellows_titan = table.freeze({
+        DisplayName = "The Bellows Titan",
+        MinimumLevel = 28,
+        MinimumAdvancementTier = 1,
+        StartNpcId = "belforge_marshal",
+        PrerequisiteQuests = table.freeze({ "belforge_triple_lock" }),
+        Objectives = table.freeze({
+            table.freeze({ Type = "Defeat", Target = "bellows_titan", Required = 1 }),
+            table.freeze({ Type = "Collect", Target = "bellows_core", Required = 1 }),
+        }),
+        Reward = table.freeze({
+            Exp = 4800,
+            Currencies = table.freeze({ Shards = 180, Marks = 1 }),
+        }),
+    }),
+    belforge_gate_sentinel = table.freeze({
+        DisplayName = "Sentinel at the Belforge",
+        MinimumLevel = 29,
+        MinimumAdvancementTier = 1,
+        StartNpcId = "belforge_marshal",
+        PrerequisiteQuests = table.freeze({ "belforge_bellows_titan" }),
+        Objectives = table.freeze({
+            table.freeze({ Type = "Defeat", Target = "belforge_sentinel", Required = 1 }),
+            table.freeze({ Type = "Collect", Target = "belforge_gate_key", Required = 1 }),
+        }),
+        Reward = table.freeze({
+            Exp = 5050,
+            Currencies = table.freeze({ Shards = 200, Marks = 2 }),
+        }),
+    }),
 })

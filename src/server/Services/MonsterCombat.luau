@@ -63,6 +63,16 @@ local function effectColor(monsterId)
         return Color3.fromRGB(193, 126, 62)
     elseif monsterId == "smelter_golem" then
         return Color3.fromRGB(255, 86, 34)
+    elseif monsterId == "forge_specter" then
+        return Color3.fromRGB(199, 108, 242)
+    elseif monsterId == "ironclad_enforcer" then
+        return Color3.fromRGB(196, 129, 62)
+    elseif monsterId == "molten_drake" then
+        return Color3.fromRGB(255, 91, 35)
+    elseif monsterId == "bellows_titan" then
+        return Color3.fromRGB(243, 79, 32)
+    elseif monsterId == "belforge_sentinel" then
+        return Color3.fromRGB(224, 151, 64)
     end
     return Color3.fromRGB(219, 211, 172)
 end
