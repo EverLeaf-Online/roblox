@@ -15,6 +15,8 @@ local root = nil
 local thumbstick = Vector2.zero
 local sprintHeld = false
 local lastDodgeAt = -math.huge
+local dodgeUntil = 0
+local dodgeDirection = Vector3.zero
 
 local function attachCharacter(character)
     humanoid = character:WaitForChild("Humanoid")
@@ -23,6 +25,8 @@ local function attachCharacter(character)
     humanoid.UseJumpPower = true
     humanoid.JumpPower = GameConfig.Movement.JumpPower
     humanoid.WalkSpeed = GameConfig.Movement.WalkSpeed
+    dodgeUntil = 0
+    dodgeDirection = Vector3.zero
 end
 
 local function inputBlocked()
@@ -114,11 +118,18 @@ local function tryDodge()
         direction = direction.Unit
     end
 
+    dodgeDirection = direction
+    dodgeUntil = now + GameConfig.Movement.DodgeDuration
+    humanoid.AutoRotate = false
+    humanoid.WalkSpeed = 0
+    humanoid:Move(Vector3.zero, false)
+    root.CFrame = CFrame.lookAt(root.Position, root.Position + dodgeDirection)
+
     local velocity = root.AssemblyLinearVelocity
     root.AssemblyLinearVelocity = Vector3.new(
-        direction.X * GameConfig.Movement.DodgeSpeed,
+        dodgeDirection.X * GameConfig.Movement.DodgeSpeed,
         velocity.Y,
-        direction.Z * GameConfig.Movement.DodgeSpeed
+        dodgeDirection.Z * GameConfig.Movement.DodgeSpeed
     )
     player:SetAttribute("LastLocalDodgeAt", now)
 end
@@ -163,6 +174,25 @@ function ThirdPersonController.Start()
         function()
             if not humanoid or humanoid.Health <= 0 then
                 return
+            end
+
+            local now = os.clock()
+            if dodgeUntil > 0 then
+                if now < dodgeUntil and root and root.Parent then
+                    humanoid.WalkSpeed = 0
+                    humanoid:Move(Vector3.zero, false)
+                    local velocity = root.AssemblyLinearVelocity
+                    root.AssemblyLinearVelocity = Vector3.new(
+                        dodgeDirection.X * GameConfig.Movement.DodgeSpeed,
+                        velocity.Y,
+                        dodgeDirection.Z * GameConfig.Movement.DodgeSpeed
+                    )
+                    return
+                end
+
+                dodgeUntil = 0
+                dodgeDirection = Vector3.zero
+                humanoid.AutoRotate = true
             end
 
             if inputBlocked() then

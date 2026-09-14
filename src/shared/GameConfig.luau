@@ -71,6 +71,7 @@ GameConfig.Movement = {
     SprintSpeed = 24,
     JumpPower = 50,
     DodgeSpeed = 42,
+    DodgeDuration = 0.22,
     DodgeCooldown = 0.8,
     MaxHorizontalSpeed = 58,
     GamepadDeadzone = 0.15,
