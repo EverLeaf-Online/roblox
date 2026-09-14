@@ -64,6 +64,19 @@ return table.freeze({
         table.freeze({ ItemId = "furnace_plate", Chance = 1, Min = 2, Max = 4 }),
         table.freeze({ ItemId = "arc_cell", Chance = 0.7, Min = 1, Max = 2 }),
     }),
+    blueflame_sentry = table.freeze({
+        table.freeze({ ItemId = "flux_lens", Chance = 0.85, Min = 1, Max = 2 }),
+        table.freeze({ ItemId = "arc_cell", Chance = 0.2, Min = 1, Max = 1 }),
+    }),
+    foundry_reaver = table.freeze({
+        table.freeze({ ItemId = "reaver_actuator", Chance = 0.86, Min = 1, Max = 2 }),
+        table.freeze({ ItemId = "field_tonic", Chance = 0.09, Min = 1, Max = 1 }),
+    }),
+    smelter_golem = table.freeze({
+        table.freeze({ ItemId = "smelter_core", Chance = 1, Min = 1, Max = 1 }),
+        table.freeze({ ItemId = "furnace_plate", Chance = 1, Min = 3, Max = 5 }),
+        table.freeze({ ItemId = "flux_lens", Chance = 0.6, Min = 1, Max = 2 }),
+    }),
     mosswarden = table.freeze({
         table.freeze({ ItemId = "mosswarden_core", Chance = 1, Min = 1, Max = 1 }),
         table.freeze({ ItemId = "lumen_fragment", Chance = 1, Min = 5, Max = 8 }),

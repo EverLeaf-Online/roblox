@@ -78,6 +78,24 @@ return table.freeze({
         QuestOffers = table.freeze({}),
         ShopId = "belforge_mark_exchange",
     }),
+    eastworks_engineer = table.freeze({
+        DisplayName = "Tamsin · Eastworks Engineer",
+        RegionId = "brasshaven",
+        Dialogue = table.freeze({
+            "Vale says you cleared the threshold. Good. Out here the machinery is smarter, hotter, and much less interested in keeping workers alive.",
+            "Those blueflame sentries are focusing straight through cracked safety glass. Bring me intact lenses so I can retune the line.",
+            "Reavers are walking the maintenance deck now. Their actuators should tell us who woke the old automation routines.",
+            "The grid is feeding both systems at once. Purge the sentries and reavers before the whole Eastworks cascades.",
+            "One Smelter Golem is still carrying a live core through the crucible yard. Break it open and bring me the heart.",
+            "That buys us time. Past Level 24, every job points closer to the Belforge itself.",
+        }),
+        QuestOffers = table.freeze({
+            "eastworks_blueflame",
+            "eastworks_reaver_line",
+            "eastworks_grid_purge",
+            "eastworks_smelter_golem",
+        }),
+    }),
     belforge_foreman = table.freeze({
         DisplayName = "Vale · Belforge Foreman",
         RegionId = "brasshaven",

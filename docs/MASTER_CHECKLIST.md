@@ -99,7 +99,7 @@
 - [x] Hidden Whisperroot Hollow and persistent one-time Wayfarer cache reward implemented.
 - [x] First Lumenreach field boss implemented: Mosswarden, Root of the Old Grove.
 - [x] Lumenreach → Brasshaven progression gate is functional and region unlock rewards are supported.
-- [x] Brasshaven now has a regression-tested Level 10–20 route: Rivet Scuttlers, Slagmites, Gearjaw Hounds, Cindercoils, Pressure Bastion, Furnace Husks, Arc Siphons, Railbreaker, drops, expanded districts, and ten Vale quests.
+- [x] Brasshaven now has a regression-tested Level 10–24 route: Vale carries 10–20, Tamsin carries 20–24, with distinct encounter districts, drops, elites, and progression rewards.
 - [x] Brasshaven Foundry Threshold starter shell is physically reachable with a working return gate.
 - [x] Region travel now moves the character transactionally and updates the saved/current respawn target.
 - [x] Dedicated full buy/sell shop screen implemented beyond dialogue preview buttons; Studio interaction/balance QA remains.
@@ -364,7 +364,7 @@
 - [x] Ground-spawn wave system with underground emergence, dust/debris, invulnerability, stagger, and trigger-state machine.
 - [x] Spawn trigger states: Idle → Triggered → Spawning → Active → Cooldown.
 - [x] Wave cooldown requires players to leave and re-enter before retriggering.
-- [x] Spawn regions placed for Mosslings, Skeletons, Slimes, Ridgebeaks, Bramblebacks, Wisps, Lumenreach elites/Mosswarden, Rivet Scuttlers, Slagmites, Gearjaw Hounds, Cindercoils, Pressure Bastion, Furnace Husks, Arc Siphons, and Railbreaker.
+- [x] Spawn regions placed for the current Lumenreach roster plus Brasshaven Rivet Scuttlers, Slagmites, Gearjaw Hounds, Cindercoils, Pressure Bastion, Furnace Husks, Arc Siphons, Railbreaker, Blueflame Sentries, Foundry Reavers, and Smelter Golem.
 - [ ] Production hitbox/hurtbox and enemy knockback/stagger-resistance rules.
 - [ ] Studio tune pathfinding, spawn density, anti-farm timing, and multiplayer target behavior.
 - [ ] Replace any remaining simple/procedural monster visuals that fail the final art-quality bar.

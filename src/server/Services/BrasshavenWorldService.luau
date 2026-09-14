@@ -396,6 +396,117 @@ local function makeFoundryVendor(parent, npcId, displayName, position, palette)
     end)
 end
 
+local function makeEastworksEngineer(parent, position)
+    local model = Instance.new("Model")
+    model.Name = "eastworks_engineer"
+    model.Parent = parent
+    local base = CFrame.new(position) * CFrame.Angles(0, math.rad(165), 0)
+
+    local function bodyPart(name, size, offset, material, color)
+        local part = makePart(model, name, size, base * CFrame.new(offset), material, color)
+        part.CanCollide = false
+        part.CanTouch = false
+        return part
+    end
+
+    local root = bodyPart(
+        "HumanoidRootPart",
+        Vector3.new(2, 6.4, 1.8),
+        Vector3.new(0, 3.2, 0),
+        Enum.Material.SmoothPlastic,
+        Color3.new(0, 0, 0)
+    )
+    root.Transparency = 1
+    bodyPart(
+        "Torso",
+        Vector3.new(2.5, 2.55, 1.5),
+        Vector3.new(0, 3.8, 0),
+        Enum.Material.Fabric,
+        Color3.fromRGB(66, 73, 77)
+    )
+    bodyPart(
+        "EngineerApron",
+        Vector3.new(2.12, 2.25, 0.14),
+        Vector3.new(0, 3.5, -0.82),
+        Enum.Material.Fabric,
+        Color3.fromRGB(92, 117, 127)
+    )
+    for _, side in { -1, 1 } do
+        bodyPart(
+            side < 0 and "LeftLeg" or "RightLeg",
+            Vector3.new(0.8, 2.4, 0.85),
+            Vector3.new(side * 0.58, 1.4, 0),
+            Enum.Material.Fabric,
+            Color3.fromRGB(48, 52, 54)
+        )
+        bodyPart(
+            side < 0 and "LeftArm" or "RightArm",
+            Vector3.new(0.72, 2.15, 0.78),
+            Vector3.new(side * 1.55, 3.75, 0),
+            Enum.Material.Fabric,
+            Color3.fromRGB(66, 73, 77)
+        )
+    end
+    local head = bodyPart(
+        "Head",
+        Vector3.new(1.7, 1.7, 1.6),
+        Vector3.new(0, 5.7, 0),
+        Enum.Material.SmoothPlastic,
+        Color3.fromRGB(202, 166, 132)
+    )
+    bodyPart(
+        "EngineerCap",
+        Vector3.new(1.95, 0.4, 1.82),
+        Vector3.new(0, 6.46, 0),
+        Enum.Material.Metal,
+        Color3.fromRGB(92, 117, 127)
+    )
+    local tool = bodyPart(
+        "CalibrationRod",
+        Vector3.new(0.22, 3.0, 0.22),
+        Vector3.new(1.55, 2.8, -0.3),
+        Enum.Material.Metal,
+        Color3.fromRGB(154, 104, 54)
+    )
+    tool.CFrame *= CFrame.Angles(0, 0, math.rad(-12))
+
+    local plate = Instance.new("BillboardGui")
+    plate.Size = UDim2.fromOffset(245, 34)
+    plate.StudsOffsetWorldSpace = Vector3.new(0, 1.72, 0)
+    plate.MaxDistance = 52
+    plate.Parent = head
+    local text = Instance.new("TextLabel")
+    text.Size = UDim2.fromScale(1, 1)
+    text.BackgroundColor3 = Color3.fromRGB(24, 28, 30)
+    text.BackgroundTransparency = 0.15
+    text.Text = "TAMSIN · EASTWORKS ENGINEER"
+    text.TextColor3 = Color3.fromRGB(191, 229, 238)
+    text.TextStrokeTransparency = 0.35
+    text.Font = Enum.Font.GothamBold
+    text.TextScaled = true
+    text.Parent = plate
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 7)
+    corner.Parent = text
+    local edge = Instance.new("UIStroke")
+    edge.Color = Color3.fromRGB(91, 142, 153)
+    edge.Transparency = 0.28
+    edge.Parent = text
+
+    model.PrimaryPart = root
+    WorldObjectService.Register(model, "Npc", "eastworks_engineer")
+    local prompt = Instance.new("ProximityPrompt")
+    prompt.ActionText = "Talk"
+    prompt.ObjectText = "Tamsin · Eastworks Engineer"
+    prompt.KeyboardKeyCode = Enum.KeyCode.E
+    prompt.MaxActivationDistance = 11
+    prompt.RequiresLineOfSight = false
+    prompt.Parent = root
+    prompt.Triggered:Connect(function(player)
+        InteractionService.Begin(player, "eastworks_engineer", model)
+    end)
+end
+
 local function makeBelforgeGate(parent, position)
     local model = Instance.new("Model")
     model.Name = "BelforgeEntrance"
@@ -789,6 +900,87 @@ local function dressEncounterAreas(parent)
         SpawnDelay = 0,
         RespawnTime = 115,
     })
+
+    local blueglassCenter = ORIGIN + Vector3.new(-72, 0, 235)
+    makeLabel(parent, blueglassCenter + Vector3.new(0, 20, 0), "BLUEGLASS ANNEX")
+    for index = 1, 5 do
+        local lens = makePart(
+            parent,
+            "BlueglassLens" .. tostring(index),
+            Vector3.new(0.45, 5.0, 5.0),
+            CFrame.new(blueglassCenter + Vector3.new(-18 + index * 7, 3.0, -16))
+                * CFrame.Angles(0, 0, math.rad(90 + index * 8)),
+            Enum.Material.Glass,
+            Color3.fromRGB(86, 177, 219)
+        )
+        lens.Shape = Enum.PartType.Cylinder
+        lens.Transparency = 0.22
+        lens.CanCollide = false
+    end
+    makeScrapPile(parent, blueglassCenter + Vector3.new(-18, 0, 13), math.rad(18), 0.85)
+
+    local maintenanceCenter = ORIGIN + Vector3.new(68, 0, -235)
+    makeLabel(parent, maintenanceCenter + Vector3.new(0, 20, 0), "EASTWORKS MAINTENANCE DECK")
+    makeScrapPile(parent, maintenanceCenter + Vector3.new(-17, 0, -12), math.rad(31), 0.9)
+    makeScrapPile(parent, maintenanceCenter + Vector3.new(18, 0, 11), math.rad(-44), 0.88)
+    for index = -2, 2 do
+        local arm = makePart(
+            parent,
+            "MaintenanceArm" .. tostring(index + 3),
+            Vector3.new(1.1, 9.0, 1.1),
+            CFrame.new(maintenanceCenter + Vector3.new(index * 7, 4.5, 18))
+                * CFrame.Angles(0, 0, math.rad(index * 5)),
+            Enum.Material.Metal,
+            Color3.fromRGB(93, 78, 62)
+        )
+        arm.CanCollide = false
+    end
+
+    local smelterCenter = ORIGIN + Vector3.new(108, 0, 235)
+    makeLabel(parent, smelterCenter + Vector3.new(0, 22, 0), "SMELTER CRUCIBLE YARD")
+    makeHotVent(parent, smelterCenter + Vector3.new(-18, 0, -13), 1.05)
+    makeHotVent(parent, smelterCenter + Vector3.new(17, 0, 12), 0.92)
+    makeHotVent(parent, smelterCenter + Vector3.new(0, 0, 20), 0.72)
+    for index = 1, 3 do
+        local crucible = makePart(
+            parent,
+            "Crucible" .. tostring(index),
+            Vector3.new(7.5, 8.0, 7.5),
+            CFrame.new(smelterCenter + Vector3.new(-16 + index * 11, 4.0, -18)),
+            Enum.Material.Metal,
+            Color3.fromRGB(67, 64, 60)
+        )
+        crucible.Shape = Enum.PartType.Cylinder
+        crucible.CanCollide = false
+    end
+
+    makeMonsterSpawnTrigger(parent, "EastworksBlueflameSentries", blueglassCenter, {
+        MonsterType = "BlueflameSentry",
+        SpawnAmount = 4,
+        TriggerRadius = 32,
+        SpawnRadius = 15,
+        MaxAliveMonster = 4,
+        SpawnDelay = 0.24,
+        RespawnTime = 30,
+    })
+    makeMonsterSpawnTrigger(parent, "EastworksFoundryReavers", maintenanceCenter, {
+        MonsterType = "FoundryReaver",
+        SpawnAmount = 4,
+        TriggerRadius = 32,
+        SpawnRadius = 15,
+        MaxAliveMonster = 4,
+        SpawnDelay = 0.28,
+        RespawnTime = 31,
+    })
+    makeMonsterSpawnTrigger(parent, "EastworksSmelterGolem", smelterCenter, {
+        MonsterType = "SmelterGolem",
+        SpawnAmount = 1,
+        TriggerRadius = 30,
+        SpawnRadius = 7,
+        MaxAliveMonster = 1,
+        SpawnDelay = 0,
+        RespawnTime = 125,
+    })
 end
 
 function BrasshavenWorldService.Init()
@@ -804,7 +996,7 @@ function BrasshavenWorldService.Init()
     local ground = makePart(
         world,
         "BrasshavenThresholdGround",
-        Vector3.new(360, 8, 420),
+        Vector3.new(360, 8, 600),
         CFrame.new(ORIGIN + Vector3.new(0, -4, 0)),
         Enum.Material.Slate,
         Color3.fromRGB(71, 67, 61)
@@ -824,7 +1016,7 @@ function BrasshavenWorldService.Init()
     local serviceSpine = makePart(
         world,
         "FoundryServiceSpine",
-        Vector3.new(30, 0.8, 330),
+        Vector3.new(30, 0.8, 520),
         CFrame.new(ORIGIN + Vector3.new(24, 0.45, 0)),
         Enum.Material.Cobblestone,
         Color3.fromRGB(88, 77, 67)
@@ -857,7 +1049,7 @@ function BrasshavenWorldService.Init()
         world,
         "NorthWall",
         Vector3.new(330, 18, 8),
-        CFrame.new(ORIGIN + Vector3.new(0, 9, -202)),
+        CFrame.new(ORIGIN + Vector3.new(0, 9, -292)),
         Enum.Material.Brick,
         wallColor
     )
@@ -865,14 +1057,14 @@ function BrasshavenWorldService.Init()
         world,
         "SouthWall",
         Vector3.new(330, 18, 8),
-        CFrame.new(ORIGIN + Vector3.new(0, 9, 202)),
+        CFrame.new(ORIGIN + Vector3.new(0, 9, 292)),
         Enum.Material.Brick,
         wallColor
     )
     makePart(
         world,
         "EastWall",
-        Vector3.new(8, 18, 404),
+        Vector3.new(8, 18, 584),
         CFrame.new(ORIGIN + Vector3.new(166, 9, 0)),
         Enum.Material.Brick,
         wallColor
@@ -880,7 +1072,7 @@ function BrasshavenWorldService.Init()
     makePart(
         world,
         "WestWall",
-        Vector3.new(8, 18, 404),
+        Vector3.new(8, 18, 584),
         CFrame.new(ORIGIN + Vector3.new(-166, 9, 0)),
         Enum.Material.Brick,
         wallColor
@@ -901,6 +1093,7 @@ function BrasshavenWorldService.Init()
     makeReturnGate(world, ORIGIN + Vector3.new(-142, 0, 0))
     makeBelforgeGate(world, ORIGIN + Vector3.new(158, 0, 0))
     makeForeman(world, ORIGIN + Vector3.new(126, 0, 24))
+    makeEastworksEngineer(world, ORIGIN + Vector3.new(92, 0, 112))
     makeFoundryVendor(
         world,
         "foundry_quartermaster",

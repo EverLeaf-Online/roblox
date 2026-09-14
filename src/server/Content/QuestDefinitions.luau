@@ -297,4 +297,65 @@ return table.freeze({
             Currencies = table.freeze({ Shards = 75, Marks = 1 }),
         }),
     }),
+    eastworks_blueflame = table.freeze({
+        DisplayName = "Blueglass Burn",
+        MinimumLevel = 20,
+        MinimumAdvancementTier = 1,
+        StartNpcId = "eastworks_engineer",
+        PrerequisiteQuests = table.freeze({ "brasshaven_railbreaker" }),
+        Objectives = table.freeze({
+            table.freeze({ Type = "Defeat", Target = "blueflame_sentry", Required = 5 }),
+            table.freeze({ Type = "Collect", Target = "flux_lens", Required = 4 }),
+        }),
+        Reward = table.freeze({
+            Exp = 2400,
+            Currencies = table.freeze({ Shards = 80 }),
+        }),
+    }),
+    eastworks_reaver_line = table.freeze({
+        DisplayName = "Reavers on the Line",
+        MinimumLevel = 21,
+        MinimumAdvancementTier = 1,
+        StartNpcId = "eastworks_engineer",
+        PrerequisiteQuests = table.freeze({ "eastworks_blueflame" }),
+        Objectives = table.freeze({
+            table.freeze({ Type = "Defeat", Target = "foundry_reaver", Required = 5 }),
+            table.freeze({ Type = "Collect", Target = "reaver_actuator", Required = 4 }),
+        }),
+        Reward = table.freeze({
+            Exp = 2600,
+            Currencies = table.freeze({ Shards = 88 }),
+        }),
+    }),
+    eastworks_grid_purge = table.freeze({
+        DisplayName = "Purge the Eastworks Grid",
+        MinimumLevel = 22,
+        MinimumAdvancementTier = 1,
+        StartNpcId = "eastworks_engineer",
+        PrerequisiteQuests = table.freeze({ "eastworks_reaver_line" }),
+        Objectives = table.freeze({
+            table.freeze({ Type = "Defeat", Target = "blueflame_sentry", Required = 4 }),
+            table.freeze({ Type = "Defeat", Target = "foundry_reaver", Required = 4 }),
+        }),
+        Reward = table.freeze({
+            Exp = 2500,
+            Currencies = table.freeze({ Shards = 96 }),
+            Items = table.freeze({ field_tonic = 2 }),
+        }),
+    }),
+    eastworks_smelter_golem = table.freeze({
+        DisplayName = "Heart of the Smelter",
+        MinimumLevel = 23,
+        MinimumAdvancementTier = 1,
+        StartNpcId = "eastworks_engineer",
+        PrerequisiteQuests = table.freeze({ "eastworks_grid_purge" }),
+        Objectives = table.freeze({
+            table.freeze({ Type = "Defeat", Target = "smelter_golem", Required = 1 }),
+            table.freeze({ Type = "Collect", Target = "smelter_core", Required = 1 }),
+        }),
+        Reward = table.freeze({
+            Exp = 3400,
+            Currencies = table.freeze({ Shards = 110, Marks = 1 }),
+        }),
+    }),
 })

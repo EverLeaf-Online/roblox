@@ -1240,6 +1240,197 @@ local function buildRailbreaker()
     return model
 end
 
+local function buildBlueflameSentry()
+    local definition = MonsterConfig.Get("blueflame_sentry")
+    local model = buildArcSiphon()
+    model.Name = definition.TemplateName
+    model:ScaleTo(1.08)
+    model:SetAttribute("AgentRadius", 1.8)
+    model:SetAttribute("AgentHeight", 4.5)
+    local humanoid = model:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid.DisplayName = definition.DisplayName
+    end
+    local root = model:FindFirstChild("HumanoidRootPart")
+    if root then
+        local lens = makePart(
+            model,
+            "FluxLens",
+            Vector3.new(1.35, 1.35, 0.24),
+            Color3.fromRGB(96, 211, 255),
+            Enum.Material.Glass,
+            Enum.PartType.Cylinder
+        )
+        lens.Transparency = 0.18
+        makeMotor(
+            root,
+            lens,
+            "FluxLensJoint",
+            Vector3.new(0, 0.55, -2.25),
+            CFrame.Angles(0, math.rad(90), 0)
+        )
+        for _, side in { -1, 1 } do
+            local fin = makePart(
+                model,
+                side < 0 and "LeftFin" or "RightFin",
+                Vector3.new(0.3, 2.6, 1.4),
+                Color3.fromRGB(88, 103, 111),
+                Enum.Material.Metal
+            )
+            makeMotor(
+                root,
+                fin,
+                side < 0 and "LeftFinJoint" or "RightFinJoint",
+                Vector3.new(side * 2.0, 0.35, 0.2),
+                CFrame.Angles(math.rad(12), 0, math.rad(side * 24))
+            )
+        end
+    end
+    return model
+end
+
+local function buildFoundryReaver()
+    local definition = MonsterConfig.Get("foundry_reaver")
+    local model, root =
+        makeBase(definition.TemplateName, definition.DisplayName, Vector3.new(2.5, 5.0, 2.0), 1.8)
+    model:SetAttribute("AgentRadius", 2.2)
+    model:SetAttribute("AgentHeight", 6.4)
+
+    local iron = Color3.fromRGB(65, 64, 61)
+    local brass = Color3.fromRGB(153, 102, 49)
+    local blue = Color3.fromRGB(91, 183, 224)
+
+    local torso =
+        makePart(model, "Torso", Vector3.new(2.9, 3.0, 1.7), iron, Enum.Material.DiamondPlate)
+    makeMotor(root, torso, "BodyJoint", Vector3.new(0, 0.55, 0))
+    local chest =
+        makePart(model, "ChestMark", Vector3.new(1.5, 1.2, 0.22), blue, Enum.Material.Neon)
+    makeMotor(root, chest, "ChestMarkJoint", Vector3.new(0, 0.65, -1.0))
+    local head = makePart(model, "Head", Vector3.new(1.75, 1.65, 1.65), iron, Enum.Material.Metal)
+    makeMotor(root, head, "HeadJoint", Vector3.new(0, 2.55, 0))
+
+    for _, side in { -1, 1 } do
+        local arm = makePart(
+            model,
+            side < 0 and "LeftArm" or "RightArm",
+            Vector3.new(0.7, 3.0, 0.8),
+            brass,
+            Enum.Material.Metal
+        )
+        makeMotor(
+            root,
+            arm,
+            side < 0 and "LeftShoulder" or "RightShoulder",
+            Vector3.new(side * 1.8, 0.55, 0)
+        )
+        local leg = makePart(
+            model,
+            side < 0 and "LeftLeg" or "RightLeg",
+            Vector3.new(0.8, 3.15, 0.9),
+            iron,
+            Enum.Material.Metal
+        )
+        makeMotor(
+            root,
+            leg,
+            side < 0 and "LeftHip" or "RightHip",
+            Vector3.new(side * 0.72, -2.1, 0)
+        )
+        local eye = makePart(
+            model,
+            side < 0 and "LeftEye" or "RightEye",
+            Vector3.new(0.23, 0.23, 0.12),
+            blue,
+            Enum.Material.Neon,
+            Enum.PartType.Ball
+        )
+        makeMotor(
+            root,
+            eye,
+            side < 0 and "LeftEyeJoint" or "RightEyeJoint",
+            Vector3.new(side * 0.4, 2.72, -0.84)
+        )
+    end
+
+    local blade = makePart(
+        model,
+        "ReaverBlade",
+        Vector3.new(0.34, 3.9, 0.72),
+        Color3.fromRGB(112, 112, 106),
+        Enum.Material.Metal
+    )
+    makeMotor(
+        root,
+        blade,
+        "WeaponJoint",
+        Vector3.new(2.15, -0.35, -0.2),
+        CFrame.Angles(0, 0, math.rad(-16))
+    )
+    return model
+end
+
+local function buildSmelterGolem()
+    local definition = MonsterConfig.Get("smelter_golem")
+    local model = buildSlagmite()
+    model.Name = definition.TemplateName
+    model:ScaleTo(1.9)
+    model:SetAttribute("AgentRadius", 3.5)
+    model:SetAttribute("AgentHeight", 6.6)
+    local humanoid = model:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid.DisplayName = definition.DisplayName
+    end
+    local root = model:FindFirstChild("HumanoidRootPart")
+    if root then
+        for _, side in { -1, 1 } do
+            local shoulder = makePart(
+                model,
+                side < 0 and "LeftSmelterPlate" or "RightSmelterPlate",
+                Vector3.new(2.6, 1.2, 2.3),
+                Color3.fromRGB(72, 68, 62),
+                Enum.Material.DiamondPlate
+            )
+            makeMotor(
+                root,
+                shoulder,
+                side < 0 and "LeftSmelterPlateJoint" or "RightSmelterPlateJoint",
+                Vector3.new(side * 2.55, 1.65, -0.2),
+                CFrame.Angles(0, 0, math.rad(side * 12))
+            )
+            local stack = makePart(
+                model,
+                side < 0 and "LeftStack" or "RightStack",
+                Vector3.new(0.85, 3.3, 0.85),
+                Color3.fromRGB(62, 61, 58),
+                Enum.Material.Metal
+            )
+            makeMotor(
+                root,
+                stack,
+                side < 0 and "LeftStackJoint" or "RightStackJoint",
+                Vector3.new(side * 1.55, 2.9, 0.65)
+            )
+            local smoke = Instance.new("Smoke")
+            smoke.Color = Color3.fromRGB(95, 80, 70)
+            smoke.Opacity = 0.2
+            smoke.RiseVelocity = 4
+            smoke.Size = 4
+            smoke.Parent = stack
+        end
+        local core = model:FindFirstChild("MoltenCore")
+        if core and core:IsA("BasePart") then
+            core.Color = Color3.fromRGB(255, 91, 35)
+            local light = core:FindFirstChildOfClass("PointLight")
+            if light then
+                light.Color = core.Color
+                light.Brightness = 2.0
+                light.Range = 16
+            end
+        end
+    end
+    return model
+end
+
 local function buildMosswarden()
     local definition = MonsterConfig.Get("mosswarden")
     local model = buildBrambleback()
@@ -1305,6 +1496,9 @@ local builders = {
     furnace_husk = buildFurnaceHusk,
     arc_siphon = buildArcSiphon,
     railbreaker = buildRailbreaker,
+    blueflame_sentry = buildBlueflameSentry,
+    foundry_reaver = buildFoundryReaver,
+    smelter_golem = buildSmelterGolem,
     mosswarden = buildMosswarden,
 }
 

@@ -244,6 +244,27 @@ return table.freeze({
         StackLimit = 20,
         SellPrice = table.freeze({ Currency = "Shards", Amount = 15 }),
     }),
+    flux_lens = table.freeze({
+        DisplayName = "Flux Lens",
+        Description = "A blueglass focusing lens from an Eastworks sentry array.",
+        Type = "Material",
+        StackLimit = 999,
+        SellPrice = table.freeze({ Currency = "Shards", Amount = 7 }),
+    }),
+    reaver_actuator = table.freeze({
+        DisplayName = "Reaver Actuator",
+        Description = "A high-torque actuator from a Foundry Reaver's shoulder assembly.",
+        Type = "Material",
+        StackLimit = 999,
+        SellPrice = table.freeze({ Currency = "Shards", Amount = 7 }),
+    }),
+    smelter_core = table.freeze({
+        DisplayName = "Smelter Core",
+        Description = "A dense furnace heart recovered from a Smelter Golem elite.",
+        Type = "Quest",
+        StackLimit = 20,
+        SellPrice = table.freeze({ Currency = "Shards", Amount = 18 }),
+    }),
     mosswarden_core = table.freeze({
         DisplayName = "Mosswarden Core",
         Type = "Quest",

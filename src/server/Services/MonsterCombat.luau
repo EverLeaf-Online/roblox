@@ -57,6 +57,12 @@ local function effectColor(monsterId)
         return Color3.fromRGB(100, 205, 255)
     elseif monsterId == "railbreaker" then
         return Color3.fromRGB(225, 89, 48)
+    elseif monsterId == "blueflame_sentry" then
+        return Color3.fromRGB(91, 193, 242)
+    elseif monsterId == "foundry_reaver" then
+        return Color3.fromRGB(193, 126, 62)
+    elseif monsterId == "smelter_golem" then
+        return Color3.fromRGB(255, 86, 34)
     end
     return Color3.fromRGB(219, 211, 172)
 end

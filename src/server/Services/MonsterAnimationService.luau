@@ -24,6 +24,9 @@ local RIG_BY_MONSTER = table.freeze({
     furnace_husk = "skeleton",
     arc_siphon = "wisp",
     railbreaker = "quadruped",
+    blueflame_sentry = "wisp",
+    foundry_reaver = "skeleton",
+    smelter_golem = "slime",
     lumen_wisp = "wisp",
 })
 
