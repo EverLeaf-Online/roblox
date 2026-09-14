@@ -35,6 +35,12 @@ handlers["quest.start"] = function(player, profile, payload)
     end
     return InteractionService.StartOfferedQuest(profile, payload.NpcId, payload.QuestId)
 end
+handlers["quest.turnin"] = function(player, profile, payload)
+    if not InteractionSessionService.ValidateNpc(player, payload.NpcId) then
+        return false, "interaction_session_required"
+    end
+    return InteractionService.TurnInOfferedQuest(profile, payload.NpcId, payload.QuestId)
+end
 handlers["shop.buy"] = function(player, profile, payload)
     return ShopService.Buy(player, profile, payload.ShopId, payload.ItemId, payload.Quantity)
 end

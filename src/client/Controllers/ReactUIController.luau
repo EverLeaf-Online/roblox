@@ -174,7 +174,9 @@ local function Objective(props)
             title = definition and definition.DisplayName or tostring(questId)
             local objective = definition and definition.Objectives and definition.Objectives[1]
             local progress = state.Progress and state.Progress[1] or 0
-            if objective then
+            if state.ReadyToTurnIn then
+                progressText = "Return to the Lumen Guide"
+            elseif objective then
                 progressText =
                     string.format("Defeat targets: %d / %d", progress, objective.Required or 1)
             end
@@ -322,21 +324,32 @@ local function Dialogue(props)
     local questId = description.QuestOffers and description.QuestOffers[1]
     local quests = profile.Quests or {}
     local completed = questId ~= nil and quests.Completed and quests.Completed[questId] == true
-    local active = questId ~= nil and quests.Active and quests.Active[questId] ~= nil
+    local activeState = questId ~= nil and quests.Active and quests.Active[questId] or nil
+    local active = activeState ~= nil
+    local readyToTurnIn = activeState ~= nil and activeState.ReadyToTurnIn == true
     local questButtonText = if completed
         then "QUEST COMPLETED"
-        else if active then "QUEST ACTIVE" else "ACCEPT QUEST"
-    local questButtonEnabled = questId ~= nil and not completed and not active
+        else if readyToTurnIn
+            then "TURN IN QUEST"
+            else if active then "QUEST ACTIVE" else "ACCEPT QUEST"
+    local questButtonEnabled = questId ~= nil and not completed and (not active or readyToTurnIn)
 
-    local function acceptQuest()
+    local function activateQuestButton()
         if not questButtonEnabled then
             return
         end
-        local ok, result = ActionClient.Invoke("quest.start", {
+        local action = if readyToTurnIn then "quest.turnin" else "quest.start"
+        local ok, result = ActionClient.Invoke(action, {
             NpcId = description.NpcId,
             QuestId = questId,
         })
-        setStatus(if ok then "Quest accepted." else string.format("Quest: %s", tostring(result)))
+        if ok then
+            setStatus(
+                if readyToTurnIn then "Quest turned in. Rewards received." else "Quest accepted."
+            )
+        else
+            setStatus(string.format("Quest: %s", tostring(result)))
+        end
     end
 
     local function buyTonic()
@@ -366,7 +379,7 @@ local function Dialogue(props)
             Font = Enum.Font.GothamBold,
             AutoButtonColor = questButtonEnabled,
             Active = questButtonEnabled,
-            [React.Event.Activated] = acceptQuest,
+            [React.Event.Activated] = activateQuestButton,
         }, roundedChildren(nil, 9))
     end
     if description.ShopId then

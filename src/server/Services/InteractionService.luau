@@ -44,22 +44,35 @@ function InteractionService.Begin(player, npcId, worldObject)
     return ok, description
 end
 
+local function npcOffersQuest(npcId, questId)
+    local definition = NpcDefinitions[npcId]
+    if not definition then
+        return false
+    end
+    for _, offeredQuestId in definition.QuestOffers or {} do
+        if offeredQuestId == questId then
+            return true
+        end
+    end
+    return false
+end
+
 function InteractionService.StartOfferedQuest(profile, npcId, questId)
     local definition = NpcDefinitions[npcId]
     if not definition then
         return false, "unknown_npc"
     end
-    local offered = false
-    for _, offeredQuestId in definition.QuestOffers or {} do
-        if offeredQuestId == questId then
-            offered = true
-            break
-        end
-    end
-    if not offered then
+    if not npcOffersQuest(npcId, questId) then
         return false, "quest_not_offered"
     end
     return QuestService.Start(profile, questId)
+end
+
+function InteractionService.TurnInOfferedQuest(profile, npcId, questId)
+    if not npcOffersQuest(npcId, questId) then
+        return false, "quest_not_offered"
+    end
+    return QuestService.TurnIn(profile, questId)
 end
 
 return InteractionService

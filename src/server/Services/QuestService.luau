@@ -48,21 +48,39 @@ function QuestService.Record(profile, objectiveType, targetId, amount)
                     complete = false
                 end
             end
-            if complete then
+            if complete and not state.ReadyToTurnIn then
+                state.ReadyToTurnIn = true
                 table.insert(completedNow, questId)
+                changed = true
             end
         end
     end
-    for _, questId in completedNow do
-        local definition = QuestDefinitions[questId]
-        profile.Quests.Active[questId] = nil
-        profile.Quests.Completed[questId] = true
-        if definition and definition.Reward then
-            RewardService.Grant(profile, definition.Reward)
-        end
-        changed = true
-    end
     return changed, completedNow
+end
+
+function QuestService.TurnIn(profile, questId)
+    local definition = QuestDefinitions[questId]
+    if not definition then
+        return false, "unknown_quest"
+    end
+    if profile.Quests.Completed[questId] then
+        return false, "already_completed"
+    end
+
+    local state = profile.Quests.Active[questId]
+    if not state then
+        return false, "quest_not_active"
+    end
+    if not state.ReadyToTurnIn then
+        return false, "objectives_incomplete"
+    end
+
+    profile.Quests.Active[questId] = nil
+    profile.Quests.Completed[questId] = true
+    if definition.Reward then
+        RewardService.Grant(profile, definition.Reward)
+    end
+    return true, { Reward = definition.Reward }
 end
 
 return QuestService
