@@ -12,11 +12,20 @@ The EverLeaf ARM64 build host keeps its working tree at:
 /opt/roblox/game
 ```
 
-Install the pinned Rokit tools:
+Install the pinned Rokit tools and Wally packages:
 
 ```bash
 rokit install
+wally install
 ```
+
+On Windows, the one-time setup can be run with:
+
+```powershell
+.\setup.ps1
+```
+
+The production UI stack uses React Lua + ReactRoblox from `wally.toml`.
 
 Run the complete pre-push validation:
 
@@ -24,7 +33,7 @@ Run the complete pre-push validation:
 ./check.sh
 ```
 
-The validation gate runs StyLua formatting checks, Selene linting, Lune headless tests, and a Rojo place build.
+The validation gate installs Wally dependencies, runs StyLua formatting checks, Selene linting, service-cycle validation, Lune headless tests, and a Rojo place build.
 
 Build only:
 

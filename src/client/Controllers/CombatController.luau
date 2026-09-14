@@ -227,7 +227,11 @@ local function performAttack()
     if attacking or not attackRemote then
         return
     end
-    if GuiService.MenuIsOpen or UserInputService:GetFocusedTextBox() then
+    if
+        GuiService.MenuIsOpen
+        or UserInputService:GetFocusedTextBox()
+        or player:GetAttribute("EverLeafUiCapture") == true
+    then
         return
     end
 

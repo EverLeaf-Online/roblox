@@ -109,10 +109,11 @@ Every client-callable RemoteFunction is rate-limited. `GameAction` uses an expli
 
 ## Client layers
 
-- Controllers: movement, camera, combat, screen navigation.
+- Controllers: movement, camera, combat, React UI root, screen navigation.
 - Services: validated action client and public catalog client.
 - State: profile store, party event store, UI store.
-- UI registry: HUD, character, inventory, equipment, skills, quests, dialogue, shop, party, settings, boss.
+- Production UI: React Lua + ReactRoblox mounted once under `PlayerGui`; HUD/dialogue are the first migrated surfaces, with character, inventory, equipment, skills, quests, shop, party, settings, and boss screens following the same component tree.
+- Custom UI capture is explicit: opening an interactive React surface releases the mouse and suppresses camera/movement/combat input until the surface closes.
 
 Controllers are fault-isolated at startup so one stalled subsystem cannot block unrelated systems.
 

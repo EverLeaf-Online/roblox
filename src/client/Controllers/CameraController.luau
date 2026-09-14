@@ -23,7 +23,9 @@ local function attachCharacter(newCharacter)
 end
 
 local function cameraInputBlocked()
-    return GuiService.MenuIsOpen or UserInputService:GetFocusedTextBox() ~= nil
+    return GuiService.MenuIsOpen
+        or UserInputService:GetFocusedTextBox() ~= nil
+        or player:GetAttribute("EverLeafUiCapture") == true
 end
 
 local function updateMouseState()

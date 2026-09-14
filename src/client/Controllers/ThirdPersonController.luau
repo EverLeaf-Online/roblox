@@ -30,7 +30,9 @@ local function attachCharacter(character)
 end
 
 local function inputBlocked()
-    return GuiService.MenuIsOpen or UserInputService:GetFocusedTextBox() ~= nil
+    return GuiService.MenuIsOpen
+        or UserInputService:GetFocusedTextBox() ~= nil
+        or player:GetAttribute("EverLeafUiCapture") == true
 end
 
 local function getMoveInput()

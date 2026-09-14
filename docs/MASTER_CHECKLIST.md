@@ -383,19 +383,22 @@
 
 - [x] Temporary client profile state store.
 - [x] Temporary combat feedback label.
-- [ ] **PARTIAL:** Production HUD shell now renders HP/MP/EXP/level/currencies/objective/hotbar; Studio UX verification and final design system remain.
-- [ ] HP bar.
-- [ ] MP bar.
-- [ ] EXP bar.
-- [ ] Level display.
-- [ ] Currency display.
-- [x] Persistent 8-slot skill hotbar data/service foundation; production UI pending.
+- [x] React Lua + ReactRoblox established as the canonical production UI stack.
+- [x] Wally dependency manifest/lockfile + Rojo `ReplicatedStorage.Packages` mapping.
+- [x] Custom UI-capture contract releases cursor and suppresses camera/movement/combat while interactive UI is open.
+- [ ] **PARTIAL:** React production HUD renders HP/MP/EXP/level/currencies/objective/hotbar; Studio UX verification and final visual polish remain.
+- [ ] **PARTIAL:** HP bar implemented in React; Studio verification/polish pending.
+- [ ] **PARTIAL:** MP bar implemented in React; Studio verification/polish pending.
+- [ ] **PARTIAL:** EXP bar implemented in React; Studio verification/polish pending.
+- [ ] **PARTIAL:** Level display implemented in React; Studio verification/polish pending.
+- [ ] **PARTIAL:** Currency display implemented in React; Studio verification/polish pending.
+- [x] Persistent 8-slot skill hotbar data/service foundation; React hotbar shell implemented.
 - [ ] Buff/debuff display.
 - [ ] Character/stat panel.
 - [ ] Inventory/equipment UI.
 - [ ] Quest UI.
-- [ ] NPC dialogue UI.
-- [ ] Shop UI.
+- [ ] **PARTIAL:** NPC dialogue migrated to React with clickable quest/shop actions; Studio verification/polish pending.
+- [ ] **PARTIAL:** Shop action is exposed through the React dialogue shell; dedicated shop screen pending.
 - [ ] Boss HP UI.
 - [ ] Notifications/toasts.
 - [ ] Settings menu.
