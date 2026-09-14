@@ -76,33 +76,135 @@ local function showFeedback(text)
     end)
 end
 
-local function playPrototypePunch()
+local function findMotor(character, names)
+    for _, name in names do
+        local joint = character:FindFirstChild(name, true)
+        if joint and joint:IsA("Motor6D") then
+            return joint
+        end
+    end
+    return nil
+end
+
+local function playPoseTween(joint, targetC0, duration, easingStyle, easingDirection)
+    if not joint or not joint.Parent then
+        return nil
+    end
+
+    local tween = TweenService:Create(
+        joint,
+        TweenInfo.new(duration, easingStyle, easingDirection),
+        { C0 = targetC0 }
+    )
+    tween:Play()
+    return tween
+end
+
+local function playAttackAnimation()
     local character = player.Character
     if not character then
         return
     end
 
-    local shoulder = character:FindFirstChild("RightShoulder", true)
-    if not shoulder or not shoulder:IsA("Motor6D") then
+    -- Roblox's built-in Animate script writes Motor6D.Transform every frame.
+    -- Layer the combat pose through C0 instead so the attack remains visible
+    -- while normal idle/run animations continue underneath it.
+    local rightShoulder = findMotor(character, { "RightShoulder", "Right Shoulder" })
+    if not rightShoulder then
         return
     end
 
-    local original = shoulder.Transform
-    local forward = original * CFrame.Angles(math.rad(-55), 0, math.rad(10))
-    local outTween = TweenService:Create(
-        shoulder,
-        TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-        { Transform = forward }
-    )
-    local backTween = TweenService:Create(
-        shoulder,
-        TweenInfo.new(0.11, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
-        { Transform = original }
-    )
+    local leftShoulder = findMotor(character, { "LeftShoulder", "Left Shoulder" })
+    local torsoJoint = findMotor(character, { "Waist", "RootJoint", "Root Joint" })
 
-    outTween:Play()
-    outTween.Completed:Once(function()
-        backTween:Play()
+    local rightBase = rightShoulder.C0
+    local leftBase = leftShoulder and leftShoulder.C0 or nil
+    local torsoBase = torsoJoint and torsoJoint.C0 or nil
+
+    task.spawn(function()
+        local windup = playPoseTween(
+            rightShoulder,
+            rightBase * CFrame.Angles(math.rad(28), math.rad(-12), math.rad(36)),
+            0.07,
+            Enum.EasingStyle.Quad,
+            Enum.EasingDirection.Out
+        )
+        if leftShoulder and leftBase then
+            playPoseTween(
+                leftShoulder,
+                leftBase * CFrame.Angles(math.rad(-8), 0, math.rad(-12)),
+                0.07,
+                Enum.EasingStyle.Quad,
+                Enum.EasingDirection.Out
+            )
+        end
+        if torsoJoint and torsoBase then
+            playPoseTween(
+                torsoJoint,
+                torsoBase * CFrame.Angles(0, math.rad(-16), 0),
+                0.07,
+                Enum.EasingStyle.Quad,
+                Enum.EasingDirection.Out
+            )
+        end
+        if windup then
+            windup.Completed:Wait()
+        end
+
+        local strike = playPoseTween(
+            rightShoulder,
+            rightBase * CFrame.Angles(math.rad(-92), math.rad(10), math.rad(-14)),
+            0.09,
+            Enum.EasingStyle.Quart,
+            Enum.EasingDirection.Out
+        )
+        if leftShoulder and leftBase then
+            playPoseTween(
+                leftShoulder,
+                leftBase * CFrame.Angles(math.rad(8), 0, math.rad(8)),
+                0.09,
+                Enum.EasingStyle.Quart,
+                Enum.EasingDirection.Out
+            )
+        end
+        if torsoJoint and torsoBase then
+            playPoseTween(
+                torsoJoint,
+                torsoBase * CFrame.Angles(0, math.rad(24), 0),
+                0.09,
+                Enum.EasingStyle.Quart,
+                Enum.EasingDirection.Out
+            )
+        end
+        if strike then
+            strike.Completed:Wait()
+        end
+
+        playPoseTween(
+            rightShoulder,
+            rightBase,
+            0.16,
+            Enum.EasingStyle.Quad,
+            Enum.EasingDirection.InOut
+        )
+        if leftShoulder and leftBase then
+            playPoseTween(
+                leftShoulder,
+                leftBase,
+                0.16,
+                Enum.EasingStyle.Quad,
+                Enum.EasingDirection.InOut
+            )
+        end
+        if torsoJoint and torsoBase then
+            playPoseTween(
+                torsoJoint,
+                torsoBase,
+                0.16,
+                Enum.EasingStyle.Quad,
+                Enum.EasingDirection.InOut
+            )
+        end
     end)
 end
 
@@ -131,7 +233,7 @@ local function performAttack()
 
     attacking = true
     faceCameraDirection()
-    playPrototypePunch()
+    playAttackAnimation()
 
     task.spawn(function()
         local invokeOk, attackOk, resultOrReason = pcall(function()
