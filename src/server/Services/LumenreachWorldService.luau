@@ -2629,6 +2629,29 @@ local function decorate(world)
     makeTrailStones(world)
 end
 
+local function makeMonsterSpawnTrigger(world, name, position, config)
+    local trigger = Instance.new("Part")
+    trigger.Name = "MonsterSpawnTrigger"
+    trigger.Size = Vector3.new(2, 0.4, 2)
+    trigger.CFrame = CFrame.new(position + Vector3.new(0, 0.2, 0))
+    trigger.Anchored = true
+    trigger.CanCollide = false
+    trigger.CanTouch = false
+    trigger.CanQuery = false
+    trigger.Transparency = 1
+    trigger:SetAttribute("TriggerName", name)
+    trigger:SetAttribute("MonsterType", config.MonsterType)
+    trigger:SetAttribute("SpawnAmount", config.SpawnAmount)
+    trigger:SetAttribute("TriggerRadius", config.TriggerRadius)
+    trigger:SetAttribute("SpawnRadius", config.SpawnRadius)
+    trigger:SetAttribute("MaxAliveMonster", config.MaxAliveMonster)
+    trigger:SetAttribute("SpawnDelay", config.SpawnDelay)
+    trigger:SetAttribute("RespawnTime", config.RespawnTime)
+    trigger.Parent = world
+    CollectionService:AddTag(trigger, "MonsterSpawnTrigger")
+    return trigger
+end
+
 local function makeSpawn(world)
     local spawn = Instance.new("SpawnLocation")
     spawn.Name = "LumenreachSpawn"
@@ -2674,23 +2697,47 @@ function LumenreachWorldService.Init()
 
     EnemySpawnerService.Spawn("training_dummy", WORLD_ZONES.Camp + Vector3.new(51, 4, -7), world)
 
-    for _, offset in
+    makeMonsterSpawnTrigger(
+        world,
+        "ShatteredArchSkeletons",
+        WORLD_ZONES.Ruins + Vector3.new(-7, 0, 24),
         {
-            Vector3.new(-24, 3, -9),
-            Vector3.new(1, 3, -19),
-            Vector3.new(27, 3, -4),
-            Vector3.new(-14, 3, 21),
-            Vector3.new(21, 3, 23),
+            MonsterType = "Skeleton",
+            SpawnAmount = 3,
+            TriggerRadius = 30,
+            SpawnRadius = 13,
+            MaxAliveMonster = 3,
+            SpawnDelay = 0.28,
+            RespawnTime = 30,
         }
-    do
-        EnemySpawnerService.Spawn("lumen_mossling", WORLD_ZONES.CombatGrove + offset, world)
-    end
-
-    EnemySpawnerService.Spawn("lumen_mossling", WORLD_ZONES.Ruins + Vector3.new(-33, 3, 28), world)
-    EnemySpawnerService.Spawn(
-        "lumen_mossling",
-        WORLD_ZONES.Glowmere + Vector3.new(51, 3, -29),
-        world
+    )
+    makeMonsterSpawnTrigger(
+        world,
+        "GlowmereSlimes",
+        WORLD_ZONES.Glowmere + Vector3.new(39, 0, -20),
+        {
+            MonsterType = "Slime",
+            SpawnAmount = 3,
+            TriggerRadius = 27,
+            SpawnRadius = 12,
+            MaxAliveMonster = 3,
+            SpawnDelay = 0.42,
+            RespawnTime = 32,
+        }
+    )
+    makeMonsterSpawnTrigger(
+        world,
+        "MossglenRidgebeaks",
+        WORLD_ZONES.CombatGrove + Vector3.new(-8, 0, -18),
+        {
+            MonsterType = "PecoPeco",
+            SpawnAmount = 3,
+            TriggerRadius = 34,
+            SpawnRadius = 16,
+            MaxAliveMonster = 3,
+            SpawnDelay = 0.2,
+            RespawnTime = 30,
+        }
     )
 end
 

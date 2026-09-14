@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local DamageService = require(script.Parent.DamageService)
 local EnemyService = require(script.Parent.EnemyService)
+local MonsterCombat = require(script.Parent.MonsterCombat)
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
 local TargetingService = require(script.Parent.TargetingService)
 
@@ -59,15 +60,32 @@ function CombatService.BasicAttack(player, profile)
     end
 
     local targetHumanoid = EnemyService.GetHumanoid(target)
-    if not targetHumanoid then
+    local targetDefinition = EnemyService.GetDefinition(target)
+    if not targetHumanoid or not targetDefinition then
         return false, "target_unavailable"
     end
 
-    EnemyService.RecordDamage(target, player, damage)
-    targetHumanoid:TakeDamage(damage)
+    local hitApplied, hitResult = MonsterCombat.ApplyPlayerHit(
+        target,
+        targetDefinition.MonsterConfig or targetDefinition,
+        damage
+    )
+    if not hitApplied then
+        if hitResult == "dodged" then
+            return true,
+                {
+                    Damage = 0,
+                    Dodged = true,
+                    TargetHealth = math.max(0, targetHumanoid.Health),
+                }
+        end
+        return false, hitResult
+    end
+
+    EnemyService.RecordDamage(target, player, hitResult)
     return true,
         {
-            Damage = damage,
+            Damage = hitResult,
             TargetHealth = math.max(0, targetHumanoid.Health),
         }
 end

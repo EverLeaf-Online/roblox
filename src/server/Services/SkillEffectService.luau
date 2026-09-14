@@ -1,5 +1,6 @@
 local DamageService = require(script.Parent.DamageService)
 local EnemyService = require(script.Parent.EnemyService)
+local MonsterCombat = require(script.Parent.MonsterCombat)
 local StatusEffectService = require(script.Parent.StatusEffectService)
 local TargetingService = require(script.Parent.TargetingService)
 
@@ -31,12 +32,23 @@ function SkillEffectService.Execute(player, profile, definition)
             return false, reason
         end
         local humanoid = EnemyService.GetHumanoid(target)
-        if not humanoid then
+        local targetDefinition = EnemyService.GetDefinition(target)
+        if not humanoid or not targetDefinition then
             return false, "target_unavailable"
         end
-        EnemyService.RecordDamage(target, player, damage)
-        humanoid:TakeDamage(damage)
-        return true, { Kind = "Damage", Damage = damage }
+        local hitApplied, hitResult = MonsterCombat.ApplyPlayerHit(
+            target,
+            targetDefinition.MonsterConfig or targetDefinition,
+            damage
+        )
+        if not hitApplied then
+            if hitResult == "dodged" then
+                return true, { Kind = "Damage", Damage = 0, Dodged = true }
+            end
+            return false, hitResult
+        end
+        EnemyService.RecordDamage(target, player, hitResult)
+        return true, { Kind = "Damage", Damage = hitResult }
     end
 
     if effect.Type == "SelfStatus" then
