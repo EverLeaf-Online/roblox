@@ -424,7 +424,7 @@ local function makeSupplyStack(parent, position, yaw)
         "CrateA",
         Vector3.new(3.6, 2.5, 3.2),
         base * CFrame.new(0, 1.25, 0),
-        Enum.Material.WoodPlanks,
+        Enum.Material.Wood,
         wood
     )
     makePart(
@@ -432,7 +432,7 @@ local function makeSupplyStack(parent, position, yaw)
         "CrateB",
         Vector3.new(2.7, 2.1, 2.5),
         base * CFrame.new(2.8, 1.05, 0.4),
-        Enum.Material.WoodPlanks,
+        Enum.Material.Wood,
         Color3.fromRGB(91, 67, 45)
     )
     local sack = makeBall(
@@ -466,7 +466,7 @@ local function makeSignpost(parent, position, yaw)
         "ArrowCamp",
         Vector3.new(4.3, 0.8, 0.35),
         base * CFrame.new(1.55, 4.35, 0),
-        Enum.Material.WoodPlanks,
+        Enum.Material.Wood,
         Color3.fromRGB(111, 80, 48)
     )
     local armB = makePart(
@@ -474,7 +474,7 @@ local function makeSignpost(parent, position, yaw)
         "ArrowRuins",
         Vector3.new(3.8, 0.8, 0.35),
         base * CFrame.new(-1.35, 3.3, 0) * CFrame.Angles(0, math.pi, 0),
-        Enum.Material.WoodPlanks,
+        Enum.Material.Wood,
         Color3.fromRGB(99, 71, 45)
     )
     armA.CanCollide = false
@@ -555,75 +555,90 @@ local function makeBush(parent, position, scale)
     return model
 end
 
+local function makeRodBetween(parent, name, a, b, thickness, material, color)
+    local delta = b - a
+    local rod = makePart(
+        parent,
+        name,
+        Vector3.new(thickness, thickness, delta.Magnitude),
+        CFrame.lookAt((a + b) * 0.5, b),
+        material,
+        color
+    )
+    rod.CanCollide = false
+    rod.CanTouch = false
+    return rod
+end
+
 local function makeCampfire(parent, position)
     local model = Instance.new("Model")
     model.Name = "WayfarerCampfire"
     model.Parent = parent
 
-    for index = 1, 8 do
-        local angle = index * math.pi * 0.25
-        makePart(
+    local coals = makePart(
+        model,
+        "CoalBed",
+        Vector3.new(0.18, 3.5, 3.5),
+        CFrame.new(position + Vector3.new(0, 0.2, 0)) * CFrame.Angles(0, 0, math.rad(90)),
+        Enum.Material.Slate,
+        Color3.fromRGB(37, 31, 27)
+    )
+    coals.Shape = Enum.PartType.Cylinder
+    coals.CanCollide = false
+
+    for index = 1, 9 do
+        local angle = index * math.pi * 2 / 9
+        local stone = makeBall(
             model,
-            "FireRingStone",
-            Vector3.new(1.4, 0.8, 1.1),
+            "FireRingStone" .. index,
+            Vector3.new(1.45, 0.85, 1.15),
             CFrame.new(position + Vector3.new(math.cos(angle) * 2.2, 0.45, math.sin(angle) * 2.2))
-                * CFrame.Angles(0, -angle, 0),
+                * CFrame.Angles(0, -angle, math.rad((index % 3 - 1) * 6)),
             Enum.Material.Rock,
-            Color3.fromRGB(79, 82, 77)
+            Color3.fromRGB(88, 89, 82)
         )
+        stone.CanCollide = false
+        useMaterialVariant(stone, "MossyRock")
     end
 
     for index = 1, 3 do
-        makePart(
+        local log = makePart(
             model,
-            "Log",
-            Vector3.new(5, 0.65, 0.65),
-            CFrame.new(position + Vector3.new(0, 0.75, 0))
-                * CFrame.Angles(0, math.rad((index - 1) * 60), 0),
+            "FireLog" .. index,
+            Vector3.new(4.7, 0.62, 0.62),
+            CFrame.new(position + Vector3.new(0, 0.72 + index * 0.05, 0))
+                * CFrame.Angles(0, math.rad((index - 1) * 60 + 12), math.rad((index - 2) * 4)),
             Enum.Material.Wood,
-            Color3.fromRGB(77, 48, 31)
+            Color3.fromRGB(72, 46, 31)
         )
+        log.Shape = Enum.PartType.Cylinder
+        log.CanCollide = false
     end
 
-    local ember = makePart(
+    local ember = makeBall(
         model,
-        "Ember",
-        Vector3.new(1.4, 1.2, 1.4),
-        CFrame.new(position + Vector3.new(0, 1.2, 0)),
+        "EmberCore",
+        Vector3.new(1.55, 1.1, 1.55),
+        CFrame.new(position + Vector3.new(0, 1.05, 0)),
         Enum.Material.Neon,
-        Color3.fromRGB(255, 139, 63)
+        Color3.fromRGB(255, 126, 48)
     )
-    ember.Shape = Enum.PartType.Ball
     ember.CanCollide = false
 
     local light = Instance.new("PointLight")
-    light.Color = Color3.fromRGB(255, 164, 92)
-    light.Brightness = 1.1
-    light.Range = 14
+    light.Color = Color3.fromRGB(255, 169, 98)
+    light.Brightness = 1.45
+    light.Range = 18
     light.Shadows = true
     light.Parent = ember
 
     local fire = Instance.new("Fire")
-    fire.Color = Color3.fromRGB(255, 179, 83)
-    fire.SecondaryColor = Color3.fromRGB(101, 205, 170)
-    fire.Heat = 6
-    fire.Size = 4.5
+    fire.Color = Color3.fromRGB(255, 181, 83)
+    fire.SecondaryColor = Color3.fromRGB(83, 196, 156)
+    fire.Heat = 7
+    fire.Size = 5.5
     fire.Parent = ember
     return model
-end
-
-local function makeWedge(parent, name, size, cframe, material, color)
-    local wedge = Instance.new("WedgePart")
-    wedge.Name = name
-    wedge.Anchored = true
-    wedge.Size = size
-    wedge.CFrame = cframe
-    wedge.Material = material
-    wedge.Color = color
-    wedge.TopSurface = Enum.SurfaceType.Smooth
-    wedge.BottomSurface = Enum.SurfaceType.Smooth
-    wedge.Parent = parent
-    return wedge
 end
 
 local function makeTent(parent, position, yaw)
@@ -632,41 +647,126 @@ local function makeTent(parent, position, yaw)
     model.Parent = parent
 
     local base = CFrame.new(position) * CFrame.Angles(0, yaw, 0)
-    local cloth = Color3.fromRGB(76, 104, 91)
-    local trim = Color3.fromRGB(45, 65, 58)
+    local cloth = Color3.fromRGB(68, 98, 86)
+    local clothDark = Color3.fromRGB(43, 66, 58)
+    local poleColor = Color3.fromRGB(92, 66, 43)
+    local ropeColor = Color3.fromRGB(146, 129, 94)
+    local halfWidth = 3.8
+    local ridgeHeight = 4.45
+    local eaveHeight = 0.48
+    local canvasLength = 8.8
+    local panelWidth =
+        math.sqrt(halfWidth * halfWidth + (ridgeHeight - eaveHeight) * (ridgeHeight - eaveHeight))
+    local slope = math.atan2(ridgeHeight - eaveHeight, halfWidth)
 
-    makeWedge(
+    local groundSheet = makePart(
         model,
-        "TentLeft",
-        Vector3.new(8, 5, 0.35),
-        base * CFrame.new(-2, 2.4, 0) * CFrame.Angles(0, 0, math.rad(28)),
+        "GroundSheet",
+        Vector3.new(6.2, 0.12, 7.1),
+        base * CFrame.new(0, 0.14, 0.25),
+        Enum.Material.Fabric,
+        Color3.fromRGB(72, 67, 56)
+    )
+    groundSheet.CanCollide = false
+
+    local leftCanvas = makePart(
+        model,
+        "CanvasLeft",
+        Vector3.new(panelWidth, 0.18, canvasLength),
+        base
+            * CFrame.new(-halfWidth * 0.5, (ridgeHeight + eaveHeight) * 0.5, 0)
+            * CFrame.Angles(0, 0, slope),
         Enum.Material.Fabric,
         cloth
     )
-    makeWedge(
+    local rightCanvas = makePart(
         model,
-        "TentRight",
-        Vector3.new(8, 5, 0.35),
-        base * CFrame.new(2, 2.4, 0) * CFrame.Angles(0, math.pi, math.rad(28)),
+        "CanvasRight",
+        Vector3.new(panelWidth, 0.18, canvasLength),
+        base
+            * CFrame.new(halfWidth * 0.5, (ridgeHeight + eaveHeight) * 0.5, 0)
+            * CFrame.Angles(0, 0, -slope),
         Enum.Material.Fabric,
-        cloth
+        clothDark
     )
+    leftCanvas.CanCollide = false
+    rightCanvas.CanCollide = false
+
     makePart(
         model,
         "RidgePole",
-        Vector3.new(0.3, 0.3, 8.5),
-        base * CFrame.new(0, 4.8, 0),
+        Vector3.new(0.28, 0.28, canvasLength + 0.6),
+        base * CFrame.new(0, ridgeHeight + 0.05, 0),
         Enum.Material.Wood,
-        trim
-    )
-    makePart(
+        poleColor
+    ).CanCollide =
+        false
+
+    for _, z in { -canvasLength * 0.5, canvasLength * 0.5 } do
+        makePart(
+            model,
+            "SupportPole",
+            Vector3.new(0.3, ridgeHeight + 0.25, 0.3),
+            base * CFrame.new(0, (ridgeHeight + 0.25) * 0.5, z),
+            Enum.Material.Wood,
+            poleColor
+        ).CanCollide =
+            false
+    end
+
+    local bedroll = makePart(
         model,
         "Bedroll",
-        Vector3.new(3.2, 0.35, 5.4),
-        base * CFrame.new(0, 0.35, 0.3),
+        Vector3.new(2.35, 0.28, 4.6),
+        base * CFrame.new(0.85, 0.34, 0.2),
         Enum.Material.Fabric,
-        Color3.fromRGB(96, 78, 67)
+        Color3.fromRGB(112, 83, 69)
     )
+    bedroll.CanCollide = false
+
+    local blanket = makePart(
+        model,
+        "Blanket",
+        Vector3.new(2.2, 0.12, 2.0),
+        base * CFrame.new(0.85, 0.51, 0.8),
+        Enum.Material.Fabric,
+        Color3.fromRGB(91, 119, 102)
+    )
+    blanket.CanCollide = false
+
+    local stakeOffsets = {
+        Vector3.new(-halfWidth - 0.8, 0.18, -canvasLength * 0.5 - 0.65),
+        Vector3.new(halfWidth + 0.8, 0.18, -canvasLength * 0.5 - 0.65),
+        Vector3.new(-halfWidth - 0.8, 0.18, canvasLength * 0.5 + 0.65),
+        Vector3.new(halfWidth + 0.8, 0.18, canvasLength * 0.5 + 0.65),
+    }
+    for index, offset in stakeOffsets do
+        local worldStake = (base * CFrame.new(offset)).Position
+        local stake = makePart(
+            model,
+            "Stake" .. index,
+            Vector3.new(0.22, 0.7, 0.22),
+            CFrame.new(worldStake + Vector3.new(0, 0.22, 0))
+                * CFrame.Angles(math.rad(9), 0, math.rad(8)),
+            Enum.Material.Wood,
+            poleColor
+        )
+        stake.CanCollide = false
+
+        local side = if index % 2 == 1 then -1 else 1
+        local endZ = if index <= 2 then -canvasLength * 0.5 else canvasLength * 0.5
+        local ropeStart = (base * CFrame.new(side * 0.15, ridgeHeight - 0.15, endZ)).Position
+        makeRodBetween(
+            model,
+            "GuyRope" .. index,
+            ropeStart,
+            worldStake + Vector3.new(0, 0.45, 0),
+            0.07,
+            Enum.Material.Fabric,
+            ropeColor
+        )
+    end
+
     return model
 end
 
@@ -947,32 +1047,106 @@ local function makeGuide(parent, position)
     local root = makePart(
         model,
         "HumanoidRootPart",
-        Vector3.new(2, 5, 2),
-        CFrame.new(position + Vector3.new(0, 2.5, 0)),
+        Vector3.new(2, 5.5, 2),
+        CFrame.new(position + Vector3.new(0, 2.75, 0)),
         Enum.Material.SmoothPlastic,
         Color3.fromRGB(48, 72, 68)
     )
     root.Transparency = 1
     root.CanCollide = false
 
-    local body = makePart(
+    local robe = makePart(
         model,
-        "Body",
-        Vector3.new(3, 4.5, 2),
-        CFrame.new(position + Vector3.new(0, 2.4, 0)),
+        "Robe",
+        Vector3.new(2.8, 2.5, 1.65),
+        CFrame.new(position + Vector3.new(0, 1.7, 0)),
         Enum.Material.Fabric,
-        Color3.fromRGB(72, 111, 104)
+        Color3.fromRGB(55, 95, 88)
     )
+    robe.CanCollide = false
+
+    local torso = makePart(
+        model,
+        "Torso",
+        Vector3.new(2.45, 2.35, 1.5),
+        CFrame.new(position + Vector3.new(0, 3.6, 0)),
+        Enum.Material.Fabric,
+        Color3.fromRGB(83, 126, 116)
+    )
+    torso.CanCollide = false
+
+    local belt = makePart(
+        model,
+        "Belt",
+        Vector3.new(2.58, 0.32, 1.58),
+        CFrame.new(position + Vector3.new(0, 2.55, 0)),
+        Enum.Material.Fabric,
+        Color3.fromRGB(74, 51, 35)
+    )
+    belt.CanCollide = false
+
+    for side = -1, 1, 2 do
+        local arm = makePart(
+            model,
+            if side < 0 then "LeftArm" else "RightArm",
+            Vector3.new(0.72, 2.45, 0.78),
+            CFrame.new(position + Vector3.new(side * 1.55, 3.35, 0))
+                * CFrame.Angles(0, 0, math.rad(side * -8)),
+            Enum.Material.Fabric,
+            Color3.fromRGB(65, 106, 98)
+        )
+        arm.CanCollide = false
+
+        local hand = makeBall(
+            model,
+            if side < 0 then "LeftHand" else "RightHand",
+            Vector3.new(0.74, 0.74, 0.74),
+            CFrame.new(position + Vector3.new(side * 1.7, 2.05, 0)),
+            Enum.Material.SmoothPlastic,
+            Color3.fromRGB(215, 184, 156)
+        )
+        hand.CanCollide = false
+    end
+
     local head = makeBall(
         model,
         "Head",
-        Vector3.new(2.2, 2.2, 2.2),
-        CFrame.new(position + Vector3.new(0, 5.4, 0)),
+        Vector3.new(2.0, 2.0, 2.0),
+        CFrame.new(position + Vector3.new(0, 5.55, 0)),
         Enum.Material.SmoothPlastic,
         Color3.fromRGB(218, 190, 163)
     )
-    body.CanCollide = false
     head.CanCollide = false
+
+    local hair = makeBall(
+        model,
+        "Hair",
+        Vector3.new(2.08, 1.05, 2.08),
+        CFrame.new(position + Vector3.new(0, 6.15, 0.08)),
+        Enum.Material.SmoothPlastic,
+        Color3.fromRGB(62, 47, 37)
+    )
+    hair.CanCollide = false
+
+    local scarf = makePart(
+        model,
+        "Scarf",
+        Vector3.new(2.15, 0.42, 1.62),
+        CFrame.new(position + Vector3.new(0, 4.65, 0)),
+        Enum.Material.Fabric,
+        Color3.fromRGB(146, 101, 63)
+    )
+    scarf.CanCollide = false
+
+    local satchel = makePart(
+        model,
+        "Satchel",
+        Vector3.new(1.15, 1.35, 0.55),
+        CFrame.new(position + Vector3.new(1.15, 2.85, 0.78)) * CFrame.Angles(0, 0, math.rad(-8)),
+        Enum.Material.Fabric,
+        Color3.fromRGB(92, 61, 39)
+    )
+    satchel.CanCollide = false
 
     model.PrimaryPart = root
     WorldObjectService.Register(model, "Npc", "lumen_guide")
@@ -1006,7 +1180,7 @@ local function makeLandmarkLabel(parent, position, text)
 
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "LandmarkLabel"
-    billboard.Size = UDim2.fromOffset(240, 42)
+    billboard.Size = UDim2.fromOffset(340, 38)
     billboard.AlwaysOnTop = false
     billboard.MaxDistance = 90
     billboard.Parent = anchor
@@ -1019,6 +1193,7 @@ local function makeLandmarkLabel(parent, position, text)
     label.TextStrokeTransparency = 0.45
     label.Font = Enum.Font.GothamBold
     label.TextScaled = true
+    label.TextWrapped = false
     label.Parent = billboard
 end
 
