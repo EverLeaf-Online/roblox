@@ -360,7 +360,7 @@ local function makeRock(parent, position, size, rotation)
         size,
         CFrame.new(position) * CFrame.Angles(rotation.X, rotation.Y, rotation.Z),
         Enum.Material.Rock,
-        Color3.fromRGB(83, 91, 92)
+        Color3.fromRGB(112, 119, 115)
     )
     rock.Shape = Enum.PartType.Ball
     useMaterialVariant(rock, "MossyRock")
@@ -383,7 +383,9 @@ local function makeRockCluster(parent, position, scale, seed)
             spec[2] * scale,
             spec[3] + Vector3.new(0, (seed or 1) * index * 0.08, 0)
         )
-        rock.Color = if index == 1 then Color3.fromRGB(76, 84, 83) else Color3.fromRGB(91, 98, 95)
+        rock.Color = if index == 1
+            then Color3.fromRGB(104, 111, 108)
+            else Color3.fromRGB(119, 125, 120)
     end
     if seed and seed % 2 == 0 then
         makeBall(
@@ -416,7 +418,7 @@ local function makeDryBranches(parent, position, yaw, scale)
         "DryBranches",
         parent,
         CFrame.new(position) * CFrame.Angles(0, yaw, 0),
-        prefabScaleForLongest("DryBranches", 6.5, scale)
+        prefabScaleForLongest("DryBranches", 4.6, scale)
     )
     if prefab then
         setInstanceCollision(prefab, false)
@@ -463,17 +465,56 @@ local function makeMossyRockSet(parent, position, yaw, scale)
 end
 
 local function makeRockFace(parent, position, yaw, scale)
+    local model = Instance.new("Model")
+    model.Name = "IntegratedRockFace"
+    model.Parent = parent
+
+    local base = CFrame.new(position) * CFrame.Angles(0, yaw, 0)
     local prefab = EnvironmentPrefabService.Place(
         "RockFace",
-        parent,
-        CFrame.new(position) * CFrame.Angles(0, yaw, 0),
-        prefabScaleForLongest("RockFace", 22, scale)
+        model,
+        CFrame.new(position - Vector3.new(0, 2.15 * scale, 0)) * CFrame.Angles(0, yaw, 0),
+        prefabScaleForLongest("RockFace", 16, scale)
     )
     if prefab then
         setInstanceCollision(prefab, true)
-        return prefab
     end
-    return makeRockCluster(parent, position, 1.8 * scale, math.max(1, math.floor(scale * 7)))
+
+    local supportSpecs = {
+        { Vector3.new(-5.2, 2.6, 2.7), Vector3.new(9.4, 5.8, 8.0), Vector3.new(0.05, -0.18, 0.08) },
+        { Vector3.new(4.8, 2.2, 3.2), Vector3.new(8.0, 4.8, 7.0), Vector3.new(-0.08, 0.24, -0.04) },
+        {
+            Vector3.new(-1.0, 1.5, -2.8),
+            Vector3.new(10.5, 3.8, 6.8),
+            Vector3.new(0.12, 0.08, 0.06),
+        },
+        { Vector3.new(0.8, 4.6, 3.8), Vector3.new(7.0, 5.6, 6.2), Vector3.new(-0.12, -0.12, 0.08) },
+    }
+    for index, spec in supportSpecs do
+        local worldPosition = (base * CFrame.new(spec[1] * scale)).Position
+        local rock = makeRock(
+            model,
+            worldPosition,
+            spec[2] * scale,
+            Vector3.new(spec[3].X, spec[3].Y + yaw, spec[3].Z)
+        )
+        rock.Color = if index % 2 == 0
+            then Color3.fromRGB(98, 105, 101)
+            else Color3.fromRGB(88, 97, 94)
+    end
+
+    local mossShelf = makeBall(
+        model,
+        "MossShelf",
+        Vector3.new(9.2, 0.85, 6.4) * scale,
+        base * CFrame.new(-1.4 * scale, 5.55 * scale, 3.0 * scale),
+        FOLIAGE_MATERIAL,
+        Color3.fromRGB(69, 105, 61)
+    )
+    mossShelf.CanCollide = false
+    mossShelf.CanTouch = false
+
+    return model
 end
 
 local function makeMushroomCluster(parent, position, scale, seed)
@@ -1513,26 +1554,38 @@ local function makeRockSpire(parent, position, scale)
     local model = Instance.new("Model")
     model.Name = "LumenRockSpire"
     model.Parent = parent
-    local color = Color3.fromRGB(76, 87, 81)
-    makeRock(
+
+    local specs = {
+        { Vector3.new(0, 2.9, 0), Vector3.new(13.5, 6.8, 11.5), Vector3.new(0.03, 0.28, 0.06) },
+        { Vector3.new(-3.4, 6.2, -0.8), Vector3.new(8.4, 7.2, 7.6), Vector3.new(0.1, -0.18, 0.14) },
+        { Vector3.new(3.5, 5.3, 1.6), Vector3.new(7.4, 5.8, 8.6), Vector3.new(-0.12, 0.4, -0.08) },
+        { Vector3.new(-0.6, 9.4, 0.2), Vector3.new(7.0, 6.2, 6.5), Vector3.new(0.08, 0.12, 0.12) },
+        {
+            Vector3.new(1.7, 11.8, -0.6),
+            Vector3.new(4.8, 4.6, 5.2),
+            Vector3.new(-0.1, -0.28, 0.06),
+        },
+    }
+    for index, spec in specs do
+        local rock = makeRock(model, position + spec[1] * scale, spec[2] * scale, spec[3])
+        rock.Color = if index == 1
+            then Color3.fromRGB(91, 100, 96)
+            else if index % 2 == 0
+                then Color3.fromRGB(101, 109, 103)
+                else Color3.fromRGB(84, 94, 90)
+    end
+
+    local moss = makeBall(
         model,
-        position + Vector3.new(0, 5 * scale, 0),
-        Vector3.new(10, 12, 10) * scale,
-        Vector3.new(0.05, 0.4, 0.08)
+        "MossCrown",
+        Vector3.new(7.8, 0.8, 6.8) * scale,
+        CFrame.new(position + Vector3.new(-0.5, 12.2, 0.3) * scale)
+            * CFrame.Angles(math.rad(4), math.rad(14), math.rad(-3)),
+        FOLIAGE_MATERIAL,
+        Color3.fromRGB(67, 108, 59)
     )
-    makeRock(
-        model,
-        position + Vector3.new(1, 13 * scale, -1),
-        Vector3.new(7, 10, 7) * scale,
-        Vector3.new(0.1, -0.2, 0.12)
-    )
-    local crown = makeRock(
-        model,
-        position + Vector3.new(-1, 20 * scale, 0),
-        Vector3.new(4, 8, 4) * scale,
-        Vector3.new(-0.1, 0.2, -0.06)
-    )
-    crown.Color = color
+    moss.CanCollide = false
+    moss.CanTouch = false
     return model
 end
 
@@ -2504,8 +2557,8 @@ local function decorate(world)
 
     -- Veilfall is a rocky wet forest with a basin, stream, deadwood, and cliff dressing.
     makeWaterfall(world, WORLD_ZONES.Waterfall)
-    makeRockFace(world, WORLD_ZONES.Waterfall + Vector3.new(-31, 0, -10), math.rad(18), 1.25)
-    makeRockFace(world, WORLD_ZONES.Waterfall + Vector3.new(34, 0, -5), math.rad(-22), 1.1)
+    makeRockFace(world, WORLD_ZONES.Waterfall + Vector3.new(-31, 0, -10), math.rad(18), 1.0)
+    makeRockFace(world, WORLD_ZONES.Waterfall + Vector3.new(34, 0, -5), math.rad(-22), 0.92)
     makeMossyRockSet(world, WORLD_ZONES.Waterfall + Vector3.new(-29, 0, 39), math.rad(27), 1.0)
     makeMossyRockSet(world, WORLD_ZONES.Waterfall + Vector3.new(30, 0, 41), math.rad(-35), 0.88)
     makeFallenLog(world, WORLD_ZONES.Waterfall + Vector3.new(41, 0.2, -36), math.rad(61), 0.9, 2)
@@ -2560,7 +2613,7 @@ local function decorate(world)
 
     -- The Shattered Arch is now a destination in its own clearing.
     makeRuins(world, WORLD_ZONES.Ruins)
-    makeRockFace(world, WORLD_ZONES.Ruins + Vector3.new(57, 0, -37), math.rad(-67), 1.05)
+    makeRockFace(world, WORLD_ZONES.Ruins + Vector3.new(57, 0, -37), math.rad(-67), 0.78)
     makeMossyRockSet(world, WORLD_ZONES.Ruins + Vector3.new(-51, 0, 31), math.rad(28), 0.9)
     makeDryBranches(world, WORLD_ZONES.Ruins + Vector3.new(37, 0.1, 34), math.rad(-31), 0.8)
     makeStump(world, WORLD_ZONES.Ruins + Vector3.new(-39, 0, -33), 0.82, 2)
@@ -2586,7 +2639,7 @@ local function decorate(world)
     -- Sunmoss Overlook finishes the northern loop with large silhouettes instead of another flat clearing.
     makeRockSpire(world, WORLD_ZONES.Overlook + Vector3.new(-31, 0, 8), 1.15)
     makeRockSpire(world, WORLD_ZONES.Overlook + Vector3.new(35, 0, -8), 0.94)
-    makeRockFace(world, WORLD_ZONES.Overlook + Vector3.new(0, 0, -39), math.rad(178), 1.35)
+    makeRockFace(world, WORLD_ZONES.Overlook + Vector3.new(0, 0, -39), math.rad(178), 0.9)
     makeWaystone(world, WORLD_ZONES.Overlook + Vector3.new(-5, 2.2, 19), math.rad(8), 0.86)
     makeCrystal(world, WORLD_ZONES.Overlook + Vector3.new(20, 5.0, 12))
     makeDryBranches(world, WORLD_ZONES.Overlook + Vector3.new(-46, 0.1, -22), math.rad(56), 0.9)
