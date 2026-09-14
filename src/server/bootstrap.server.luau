@@ -115,7 +115,7 @@ allocateStat.OnServerInvoke = function(player, statName, amount)
     return ok, reason
 end
 
-basicAttack.OnServerInvoke = function(player, target)
+basicAttack.OnServerInvoke = function(player)
     local limit = GameConfig.Security.BasicAttack
     if
         not RateLimiterService.Allow(
@@ -134,5 +134,5 @@ basicAttack.OnServerInvoke = function(player, target)
         return false, "profile_not_loaded"
     end
 
-    return CombatService.BasicAttack(player, profile, target)
+    return CombatService.BasicAttack(player, profile)
 end

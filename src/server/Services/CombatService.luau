@@ -1,3 +1,4 @@
+local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -12,20 +13,47 @@ local function getRoot(model)
     return model and model:FindFirstChild("HumanoidRootPart")
 end
 
-function CombatService.BasicAttack(player, profile, target)
-    if typeof(target) ~= "Instance" or not target:IsA("Model") then
-        return false, "invalid_target"
-    end
-    if not EnemyService.IsValidTarget(target) then
-        return false, "target_unavailable"
+local function findNearestTarget(playerRoot)
+    local nearest = nil
+    local nearestDistance = math.huge
+
+    for _, candidate in CollectionService:GetTagged("EverLeafEnemy") do
+        if candidate:IsA("Model") and EnemyService.IsValidTarget(candidate) then
+            local targetRoot = getRoot(candidate) or candidate.PrimaryPart
+            if targetRoot then
+                local delta = targetRoot.Position - playerRoot.Position
+                local planarDistance = Vector2.new(delta.X, delta.Y).Magnitude
+                if
+                    planarDistance <= GameConfig.Combat.BasicAttackRange
+                    and math.abs(delta.Z) <= GameConfig.Combat.BasicAttackDepthRange
+                    and planarDistance < nearestDistance
+                then
+                    nearest = candidate
+                    nearestDistance = planarDistance
+                end
+            end
+        end
     end
 
+    return nearest
+end
+
+function CombatService.BasicAttack(player, profile)
     local character = player.Character
     local humanoid = character and character:FindFirstChildOfClass("Humanoid")
     local playerRoot = getRoot(character)
-    local targetRoot = getRoot(target) or target.PrimaryPart
-    if not humanoid or humanoid.Health <= 0 or not playerRoot or not targetRoot then
+    if not humanoid or humanoid.Health <= 0 or not playerRoot then
         return false, "character_unavailable"
+    end
+
+    local target = findNearestTarget(playerRoot)
+    if not target then
+        return false, "no_target"
+    end
+
+    local targetRoot = getRoot(target) or target.PrimaryPart
+    if not targetRoot then
+        return false, "target_unavailable"
     end
 
     local now = os.clock()
