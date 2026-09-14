@@ -30,6 +30,14 @@ return table.freeze({
         table.freeze({ ItemId = "glowcap_gel", Chance = 1, Min = 2, Max = 4 }),
         table.freeze({ ItemId = "mossguard_charm", Chance = 0.08, Min = 1, Max = 1 }),
     }),
+    rivet_scuttler = table.freeze({
+        table.freeze({ ItemId = "rivet_spring", Chance = 0.84, Min = 1, Max = 2 }),
+        table.freeze({ ItemId = "field_tonic", Chance = 0.07, Min = 1, Max = 1 }),
+    }),
+    slagmite = table.freeze({
+        table.freeze({ ItemId = "slag_core", Chance = 0.82, Min = 1, Max = 2 }),
+        table.freeze({ ItemId = "rivet_spring", Chance = 0.22, Min = 1, Max = 1 }),
+    }),
     mosswarden = table.freeze({
         table.freeze({ ItemId = "mosswarden_core", Chance = 1, Min = 1, Max = 1 }),
         table.freeze({ ItemId = "lumen_fragment", Chance = 1, Min = 5, Max = 8 }),

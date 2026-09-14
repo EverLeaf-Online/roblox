@@ -92,13 +92,14 @@
 - [x] Starter equipment/reward path added (`Wayfarer Scout Blade`, `Mossguard Charm`, tonics/materials).
 - [x] Three camp NPCs added beyond Ilyra: Orin (quartermaster), Tovin (scout), and Maela (archive keeper).
 - [x] NPC dialogue now changes with progression and quest availability.
-- [x] Starter/tutorial, hunting, exploration, boss, and region-unlock quest chains added.
+- [x] Starter/tutorial, hunting, exploration, boss, region-unlock, and first Brasshaven quest chains added.
 - [x] Quest prerequisites, Collect objectives, and Explore objectives implemented.
 - [x] Landmark exploration triggers wired for Crossroads, Glowmere, Shattered Arch, Veilfall, Sunmoss, and Whisperroot Hollow.
 - [x] Basic multi-item shop inventories exposed through NPC dialogue for supply/outfitter/archive vendors.
 - [x] Hidden Whisperroot Hollow and persistent one-time Wayfarer cache reward implemented.
 - [x] First Lumenreach field boss implemented: Mosswarden, Root of the Old Grove.
 - [x] Lumenreach → Brasshaven progression gate is functional and region unlock rewards are supported.
+- [x] Brasshaven Foundry Threshold now has a playable chapter opener: Rivet Scuttlers, Slagmites, drops, encounter pockets, and Vale's first three quests.
 - [x] Brasshaven Foundry Threshold starter shell is physically reachable with a working return gate.
 - [x] Region travel now moves the character transactionally and updates the saved/current respawn target.
 - [x] Dedicated full buy/sell shop screen implemented beyond dialogue preview buttons; Studio interaction/balance QA remains.
@@ -363,7 +364,7 @@
 - [x] Ground-spawn wave system with underground emergence, dust/debris, invulnerability, stagger, and trigger-state machine.
 - [x] Spawn trigger states: Idle → Triggered → Spawning → Active → Cooldown.
 - [x] Wave cooldown requires players to leave and re-enter before retriggering.
-- [x] Spawn regions placed for Mosslings, Skeletons, Slimes, Ridgebeaks, Bramblebacks, Wisps, elites, and Mosswarden.
+- [x] Spawn regions placed for Mosslings, Skeletons, Slimes, Ridgebeaks, Bramblebacks, Wisps, elites, Mosswarden, Rivet Scuttlers, and Slagmites.
 - [ ] Production hitbox/hurtbox and enemy knockback/stagger-resistance rules.
 - [ ] Studio tune pathfinding, spawn density, anti-farm timing, and multiplayer target behavior.
 - [ ] Replace any remaining simple/procedural monster visuals that fail the final art-quality bar.

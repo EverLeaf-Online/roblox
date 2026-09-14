@@ -147,4 +147,48 @@ return table.freeze({
             UnlockRegions = table.freeze({ "brasshaven" }),
         }),
     }),
+    brasshaven_first_shift = table.freeze({
+        DisplayName = "First Shift at the Foundry",
+        MinimumLevel = 10,
+        MinimumAdvancementTier = 1,
+        StartNpcId = "belforge_foreman",
+        PrerequisiteQuests = table.freeze({ "brasshaven_passage" }),
+        Objectives = table.freeze({
+            table.freeze({ Type = "Defeat", Target = "rivet_scuttler", Required = 5 }),
+        }),
+        Reward = table.freeze({
+            Exp = 550,
+            Currencies = table.freeze({ Shards = 25 }),
+        }),
+    }),
+    brasshaven_hot_lines = table.freeze({
+        DisplayName = "Heat in the Lines",
+        MinimumLevel = 11,
+        MinimumAdvancementTier = 1,
+        StartNpcId = "belforge_foreman",
+        PrerequisiteQuests = table.freeze({ "brasshaven_first_shift" }),
+        Objectives = table.freeze({
+            table.freeze({ Type = "Collect", Target = "rivet_spring", Required = 5 }),
+            table.freeze({ Type = "Defeat", Target = "slagmite", Required = 3 }),
+        }),
+        Reward = table.freeze({
+            Exp = 700,
+            Currencies = table.freeze({ Shards = 30 }),
+        }),
+    }),
+    brasshaven_core_sample = table.freeze({
+        DisplayName = "A Core Worth Studying",
+        MinimumLevel = 12,
+        MinimumAdvancementTier = 1,
+        StartNpcId = "belforge_foreman",
+        PrerequisiteQuests = table.freeze({ "brasshaven_hot_lines" }),
+        Objectives = table.freeze({
+            table.freeze({ Type = "Collect", Target = "slag_core", Required = 4 }),
+        }),
+        Reward = table.freeze({
+            Exp = 1000,
+            Currencies = table.freeze({ Shards = 35 }),
+            Items = table.freeze({ field_tonic = 2 }),
+        }),
+    }),
 })

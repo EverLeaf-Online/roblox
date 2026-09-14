@@ -648,6 +648,174 @@ local function buildRoyalGlowcap()
     return model
 end
 
+local function buildRivetScuttler()
+    local definition = MonsterConfig.Get("rivet_scuttler")
+    local model, root =
+        makeBase(definition.TemplateName, definition.DisplayName, Vector3.new(3.1, 2.3, 4.4), 0.9)
+    model:SetAttribute("AgentRadius", 2.2)
+    model:SetAttribute("AgentHeight", 3.8)
+
+    local iron = Color3.fromRGB(73, 72, 68)
+    local brass = Color3.fromRGB(151, 103, 48)
+    local hot = Color3.fromRGB(241, 135, 59)
+
+    local body =
+        makePart(model, "Body", Vector3.new(4.7, 2.0, 5.0), iron, Enum.Material.DiamondPlate)
+    makeMotor(root, body, "BodyJoint", Vector3.new(0, 0.2, 0))
+
+    local shell = makePart(
+        model,
+        "Shell",
+        Vector3.new(3.9, 1.1, 3.8),
+        brass,
+        Enum.Material.Metal,
+        Enum.PartType.Ball
+    )
+    makeMotor(root, shell, "ShellJoint", Vector3.new(0, 1.0, 0.25))
+
+    local head = makePart(model, "Head", Vector3.new(2.4, 1.3, 2.2), iron, Enum.Material.Metal)
+    makeMotor(root, head, "HeadJoint", Vector3.new(0, 0.25, -3.0))
+
+    for _, spec in
+        {
+            { "FrontLeft", -1.55, -1.55 },
+            { "FrontRight", 1.55, -1.55 },
+            { "BackLeft", -1.55, 1.6 },
+            { "BackRight", 1.55, 1.6 },
+        }
+    do
+        local leg = makePart(
+            model,
+            spec[1] .. "Leg",
+            Vector3.new(0.48, 2.0, 0.55),
+            brass,
+            Enum.Material.Metal
+        )
+        makeMotor(root, leg, spec[1] .. "Hip", Vector3.new(spec[2], -1.35, spec[3]))
+        local foot = makePart(
+            model,
+            spec[1] .. "Foot",
+            Vector3.new(0.9, 0.35, 1.0),
+            iron,
+            Enum.Material.DiamondPlate
+        )
+        makeMotor(root, foot, spec[1] .. "FootJoint", Vector3.new(spec[2], -2.15, spec[3] - 0.15))
+    end
+
+    for _, side in { -1, 1 } do
+        local eye = makePart(
+            model,
+            side < 0 and "LeftEye" or "RightEye",
+            Vector3.new(0.28, 0.28, 0.15),
+            hot,
+            Enum.Material.Neon,
+            Enum.PartType.Ball
+        )
+        makeMotor(
+            root,
+            eye,
+            side < 0 and "LeftEyeJoint" or "RightEyeJoint",
+            Vector3.new(side * 0.52, 0.45, -4.08)
+        )
+    end
+
+    local cutter = makePart(
+        model,
+        "RivetCutter",
+        Vector3.new(0.38, 0.38, 2.3),
+        Color3.fromRGB(112, 112, 106),
+        Enum.Material.Metal
+    )
+    makeMotor(
+        root,
+        cutter,
+        "WeaponJoint",
+        Vector3.new(0, -0.25, -4.0),
+        CFrame.Angles(math.rad(90), 0, 0)
+    )
+    return model
+end
+
+local function buildSlagmite()
+    local definition = MonsterConfig.Get("slagmite")
+    local model, root =
+        makeBase(definition.TemplateName, definition.DisplayName, Vector3.new(3.0, 2.8, 3.0), 1.1)
+    model:SetAttribute("AgentRadius", 2.3)
+    model:SetAttribute("AgentHeight", 4.5)
+
+    local crust = Color3.fromRGB(61, 58, 54)
+    local slag = Color3.fromRGB(103, 73, 48)
+    local molten = Color3.fromRGB(255, 121, 43)
+
+    local body = makePart(
+        model,
+        "Body",
+        Vector3.new(4.8, 3.6, 4.5),
+        slag,
+        Enum.Material.Basalt,
+        Enum.PartType.Ball
+    )
+    makeMotor(root, body, "BodyJoint", Vector3.new(0, 0.3, 0))
+
+    for index, offset in
+        {
+            Vector3.new(-1.1, 0.7, -1.65),
+            Vector3.new(1.0, 0.15, -1.9),
+            Vector3.new(-0.4, 1.15, 1.8),
+            Vector3.new(1.35, -0.35, 1.2),
+        }
+    do
+        local plate = makePart(
+            model,
+            "CrustPlate" .. tostring(index),
+            Vector3.new(1.5, 0.55, 1.15),
+            crust,
+            Enum.Material.Basalt
+        )
+        makeMotor(
+            root,
+            plate,
+            "CrustJoint" .. tostring(index),
+            offset,
+            CFrame.Angles(math.rad(index * 11), math.rad(index * 37), math.rad(index * 7))
+        )
+    end
+
+    local core = makePart(
+        model,
+        "MoltenCore",
+        Vector3.new(1.45, 1.45, 1.45),
+        molten,
+        Enum.Material.Neon,
+        Enum.PartType.Ball
+    )
+    core.Transparency = 0.05
+    makeMotor(root, core, "CoreJoint", Vector3.new(0, 0.35, -2.05))
+    local light = Instance.new("PointLight")
+    light.Color = molten
+    light.Brightness = 1.25
+    light.Range = 10
+    light.Parent = core
+
+    for _, side in { -1, 1 } do
+        local eye = makePart(
+            model,
+            side < 0 and "LeftEye" or "RightEye",
+            Vector3.new(0.24, 0.24, 0.14),
+            Color3.fromRGB(255, 203, 102),
+            Enum.Material.Neon,
+            Enum.PartType.Ball
+        )
+        makeMotor(
+            root,
+            eye,
+            side < 0 and "LeftEyeJoint" or "RightEyeJoint",
+            Vector3.new(side * 0.48, 0.7, -2.43)
+        )
+    end
+    return model
+end
+
 local function buildMosswarden()
     local definition = MonsterConfig.Get("mosswarden")
     local model = buildBrambleback()
@@ -705,6 +873,8 @@ local builders = {
     lumen_wisp = buildWisp,
     gravebone_captain = buildGraveboneCaptain,
     royal_glowcap = buildRoyalGlowcap,
+    rivet_scuttler = buildRivetScuttler,
+    slagmite = buildSlagmite,
     mosswarden = buildMosswarden,
 }
 

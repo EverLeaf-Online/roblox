@@ -1,3 +1,4 @@
+local CollectionService = game:GetService("CollectionService")
 local Workspace = game:GetService("Workspace")
 
 local InteractionService = require(script.Parent.InteractionService)
@@ -341,6 +342,150 @@ local function makeBelforgeGate(parent, position)
     light.Parent = warning
 end
 
+local function makeMonsterSpawnTrigger(parent, name, position, config)
+    local trigger = Instance.new("Part")
+    trigger.Name = "MonsterSpawnTrigger"
+    trigger.Size = Vector3.new(2, 0.4, 2)
+    trigger.CFrame = CFrame.new(position + Vector3.new(0, 0.2, 0))
+    trigger.Anchored = true
+    trigger.CanCollide = false
+    trigger.CanTouch = false
+    trigger.CanQuery = false
+    trigger.Transparency = 1
+    trigger:SetAttribute("TriggerName", name)
+    trigger:SetAttribute("MonsterType", config.MonsterType)
+    trigger:SetAttribute("SpawnAmount", config.SpawnAmount)
+    trigger:SetAttribute("TriggerRadius", config.TriggerRadius)
+    trigger:SetAttribute("SpawnRadius", config.SpawnRadius)
+    trigger:SetAttribute("MaxAliveMonster", config.MaxAliveMonster)
+    trigger:SetAttribute("SpawnDelay", config.SpawnDelay)
+    trigger:SetAttribute("RespawnTime", config.RespawnTime)
+    trigger.Parent = parent
+    CollectionService:AddTag(trigger, "MonsterSpawnTrigger")
+    return trigger
+end
+
+local function makeScrapPile(parent, position, yaw, scale)
+    local model = Instance.new("Model")
+    model.Name = "FoundryScrap"
+    model.Parent = parent
+    local base = CFrame.new(position) * CFrame.Angles(0, yaw or 0, 0)
+    scale = scale or 1
+    local iron = Color3.fromRGB(76, 72, 66)
+    local brass = Color3.fromRGB(137, 94, 47)
+
+    for index, spec in
+        {
+            { Vector3.new(-1.8, 0.65, 0.3), Vector3.new(3.6, 1.1, 1.3), iron, -18 },
+            { Vector3.new(1.1, 0.85, -0.5), Vector3.new(2.7, 1.5, 1.0), brass, 27 },
+            { Vector3.new(0.2, 1.45, 1.0), Vector3.new(1.1, 2.6, 1.1), iron, 74 },
+            { Vector3.new(-0.4, 0.35, -1.3), Vector3.new(4.2, 0.45, 1.4), brass, -42 },
+        }
+    do
+        local part = makePart(
+            model,
+            "Scrap" .. tostring(index),
+            spec[2] * scale,
+            base
+                * CFrame.new(spec[1] * scale)
+                * CFrame.Angles(0, math.rad(spec[4]), math.rad(index * 7)),
+            Enum.Material.Metal,
+            spec[3]
+        )
+        part.CanCollide = false
+        part.CanTouch = false
+    end
+    return model
+end
+
+local function makeHotVent(parent, position, scale)
+    scale = scale or 1
+    local model = Instance.new("Model")
+    model.Name = "HotworksVent"
+    model.Parent = parent
+    local rim = makePart(
+        model,
+        "Rim",
+        Vector3.new(7, 0.7, 7) * scale,
+        CFrame.new(position + Vector3.new(0, 0.35, 0)),
+        Enum.Material.Basalt,
+        Color3.fromRGB(54, 52, 49)
+    )
+    rim.Shape = Enum.PartType.Cylinder
+    rim.Orientation = Vector3.new(0, 0, 90)
+    rim.CanCollide = false
+    local glow = makePart(
+        model,
+        "Heat",
+        Vector3.new(4.8, 0.24, 4.8) * scale,
+        CFrame.new(position + Vector3.new(0, 0.76, 0)),
+        Enum.Material.Neon,
+        Color3.fromRGB(246, 104, 36)
+    )
+    glow.Shape = Enum.PartType.Cylinder
+    glow.Orientation = Vector3.new(0, 0, 90)
+    glow.CanCollide = false
+    glow.CanTouch = false
+    local light = Instance.new("PointLight")
+    light.Color = glow.Color
+    light.Brightness = 1.4
+    light.Range = 13 * scale
+    light.Parent = glow
+    local smoke = Instance.new("Smoke")
+    smoke.Color = Color3.fromRGB(96, 78, 65)
+    smoke.Opacity = 0.18
+    smoke.RiseVelocity = 3.5
+    smoke.Size = 4 * scale
+    smoke.Parent = glow
+    return model
+end
+
+local function dressEncounterAreas(parent)
+    local scrapCenter = ORIGIN + Vector3.new(-22, 0, -56)
+    makeLabel(parent, scrapCenter + Vector3.new(0, 15, 0), "SCRAP LANES")
+    makeScrapPile(parent, scrapCenter + Vector3.new(-14, 0, -10), math.rad(15), 1.05)
+    makeScrapPile(parent, scrapCenter + Vector3.new(12, 0, 8), math.rad(-32), 0.9)
+    makeScrapPile(parent, scrapCenter + Vector3.new(21, 0, -13), math.rad(61), 0.75)
+    for index = 1, 6 do
+        local x = -18 + index * 6
+        local post = makePart(
+            parent,
+            "ScrapLanePost" .. tostring(index),
+            Vector3.new(0.6, 4.2, 0.6),
+            CFrame.new(scrapCenter + Vector3.new(x, 2.1, 20)),
+            Enum.Material.Metal,
+            Color3.fromRGB(104, 76, 48)
+        )
+        post.CanCollide = false
+    end
+
+    local hotworksCenter = ORIGIN + Vector3.new(58, 0, 58)
+    makeLabel(parent, hotworksCenter + Vector3.new(0, 16, 0), "LOWER HOTWORKS")
+    makeHotVent(parent, hotworksCenter + Vector3.new(-14, 0, -8), 1.0)
+    makeHotVent(parent, hotworksCenter + Vector3.new(10, 0, 11), 0.82)
+    makeHotVent(parent, hotworksCenter + Vector3.new(19, 0, -15), 0.68)
+    makeScrapPile(parent, hotworksCenter + Vector3.new(-23, 0, 16), math.rad(28), 0.78)
+
+    makeMonsterSpawnTrigger(parent, "BrasshavenScrapLaneScuttlers", scrapCenter, {
+        MonsterType = "RivetScuttler",
+        SpawnAmount = 4,
+        TriggerRadius = 30,
+        SpawnRadius = 15,
+        MaxAliveMonster = 4,
+        SpawnDelay = 0.24,
+        RespawnTime = 24,
+    })
+    makeMonsterSpawnTrigger(parent, "BrasshavenHotworksSlagmites", hotworksCenter, {
+        MonsterType = "Slagmite",
+        SpawnAmount = 3,
+        TriggerRadius = 31,
+        SpawnRadius = 14,
+        MaxAliveMonster = 3,
+        SpawnDelay = 0.38,
+        RespawnTime = 29,
+    })
+end
+
 function BrasshavenWorldService.Init()
     local previous = Workspace:FindFirstChild(GENERATED_NAME)
     if previous then
@@ -389,6 +534,8 @@ function BrasshavenWorldService.Init()
     makeForgeTower(world, ORIGIN + Vector3.new(62, 0, -70), 28, 1)
     makeForgeTower(world, ORIGIN + Vector3.new(104, 0, 72), 34, 2)
     makeForgeTower(world, ORIGIN + Vector3.new(-88, 0, -76), 24, 3)
+
+    dressEncounterAreas(world)
 
     local wallColor = Color3.fromRGB(81, 73, 65)
     makePart(

@@ -133,6 +133,20 @@ return table.freeze({
         StackLimit = 999,
         SellPrice = table.freeze({ Currency = "Shards", Amount = 3 }),
     }),
+    rivet_spring = table.freeze({
+        DisplayName = "Rivet Spring",
+        Description = "A heat-darkened tension spring scavenged from Brasshaven constructs.",
+        Type = "Material",
+        StackLimit = 999,
+        SellPrice = table.freeze({ Currency = "Shards", Amount = 3 }),
+    }),
+    slag_core = table.freeze({
+        DisplayName = "Slag Core",
+        Description = "A dense foundry core that stays warm long after a Slagmite falls apart.",
+        Type = "Material",
+        StackLimit = 999,
+        SellPrice = table.freeze({ Currency = "Shards", Amount = 4 }),
+    }),
     mosswarden_core = table.freeze({
         DisplayName = "Mosswarden Core",
         Type = "Quest",

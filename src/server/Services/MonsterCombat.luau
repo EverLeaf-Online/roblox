@@ -41,6 +41,10 @@ local function effectColor(monsterId)
         return Color3.fromRGB(121, 187, 96)
     elseif monsterId == "lumen_wisp" then
         return Color3.fromRGB(111, 237, 219)
+    elseif monsterId == "rivet_scuttler" then
+        return Color3.fromRGB(210, 146, 67)
+    elseif monsterId == "slagmite" then
+        return Color3.fromRGB(247, 116, 45)
     end
     return Color3.fromRGB(219, 211, 172)
 end

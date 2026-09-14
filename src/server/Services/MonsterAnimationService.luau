@@ -16,6 +16,8 @@ local RIG_BY_MONSTER = table.freeze({
     peco_peco = "bird",
     brambleback = "quadruped",
     mosswarden = "quadruped",
+    rivet_scuttler = "quadruped",
+    slagmite = "slime",
     lumen_wisp = "wisp",
 })
 

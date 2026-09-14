@@ -64,9 +64,15 @@ return table.freeze({
         DisplayName = "Vale · Belforge Foreman",
         RegionId = "brasshaven",
         Dialogue = table.freeze({
-            "The Belforge is sealed below the eastworks. The Colossus has not moved, but every pressure gauge says it is awake.",
-            "Nobody opens that gate for an unseasoned Wayfarer. Brasshaven has work enough to harden you before Level 30.",
+            "Welcome to Brasshaven. If you want work, start by clearing the Rivet Scuttlers out of the scrap lanes before they chew through another pressure line.",
+            "Good. The scrap lanes can breathe again, but the hotworks are spitting Slagmites through cracked vents. Bring me springs and clear the worst of them.",
+            "Those cores are holding heat far longer than they should. Bring me a clean sample before we decide what is waking below the eastworks.",
+            "The Belforge is still sealed. Brasshaven has work enough to harden you before Level 30, and the Colossus can wait until you are ready.",
         }),
-        QuestOffers = table.freeze({}),
+        QuestOffers = table.freeze({
+            "brasshaven_first_shift",
+            "brasshaven_hot_lines",
+            "brasshaven_core_sample",
+        }),
     }),
 })
