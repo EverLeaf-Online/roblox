@@ -47,4 +47,16 @@ return table.freeze({
         QuestOffers = table.freeze({ "lumen_echoes" }),
         ShopId = "archive_exchange",
     }),
+    path_mentor = table.freeze({
+        DisplayName = "Seren · Pathkeeper",
+        RegionId = "lumenreach",
+        AdvancementMentor = true,
+        AdvancementQuestId = "first_advancement_trial",
+        Dialogue = table.freeze({
+            "Surviving the grove proves instinct. Choosing a path proves intent. The old Wayfarers kept five disciplines, and none of them forgive hesitation.",
+            "Walk the proving circle, then bring down the Gravebone Captain at the Shattered Arch. Return when you know what kind of fighter you intend to become.",
+            "The trial is behind you. The choice ahead is permanent. Read each path carefully before you bind yourself to it.",
+        }),
+        QuestOffers = table.freeze({ "first_advancement_trial" }),
+    }),
 })

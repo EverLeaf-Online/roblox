@@ -1,7 +1,7 @@
 # EverLeaf Roblox — Master Checklist
 
 **Canonical status:** 2026-09-14
-**Latest gameplay checkpoint:** production UX pass — dedicated shop, notifications, item details, boss HUD
+**Latest gameplay checkpoint:** first-advancement implementation — five families, Pathkeeper trial, proving circle, starter skills
 **Purpose:** detailed implementation/status tracker for the entire project.
 **Roadmap:** [`ROADMAP.md`](ROADMAP.md)
 
@@ -233,8 +233,8 @@
 - [x] Headless progression-math tests.
 - [ ] Tune/finalize EXP curve for levels 1–30.
 - [ ] Define death EXP behavior, if any.
-- [ ] Add level-up presentation/feedback.
-- [ ] Add advancement presentation/quest flow.
+- [x] Level-up toast presentation/feedback foundation.
+- [x] First-advancement presentation/quest flow implemented; Studio end-to-end QA remains.
 
 ## 5. Core stats / resources
 
@@ -258,12 +258,12 @@
 
 - [x] Generic family/tier architecture avoids hardcoding unfinished class names.
 - [x] Advancement eligibility service foundation.
-- [ ] **DECISION:** finalize original first-advancement class-family names.
-- [ ] **DECISION:** determine which families advance at level 8 vs 10.
-- [ ] Define each family’s primary/secondary stat identity.
+- [x] First families finalized: Ironbloom, Thornrunner, Lumenweaver, Veilstrider, Brasshand.
+- [x] Level gates locked: Ironbloom/Thornrunner/Veilstrider at 8; Lumenweaver/Brasshand at 10.
+- [x] Primary stat/role identities defined for all five first families; deeper secondary-stat scaling remains for later tuning.
 - [ ] Define starting weapons/equipment identities.
-- [ ] Define first advancement requirements/quests.
-- [ ] Implement first advancement.
+- [x] First advancement requires The Five Paths trial: Wayfarer Proving Circle + Gravebone Captain, after Mosswarden progression.
+- [x] First advancement implemented with server validation, permanent family binding, +3 starting SP, starter skill grant/hotbar assignment, and family-aware basic attacks.
 - [ ] Implement level-30 advancements.
 - [ ] Implement level-70 advancements.
 - [ ] Implement level-120 advancements.
@@ -647,7 +647,7 @@
 4. [ ] Verify visible loot pickup, Collect objectives, equipment rewards, all three shops, and the Whisperroot one-time cache across death/rejoin.
 5. [ ] Multiplayer smoke test: target selection, damage ownership, loot ownership, simultaneous trigger activation, and party/network behavior.
 6. [x] Dedicated shop UX, item detail cards, reward/quest/level-up notifications, and field-boss HUD implemented; complete Studio UX QA remains.
-7. [ ] Finalize first-advancement class-family names and implement the first advancement quest/location flow.
+7. [x] Five first families, Seren the Pathkeeper, Wayfarer Proving Circle, The Five Paths trial, permanent family selection, and starter-skill grants implemented; Studio UX/progression QA remains.
 8. [ ] Tune level 1–30 EXP, monster stats, spawn density, drop rates, Shard/Mark sinks, and boss rewards.
 9. [ ] Performance profile the dense Lumenreach build for frame time, memory, streaming, and listener leaks.
 10. [ ] Complete keyboard/mouse + controller blocking-flow QA and the full no-red-Output Phase 1 run.

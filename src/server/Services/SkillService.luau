@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SkillDefinitions = require(script.Parent.Parent.Content.SkillDefinitions)
 local ResourceService = require(script.Parent.ResourceService)
 local SkillUseRules = require(ReplicatedStorage.Shared.Logic.SkillUseRules)
+local AdvancementRules = require(ReplicatedStorage.Shared.Logic.AdvancementRules)
 local SkillEffectService = require(script.Parent.SkillEffectService)
 
 local SkillService = {}
@@ -12,6 +13,10 @@ function SkillService.Learn(profile, skillId)
     local definition = SkillDefinitions[skillId]
     if not definition then
         return false, "unknown_skill"
+    end
+    local familyAllowed, familyReason = AdvancementRules.CanUseFamilySkill(profile, definition)
+    if not familyAllowed then
+        return false, familyReason
     end
     if profile.Level < (definition.RequiredLevel or 1) then
         return false, "level_too_low"
@@ -55,6 +60,10 @@ function SkillService.TryBeginUse(player, profile, skillId)
     end
     if not profile.Skills.Learned[skillId] then
         return false, "skill_not_learned"
+    end
+    local familyAllowed, familyReason = AdvancementRules.CanUseFamilySkill(profile, definition)
+    if not familyAllowed then
+        return false, familyReason
     end
     local state = cooldowns[player]
     if not state then

@@ -1,3 +1,4 @@
+local AdvancementService = require(script.Parent.AdvancementService)
 local ConsumableService = require(script.Parent.ConsumableService)
 local CosmeticService = require(script.Parent.CosmeticService)
 local EquipmentService = require(script.Parent.EquipmentService)
@@ -50,6 +51,15 @@ handlers["shop.buy"] = function(player, profile, payload)
 end
 handlers["shop.sell"] = function(player, profile, payload)
     return ShopService.Sell(player, profile, payload.ShopId, payload.ItemId, payload.Quantity)
+end
+handlers["advancement.first"] = function(player, profile, payload)
+    if not InteractionSessionService.ValidateNpc(player, payload.NpcId) then
+        return false, "interaction_session_required"
+    end
+    if not InteractionService.IsAdvancementMentor(payload.NpcId) then
+        return false, "invalid_mentor"
+    end
+    return AdvancementService.FirstAdvance(profile, payload.FamilyId)
 end
 handlers["party.create"] = function(player)
     local ok, reason = PartyService.Create(player)

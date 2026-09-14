@@ -11,6 +11,7 @@ local ProfileStore = require(script.Parent.Parent.State.ProfileStore)
 local EverLeafIcons = require(script.Parent.Parent.UI.EverLeafIcons)
 local NotificationStore = require(script.Parent.Parent.UI.NotificationStore)
 local BossHud = require(script.Parent.Parent.UI.Components.BossHud)
+local AdvancementOverlay = require(script.Parent.Parent.UI.Components.AdvancementOverlay)
 local ShopOverlay = require(script.Parent.Parent.UI.Components.ShopOverlay)
 local ToastStack = require(script.Parent.Parent.UI.Components.ToastStack)
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -817,6 +818,18 @@ local function Dialogue(props)
             ZIndex = 24,
         })
     end
+    if description.AdvancementMentor and props.OnOpenAdvancement then
+        actionChildren.Advancement = React.createElement(Button, {
+            Position = UDim2.fromOffset(22, questId and 250 or 198),
+            Size = UDim2.fromOffset(220, 44),
+            Text = (tonumber(profile.AdvancementTier) or 0) >= 1 and "PATH ALREADY BOUND"
+                or "CHOOSE FIRST PATH",
+            Tone = "accent",
+            Active = (tonumber(profile.AdvancementTier) or 0) == 0,
+            OnActivated = props.OnOpenAdvancement,
+            ZIndex = 24,
+        })
+    end
 
     local shopItems = description.ShopItems or {}
     local shopChildren = {}
@@ -1023,11 +1036,20 @@ local function CharacterPanel(profile, invoke)
                 }),
                 Tier = React.createElement(Label, {
                     Position = UDim2.fromOffset(18, 43),
-                    Size = UDim2.fromOffset(260, 24),
-                    Text = string.format(
-                        "Advancement Tier %d",
-                        tonumber(profile.AdvancementTier) or 0
-                    ),
+                    Size = UDim2.fromOffset(300, 24),
+                    Text = if type(profile.FamilyId) == "string"
+                            and profile.FamilyId ~= ""
+                        then string.format(
+                            "%s · Tier %d",
+                            (
+                                (CatalogClient.Get() or {}).Families
+                                and (CatalogClient.Get() or {}).Families[profile.FamilyId]
+                                and (CatalogClient.Get() or {}).Families[profile.FamilyId].DisplayName
+                            )
+                                or prettyId(profile.FamilyId),
+                            tonumber(profile.AdvancementTier) or 0
+                        )
+                        else "Unbound Wayfarer · Tier 0",
                     TextSize = 12,
                     Color = COLORS.Muted,
                     ZIndex = 5,
@@ -1420,10 +1442,13 @@ local function SkillsPanel(profile, catalog, invoke, selectedSkillId, setSelecte
     local learned = profile.Skills and profile.Skills.Learned or {}
     local skillRows = {}
     for skillId, definition in catalog.Skills or {} do
-        table.insert(
-            skillRows,
-            { Id = skillId, Definition = definition, Rank = learned[skillId] or 0 }
-        )
+        local familyId = definition.FamilyId
+        if familyId == nil or familyId == "" or familyId == profile.FamilyId then
+            table.insert(
+                skillRows,
+                { Id = skillId, Definition = definition, Rank = learned[skillId] or 0 }
+            )
+        end
     end
     table.sort(skillRows, function(a, b)
         return (a.Definition.DisplayName or a.Id) < (b.Definition.DisplayName or b.Id)
@@ -2306,6 +2331,12 @@ local function displayItemName(itemId)
     return definition and definition.DisplayName or prettyId(itemId)
 end
 
+local function displayFamilyName(familyId)
+    local catalog = CatalogClient.Get()
+    local definition = catalog and catalog.Families and catalog.Families[familyId]
+    return definition and definition.DisplayName or prettyId(familyId)
+end
+
 local function emitProfileNotifications(previous, current)
     if type(previous) ~= "table" or type(current) ~= "table" then
         return
@@ -2319,6 +2350,17 @@ local function emitProfileNotifications(previous, current)
             "Level Up",
             string.format("You reached Level %d.", newLevel),
             4.5
+        )
+    end
+
+    local oldFamily = previous.FamilyId or ""
+    local newFamily = current.FamilyId or ""
+    if newFamily ~= "" and newFamily ~= oldFamily then
+        NotificationStore.Push(
+            "success",
+            "First Advancement",
+            string.format("Your path is now %s.", displayFamilyName(newFamily)),
+            5.5
         )
     end
 
@@ -2372,6 +2414,7 @@ local function App()
     local profile, setProfile = React.useState(ProfileStore.Get())
     local interaction, setInteraction = React.useState(nil)
     local shopOpen, setShopOpen = React.useState(false)
+    local advancementOpen, setAdvancementOpen = React.useState(false)
     local menuOpen, setMenuOpen = React.useState(false)
     local menuTab, setMenuTab = React.useState("CHARACTER")
     local health, setHealth = React.useState(100)
@@ -2409,6 +2452,7 @@ local function App()
 
             setInteraction(nil)
             setShopOpen(false)
+            setAdvancementOpen(false)
             setMenuOpen(false)
             setDead(false)
             player:SetAttribute("EverLeafUiCapture", false)
@@ -2463,6 +2507,7 @@ local function App()
             if eventName == "open" and type(payload) == "table" then
                 setMenuOpen(false)
                 setShopOpen(false)
+                setAdvancementOpen(false)
                 setInteraction(payload)
             end
         end)
@@ -2472,11 +2517,14 @@ local function App()
     end, {})
 
     React.useEffect(function()
-        player:SetAttribute("EverLeafUiCapture", interaction ~= nil or shopOpen or menuOpen or dead)
+        player:SetAttribute(
+            "EverLeafUiCapture",
+            interaction ~= nil or shopOpen or advancementOpen or menuOpen or dead
+        )
         return function()
             player:SetAttribute("EverLeafUiCapture", false)
         end
-    end, { interaction, shopOpen, menuOpen, dead })
+    end, { interaction, shopOpen, advancementOpen, menuOpen, dead })
 
     React.useEffect(function()
         local connection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
@@ -2484,7 +2532,7 @@ local function App()
                 return
             end
 
-            if interaction == nil and not shopOpen then
+            if interaction == nil and not shopOpen and not advancementOpen then
                 local tabByKey = {
                     [Enum.KeyCode.C] = "CHARACTER",
                     [Enum.KeyCode.I] = "INVENTORY",
@@ -2505,7 +2553,9 @@ local function App()
             end
 
             if input.KeyCode == Enum.KeyCode.Escape then
-                if shopOpen then
+                if advancementOpen then
+                    setAdvancementOpen(false)
+                elseif shopOpen then
                     setShopOpen(false)
                 elseif interaction ~= nil then
                     setInteraction(nil)
@@ -2517,9 +2567,9 @@ local function App()
         return function()
             connection:Disconnect()
         end
-    end, { interaction, shopOpen, menuOpen, menuTab, dead })
+    end, { interaction, shopOpen, advancementOpen, menuOpen, menuTab, dead })
 
-    local uiOpen = interaction ~= nil or shopOpen or menuOpen
+    local uiOpen = interaction ~= nil or shopOpen or advancementOpen or menuOpen
     return React.createElement(React.Fragment, nil, {
         HUD = React.createElement(HUD, {
             Profile = profile,
@@ -2535,18 +2585,26 @@ local function App()
                 setMenuOpen(false)
             end,
         }) or nil,
-        Dialogue = interaction and not shopOpen and React.createElement(Dialogue, {
-            Description = interaction,
-            Profile = profile,
-            OnOpenShop = function()
-                if interaction.ShopId then
-                    setShopOpen(true)
-                end
-            end,
-            OnClose = function()
-                setInteraction(nil)
-            end,
-        }) or nil,
+        Dialogue = interaction and not shopOpen and not advancementOpen and React.createElement(
+            Dialogue,
+            {
+                Description = interaction,
+                Profile = profile,
+                OnOpenShop = function()
+                    if interaction.ShopId then
+                        setShopOpen(true)
+                    end
+                end,
+                OnOpenAdvancement = function()
+                    if interaction.AdvancementMentor then
+                        setAdvancementOpen(true)
+                    end
+                end,
+                OnClose = function()
+                    setInteraction(nil)
+                end,
+            }
+        ) or nil,
         Shop = shopOpen and interaction and interaction.ShopId and React.createElement(
             ShopOverlay,
             {
@@ -2558,6 +2616,18 @@ local function App()
                 end,
             }
         ) or nil,
+        Advancement = advancementOpen
+                and interaction
+                and interaction.AdvancementMentor
+                and React.createElement(AdvancementOverlay, {
+                    Profile = profile,
+                    Catalog = CatalogClient.Get() or {},
+                    MentorNpcId = interaction.NpcId,
+                    OnClose = function()
+                        setAdvancementOpen(false)
+                    end,
+                })
+            or nil,
         Boss = React.createElement(BossHud, { Hidden = uiOpen or dead }),
         Toasts = React.createElement(ToastStack),
         Death = dead and React.createElement(DeathOverlay) or nil,

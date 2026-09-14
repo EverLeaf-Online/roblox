@@ -51,6 +51,16 @@ local function chooseDialogue(definition, profile)
         return dialogue[1]
     end
 
+    if definition.AdvancementMentor and type(definition.AdvancementQuestId) == "string" then
+        local questId = definition.AdvancementQuestId
+        if profile.Quests.Completed[questId] == true then
+            return dialogue[#dialogue]
+        end
+        if profile.Quests.Active[questId] ~= nil and #dialogue >= 2 then
+            return dialogue[2]
+        end
+    end
+
     local completedCount = 0
     for _, questId in definition.QuestOffers or {} do
         if profile.Quests.Completed[questId] == true then
@@ -73,6 +83,7 @@ function InteractionService.Describe(npcId, profile)
         DialogueText = chooseDialogue(definition, profile),
         QuestOffers = visibleQuestOffers(definition, profile),
         ShopId = definition.ShopId,
+        AdvancementMentor = definition.AdvancementMentor == true,
     }
 
     local shop = definition.ShopId and ShopDefinitions[definition.ShopId]
@@ -129,6 +140,11 @@ local function npcOffersQuest(npcId, questId)
         end
     end
     return false
+end
+
+function InteractionService.IsAdvancementMentor(npcId)
+    local definition = NpcDefinitions[npcId]
+    return definition ~= nil and definition.AdvancementMentor == true
 end
 
 function InteractionService.StartOfferedQuest(profile, npcId, questId)

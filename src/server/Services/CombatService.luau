@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local ClassFamilyDefinitions = require(script.Parent.Parent.Content.ClassFamilyDefinitions)
 local DamageService = require(script.Parent.DamageService)
 local EnemyService = require(script.Parent.EnemyService)
 local MonsterCombat = require(script.Parent.MonsterCombat)
@@ -49,8 +50,11 @@ function CombatService.BasicAttack(player, profile)
     end
 
     lastAttackAt[player] = now
+    local family = type(profile.FamilyId) == "string" and ClassFamilyDefinitions[profile.FamilyId]
+        or nil
+    local primaryStat = family and family.PrimaryStat or "Might"
     local damage, reason = DamageService.RollBasicDamage(profile, {
-        PrimaryStat = "Might",
+        PrimaryStat = primaryStat,
         AttackPower = GameConfig.Combat.BeginnerAttackPower,
         StatScale = GameConfig.Combat.BeginnerStatScale,
         Mastery = GameConfig.Combat.DefaultMastery,

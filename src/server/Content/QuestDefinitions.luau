@@ -90,6 +90,20 @@ return table.freeze({
             Currencies = table.freeze({ Shards = 30, Marks = 1 }),
         }),
     }),
+    first_advancement_trial = table.freeze({
+        DisplayName = "The Five Paths",
+        MinimumLevel = 8,
+        StartNpcId = "path_mentor",
+        PrerequisiteQuests = table.freeze({ "old_grove_stirs" }),
+        Objectives = table.freeze({
+            table.freeze({ Type = "Explore", Target = "wayfarer_proving_circle", Required = 1 }),
+            table.freeze({ Type = "Defeat", Target = "gravebone_captain", Required = 1 }),
+        }),
+        Reward = table.freeze({
+            Exp = 250,
+            Currencies = table.freeze({ Shards = 20, Marks = 1 }),
+        }),
+    }),
     brasshaven_passage = table.freeze({
         DisplayName = "The Road Beyond Lumenreach",
         MinimumLevel = 20,

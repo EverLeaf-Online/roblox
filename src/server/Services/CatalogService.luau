@@ -2,6 +2,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local BuildInfo = require(ReplicatedStorage.Shared.BuildInfo)
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
 local BossDefinitions = require(script.Parent.Parent.Content.BossDefinitions)
+local ClassFamilyDefinitions = require(script.Parent.Parent.Content.ClassFamilyDefinitions)
 local ItemDefinitions = require(script.Parent.Parent.Content.ItemDefinitions)
 local NpcDefinitions = require(script.Parent.Parent.Content.NpcDefinitions)
 local QuestDefinitions = require(script.Parent.Parent.Content.QuestDefinitions)
@@ -37,17 +38,31 @@ function CatalogService.Build()
             "Effects",
             "SellPrice",
         }),
-        Skills = copySelected(
-            SkillDefinitions,
-            { "DisplayName", "MaxRank", "RequiredLevel", "RequiredTier", "Kind" }
-        ),
+        Skills = copySelected(SkillDefinitions, {
+            "DisplayName",
+            "Description",
+            "FamilyId",
+            "MaxRank",
+            "RequiredLevel",
+            "RequiredTier",
+            "Kind",
+        }),
         Quests = copySelected(QuestDefinitions, { "DisplayName", "MinimumLevel", "Objectives" }),
-        Npcs = copySelected(NpcDefinitions, { "DisplayName", "RegionId" }),
+        Npcs = copySelected(NpcDefinitions, { "DisplayName", "RegionId", "AdvancementMentor" }),
         Regions = copySelected(RegionDefinitions, { "DisplayName", "MinimumLevel", "Kind" }),
         Bosses = copySelected(
             BossDefinitions,
             { "DisplayName", "RegionId", "RecommendedLevel", "MaxPlayers", "MonsterId" }
         ),
+        Families = copySelected(ClassFamilyDefinitions, {
+            "DisplayName",
+            "PrimaryStat",
+            "CombatRole",
+            "FirstAdvancementLevel",
+            "StarterSkillId",
+            "Accent",
+            "Summary",
+        }),
     }
 end
 

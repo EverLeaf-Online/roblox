@@ -17,7 +17,12 @@ This repository is a clean, original Roblox RPG built from scratch.
 - Core stats: Might, Finesse, Insight, Fortune.
 - AP: +5 per level.
 - SP: +3 per level after first advancement.
-- First-family advancement occurs at level 8 or 10 depending on the eventual family.
+- First-family advancement occurs at level 8 or 10 depending on family:
+  - Ironbloom — Level 8, Might, frontline.
+  - Thornrunner — Level 8, Finesse, ranged skirmisher.
+  - Lumenweaver — Level 10, Insight, Lumen caster.
+  - Veilstrider — Level 8, Fortune, agile skirmisher.
+  - Brasshand — Level 10, Might, close-range bruiser/battlecraft path.
 - Later advancements: levels 30, 70, and 120.
 - Damage uses mastery-based variance rather than a single deterministic roll.
 - HP/MP growth, attack cadence, knockback, and aggro are first-class combat systems.
@@ -35,7 +40,7 @@ Build a secure level 1–30 vertical slice with:
 
 1. Player data/profile lifecycle.
 2. Server-owned level, EXP, AP, SP, and core stats.
-3. Advancement eligibility framework without hardcoding undecided class-family names.
+3. Data-driven five-family first-advancement system with mentor trial, permanent family binding, starter skills, and later-tier extension points.
 4. Server-owned currency ledger for Shards and Marks.
 5. Networking boundary where clients request actions but never submit authoritative rewards/state.
 6. Full 3D third-person movement/combat foundations.

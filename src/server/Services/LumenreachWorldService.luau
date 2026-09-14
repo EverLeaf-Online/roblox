@@ -2235,6 +2235,35 @@ local function makeCampNpc(parent, npcId, displayName, position, yaw, palette, r
             Enum.Material.Fabric,
             accent
         )
+    elseif role == "Mentor" then
+        npcPart(
+            "PathkeeperMantle",
+            Vector3.new(3.0, 0.72, 1.92),
+            Vector3.new(0, 4.75, 0),
+            Enum.Material.Fabric,
+            accent
+        )
+        npcPart(
+            "PathkeeperStaff",
+            Vector3.new(0.2, 6.2, 0.2),
+            Vector3.new(1.65, 3.2, 0.3),
+            Enum.Material.Wood,
+            Color3.fromRGB(82, 58, 38),
+            CFrame.Angles(0, 0, math.rad(-6))
+        )
+        local pathLumen = npcPart(
+            "PathkeeperLumen",
+            Vector3.new(0.64, 0.64, 0.64),
+            Vector3.new(1.49, 6.28, 0.12),
+            Enum.Material.Neon,
+            Color3.fromRGB(113, 238, 170)
+        )
+        pathLumen.Shape = Enum.PartType.Ball
+        local light = Instance.new("PointLight")
+        light.Color = Color3.fromRGB(121, 244, 183)
+        light.Brightness = 0.75
+        light.Range = 8
+        light.Parent = pathLumen
     end
 
     local nameplate = Instance.new("BillboardGui")
@@ -2274,6 +2303,84 @@ local function makeCampNpc(parent, npcId, displayName, position, yaw, palette, r
         InteractionService.Begin(player, npcId, model)
     end)
     return model
+end
+
+local function makeProvingCircle(parent)
+    local origin = WORLD_ZONES.Camp + Vector3.new(74, 0, -42)
+    local model = Instance.new("Model")
+    model.Name = "WayfarerProvingCircle"
+    model.Parent = parent
+
+    local platform = makePart(
+        model,
+        "ProvingStone",
+        Vector3.new(1.2, 25, 25),
+        CFrame.new(origin + Vector3.new(0, 0.55, 0)) * CFrame.Angles(0, 0, math.rad(90)),
+        Enum.Material.Slate,
+        Color3.fromRGB(62, 78, 69)
+    )
+    platform.Shape = Enum.PartType.Cylinder
+    platform.CanCollide = true
+
+    local inset = makePart(
+        model,
+        "LumenInlay",
+        Vector3.new(1.26, 15.5, 15.5),
+        CFrame.new(origin + Vector3.new(0, 0.61, 0)) * CFrame.Angles(0, 0, math.rad(90)),
+        Enum.Material.Neon,
+        Color3.fromRGB(52, 126, 91)
+    )
+    inset.Shape = Enum.PartType.Cylinder
+    inset.Transparency = 0.38
+    inset.CanCollide = false
+
+    local familyColors = {
+        Color3.fromRGB(98, 157, 103),
+        Color3.fromRGB(211, 156, 76),
+        Color3.fromRGB(86, 188, 171),
+        Color3.fromRGB(145, 105, 184),
+        Color3.fromRGB(197, 151, 74),
+    }
+    for index, color in familyColors do
+        local angle = math.rad(-90 + (index - 1) * 72)
+        local position = origin + Vector3.new(math.cos(angle) * 15.5, 0, math.sin(angle) * 15.5)
+        local stone = makePart(
+            model,
+            "PathStone" .. tostring(index),
+            Vector3.new(3.2, 6.4, 2.1),
+            CFrame.new(position + Vector3.new(0, 3.2, 0))
+                * CFrame.Angles(0, -angle + math.rad(90), 0),
+            Enum.Material.Slate,
+            Color3.fromRGB(55, 69, 63)
+        )
+        stone.CanCollide = false
+        local rune = makePart(
+            model,
+            "PathRune" .. tostring(index),
+            Vector3.new(1.15, 2.5, 0.12),
+            stone.CFrame * CFrame.new(0, 0.15, -1.08),
+            Enum.Material.Neon,
+            color
+        )
+        rune.CanCollide = false
+    end
+
+    local beacon = makeBall(
+        model,
+        "PathkeeperBeacon",
+        Vector3.new(1.1, 1.1, 1.1),
+        CFrame.new(origin + Vector3.new(0, 2.0, 0)),
+        Enum.Material.Neon,
+        Color3.fromRGB(121, 244, 183)
+    )
+    beacon.CanCollide = false
+    local light = Instance.new("PointLight")
+    light.Color = Color3.fromRGB(121, 244, 183)
+    light.Brightness = 1.1
+    light.Range = 13
+    light.Parent = beacon
+
+    return origin
 end
 
 local function makeExplorationTrigger(parent, landmarkId, position, radius)
@@ -3106,6 +3213,16 @@ function LumenreachWorldService.Init()
         { Cloth = Color3.fromRGB(67, 65, 92), Accent = Color3.fromRGB(132, 104, 157) },
         "Archivist"
     )
+    makeCampNpc(
+        world,
+        "path_mentor",
+        "Seren · Pathkeeper",
+        WORLD_ZONES.Camp + Vector3.new(24, 0, -28),
+        math.rad(18),
+        { Cloth = Color3.fromRGB(51, 74, 65), Accent = Color3.fromRGB(87, 151, 116) },
+        "Mentor"
+    )
+    local provingCircleOrigin = makeProvingCircle(world)
 
     makeStoryRemnant(world, WORLD_ZONES.Crossroads + Vector3.new(28, 0, -26), math.rad(26))
     makeStoryRemnant(world, WORLD_ZONES.Ruins + Vector3.new(-34, 0, -42), math.rad(-41))
@@ -3113,6 +3230,7 @@ function LumenreachWorldService.Init()
     makeWhisperrootHollow(world)
 
     makeLandmarkLabel(world, WORLD_ZONES.Camp + Vector3.new(8, 15, 4), "LUMENREACH WAYFARER CAMP")
+    makeLandmarkLabel(world, provingCircleOrigin + Vector3.new(0, 11, 0), "WAYFARER PROVING CIRCLE")
     makeLandmarkLabel(world, WORLD_ZONES.Crossroads + Vector3.new(0, 11, 0), "LUMENWOOD CROSSROADS")
     makeLandmarkLabel(
         world,
@@ -3125,6 +3243,7 @@ function LumenreachWorldService.Init()
     makeLandmarkLabel(world, WORLD_ZONES.Overlook + Vector3.new(0, 19, 0), "SUNMOSS OVERLOOK")
 
     makeExplorationTrigger(world, "lumenwood_crossroads", WORLD_ZONES.Crossroads, 17)
+    makeExplorationTrigger(world, "wayfarer_proving_circle", provingCircleOrigin, 15)
     makeExplorationTrigger(world, "glowmere_pool", WORLD_ZONES.Glowmere, 22)
     makeExplorationTrigger(world, "shattered_lumen_arch", WORLD_ZONES.Ruins, 22)
     makeExplorationTrigger(
