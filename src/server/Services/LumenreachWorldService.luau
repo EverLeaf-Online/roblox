@@ -615,17 +615,24 @@ local function prepareGround(world)
     local terrain = Workspace:FindFirstChildOfClass("Terrain")
     if terrain then
         terrain:Clear()
-        terrain:FillBlock(CFrame.new(0, -7, 0), Vector3.new(250, 14, 230), Enum.Material.Grass)
+        terrain:FillBlock(CFrame.new(0, -5, 0), Vector3.new(250, 10, 230), Enum.Material.Grass)
 
-        local hills = {
-            { Vector3.new(-72, -2, 36), 38, Enum.Material.Ground },
-            { Vector3.new(48, -4, 28), 42, Enum.Material.Grass },
-            { Vector3.new(27, -5, -70), 48, Enum.Material.Grass },
-            { Vector3.new(-95, -1, -28), 40, Enum.Material.Rock },
-            { Vector3.new(92, -4, 45), 34, Enum.Material.Grass },
-            { Vector3.new(78, -3, -45), 36, Enum.Material.Rock },
+        -- Keep the playable core readable and mostly level. Terrain masses live on the perimeter.
+        terrain:FillBlock(CFrame.new(-55, -0.75, 34), Vector3.new(72, 3, 58), Enum.Material.Ground)
+        terrain:FillBlock(CFrame.new(48, -0.85, 28), Vector3.new(76, 2.8, 66), Enum.Material.Grass)
+
+        local perimeterHills = {
+            { Vector3.new(-118, -13, 66), 24, Enum.Material.Grass },
+            { Vector3.new(-120, -12, -52), 26, Enum.Material.Rock },
+            { Vector3.new(-72, -16, -105), 22, Enum.Material.Grass },
+            { Vector3.new(8, -17, -112), 24, Enum.Material.Grass },
+            { Vector3.new(82, -15, -102), 25, Enum.Material.Rock },
+            { Vector3.new(118, -13, -48), 24, Enum.Material.Rock },
+            { Vector3.new(122, -15, 50), 23, Enum.Material.Grass },
+            { Vector3.new(72, -16, 108), 22, Enum.Material.Grass },
+            { Vector3.new(-22, -17, 112), 21, Enum.Material.Grass },
         }
-        for _, hill in hills do
+        for _, hill in perimeterHills do
             terrain:FillBall(hill[1], hill[2], hill[3])
         end
 
