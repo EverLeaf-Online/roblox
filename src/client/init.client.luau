@@ -1,0 +1,4 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Config = require(ReplicatedStorage.Shared.Config)
+
+print(("[%s] client booted"):format(Config.ProjectName))
