@@ -1,7 +1,7 @@
 # EverLeaf Roblox — Master Checklist
 
 **Canonical status:** 2026-09-14
-**Latest gameplay checkpoint:** Lumenreach 1–10 progression pacing — advancement route, post-trial bridges, Brasshaven Level-10 gate
+**Latest gameplay checkpoint:** Brasshaven transition shell — physical region travel, region-aware respawn, Foundry Threshold starter area
 **Purpose:** detailed implementation/status tracker for the entire project.
 **Roadmap:** [`ROADMAP.md`](ROADMAP.md)
 
@@ -98,9 +98,11 @@
 - [x] Hidden Whisperroot Hollow and persistent one-time Wayfarer cache reward implemented.
 - [x] First Lumenreach field boss implemented: Mosswarden, Root of the Old Grove.
 - [x] Lumenreach → Brasshaven progression gate is functional and region unlock rewards are supported.
+- [x] Brasshaven Foundry Threshold starter shell is physically reachable with a working return gate.
+- [x] Region travel now moves the character transactionally and updates the saved/current respawn target.
 - [x] Dedicated full buy/sell shop screen implemented beyond dialogue preview buttons; Studio interaction/balance QA remains.
-- [ ] Level-up feedback and final level 1–30 EXP tuning.
-- [ ] First advancement hook/location/quest flow.
+- [ ] Level-up feedback is implemented; Lumenreach 1–10 pacing is regression-tested; Brasshaven 10–30 tuning remains.
+- [x] First advancement hook/location/quest flow implemented with Seren, the Proving Circle, The Five Paths, and five permanent family choices.
 - [ ] Belforge boss-entry shell only to the extent required for Phase 1 progression continuity.
 
 ### F. Phase 1 exit validation
@@ -369,7 +371,7 @@
 - [ ] Knockback on player.
 - [x] Death state and timed respawn loop Studio-verified.
 - [x] Safe-spawn respawn flow + death overlay Studio-verified; presentation polish remains.
-- [x] Lumenreach Wayfarer Camp safe respawn is assigned server-side.
+- [x] Region-aware safe respawn is assigned server-side for Lumenreach and Brasshaven, including portal/rejoin synchronization.
 - [ ] Death penalties decision.
 - [x] React death overlay appears during the Studio-verified death/respawn flow; damage-feedback polish remains.
 

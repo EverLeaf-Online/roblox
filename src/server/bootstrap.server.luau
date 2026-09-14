@@ -1,8 +1,8 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Workspace = game:GetService("Workspace")
 
 local ActionService = require(script.Parent.Services.ActionService)
+local BrasshavenWorldService = require(script.Parent.Services.BrasshavenWorldService)
 local CatalogService = require(script.Parent.Services.CatalogService)
 local CharacterStatsService = require(script.Parent.Services.CharacterStatsService)
 local CombatService = require(script.Parent.Services.CombatService)
@@ -25,6 +25,7 @@ local RateLimiterService = require(script.Parent.Services.RateLimiterService)
 local SnapshotService = require(script.Parent.Services.SnapshotService)
 local StatusEffectService = require(script.Parent.Services.StatusEffectService)
 local StudioEnvironmentAssetService = require(script.Parent.Services.StudioEnvironmentAssetService)
+local WorldTravelService = require(script.Parent.Services.WorldTravelService)
 local WorldVisualService = require(script.Parent.Services.WorldVisualService)
 local StatService = require(script.Parent.Services.StatService)
 
@@ -62,6 +63,7 @@ EnemySpawnerService.Init()
 PBRMaterialService.Init()
 StudioEnvironmentAssetService.Init()
 LumenreachWorldService.Init()
+BrasshavenWorldService.Init()
 MonsterAnimationService.Init()
 EnemyAIService.Init()
 MonsterSpawnService.Init()
@@ -72,11 +74,20 @@ StatusEffectService.Init()
 WorldVisualService.Init()
 Players.RespawnTime = 3
 
-local function assignSafeRespawn(player)
-    local world = Workspace:FindFirstChild("EverLeafGeneratedWorld")
-    local spawn = world and world:FindFirstChild("LumenreachSpawn")
-    if spawn and spawn:IsA("SpawnLocation") then
-        player.RespawnLocation = spawn
+local function syncPlayerWorld(player, profile, moveCharacter)
+    local ok, reason = WorldTravelService.SyncPlayer(player, profile, moveCharacter)
+    if not ok then
+        warn(
+            string.format(
+                "[Bootstrap] Could not sync %s to %s: %s",
+                player.Name,
+                tostring(profile.World.SpawnId),
+                tostring(reason)
+            )
+        )
+        profile.World.RegionId = "lumenreach"
+        profile.World.SpawnId = "lumenreach_start"
+        WorldTravelService.SyncPlayer(player, profile, moveCharacter)
     end
 end
 
@@ -115,11 +126,15 @@ local function onPlayerAdded(player)
         return
     end
 
-    assignSafeRespawn(player)
+    syncPlayerWorld(player, profileOrReason, player.Character ~= nil)
     DeathService.InitPlayer(player)
 
     player.CharacterAdded:Connect(function()
         task.defer(function()
+            local profile = PlayerDataService.Get(player)
+            if profile then
+                WorldTravelService.SetRespawn(player, profile.World.SpawnId)
+            end
             CharacterStatsService.Apply(player, true)
             PlayerDataService.NotifyChanged(player)
         end)

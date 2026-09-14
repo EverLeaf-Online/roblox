@@ -1,6 +1,7 @@
 local PortalDefinitions = require(script.Parent.Parent.Content.PortalDefinitions)
 local RegionService = require(script.Parent.RegionService)
 local WorldObjectService = require(script.Parent.WorldObjectService)
+local WorldTravelService = require(script.Parent.WorldTravelService)
 
 local PortalService = {}
 
@@ -19,7 +20,23 @@ function PortalService.Travel(player, profile, portalId, worldObject)
     if profile.World.RegionId ~= definition.SourceRegionId then
         return false, "wrong_source_region"
     end
-    return RegionService.SetCurrent(profile, definition.TargetRegionId, definition.TargetSpawnId)
+
+    local previousRegionId = profile.World.RegionId
+    local previousSpawnId = profile.World.SpawnId
+    local changed, changeReason =
+        RegionService.SetCurrent(profile, definition.TargetRegionId, definition.TargetSpawnId)
+    if not changed then
+        return false, changeReason
+    end
+
+    local moved, moveReason = WorldTravelService.Teleport(player, definition.TargetSpawnId)
+    if not moved then
+        profile.World.RegionId = previousRegionId
+        profile.World.SpawnId = previousSpawnId
+        WorldTravelService.SetRespawn(player, previousSpawnId)
+        return false, moveReason
+    end
+    return true, definition.TargetRegionId
 end
 
 return PortalService

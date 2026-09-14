@@ -54,7 +54,7 @@ Schema version 2 owns:
 - QuestService
 - InteractionService / InteractionSessionService
 - WorldObjectService for physical actor registration/proximity
-- RegionService / PortalService
+- RegionService / PortalService / WorldTravelService
 - CatalogService
 - AchievementService / CosmeticService
 
@@ -135,7 +135,7 @@ Controllers are fault-isolated at startup so one stalled subsystem cannot block 
 4. all Lune tests (currently gameplay math + state-machine regression tests);
 5. Rojo headless place build.
 
-At Phase A closure the dependency checker reports 51 server services with no cycles, Selene reports zero warnings/errors, both headless suites pass, and Rojo builds successfully.
+The current dependency checker reports 65 server services with no cycles; Selene reports zero warnings/errors, the Lune regression suite passes, and both Rojo outputs build successfully.
 
 ## Phase A completion rule
 

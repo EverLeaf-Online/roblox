@@ -10,6 +10,7 @@ local PlayerDataService = require(script.Parent.PlayerDataService)
 local QuestService = require(script.Parent.QuestService)
 local PortalService = require(script.Parent.PortalService)
 local WorldObjectService = require(script.Parent.WorldObjectService)
+local WorldTravelService = require(script.Parent.WorldTravelService)
 
 local LumenreachWorldService = {}
 
@@ -1678,7 +1679,7 @@ local function makeRuins(parent, origin)
     local prompt = Instance.new("ProximityPrompt")
     prompt.Name = "BrasshavenGatePrompt"
     prompt.ActionText = "Travel"
-    prompt.ObjectText = "Brasshaven Gate · Level 20"
+    prompt.ObjectText = "Brasshaven Gate · Level 10"
     prompt.KeyboardKeyCode = Enum.KeyCode.E
     prompt.MaxActivationDistance = 10
     prompt.RequiresLineOfSight = false
@@ -3168,6 +3169,7 @@ local function makeSpawn(world)
     spawn.Color = Color3.fromRGB(77, 96, 87)
     spawn.Transparency = 0.15
     spawn.Parent = world
+    WorldTravelService.RegisterSpawn("lumenreach_start", spawn)
     return spawn
 end
 

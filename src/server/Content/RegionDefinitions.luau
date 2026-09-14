@@ -7,7 +7,7 @@ return table.freeze({
     }),
     brasshaven = table.freeze({
         DisplayName = "Brasshaven",
-        MinimumLevel = 20,
+        MinimumLevel = 10,
         DefaultSpawnId = "brasshaven_start",
         Kind = "Region",
     }),
