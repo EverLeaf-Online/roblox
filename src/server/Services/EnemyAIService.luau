@@ -64,12 +64,16 @@ function EnemyAIService.Init()
             state.Target = target
             if not target then
                 state.State = "Idle"
+                local velocity = root.AssemblyLinearVelocity
+                root.AssemblyLinearVelocity = Vector3.new(0, velocity.Y, 0)
                 continue
             end
             local targetRoot = target.Character
                 and target.Character:FindFirstChild("HumanoidRootPart")
             if distance <= (def.AttackRange or 4) then
                 state.State = "Attack"
+                local velocity = root.AssemblyLinearVelocity
+                root.AssemblyLinearVelocity = Vector3.new(0, velocity.Y, 0)
                 if os.clock() >= state.NextAttackAt then
                     state.NextAttackAt = os.clock() + (def.AttackCooldown or 1.5)
                     PlayerDamageService.Apply(
@@ -80,7 +84,16 @@ function EnemyAIService.Init()
                 end
             elseif targetRoot then
                 state.State = "Pursue"
-                humanoid:MoveTo(targetRoot.Position)
+                local offset = targetRoot.Position - root.Position
+                local planar = Vector3.new(offset.X, 0, offset.Z)
+                if planar.Magnitude > 0.05 then
+                    local direction = planar.Unit
+                    local speed = def.MoveSpeed or humanoid.WalkSpeed
+                    local velocity = root.AssemblyLinearVelocity
+                    root.AssemblyLinearVelocity =
+                        Vector3.new(direction.X * speed, velocity.Y, direction.Z * speed)
+                    root.CFrame = CFrame.lookAt(root.Position, root.Position + direction)
+                end
             end
         end
     end)

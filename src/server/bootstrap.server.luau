@@ -9,7 +9,9 @@ local DeathService = require(script.Parent.Services.DeathService)
 local EnemyAIService = require(script.Parent.Services.EnemyAIService)
 local EnemySpawnerService = require(script.Parent.Services.EnemySpawnerService)
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
+local InteractionService = require(script.Parent.Services.InteractionService)
 local InteractionSessionService = require(script.Parent.Services.InteractionSessionService)
+local LumenreachWorldService = require(script.Parent.Services.LumenreachWorldService)
 local MovementSanityService = require(script.Parent.Services.MovementSanityService)
 local PartyService = require(script.Parent.Services.PartyService)
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -41,6 +43,7 @@ end
 local profileReady = ensureRemote("RemoteEvent", Net.Events.ProfileReady)
 local profileChanged = ensureRemote("RemoteEvent", Net.Events.ProfileChanged)
 local partyEvent = ensureRemote("RemoteEvent", Net.Events.PartyEvent)
+local interactionEvent = ensureRemote("RemoteEvent", Net.Events.InteractionEvent)
 local requestProfile = ensureRemote("RemoteFunction", Net.Functions.RequestProfile)
 local allocateStat = ensureRemote("RemoteFunction", Net.Functions.AllocateStat)
 local basicAttack = ensureRemote("RemoteFunction", Net.Functions.BasicAttack)
@@ -50,6 +53,7 @@ local requestCatalog = ensureRemote("RemoteFunction", Net.Functions.RequestCatal
 PlayerDataService.Init()
 MovementSanityService.Init()
 EnemySpawnerService.Init()
+LumenreachWorldService.Init()
 EnemyAIService.Init()
 PartyService.Init()
 InteractionSessionService.Init()
@@ -68,6 +72,12 @@ PlayerDataService.Changed:Connect(replicateProfile)
 PartyService.Event:Connect(function(player, eventData)
     if player.Parent == Players then
         partyEvent:FireClient(player, eventData)
+    end
+end)
+
+InteractionService.Opened:Connect(function(player, description)
+    if player.Parent == Players then
+        interactionEvent:FireClient(player, "open", description)
     end
 end)
 

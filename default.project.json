@@ -31,6 +31,9 @@
         },
         "PartyEvent": {
           "$className": "RemoteEvent"
+        },
+        "InteractionEvent": {
+          "$className": "RemoteEvent"
         }
       }
     },

@@ -18,7 +18,7 @@ Immediate 3D priorities:
 - left-click/R2 basic combat with spatial targeting;
 - sprint/dodge/jump/interact controls;
 - true XYZ enemy pursuit and navigation;
-- Lumenreach 3D graybox;
+- Lumenreach 3D benchmark graybox — source-generated foundation landed 2026-09-14;
 - lighting/atmosphere/terrain/foliage quality baseline;
 - asset import/optimization/licensing pipeline;
 - first production-quality environmental benchmark area.

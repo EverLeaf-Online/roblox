@@ -4,7 +4,7 @@ return table.freeze({
         MinimumLevel = 1,
         StartNpcId = "lumen_guide",
         Objectives = table.freeze({
-            table.freeze({ Type = "Defeat", Target = "training_dummy", Required = 1 }),
+            table.freeze({ Type = "Defeat", Target = "lumen_mossling", Required = 2 }),
         }),
         Reward = table.freeze({ Exp = 25, Currencies = table.freeze({ Shards = 3 }) }),
     }),

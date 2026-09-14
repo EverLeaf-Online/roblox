@@ -56,9 +56,9 @@
 - [ ] Production hitbox/hurtbox system.
 - [ ] Lock-on / soft-target system decision and implementation.
 - [ ] Production enemy pathfinding/navigation.
-- [ ] Lumenreach 3D graybox.
-- [ ] Asset import + optimization pipeline established.
-- [ ] Poly Haven/approved Sketchfab material/model source policy documented.
+- [x] Lumenreach 3D benchmark graybox generated from canonical source.
+- [ ] **PARTIAL:** Asset import + optimization pipeline documented; production asset ingestion still pending.
+- [x] Poly Haven/approved Sketchfab material/model source policy documented.
 - [ ] Foliage/wind solution audited and integrated.
 - [ ] Streaming/performance budgets measured in Studio.
 - [ ] First production-quality environment benchmark scene.
@@ -332,17 +332,17 @@
 
 ## 16. World — Lumenreach
 
-- [ ] World visual bible/concept direction.
-- [ ] Graybox first map.
-- [ ] Spawn/tutorial area.
-- [ ] Field boundaries.
-- [ ] Platforms/terrain.
-- [ ] Camera framing zones.
-- [ ] Portals/transitions.
-- [ ] NPC placements.
-- [ ] Monster spawn placements.
-- [ ] Quest route.
-- [ ] Shops/services.
+- [x] World visual bible/concept direction.
+- [x] Source-generated 3D benchmark graybox.
+- [x] Wayfarer Camp spawn/tutorial area foundation.
+- [x] Benchmark field boundaries and traversable ground.
+- [x] Placeholder ground/path/pond/ruin composition.
+- [ ] Camera obstruction/framing review in finished environment geometry.
+- [ ] **PARTIAL:** Brasshaven portal world object placed/registered; transition remains sealed.
+- [x] Lumen Guide physical NPC placement + interaction prompt.
+- [x] Training dummy + Lumen Mossling spawn placements.
+- [x] First quest route: guide → Mossglen combat grove.
+- [x] Lumen Guide supply-shop interaction shell.
 - [ ] First advancement location.
 - [ ] Original environment assets.
 - [ ] Lighting/post-processing.
@@ -509,10 +509,10 @@
 
 1. [ ] Build the production HUD shell (HP/MP/EXP/level/currency/hotbar).
 2. [ ] Build inventory/equipment/character/skills/quests/settings screen shells.
-3. [ ] Add physical Lumenreach graybox + world-object registration for NPCs/portals.
-4. [ ] Add the first real hostile enemy using the AI/player-damage architecture.
+3. [x] Add physical Lumenreach benchmark graybox + NPC/portal world-object registration.
+4. [ ] **PARTIAL:** First hostile Lumen Mossling is integrated with AI/player damage; Studio verification pending.
 5. [ ] Finish death/respawn presentation and safe spawn flow.
-6. [ ] Add NPC dialogue + quest + shop shell using server interaction sessions.
+6. [ ] **PARTIAL:** Lumen Guide dialogue/quest/shop shell is integrated; Studio verification/polish pending.
 7. [ ] Add first real skill-use/hotbar flow through `SkillEffectService`.
 8. [ ] Add party UI/invite flow and a private-instance shell.
 9. [ ] Add Belforge boss-entry/encounter shell using the generic state machine.

@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CameraController = require(script.Parent.Controllers.CameraController)
 local CatalogClient = require(script.Parent.Services.CatalogClient)
 local CombatController = require(script.Parent.Controllers.CombatController)
+local InteractionController = require(script.Parent.Controllers.InteractionController)
 local ScreenController = require(script.Parent.Controllers.ScreenController)
 local ThirdPersonController = require(script.Parent.Controllers.ThirdPersonController)
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -24,6 +25,7 @@ end
 startController("ThirdPersonController", ThirdPersonController)
 startController("CameraController", CameraController)
 startController("CombatController", CombatController)
+startController("InteractionController", InteractionController)
 startController("ScreenController", ScreenController)
 
 -- Profile networking is also isolated from controller startup.

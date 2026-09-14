@@ -6,6 +6,7 @@ Net.Events = table.freeze({
     ProfileReady = "ProfileReady",
     ProfileChanged = "ProfileChanged",
     PartyEvent = "PartyEvent",
+    InteractionEvent = "InteractionEvent",
 })
 
 Net.Functions = table.freeze({
