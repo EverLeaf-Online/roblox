@@ -56,23 +56,23 @@ end
 local function configurePostProcessing()
     local color = ensureEffect("ColorCorrectionEffect", "EverLeafColorGrade")
     if color then
-        safeSet(color, "Brightness", 0.015)
-        safeSet(color, "Contrast", 0.08)
-        safeSet(color, "Saturation", 0.08)
-        safeSet(color, "TintColor", Color3.fromRGB(232, 246, 236))
+        safeSet(color, "Brightness", -0.01)
+        safeSet(color, "Contrast", 0.06)
+        safeSet(color, "Saturation", 0.03)
+        safeSet(color, "TintColor", Color3.fromRGB(241, 246, 238))
     end
 
     local bloom = ensureEffect("BloomEffect", "EverLeafBloom")
     if bloom then
-        safeSet(bloom, "Intensity", 0.28)
-        safeSet(bloom, "Size", 28)
-        safeSet(bloom, "Threshold", 1.15)
+        safeSet(bloom, "Intensity", 0.08)
+        safeSet(bloom, "Size", 18)
+        safeSet(bloom, "Threshold", 2)
     end
 
     local rays = ensureEffect("SunRaysEffect", "EverLeafSunRays")
     if rays then
-        safeSet(rays, "Intensity", 0.055)
-        safeSet(rays, "Spread", 0.72)
+        safeSet(rays, "Intensity", 0.025)
+        safeSet(rays, "Spread", 0.62)
     end
 end
 

@@ -114,15 +114,15 @@ GameConfig.Combat = {
 }
 
 GameConfig.Graphics = {
-    Brightness = 2.25,
-    ClockTime = 14.5,
-    ExposureCompensation = 0.05,
-    EnvironmentDiffuseScale = 0.45,
-    EnvironmentSpecularScale = 1,
-    ShadowSoftness = 0.25,
-    AtmosphereDensity = 0.24,
-    AtmosphereHaze = 1.4,
-    AtmosphereGlare = 0.12,
+    Brightness = 1.75,
+    ClockTime = 15.1,
+    ExposureCompensation = -0.12,
+    EnvironmentDiffuseScale = 0.38,
+    EnvironmentSpecularScale = 0.72,
+    ShadowSoftness = 0.35,
+    AtmosphereDensity = 0.2,
+    AtmosphereHaze = 1.15,
+    AtmosphereGlare = 0.04,
 }
 
 GameConfig.Development = {

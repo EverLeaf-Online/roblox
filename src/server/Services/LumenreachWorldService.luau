@@ -81,16 +81,17 @@ local function makeCrystal(parent, position)
     local crystal = makePart(
         parent,
         "LumenCrystal",
-        Vector3.new(2.6, 7, 2.6),
+        Vector3.new(1.6, 4.6, 1.6),
         CFrame.new(position) * CFrame.Angles(0, 0, math.rad(45)),
-        Enum.Material.Neon,
-        Color3.fromRGB(113, 219, 207)
+        Enum.Material.Glass,
+        Color3.fromRGB(103, 193, 184)
     )
     crystal.CanCollide = false
     local light = Instance.new("PointLight")
     light.Color = crystal.Color
-    light.Brightness = 2
-    light.Range = 18
+    crystal.Transparency = 0.08
+    light.Brightness = 0.55
+    light.Range = 9
     light.Parent = crystal
     return crystal
 end
@@ -192,8 +193,8 @@ local function makeCampfire(parent, position)
 
     local light = Instance.new("PointLight")
     light.Color = Color3.fromRGB(255, 164, 92)
-    light.Brightness = 2.4
-    light.Range = 24
+    light.Brightness = 1.1
+    light.Range = 14
     light.Shadows = true
     light.Parent = ember
 
@@ -611,92 +612,54 @@ local function prepareGround(world)
         oldBaseplate.CanCollide = false
     end
 
-    makePart(
-        world,
-        "LumenreachGround",
-        Vector3.new(240, 4, 220),
-        CFrame.new(0, -2, 0),
-        Enum.Material.Grass,
-        Color3.fromRGB(72, 106, 62)
-    )
-    makePart(
-        world,
-        "SpawnRise",
-        Vector3.new(62, 3, 52),
-        CFrame.new(-61, 1.5, 38) * CFrame.Angles(0, math.rad(-8), 0),
-        Enum.Material.Ground,
-        Color3.fromRGB(96, 104, 69)
-    )
-    makePart(
-        world,
-        "CombatGrove",
-        Vector3.new(70, 2, 62),
-        CFrame.new(49, 1, 27),
-        Enum.Material.Ground,
-        Color3.fromRGB(82, 96, 64)
-    )
-    makePart(
-        world,
-        "NorthRise",
-        Vector3.new(82, 7, 52),
-        CFrame.new(28, 2.8, -72) * CFrame.Angles(math.rad(-4), math.rad(5), 0),
-        Enum.Material.Grass,
-        Color3.fromRGB(67, 96, 59)
-    )
-    makePart(
-        world,
-        "WestShelf",
-        Vector3.new(56, 9, 70),
-        CFrame.new(-92, 3.4, -25) * CFrame.Angles(math.rad(2), math.rad(-7), 0),
-        Enum.Material.Rock,
-        Color3.fromRGB(75, 84, 77)
-    )
-    makeWedge(
-        world,
-        "NorthApproachSlope",
-        Vector3.new(28, 7, 26),
-        CFrame.new(11, 1.2, -49) * CFrame.Angles(0, math.rad(5), 0),
-        Enum.Material.Ground,
-        Color3.fromRGB(91, 100, 69)
-    )
+    local terrain = Workspace:FindFirstChildOfClass("Terrain")
+    if terrain then
+        terrain:Clear()
+        terrain:FillBlock(CFrame.new(0, -7, 0), Vector3.new(250, 14, 230), Enum.Material.Grass)
 
-    local pathColor = Color3.fromRGB(131, 116, 86)
-    makePart(
-        world,
-        "Path",
-        Vector3.new(12, 0.6, 58),
-        CFrame.new(-32, 0.3, 24) * CFrame.Angles(0, math.rad(-58), 0),
-        Enum.Material.Ground,
-        pathColor
-    )
-    makePart(
-        world,
-        "Path",
-        Vector3.new(12, 0.6, 70),
-        CFrame.new(8, 0.3, 3) * CFrame.Angles(0, math.rad(-92), 0),
-        Enum.Material.Ground,
-        pathColor
-    )
-    makePart(
-        world,
-        "Path",
-        Vector3.new(10, 0.6, 46),
-        CFrame.new(29, 0.3, -17) * CFrame.Angles(0, math.rad(-32), 0),
-        Enum.Material.Ground,
-        pathColor
-    )
+        local hills = {
+            { Vector3.new(-72, -2, 36), 38, Enum.Material.Ground },
+            { Vector3.new(48, -4, 28), 42, Enum.Material.Grass },
+            { Vector3.new(27, -5, -70), 48, Enum.Material.Grass },
+            { Vector3.new(-95, -1, -28), 40, Enum.Material.Rock },
+            { Vector3.new(92, -4, 45), 34, Enum.Material.Grass },
+            { Vector3.new(78, -3, -45), 36, Enum.Material.Rock },
+        }
+        for _, hill in hills do
+            terrain:FillBall(hill[1], hill[2], hill[3])
+        end
 
-    local pond = makePart(
+        local pathSegments = {
+            {
+                CFrame.new(-42, 0.2, 28) * CFrame.Angles(0, math.rad(-58), 0),
+                Vector3.new(12, 1.1, 48),
+            },
+            {
+                CFrame.new(1, 0.25, 5) * CFrame.Angles(0, math.rad(-90), 0),
+                Vector3.new(12, 1.1, 62),
+            },
+            {
+                CFrame.new(30, 0.3, -19) * CFrame.Angles(0, math.rad(-30), 0),
+                Vector3.new(10, 1.1, 44),
+            },
+        }
+        for _, segment in pathSegments do
+            terrain:FillBlock(segment[1], segment[2], Enum.Material.Ground)
+        end
+
+        terrain:FillBlock(CFrame.new(-18, -1.5, -43), Vector3.new(46, 4, 33), Enum.Material.Water)
+        terrain:FillBlock(CFrame.new(-18, -3.5, -43), Vector3.new(50, 3, 37), Enum.Material.Rock)
+    end
+
+    local foundation = makePart(
         world,
-        "LumenPond",
-        Vector3.new(44, 0.8, 31),
-        CFrame.new(-18, 0.15, -43),
-        Enum.Material.Glass,
-        Color3.fromRGB(59, 153, 159)
+        "InvisibleFoundation",
+        Vector3.new(250, 2, 230),
+        CFrame.new(0, -9, 0),
+        Enum.Material.SmoothPlastic,
+        Color3.new(0, 0, 0)
     )
-    pond.Transparency = 0.25
-    pond.CanCollide = false
-    pond.Reflectance = 0.08
+    foundation.Transparency = 1
 end
 
 local function decorate(world)
