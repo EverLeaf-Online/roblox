@@ -2323,6 +2323,56 @@ local function dressZoneEdge(parent, center, radiusX, radiusZ, count, seed)
     end
 end
 
+local function scatterForestPatch(parent, center, radiusX, radiusZ, count, seed)
+    local goldenAngle = math.rad(137.507764)
+    for index = 1, count do
+        local alpha = math.sqrt(index / count)
+        local angle = index * goldenAngle + seed * 0.41
+        local jitterX = math.sin(index * 1.73 + seed) * 4
+        local jitterZ = math.cos(index * 2.11 + seed) * 4
+        local position = center
+            + Vector3.new(
+                math.cos(angle) * radiusX * alpha + jitterX,
+                0,
+                math.sin(angle) * radiusZ * alpha + jitterZ
+            )
+        local scale = 0.78 + ((index + seed) % 6) * 0.07
+        makeTree(parent, position, scale, ((index + seed) % 3) + 1)
+
+        if index % 2 == 0 then
+            local undergrowthOffset = Vector3.new(
+                math.cos(angle + 0.8) * (5 + (index % 4) * 2),
+                0,
+                math.sin(angle + 0.8) * (5 + (index % 4) * 2)
+            )
+            local selector = (index + seed) % 4
+            if selector == 0 then
+                makeFern(parent, position + undergrowthOffset, 0.72 + (index % 3) * 0.08)
+            elseif selector == 1 then
+                makeBush(parent, position + undergrowthOffset, 0.58 + (index % 3) * 0.08)
+            elseif selector == 2 then
+                makeGrassTuft(parent, position + undergrowthOffset, 0.68 + (index % 2) * 0.1)
+            else
+                makeMushroomCluster(parent, position + undergrowthOffset, 0.62, index + seed)
+            end
+        end
+    end
+end
+
+local function makeTrailsideCluster(parent, position, yaw, seed)
+    makeRockCluster(parent, position, 0.52 + (seed % 3) * 0.08, seed)
+    local side = if seed % 2 == 0 then 1 else -1
+    makeFern(parent, position + Vector3.new(side * 4.2, 0, 2.6), 0.72 + (seed % 3) * 0.06)
+    makeGrassTuft(parent, position + Vector3.new(-side * 3.6, 0, -2.4), 0.7)
+    if seed % 3 == 0 then
+        makeDryBranches(parent, position + Vector3.new(side * 6.0, 0.1, -4.0), yaw, 0.55)
+    elseif seed % 3 == 1 then
+        makeStump(parent, position + Vector3.new(side * 5.2, 0, -3.2), 0.58, (seed % 2) + 1)
+    else
+        makePineRoots(parent, position + Vector3.new(side * 5.8, 0, 3.1), yaw, 0.52)
+    end
+end
+
 local function decorate(world)
     -- A forest belt frames the whole map. Major clearings stay readable instead of being carpeted with props.
     placeTreeArc(world, Vector3.zero, 365, 305, 44, 0, 360, 2)
@@ -2340,6 +2390,79 @@ local function decorate(world)
     dressZoneEdge(world, WORLD_ZONES.Glowmere, 67, 52, 15, 19)
     dressZoneEdge(world, WORLD_ZONES.Waterfall, 61, 48, 13, 23)
     dressZoneEdge(world, WORLD_ZONES.Overlook, 60, 44, 10, 29)
+
+    -- Fill the spaces between destinations with continuous forest instead of open grass fields.
+    local forestPatches = {
+        { Vector3.new(-365, 0, 140), 45, 38, 12, 41 },
+        { Vector3.new(-350, 0, 15), 48, 42, 12, 43 },
+        { Vector3.new(-335, 0, -110), 48, 40, 11, 47 },
+        { Vector3.new(-310, 0, 245), 50, 42, 12, 53 },
+        { Vector3.new(-215, 0, 250), 52, 42, 13, 59 },
+        { Vector3.new(-115, 0, 255), 50, 40, 12, 61 },
+        { Vector3.new(75, 0, 275), 55, 42, 13, 67 },
+        { Vector3.new(205, 0, 250), 50, 40, 12, 71 },
+        { Vector3.new(325, 0, 210), 48, 42, 12, 73 },
+        { Vector3.new(345, 0, 85), 46, 38, 11, 79 },
+        { Vector3.new(335, 0, -65), 48, 40, 12, 83 },
+        { Vector3.new(300, 0, -210), 54, 42, 13, 89 },
+        { Vector3.new(205, 0, -300), 50, 40, 12, 97 },
+        { Vector3.new(70, 0, -305), 52, 42, 13, 101 },
+        { Vector3.new(-70, 0, -300), 52, 44, 13, 103 },
+        { Vector3.new(-205, 0, -285), 52, 42, 13, 107 },
+        { Vector3.new(-330, 0, -225), 50, 42, 12, 109 },
+        { Vector3.new(-178, 0, -22), 34, 28, 9, 113 },
+        { Vector3.new(-18, 0, -108), 36, 30, 10, 127 },
+        { Vector3.new(112, 0, 20), 34, 28, 9, 131 },
+        { Vector3.new(112, 0, 174), 36, 30, 10, 137 },
+    }
+    for _, patch in forestPatches do
+        scatterForestPatch(world, patch[1], patch[2], patch[3], patch[4], patch[5])
+    end
+
+    local trailClusters = {
+        { Vector3.new(-207, 0, 69), math.rad(25), 11 },
+        { Vector3.new(-169, 0, 113), math.rad(-31), 12 },
+        { Vector3.new(-126, 0, 48), math.rad(54), 13 },
+        { Vector3.new(-51, 0, 11), math.rad(-12), 14 },
+        { Vector3.new(-17, 0, 8), math.rad(61), 15 },
+        { Vector3.new(22, 0, -23), math.rad(-46), 16 },
+        { Vector3.new(55, 0, -59), math.rad(24), 17 },
+        { Vector3.new(116, 0, -70), math.rad(-68), 18 },
+        { Vector3.new(151, 0, 55), math.rad(37), 19 },
+        { Vector3.new(182, 0, 117), math.rad(-28), 20 },
+        { Vector3.new(120, 0, 133), math.rad(48), 21 },
+        { Vector3.new(72, 0, 158), math.rad(-53), 22 },
+        { Vector3.new(-47, 0, 148), math.rad(17), 23 },
+        { Vector3.new(-113, 0, 132), math.rad(-36), 24 },
+        { Vector3.new(-151, 0, -49), math.rad(62), 25 },
+        { Vector3.new(-191, 0, -96), math.rad(-41), 26 },
+        { Vector3.new(-231, 0, -132), math.rad(26), 27 },
+        { Vector3.new(116, 0, -144), math.rad(-52), 28 },
+        { Vector3.new(148, 0, -181), math.rad(31), 29 },
+        { Vector3.new(207, 0, -160), math.rad(-22), 30 },
+        { Vector3.new(252, 0, -94), math.rad(57), 31 },
+        { Vector3.new(268, 0, 18), math.rad(-33), 32 },
+    }
+    for _, cluster in trailClusters do
+        makeTrailsideCluster(world, cluster[1], cluster[2], cluster[3])
+    end
+
+    local routeBeacons = {
+        { Vector3.new(-187, 0, 93), math.rad(-54), 0.58 },
+        { Vector3.new(-131, 0, 61), math.rad(-61), 0.62 },
+        { Vector3.new(-24, 0, -7), math.rad(-42), 0.58 },
+        { Vector3.new(53, 0, 66), math.rad(-78), 0.6 },
+        { Vector3.new(139, 0, 79), math.rad(-84), 0.64 },
+        { Vector3.new(-171, 0, -88), math.rad(44), 0.58 },
+        { Vector3.new(-85, 0, 169), math.rad(-88), 0.56 },
+        { Vector3.new(126, 0, -166), math.rad(26), 0.62 },
+    }
+    for index, beacon in routeBeacons do
+        makeWaystone(world, beacon[1], beacon[2], beacon[3])
+        if index % 2 == 0 then
+            makeLantern(world, beacon[1] + Vector3.new(6, 0, 5))
+        end
+    end
 
     -- Wayfarer Camp is now one district in the world, not the world itself.
     makeCampfire(world, WORLD_ZONES.Camp + Vector3.new(10, 0, -3))
@@ -2362,6 +2485,10 @@ local function decorate(world)
     do
         makeLantern(world, WORLD_ZONES.Camp + offset)
     end
+    makeTent(world, WORLD_ZONES.Camp + Vector3.new(-55, 0.2, 3), math.rad(69))
+    makeCampBench(world, WORLD_ZONES.Camp + Vector3.new(47, 0, -18), math.rad(-18))
+    makeWaystone(world, WORLD_ZONES.Camp + Vector3.new(51, 0, 32), math.rad(33), 0.68)
+    makeFallenLog(world, WORLD_ZONES.Camp + Vector3.new(51, 0.2, 45), math.rad(-29), 0.66, 1)
 
     -- Lumenwood Crossroads establishes the main navigation fork.
     makeSignpost(world, WORLD_ZONES.Crossroads + Vector3.new(-3, 0, 1), math.rad(-82))
@@ -2370,6 +2497,10 @@ local function decorate(world)
     makeLantern(world, WORLD_ZONES.Crossroads + Vector3.new(-24, 0, -17))
     makeLantern(world, WORLD_ZONES.Crossroads + Vector3.new(25, 0, 17))
     makeRockCluster(world, WORLD_ZONES.Crossroads + Vector3.new(31, 0, -26), 0.65, 12)
+    makeCampBench(world, WORLD_ZONES.Crossroads + Vector3.new(7, 0, 28), math.rad(9))
+    makeSupplyStack(world, WORLD_ZONES.Crossroads + Vector3.new(-34, 0, 25), math.rad(-17))
+    makeCampfire(world, WORLD_ZONES.Crossroads + Vector3.new(24, 0, 31))
+    makeStump(world, WORLD_ZONES.Crossroads + Vector3.new(-37, 0, -23), 0.64, 2)
 
     -- Veilfall is a rocky wet forest with a basin, stream, deadwood, and cliff dressing.
     makeWaterfall(world, WORLD_ZONES.Waterfall)
@@ -2391,6 +2522,9 @@ local function decorate(world)
     end
     makeFireflyCluster(world, WORLD_ZONES.Waterfall + Vector3.new(-24, 0, 27))
     makeFireflyCluster(world, WORLD_ZONES.Waterfall + Vector3.new(29, 0, 18))
+    makeCampBench(world, WORLD_ZONES.Waterfall + Vector3.new(49, 0, 17), math.rad(-71))
+    makeLantern(world, WORLD_ZONES.Waterfall + Vector3.new(43, 0, 28))
+    makeSupplyStack(world, WORLD_ZONES.Waterfall + Vector3.new(-48, 0, -28), math.rad(22))
 
     -- Glowmere is a calmer exploration landmark with bridge, reeds, crystals, and fireflies.
     makeBridge(world, WORLD_ZONES.Glowmere + Vector3.new(-8, 0.2, 0), math.rad(2), 60, 6.5)
@@ -2418,6 +2552,11 @@ local function decorate(world)
     makeCrystal(world, WORLD_ZONES.Glowmere + Vector3.new(31, 2.1, -6))
     makeFireflyCluster(world, WORLD_ZONES.Glowmere + Vector3.new(-18, 0, -30))
     makeFireflyCluster(world, WORLD_ZONES.Glowmere + Vector3.new(25, 0, 24))
+    makeCampBench(world, WORLD_ZONES.Glowmere + Vector3.new(-52, 0, 31), math.rad(31))
+    makeCampBench(world, WORLD_ZONES.Glowmere + Vector3.new(48, 0, 27), math.rad(-27))
+    makeLantern(world, WORLD_ZONES.Glowmere + Vector3.new(-49, 0, 20))
+    makeLantern(world, WORLD_ZONES.Glowmere + Vector3.new(49, 0, 18))
+    makeSignpost(world, WORLD_ZONES.Glowmere + Vector3.new(-57, 0, -38), math.rad(36))
 
     -- The Shattered Arch is now a destination in its own clearing.
     makeRuins(world, WORLD_ZONES.Ruins)
@@ -2426,6 +2565,10 @@ local function decorate(world)
     makeDryBranches(world, WORLD_ZONES.Ruins + Vector3.new(37, 0.1, 34), math.rad(-31), 0.8)
     makeStump(world, WORLD_ZONES.Ruins + Vector3.new(-39, 0, -33), 0.82, 2)
     makeWaystone(world, WORLD_ZONES.Ruins + Vector3.new(-46, 0, -3), math.rad(76), 0.72)
+    makeWaystone(world, WORLD_ZONES.Ruins + Vector3.new(46, 0, 21), math.rad(-66), 0.64)
+    makeFireflyCluster(world, WORLD_ZONES.Ruins + Vector3.new(-27, 0, 18))
+    makeCampBench(world, WORLD_ZONES.Ruins + Vector3.new(-48, 0, 42), math.rad(28))
+    makeLantern(world, WORLD_ZONES.Ruins + Vector3.new(-43, 0, 35))
 
     -- Mossglen is a large combat arena with space around enemy spawns.
     makeCombatGrove(world, WORLD_ZONES.CombatGrove)
@@ -2434,6 +2577,11 @@ local function decorate(world)
     makeFallenLog(world, WORLD_ZONES.CombatGrove + Vector3.new(-55, 0.2, 41), math.rad(48), 0.84, 2)
     makeStump(world, WORLD_ZONES.CombatGrove + Vector3.new(57, 0, -34), 0.78, 1)
     makeFireflyCluster(world, WORLD_ZONES.CombatGrove + Vector3.new(0, 0, 47))
+    makeCampBench(world, WORLD_ZONES.CombatGrove + Vector3.new(-67, 0, 11), math.rad(82))
+    makeCampBench(world, WORLD_ZONES.CombatGrove + Vector3.new(66, 0, 6), math.rad(-81))
+    makeLantern(world, WORLD_ZONES.CombatGrove + Vector3.new(-58, 0, -24))
+    makeLantern(world, WORLD_ZONES.CombatGrove + Vector3.new(58, 0, -24))
+    makeSignpost(world, WORLD_ZONES.CombatGrove + Vector3.new(-47, 0, -51), math.rad(67))
 
     -- Sunmoss Overlook finishes the northern loop with large silhouettes instead of another flat clearing.
     makeRockSpire(world, WORLD_ZONES.Overlook + Vector3.new(-31, 0, 8), 1.15)
@@ -2442,6 +2590,10 @@ local function decorate(world)
     makeWaystone(world, WORLD_ZONES.Overlook + Vector3.new(-5, 2.2, 19), math.rad(8), 0.86)
     makeCrystal(world, WORLD_ZONES.Overlook + Vector3.new(20, 5.0, 12))
     makeDryBranches(world, WORLD_ZONES.Overlook + Vector3.new(-46, 0.1, -22), math.rad(56), 0.9)
+    makeCampBench(world, WORLD_ZONES.Overlook + Vector3.new(-7, 2.1, 31), math.rad(176))
+    makeLantern(world, WORLD_ZONES.Overlook + Vector3.new(-21, 1.5, 24))
+    makeSupplyStack(world, WORLD_ZONES.Overlook + Vector3.new(37, 0, 31), math.rad(-23))
+    makeSignpost(world, WORLD_ZONES.Overlook + Vector3.new(-48, 0, 28), math.rad(54))
 
     -- The imported forest kit is used between destinations rather than stacked in one location.
     for _, entry in
