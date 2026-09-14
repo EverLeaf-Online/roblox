@@ -54,7 +54,9 @@ Roblox Studio remains the visual editor/playtest environment. Rojo keeps Studio 
 
 ## Project tracking
 
+- [Architecture](docs/ARCHITECTURE.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Master checklist](docs/MASTER_CHECKLIST.md)
 - [Canonical game design](docs/GAME_DESIGN.md)
 - [Toolchain](docs/TOOLCHAIN.md)
+- [Deployment](docs/DEPLOYMENT.md)

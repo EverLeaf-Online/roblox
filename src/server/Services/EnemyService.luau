@@ -2,7 +2,10 @@ local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 
 local EnemyDefinitions = require(script.Parent.Parent.Content.EnemyDefinitions)
+local AchievementService = require(script.Parent.AchievementService)
+local EnemyAIService = require(script.Parent.EnemyAIService)
 local PlayerDataService = require(script.Parent.PlayerDataService)
+local QuestService = require(script.Parent.QuestService)
 local RewardService = require(script.Parent.RewardService)
 
 local EnemyService = {}
@@ -45,6 +48,9 @@ function EnemyService.Register(enemy, enemyId, onDeath)
         Dead = false,
     }
     states[enemy] = state
+    if definition.AI then
+        EnemyAIService.Attach(enemy, definition.AI)
+    end
 
     humanoid.Died:Connect(function()
         if state.Dead then
@@ -53,17 +59,26 @@ function EnemyService.Register(enemy, enemyId, onDeath)
         state.Dead = true
 
         local winner = chooseWinner(state)
-        if winner and definition.Reward then
+        if winner then
             local profile = PlayerDataService.Get(winner)
             if profile then
-                local rewarded = RewardService.Grant(profile, definition.Reward)
-                if rewarded then
+                local changed = false
+                if definition.Reward then
+                    local rewarded = RewardService.Grant(profile, definition.Reward)
+                    changed = rewarded or changed
+                end
+                local questChanged = QuestService.Record(profile, "Defeat", enemyId, 1)
+                changed = questChanged or changed
+                local achievementChanged = AchievementService.Unlock(profile, "first_victory")
+                changed = achievementChanged or changed
+                if changed then
                     PlayerDataService.NotifyChanged(winner)
                 end
             end
         end
 
         states[enemy] = nil
+        EnemyAIService.Detach(enemy)
         CollectionService:RemoveTag(enemy, "EverLeafEnemy")
         if onDeath then
             task.spawn(onDeath, enemy, definition)

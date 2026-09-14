@@ -4,67 +4,16 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local ProfileSchema = require(script.Parent.Parent.Data.ProfileSchema)
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
 
 local PlayerDataService = {}
-
 local store = DataStoreService:GetDataStore(GameConfig.DataStore.Name)
 local profiles = {}
 local persistent = {}
 local closing = false
 local changedEvent = Instance.new("BindableEvent")
 local sessionId = if game.JobId ~= "" then game.JobId else HttpService:GenerateGUID(false)
-
-local DEFAULT_PROFILE = {
-    Meta = {
-        SchemaVersion = GameConfig.DataStore.SchemaVersion,
-        ActiveSession = nil,
-    },
-    Level = 1,
-    Exp = 0,
-    AP = 0,
-    SP = 0,
-    AdvancementTier = 0,
-    FamilyId = nil,
-    Stats = {
-        Might = 4,
-        Finesse = 4,
-        Insight = 4,
-        Fortune = 4,
-    },
-    Currencies = {
-        Shards = 0,
-        Marks = 0,
-    },
-}
-
-local function deepCopy(value)
-    if type(value) ~= "table" then
-        return value
-    end
-
-    local copy = {}
-    for key, child in value do
-        copy[deepCopy(key)] = deepCopy(child)
-    end
-    return copy
-end
-
-local function reconcile(target, template)
-    for key, defaultValue in template do
-        local currentValue = target[key]
-        if currentValue == nil or type(currentValue) ~= type(defaultValue) then
-            target[key] = deepCopy(defaultValue)
-        elseif type(defaultValue) == "table" then
-            reconcile(currentValue, defaultValue)
-        end
-    end
-    return target
-end
-
-local function makeDefaultProfile()
-    return deepCopy(DEFAULT_PROFILE)
-end
 
 local function keyFor(player)
     return string.format("player:%d", player.UserId)
@@ -77,7 +26,6 @@ local function retry(operation)
         if ok then
             return true, result
         end
-
         lastError = result
         if attempt < GameConfig.DataStore.MaxAttempts then
             task.wait(GameConfig.DataStore.RetryBaseSeconds * (2 ^ (attempt - 1)))
@@ -90,30 +38,22 @@ local function persistenceEnabled()
     return not RunService:IsStudio() or GameConfig.DataStore.EnableInStudio
 end
 
-local function publicSnapshot(profile)
-    return {
-        Level = profile.Level,
-        Exp = profile.Exp,
-        AP = profile.AP,
-        SP = profile.SP,
-        AdvancementTier = profile.AdvancementTier,
-        FamilyId = profile.FamilyId,
-        Stats = table.clone(profile.Stats),
-        Currencies = table.clone(profile.Currencies),
-    }
-end
-
 local function claimPersistentProfile(player)
     local blocked = false
+    local migrationError = nil
     local claimed = nil
     local now = os.time()
 
     local ok, result = retry(function()
         blocked = false
+        migrationError = nil
         return store:UpdateAsync(keyFor(player), function(raw)
-            local data = if type(raw) == "table" then deepCopy(raw) else makeDefaultProfile()
-            reconcile(data, DEFAULT_PROFILE)
-
+            local migrated, dataOrReason = ProfileSchema.Migrate(raw)
+            if not migrated then
+                migrationError = dataOrReason
+                return nil
+            end
+            local data = dataOrReason
             local lock = data.Meta.ActiveSession
             if lock and lock.Id ~= sessionId then
                 local touchedAt = tonumber(lock.TouchedAt) or 0
@@ -122,19 +62,18 @@ local function claimPersistentProfile(player)
                     return nil
                 end
             end
-
-            data.Meta.SchemaVersion = GameConfig.DataStore.SchemaVersion
-            data.Meta.ActiveSession = {
-                Id = sessionId,
-                TouchedAt = now,
-            }
-            claimed = deepCopy(data)
+            data.Meta.ActiveSession = { Id = sessionId, TouchedAt = now }
+            data.Meta.LastSeenAt = now
+            claimed = ProfileSchema.DeepCopy(data)
             return data
         end)
     end)
 
     if not ok then
         return false, tostring(result)
+    end
+    if migrationError then
+        return false, migrationError
     end
     if blocked then
         return false, "profile_in_use"
@@ -144,8 +83,11 @@ local function claimPersistentProfile(player)
     if type(profile) ~= "table" then
         return false, "invalid_profile"
     end
-    reconcile(profile, DEFAULT_PROFILE)
-    return true, profile
+    local migrated, migratedProfile = ProfileSchema.Migrate(profile)
+    if not migrated then
+        return false, migratedProfile
+    end
+    return true, migratedProfile
 end
 
 function PlayerDataService.Load(player)
@@ -153,38 +95,29 @@ function PlayerDataService.Load(player)
     if profiles[player] then
         return true, profiles[player]
     end
-
     if not persistenceEnabled() then
-        local profile = makeDefaultProfile()
+        local profile = ProfileSchema.New()
         profiles[player] = profile
         persistent[player] = false
         return true, profile
     end
-
     local ok, profileOrReason = claimPersistentProfile(player)
     if not ok then
         return false, profileOrReason
     end
-
     profiles[player] = profileOrReason
     persistent[player] = true
     return true, profileOrReason
 end
 
 PlayerDataService.Changed = changedEvent.Event
-
 function PlayerDataService.Get(player)
     return profiles[player]
 end
-
 function PlayerDataService.GetSnapshot(player)
     local profile = profiles[player]
-    if not profile then
-        return nil
-    end
-    return publicSnapshot(profile)
+    return profile and ProfileSchema.PublicSnapshot(profile) or nil
 end
-
 function PlayerDataService.Mutate(player, mutator)
     local profile = profiles[player]
     if not profile then
@@ -193,7 +126,6 @@ function PlayerDataService.Mutate(player, mutator)
     mutator(profile)
     return true
 end
-
 function PlayerDataService.NotifyChanged(player)
     if profiles[player] then
         changedEvent:Fire(player)
@@ -202,21 +134,15 @@ end
 
 function PlayerDataService.Save(player, releaseSession)
     local profile = profiles[player]
-    if not profile then
+    if not profile or not persistent[player] then
         return true
     end
-    if not persistent[player] then
-        return true
-    end
-
-    local snapshot = deepCopy(profile)
+    local snapshot = ProfileSchema.DeepCopy(profile)
     snapshot.Meta.SchemaVersion = GameConfig.DataStore.SchemaVersion
+    snapshot.Meta.LastSeenAt = os.time()
     snapshot.Meta.ActiveSession = if releaseSession
         then nil
-        else {
-            Id = sessionId,
-            TouchedAt = os.time(),
-        }
+        else { Id = sessionId, TouchedAt = os.time() }
 
     local lostLock = false
     local ok, result = retry(function()
@@ -234,7 +160,6 @@ function PlayerDataService.Save(player, releaseSession)
             return snapshot
         end)
     end)
-
     if not ok then
         warn(
             string.format(
@@ -262,7 +187,6 @@ function PlayerDataService.Unload(player)
     profiles[player] = nil
     persistent[player] = nil
 end
-
 function PlayerDataService.IsPersistent(player)
     return persistent[player] == true
 end
@@ -271,7 +195,6 @@ function PlayerDataService.Init()
     Players.PlayerRemoving:Connect(function(player)
         PlayerDataService.Unload(player)
     end)
-
     task.spawn(function()
         while not closing do
             task.wait(GameConfig.DataStore.AutosaveSeconds)
@@ -283,7 +206,6 @@ function PlayerDataService.Init()
             end
         end
     end)
-
     game:BindToClose(function()
         closing = true
         for player in profiles do

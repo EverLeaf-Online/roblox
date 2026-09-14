@@ -1,5 +1,7 @@
 local GameConfig = {}
 
+GameConfig.Environment = "development"
+
 GameConfig.LevelCap = 200
 GameConfig.VerticalSliceMaxLevel = 30
 
@@ -33,7 +35,7 @@ GameConfig.Bosses = {
 
 GameConfig.DataStore = {
     Name = "EverLeafPlayerData_v1",
-    SchemaVersion = 1,
+    SchemaVersion = 2,
     AutosaveSeconds = 60,
     SessionLockSeconds = 180,
     MaxAttempts = 4,
@@ -49,6 +51,18 @@ GameConfig.Security = {
     BasicAttack = {
         Capacity = 6,
         RefillPerSecond = 5,
+    },
+    GameplayAction = {
+        Capacity = 12,
+        RefillPerSecond = 8,
+    },
+    ProfileRequest = {
+        Capacity = 4,
+        RefillPerSecond = 1,
+    },
+    CatalogRequest = {
+        Capacity = 2,
+        RefillPerSecond = 0.2,
     },
 }
 
@@ -86,6 +100,20 @@ GameConfig.Combat = {
 
 GameConfig.Development = {
     SpawnTrainingDummyInStudio = true,
+}
+
+GameConfig.Places = {
+    World = 0,
+    Instance = 0,
+}
+
+GameConfig.AdminUserIds = {}
+
+GameConfig.Features = {
+    Crafting = true,
+    Enhancement = false,
+    Storage = false,
+    Trading = false,
 }
 
 GameConfig.Monetization = {

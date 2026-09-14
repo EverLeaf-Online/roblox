@@ -13,6 +13,33 @@
 
 ---
 
+## 0. Phase A — complete architecture — COMPLETE
+
+- [x] Versioned persistent profile schema owns all major player-state domains.
+- [x] Centralized server-authoritative `GameAction` router with rate limiting.
+- [x] Data-driven registries for items, skills, quests, NPCs, shops, regions, portals, bosses, achievements, and enemies.
+- [x] Inventory/equipment/consumable service boundaries.
+- [x] Skill/hotbar/status-effect service boundaries.
+- [x] Quest/NPC/shop interaction-session service boundaries.
+- [x] Region/portal/world-progression service boundaries.
+- [x] Party/instance/boss runtime service boundaries.
+- [x] Achievement/cosmetic/settings persistence boundaries.
+- [x] Client action/catalog/profile/UI-state layers.
+- [x] Reward pipeline can grant EXP, currencies, and items.
+- [x] Equipment stat bonuses feed combat damage.
+- [x] Physical world-object registry + proximity validation for NPCs/portals.
+- [x] Enemy AI state-machine + enemy-to-player damage architecture.
+- [x] Generic skill targeting/effect execution architecture.
+- [x] Generic boss state-machine interface.
+- [x] Crafting/enhancement/storage hooks.
+- [x] Party invite/accept/kick protocol.
+- [x] Instance teleport/lifecycle boundary.
+- [x] Admin/recovery/audit interfaces.
+- [x] Release/build/staging/production architecture.
+- [x] Client screen navigation/controller shell.
+- [x] Architecture-level tests for newly added pure logic.
+- [x] Final dependency/cycle/security review.
+
 ## 1. Repository / development environment
 
 - [x] `EverLeaf-Online/roblox` created as canonical repository.
@@ -44,9 +71,9 @@
 - [x] Server bootstrap creates/owns remotes.
 - [x] Client-safe profile snapshot layer.
 - [x] Remote rate-limiter service foundation.
-- [ ] Centralize remote schemas/payload validation further as systems grow.
-- [ ] Add structured server logging/error categories.
-- [ ] Add service initialization/dependency framework if complexity warrants it.
+- [x] Centralized allowlisted/rate-limited `GameAction` router for safe gameplay mutations.
+- [x] Audit logging foundation; richer structured production logging remains a later operations task.
+- [x] Service dependencies are explicit module requires; automated cycle detection now gates builds.
 
 ## 3. Player data / persistence
 
@@ -61,7 +88,7 @@
 - [x] Save on player leaving.
 - [x] BindToClose release/save handling.
 - [x] Studio persistence can remain disabled for safe local iteration.
-- [ ] Migration framework for destructive/future schema changes.
+- [x] Versioned schema migration/reconciliation framework (`ProfileSchema`, schema v2).
 - [ ] Backup/restore/admin recovery workflow.
 - [ ] DataStore failure simulation tests.
 - [ ] Rejoin/session-lock stress tests.
@@ -165,19 +192,19 @@
 
 ## 9. Skills
 
-- [ ] Skill-definition schema.
-- [ ] Server skill execution service.
-- [ ] SP spending/validation.
-- [ ] Skill levels/max ranks.
+- [x] Skill-definition schema foundation.
+- [x] Skill service foundation for learning, cooldowns, and MP spend; targeting/effects still pending.
+- [x] SP spending/validation foundation.
+- [x] Skill rank/max-rank architecture.
 - [ ] Skill prerequisites.
 - [ ] Active skills.
 - [ ] Passive skills.
-- [ ] Buff/debuff/status-effect framework.
-- [ ] MP/resource costs.
-- [ ] Cooldowns.
+- [x] Runtime status-effect framework foundation.
+- [x] Skill MP/resource-cost validation foundation.
+- [x] Server skill cooldown foundation.
 - [ ] Targeting shapes/ranges.
 - [ ] Skill animation/VFX/SFX hooks.
-- [ ] Hotbar.
+- [x] Persistent 8-slot skill hotbar data/service foundation; production UI pending.
 - [ ] Keyboard/controller bindings.
 - [ ] Skill tree UI.
 
@@ -234,17 +261,17 @@
 
 ## 13. Inventory / equipment / items
 
-- [ ] Inventory persistence schema.
-- [ ] Stackable items.
-- [ ] Non-stackable/equipment items.
+- [x] Inventory persistence schema foundation.
+- [x] Stackable item architecture with stack limits.
+- [x] Non-stackable/equipment item architecture.
 - [ ] Unique item IDs where needed.
-- [ ] Equipment slots.
-- [ ] Equip/unequip validation.
-- [ ] Item stat aggregation.
+- [x] Equipment slot architecture.
+- [x] Server equip/unequip validation foundation.
+- [x] Equipment stat aggregation foundation; AttackPower feeds basic damage.
 - [ ] Level/class requirements.
 - [ ] Weapon types.
 - [ ] Armor/accessory types.
-- [ ] Consumables.
+- [x] Consumable architecture with HP/MP restoration foundation.
 - [ ] Inventory capacity rules.
 - [ ] Item tooltips.
 - [ ] Inventory UI.
@@ -254,26 +281,26 @@
 ## 14. NPC / interaction / quests
 
 - [ ] Generic interactable framework.
-- [ ] NPC definitions.
+- [x] NPC-definition registry foundation.
 - [ ] NPC interaction range/server validation.
 - [ ] Dialogue system.
-- [ ] Quest definitions.
-- [ ] Quest state persistence.
+- [x] Quest-definition registry foundation.
+- [x] Active/completed quest persistence foundation.
 - [ ] Quest prerequisites.
-- [ ] Kill quests.
+- [x] Defeat-objective progression foundation wired to enemy deaths.
 - [ ] Collect quests.
 - [ ] Talk/exploration quests.
-- [ ] Quest reward validation.
+- [x] Quest reward pipeline foundation.
 - [ ] Quest tracker UI.
 - [ ] Dialogue UI.
 
 ## 15. Shops / services
 
-- [ ] Shop definitions.
-- [ ] Server-authoritative buy flow.
-- [ ] Server-authoritative sell flow.
-- [ ] Price/currency validation.
-- [ ] Inventory-space validation.
+- [x] Shop-definition registry foundation.
+- [x] Server-authoritative buy-flow foundation with interaction-session requirement.
+- [x] Server-authoritative sell-flow foundation with interaction-session requirement.
+- [x] Shop price/currency validation foundation.
+- [x] Inventory-space validation foundation.
 - [ ] Shop UI.
 - [ ] Storage/bank design decision.
 - [ ] Enhancement/crafting design decision.
@@ -331,13 +358,13 @@
 
 - [x] Temporary client profile state store.
 - [x] Temporary combat feedback label.
-- [ ] Production HUD design system.
+- [ ] Production HUD design system (client UI state/screen registry scaffold now exists).
 - [ ] HP bar.
 - [ ] MP bar.
 - [ ] EXP bar.
 - [ ] Level display.
 - [ ] Currency display.
-- [ ] Hotbar.
+- [x] Persistent 8-slot skill hotbar data/service foundation; production UI pending.
 - [ ] Buff/debuff display.
 - [ ] Character/stat panel.
 - [ ] Inventory/equipment UI.
@@ -365,14 +392,14 @@
 
 ## 21. Social / multiplayer
 
-- [ ] Party system.
+- [x] Runtime party-state foundation (create/add/leave/leader handoff).
 - [ ] Party UI.
 - [ ] Shared/individual reward rules.
 - [ ] Instance/party teleport flow.
 - [ ] Trading design decision.
 - [ ] Secure trading if approved.
 - [ ] Social/profile inspection.
-- [ ] Achievements/titles.
+- [x] Achievement persistence/service foundation; titles/presentation pending.
 - [ ] Multiplayer boss rules.
 
 ## 22. Monetization
@@ -412,7 +439,7 @@
 - [x] Rojo headless build gate.
 - [x] First Studio Rojo sync test.
 - [x] First movement/jump Studio test.
-- [ ] Verify latest `Z` basic attack end-to-end in a fresh Studio session.
+- [x] `Z` basic attack verified end-to-end in Studio with server damage and hit feedback.
 - [ ] Add unit tests for services that can be pure-tested.
 - [ ] Add regression tests for progression curves.
 - [ ] Add DataStore/session-lock test scenarios.
@@ -431,9 +458,9 @@
 - [ ] Create/finalize Universe/Place IDs.
 - [ ] Configure private development place(s).
 - [ ] Open Cloud publishing credentials/workflow if desired.
-- [ ] Decide VM auto-publish policy (never publish unvalidated commits).
-- [ ] Version/build metadata.
-- [ ] Staging vs production place strategy.
+- [x] VM auto-publish policy: disabled/fail-closed; publishing requires an explicit validated release workflow.
+- [x] Build/protocol/content metadata foundation (`BuildInfo`, `ReleaseService`).
+- [x] Development → staging → production environment boundary documented; actual Place IDs still pending.
 - [ ] Private alpha access setup.
 - [ ] Closed beta gate.
 - [ ] Public launch checklist.
@@ -445,24 +472,26 @@
 - [x] `TOOLCHAIN.md` development environment documentation.
 - [x] `ROADMAP.md` canonical phased roadmap.
 - [x] `MASTER_CHECKLIST.md` canonical detailed checklist.
+- [x] `ARCHITECTURE.md` canonical system-boundary documentation.
+- [x] `DEPLOYMENT.md` environment/release architecture.
 - [ ] Keep roadmap/checklist updated whenever a milestone lands.
 - [ ] Record major design decisions so implementation does not drift.
 - [ ] Add contributor workflow if/when more developers join.
 
 ---
 
-# Current highest-priority queue
+# Current highest-priority queue — Phase B game shell
 
-1. [ ] Verify `Z` basic attack in a **fresh** Studio play session.
-2. [ ] Finish visible attack animation + hit confirmation + damage numbers.
-3. [ ] Replace nearest-target prototype targeting with facing/hitbox combat.
-4. [ ] Add hostile enemy aggro/pursuit/attacks.
-5. [ ] Add player damage/knockback/death/respawn.
-6. [ ] Lock first class-family names/requirements.
-7. [ ] Start production HUD.
-8. [ ] Graybox Lumenreach.
-9. [ ] Build first real monster + loot + NPC + quest loop.
-10. [ ] Polish levels 1–10 before scaling content to level 30.
+1. [ ] Build the production HUD shell (HP/MP/EXP/level/currency/hotbar).
+2. [ ] Build inventory/equipment/character/skills/quests/settings screen shells.
+3. [ ] Add physical Lumenreach graybox + world-object registration for NPCs/portals.
+4. [ ] Add the first real hostile enemy using the AI/player-damage architecture.
+5. [ ] Finish death/respawn presentation and safe spawn flow.
+6. [ ] Add NPC dialogue + quest + shop shell using server interaction sessions.
+7. [ ] Add first real skill-use/hotbar flow through `SkillEffectService`.
+8. [ ] Add party UI/invite flow and a private-instance shell.
+9. [ ] Add Belforge boss-entry/encounter shell using the generic state machine.
+10. [ ] Make the Lumenreach → Brasshaven route traversable with placeholder content.
 
 # Definition of the first meaningful playable milestone
 

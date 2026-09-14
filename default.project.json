@@ -22,6 +22,15 @@
         },
         "BasicAttack": {
           "$className": "RemoteFunction"
+        },
+        "GameAction": {
+          "$className": "RemoteFunction"
+        },
+        "RequestCatalog": {
+          "$className": "RemoteFunction"
+        },
+        "PartyEvent": {
+          "$className": "RemoteEvent"
         }
       }
     },

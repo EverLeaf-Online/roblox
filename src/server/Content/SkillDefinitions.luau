@@ -1,0 +1,30 @@
+return table.freeze({
+    beginner_strike = table.freeze({
+        DisplayName = "Beginner Strike",
+        MaxRank = 5,
+        RequiredLevel = 1,
+        RequiredTier = 0,
+        SPCostPerRank = 1,
+        MPCost = 4,
+        Cooldown = 1.2,
+        Kind = "Active",
+        Effect = table.freeze({
+            Type = "DamageNearest",
+            PrimaryStat = "Might",
+            AttackPower = 9,
+            StatScale = 1.8,
+            Mastery = 0.35,
+            Range = 12,
+            VerticalRange = 8,
+            DepthRange = 3,
+        }),
+    }),
+    steady_footing = table.freeze({
+        DisplayName = "Steady Footing",
+        MaxRank = 5,
+        RequiredLevel = 1,
+        RequiredTier = 0,
+        SPCostPerRank = 1,
+        Kind = "Passive",
+    }),
+})

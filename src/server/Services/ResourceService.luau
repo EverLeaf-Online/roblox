@@ -57,6 +57,16 @@ function ResourceService.SpendMP(player, profile, amount)
     return true, state.CurrentMP
 end
 
+function ResourceService.RestoreMP(player, profile, amount)
+    if type(amount) ~= "number" or amount <= 0 then
+        return false, "invalid_amount"
+    end
+    local state = getOrCreate(player, profile)
+    local derived = DerivedStatsService.Compute(profile)
+    state.CurrentMP = math.min(derived.MaxMP, state.CurrentMP + amount)
+    return true, state.CurrentMP
+end
+
 Players.PlayerRemoving:Connect(function(player)
     runtime[player] = nil
 end)

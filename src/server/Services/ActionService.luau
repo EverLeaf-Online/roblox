@@ -1,0 +1,106 @@
+local ConsumableService = require(script.Parent.ConsumableService)
+local CosmeticService = require(script.Parent.CosmeticService)
+local EquipmentService = require(script.Parent.EquipmentService)
+local InteractionService = require(script.Parent.InteractionService)
+local InteractionSessionService = require(script.Parent.InteractionSessionService)
+local PartyService = require(script.Parent.PartyService)
+local PayloadValidationService = require(script.Parent.PayloadValidationService)
+local ShopService = require(script.Parent.ShopService)
+local SkillService = require(script.Parent.SkillService)
+
+local ActionService = {}
+local handlers = {}
+
+handlers["inventory.use"] = function(player, profile, payload)
+    return ConsumableService.Use(player, profile, payload.ItemId)
+end
+handlers["equipment.equip"] = function(_, profile, payload)
+    return EquipmentService.Equip(profile, payload.InventoryIndex)
+end
+handlers["equipment.unequip"] = function(_, profile, payload)
+    return EquipmentService.Unequip(profile, payload.Slot)
+end
+handlers["skill.learn"] = function(_, profile, payload)
+    return SkillService.Learn(profile, payload.SkillId)
+end
+handlers["skill.hotbar"] = function(_, profile, payload)
+    return SkillService.AssignHotbar(profile, payload.Index, payload.SkillId)
+end
+handlers["skill.use"] = function(player, profile, payload)
+    return SkillService.Use(player, profile, payload.SkillId)
+end
+handlers["quest.start"] = function(player, profile, payload)
+    if not InteractionSessionService.ValidateNpc(player, payload.NpcId) then
+        return false, "interaction_session_required"
+    end
+    return InteractionService.StartOfferedQuest(profile, payload.NpcId, payload.QuestId)
+end
+handlers["shop.buy"] = function(player, profile, payload)
+    return ShopService.Buy(player, profile, payload.ShopId, payload.ItemId, payload.Quantity)
+end
+handlers["shop.sell"] = function(player, profile, payload)
+    return ShopService.Sell(player, profile, payload.ShopId, payload.ItemId, payload.Quantity)
+end
+handlers["party.create"] = function(player)
+    local ok, reason = PartyService.Create(player)
+    if not ok then
+        return false, reason
+    end
+    return true
+end
+handlers["party.invite"] = function(player, _, payload)
+    return PartyService.Invite(player, payload.TargetUserId)
+end
+handlers["party.accept"] = function(player)
+    return PartyService.Accept(player)
+end
+handlers["party.decline"] = function(player)
+    return PartyService.Decline(player)
+end
+handlers["party.kick"] = function(player, _, payload)
+    return PartyService.Kick(player, payload.TargetUserId)
+end
+handlers["party.leave"] = function(player)
+    return PartyService.Leave(player)
+end
+handlers["cosmetic.equip"] = function(_, profile, payload)
+    return CosmeticService.Equip(profile, payload.Slot, payload.CosmeticId)
+end
+handlers["settings.update"] = function(_, profile, payload)
+    local key = payload.Key
+    local value = payload.Value
+    if key == "MusicVolume" or key == "SfxVolume" then
+        if type(value) ~= "number" then
+            return false, "invalid_value"
+        end
+        profile.Settings[key] = math.clamp(value, 0, 1)
+        return true
+    end
+    if key == "ShowDamageNumbers" then
+        if type(value) ~= "boolean" then
+            return false, "invalid_value"
+        end
+        profile.Settings[key] = value
+        return true
+    end
+    return false, "invalid_setting"
+end
+
+function ActionService.Handle(player, profile, actionName, payload)
+    if type(actionName) ~= "string" then
+        return false, "invalid_action"
+    end
+    if payload == nil then
+        payload = {}
+    end
+    if type(payload) ~= "table" or not PayloadValidationService.IsBounded(payload) then
+        return false, "invalid_payload"
+    end
+    local handler = handlers[actionName]
+    if not handler then
+        return false, "unknown_action"
+    end
+    return handler(player, profile, payload)
+end
+
+return ActionService

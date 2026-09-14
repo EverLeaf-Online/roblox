@@ -50,7 +50,7 @@ function AdvancementService.Advance(profile, familyId, firstAdvancementLevel)
             return false, "invalid_family"
         end
         profile.FamilyId = familyId
-    elseif not profile.FamilyId then
+    elseif type(profile.FamilyId) ~= "string" or profile.FamilyId == "" then
         return false, "missing_family"
     end
 

@@ -1,15 +1,22 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local ActionService = require(script.Parent.Services.ActionService)
+local CatalogService = require(script.Parent.Services.CatalogService)
 local CharacterStatsService = require(script.Parent.Services.CharacterStatsService)
 local CombatService = require(script.Parent.Services.CombatService)
+local DeathService = require(script.Parent.Services.DeathService)
+local EnemyAIService = require(script.Parent.Services.EnemyAIService)
 local EnemySpawnerService = require(script.Parent.Services.EnemySpawnerService)
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
+local InteractionSessionService = require(script.Parent.Services.InteractionSessionService)
 local MovementSanityService = require(script.Parent.Services.MovementSanityService)
+local PartyService = require(script.Parent.Services.PartyService)
 local Net = require(ReplicatedStorage.Shared.Net)
 local PlayerDataService = require(script.Parent.Services.PlayerDataService)
 local RateLimiterService = require(script.Parent.Services.RateLimiterService)
 local SnapshotService = require(script.Parent.Services.SnapshotService)
+local StatusEffectService = require(script.Parent.Services.StatusEffectService)
 local StatService = require(script.Parent.Services.StatService)
 
 local remotes = ReplicatedStorage:FindFirstChild(Net.RemoteFolderName)
@@ -32,13 +39,20 @@ end
 
 local profileReady = ensureRemote("RemoteEvent", Net.Events.ProfileReady)
 local profileChanged = ensureRemote("RemoteEvent", Net.Events.ProfileChanged)
+local partyEvent = ensureRemote("RemoteEvent", Net.Events.PartyEvent)
 local requestProfile = ensureRemote("RemoteFunction", Net.Functions.RequestProfile)
 local allocateStat = ensureRemote("RemoteFunction", Net.Functions.AllocateStat)
 local basicAttack = ensureRemote("RemoteFunction", Net.Functions.BasicAttack)
+local gameAction = ensureRemote("RemoteFunction", Net.Functions.GameAction)
+local requestCatalog = ensureRemote("RemoteFunction", Net.Functions.RequestCatalog)
 
 PlayerDataService.Init()
 MovementSanityService.Init()
 EnemySpawnerService.Init()
+EnemyAIService.Init()
+PartyService.Init()
+InteractionSessionService.Init()
+StatusEffectService.Init()
 
 local function replicateProfile(player)
     CharacterStatsService.Apply(player, false)
@@ -49,6 +63,11 @@ local function replicateProfile(player)
 end
 
 PlayerDataService.Changed:Connect(replicateProfile)
+PartyService.Event:Connect(function(player, eventData)
+    if player.Parent == Players then
+        partyEvent:FireClient(player, eventData)
+    end
+end)
 
 local function onPlayerAdded(player)
     local ok, profileOrReason = PlayerDataService.Load(player)
@@ -65,6 +84,7 @@ local function onPlayerAdded(player)
     end
 
     player:SetAttribute("MovementPlaneZ", GameConfig.Movement.DefaultPlaneZ)
+    DeathService.InitPlayer(player)
 
     player.CharacterAdded:Connect(function()
         task.defer(CharacterStatsService.Apply, player, true)
@@ -86,6 +106,18 @@ for _, player in Players:GetPlayers() do
 end
 
 requestProfile.OnServerInvoke = function(player)
+    local limit = GameConfig.Security.ProfileRequest
+    if
+        not RateLimiterService.Allow(
+            player,
+            "RequestProfile",
+            limit.Capacity,
+            limit.RefillPerSecond,
+            1
+        )
+    then
+        return nil
+    end
     return SnapshotService.Build(player)
 end
 
@@ -135,4 +167,38 @@ basicAttack.OnServerInvoke = function(player)
     end
 
     return CombatService.BasicAttack(player, profile)
+end
+
+requestCatalog.OnServerInvoke = function(player)
+    local limit = GameConfig.Security.CatalogRequest
+    if
+        not RateLimiterService.Allow(
+            player,
+            "RequestCatalog",
+            limit.Capacity,
+            limit.RefillPerSecond,
+            1
+        )
+    then
+        return nil
+    end
+    return CatalogService.Build()
+end
+
+gameAction.OnServerInvoke = function(player, actionName, payload)
+    local limit = GameConfig.Security.GameplayAction
+    if
+        not RateLimiterService.Allow(player, "GameAction", limit.Capacity, limit.RefillPerSecond, 1)
+    then
+        return false, "rate_limited"
+    end
+    local profile = PlayerDataService.Get(player)
+    if not profile then
+        return false, "profile_not_loaded"
+    end
+    local ok, result = ActionService.Handle(player, profile, actionName, payload)
+    if ok then
+        PlayerDataService.NotifyChanged(player)
+    end
+    return ok, result
 end

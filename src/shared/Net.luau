@@ -5,12 +5,15 @@ Net.RemoteFolderName = "EverLeafRemotes"
 Net.Events = table.freeze({
     ProfileReady = "ProfileReady",
     ProfileChanged = "ProfileChanged",
+    PartyEvent = "PartyEvent",
 })
 
 Net.Functions = table.freeze({
     AllocateStat = "AllocateStat",
     RequestProfile = "RequestProfile",
     BasicAttack = "BasicAttack",
+    GameAction = "GameAction",
+    RequestCatalog = "RequestCatalog",
 })
 
 return table.freeze(Net)
