@@ -1,7 +1,7 @@
 # EverLeaf Roblox — Master Checklist
 
 **Canonical status:** 2026-09-14
-**Latest gameplay checkpoint:** `31a24bb` — first-region gameplay/content pass
+**Latest gameplay checkpoint:** production UX pass — dedicated shop, notifications, item details, boss HUD
 **Purpose:** detailed implementation/status tracker for the entire project.
 **Roadmap:** [`ROADMAP.md`](ROADMAP.md)
 
@@ -75,9 +75,9 @@
 - [x] Settings mutations are wired.
 - [ ] Responsive layout pass for common desktop resolutions.
 - [ ] Controller navigation/focus pass.
-- [ ] Dedicated shop screen.
-- [ ] Item/equipment tooltips.
-- [ ] Notifications/toasts for rewards, quest updates, errors, and level-up.
+- [x] Dedicated buy/sell shop screen implemented with item selection, quantity controls, pricing, balance display, and server-authoritative transactions.
+- [x] Reusable item detail card implemented for shop/inventory-facing item inspection; hover/pointer refinement remains part of final UI QA.
+- [x] Notification/toast system implemented for level-up, currency/item rewards, quest acceptance/readiness/completion, shop success, and shop errors.
 - [ ] Split monolithic `ReactUIController` into maintainable components after Phase 1 behavior is locked.
 
 ### E. RPG/content closure
@@ -98,7 +98,7 @@
 - [x] Hidden Whisperroot Hollow and persistent one-time Wayfarer cache reward implemented.
 - [x] First Lumenreach field boss implemented: Mosswarden, Root of the Old Grove.
 - [x] Lumenreach → Brasshaven progression gate is functional and region unlock rewards are supported.
-- [ ] Dedicated full shop screen/polish beyond dialogue-based shop inventory buttons.
+- [x] Dedicated full buy/sell shop screen implemented beyond dialogue preview buttons; Studio interaction/balance QA remains.
 - [ ] Level-up feedback and final level 1–30 EXP tuning.
 - [ ] First advancement hook/location/quest flow.
 - [ ] Belforge boss-entry shell only to the extent required for Phase 1 progression continuity.
@@ -529,7 +529,7 @@
 - [ ] **PARTIAL:** React quest menu shell is source-complete; further filtering/polish pending.
 - [x] React NPC dialogue with clickable quest/shop actions verified in Studio; visual polish remains.
 - [ ] **PARTIAL:** Shop action is exposed through the React dialogue shell; dedicated shop screen pending.
-- [ ] Boss HP UI.
+- [x] Field-boss HUD implemented for nearby catalogued bosses with name, recommended level, HP, and percentage.
 - [ ] Notifications/toasts.
 - [x] React settings controls mutate music/SFX/damage-number preferences server-side; menu action shell is Studio-verified, visual polish remains.
 - [ ] Responsive layout testing.
@@ -635,6 +635,7 @@
 - [ ] Keep roadmap/checklist updated whenever a milestone lands.
 - [ ] Record major design decisions so implementation does not drift.
 - [ ] Add contributor workflow if/when more developers join.
+- [x] Ignored timestamp backup clutter removed from the working tree; source-of-truth changes now live in Git history instead of local `.bak.*` files.
 
 ---
 
@@ -645,7 +646,7 @@
 3. [ ] Complete a fresh-profile starter quest chain through Mosswarden and the Brasshaven unlock without developer intervention.
 4. [ ] Verify visible loot pickup, Collect objectives, equipment rewards, all three shops, and the Whisperroot one-time cache across death/rejoin.
 5. [ ] Multiplayer smoke test: target selection, damage ownership, loot ownership, simultaneous trigger activation, and party/network behavior.
-6. [ ] Finish dedicated shop UX and reward/quest/level-up notifications.
+6. [x] Dedicated shop UX, item detail cards, reward/quest/level-up notifications, and field-boss HUD implemented; complete Studio UX QA remains.
 7. [ ] Finalize first-advancement class-family names and implement the first advancement quest/location flow.
 8. [ ] Tune level 1–30 EXP, monster stats, spawn density, drop rates, Shard/Mark sinks, and boss rewards.
 9. [ ] Performance profile the dense Lumenreach build for frame time, memory, streaming, and listener leaks.

@@ -9,6 +9,10 @@ local ActionClient = require(script.Parent.Parent.Services.ActionClient)
 local CatalogClient = require(script.Parent.Parent.Services.CatalogClient)
 local ProfileStore = require(script.Parent.Parent.State.ProfileStore)
 local EverLeafIcons = require(script.Parent.Parent.UI.EverLeafIcons)
+local NotificationStore = require(script.Parent.Parent.UI.NotificationStore)
+local BossHud = require(script.Parent.Parent.UI.Components.BossHud)
+local ShopOverlay = require(script.Parent.Parent.UI.Components.ShopOverlay)
+local ToastStack = require(script.Parent.Parent.UI.Components.ToastStack)
 local Net = require(ReplicatedStorage.Shared.Net)
 local ProgressionMath = require(ReplicatedStorage.Shared.Math.ProgressionMath)
 
@@ -800,6 +804,16 @@ local function Dialogue(props)
             Active = questButtonEnabled,
             Tone = readyToTurnIn and "accent" or nil,
             OnActivated = activateQuestButton,
+            ZIndex = 24,
+        })
+    end
+    if description.ShopId and props.OnOpenShop then
+        actionChildren.Shop = React.createElement(Button, {
+            Position = UDim2.fromOffset(22, questId and 250 or 198),
+            Size = UDim2.fromOffset(220, 44),
+            Text = "OPEN " .. string.upper(description.ShopDisplayName or "SHOP"),
+            Tone = "accent",
+            OnActivated = props.OnOpenShop,
             ZIndex = 24,
         })
     end
@@ -2268,17 +2282,109 @@ local function DeathOverlay()
     })
 end
 
+local function inventoryTotals(profile)
+    local totals = {}
+    local inventory = profile and profile.Inventory
+    for _, slot in inventory and inventory.Slots or {} do
+        local itemId = slot.ItemId
+        if itemId then
+            totals[itemId] = (totals[itemId] or 0) + (tonumber(slot.Quantity) or 0)
+        end
+    end
+    return totals
+end
+
+local function displayQuestName(questId)
+    local catalog = CatalogClient.Get()
+    local definition = catalog and catalog.Quests and catalog.Quests[questId]
+    return definition and definition.DisplayName or prettyId(questId)
+end
+
+local function displayItemName(itemId)
+    local catalog = CatalogClient.Get()
+    local definition = catalog and catalog.Items and catalog.Items[itemId]
+    return definition and definition.DisplayName or prettyId(itemId)
+end
+
+local function emitProfileNotifications(previous, current)
+    if type(previous) ~= "table" or type(current) ~= "table" then
+        return
+    end
+
+    local oldLevel = tonumber(previous.Level) or 1
+    local newLevel = tonumber(current.Level) or oldLevel
+    if newLevel > oldLevel then
+        NotificationStore.Push(
+            "success",
+            "Level Up",
+            string.format("You reached Level %d.", newLevel),
+            4.5
+        )
+    end
+
+    local oldCurrencies = previous.Currencies or {}
+    for currency, amount in current.Currencies or {} do
+        local delta = (tonumber(amount) or 0) - (tonumber(oldCurrencies[currency]) or 0)
+        if delta > 0 then
+            NotificationStore.Push(
+                "reward",
+                "Reward",
+                string.format("+%d %s", delta, tostring(currency)),
+                3
+            )
+        end
+    end
+
+    local oldItems = inventoryTotals(previous)
+    local newItems = inventoryTotals(current)
+    for itemId, amount in newItems do
+        local delta = amount - (oldItems[itemId] or 0)
+        if delta > 0 then
+            NotificationStore.Push(
+                "reward",
+                "Item Received",
+                string.format("%s ×%d", displayItemName(itemId), delta),
+                3.2
+            )
+        end
+    end
+
+    local oldQuests = previous.Quests or {}
+    local newQuests = current.Quests or {}
+    local oldActive = oldQuests.Active or {}
+    for questId, state in newQuests.Active or {} do
+        local oldState = oldActive[questId]
+        if oldState == nil then
+            NotificationStore.Push("quest", "Quest Accepted", displayQuestName(questId), 4)
+        elseif oldState.ReadyToTurnIn ~= true and state.ReadyToTurnIn == true then
+            NotificationStore.Push("quest", "Quest Ready", displayQuestName(questId), 4)
+        end
+    end
+    local oldCompleted = oldQuests.Completed or {}
+    for questId, completed in newQuests.Completed or {} do
+        if completed == true and oldCompleted[questId] ~= true then
+            NotificationStore.Push("success", "Quest Complete", displayQuestName(questId), 4.5)
+        end
+    end
+end
+
 local function App()
     local profile, setProfile = React.useState(ProfileStore.Get())
     local interaction, setInteraction = React.useState(nil)
+    local shopOpen, setShopOpen = React.useState(false)
     local menuOpen, setMenuOpen = React.useState(false)
     local menuTab, setMenuTab = React.useState("CHARACTER")
     local health, setHealth = React.useState(100)
     local maxHealth, setMaxHealth = React.useState(100)
     local dead, setDead = React.useState(false)
+    local previousProfile = React.useRef(profile)
 
     React.useEffect(function()
-        local connection = ProfileStore.Subscribe(setProfile)
+        local connection = ProfileStore.Subscribe(function(snapshot)
+            emitProfileNotifications(previousProfile.current, snapshot)
+            previousProfile.current = snapshot
+            setProfile(snapshot)
+        end)
         return function()
             connection:Disconnect()
         end
@@ -2302,6 +2408,7 @@ local function App()
             end
 
             setInteraction(nil)
+            setShopOpen(false)
             setMenuOpen(false)
             setDead(false)
             player:SetAttribute("EverLeafUiCapture", false)
@@ -2355,6 +2462,7 @@ local function App()
         local connection = remote.OnClientEvent:Connect(function(eventName, payload)
             if eventName == "open" and type(payload) == "table" then
                 setMenuOpen(false)
+                setShopOpen(false)
                 setInteraction(payload)
             end
         end)
@@ -2364,11 +2472,11 @@ local function App()
     end, {})
 
     React.useEffect(function()
-        player:SetAttribute("EverLeafUiCapture", interaction ~= nil or menuOpen or dead)
+        player:SetAttribute("EverLeafUiCapture", interaction ~= nil or shopOpen or menuOpen or dead)
         return function()
             player:SetAttribute("EverLeafUiCapture", false)
         end
-    end, { interaction, menuOpen, dead })
+    end, { interaction, shopOpen, menuOpen, dead })
 
     React.useEffect(function()
         local connection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
@@ -2376,7 +2484,7 @@ local function App()
                 return
             end
 
-            if interaction == nil then
+            if interaction == nil and not shopOpen then
                 local tabByKey = {
                     [Enum.KeyCode.C] = "CHARACTER",
                     [Enum.KeyCode.I] = "INVENTORY",
@@ -2397,7 +2505,9 @@ local function App()
             end
 
             if input.KeyCode == Enum.KeyCode.Escape then
-                if interaction ~= nil then
+                if shopOpen then
+                    setShopOpen(false)
+                elseif interaction ~= nil then
                     setInteraction(nil)
                 elseif menuOpen then
                     setMenuOpen(false)
@@ -2407,9 +2517,9 @@ local function App()
         return function()
             connection:Disconnect()
         end
-    end, { interaction, menuOpen, menuTab, dead })
+    end, { interaction, shopOpen, menuOpen, menuTab, dead })
 
-    local uiOpen = interaction ~= nil or menuOpen
+    local uiOpen = interaction ~= nil or shopOpen or menuOpen
     return React.createElement(React.Fragment, nil, {
         HUD = React.createElement(HUD, {
             Profile = profile,
@@ -2425,13 +2535,31 @@ local function App()
                 setMenuOpen(false)
             end,
         }) or nil,
-        Dialogue = interaction and React.createElement(Dialogue, {
+        Dialogue = interaction and not shopOpen and React.createElement(Dialogue, {
             Description = interaction,
             Profile = profile,
+            OnOpenShop = function()
+                if interaction.ShopId then
+                    setShopOpen(true)
+                end
+            end,
             OnClose = function()
                 setInteraction(nil)
             end,
         }) or nil,
+        Shop = shopOpen and interaction and interaction.ShopId and React.createElement(
+            ShopOverlay,
+            {
+                Description = interaction,
+                Profile = profile,
+                Catalog = CatalogClient.Get() or {},
+                OnClose = function()
+                    setShopOpen(false)
+                end,
+            }
+        ) or nil,
+        Boss = React.createElement(BossHud, { Hidden = uiOpen or dead }),
+        Toasts = React.createElement(ToastStack),
         Death = dead and React.createElement(DeathOverlay) or nil,
     })
 end

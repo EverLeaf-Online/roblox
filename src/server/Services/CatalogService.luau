@@ -28,10 +28,15 @@ function CatalogService.Build()
     return {
         Build = BuildInfo,
         Features = GameConfig.Features,
-        Items = copySelected(
-            ItemDefinitions,
-            { "DisplayName", "Type", "EquipmentSlot", "StackLimit", "Stats" }
-        ),
+        Items = copySelected(ItemDefinitions, {
+            "DisplayName",
+            "Type",
+            "EquipmentSlot",
+            "StackLimit",
+            "Stats",
+            "Effects",
+            "SellPrice",
+        }),
         Skills = copySelected(
             SkillDefinitions,
             { "DisplayName", "MaxRank", "RequiredLevel", "RequiredTier", "Kind" }
@@ -41,7 +46,7 @@ function CatalogService.Build()
         Regions = copySelected(RegionDefinitions, { "DisplayName", "MinimumLevel", "Kind" }),
         Bosses = copySelected(
             BossDefinitions,
-            { "DisplayName", "RegionId", "RecommendedLevel", "MaxPlayers" }
+            { "DisplayName", "RegionId", "RecommendedLevel", "MaxPlayers", "MonsterId" }
         ),
     }
 end
