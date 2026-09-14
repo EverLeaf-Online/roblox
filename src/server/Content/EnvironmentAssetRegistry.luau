@@ -1,4 +1,12 @@
 local EnvironmentAssetRegistry = {
+    TreePrimary = {
+        AssetId = 580221169,
+        Name = "Tree",
+        Source = "Roblox Creator Store",
+        Status = "approved_for_studio_sanitized_import",
+        PrefabName = "TreePrimary",
+        Notes = "Approved development tree candidate. Studio-only loader may fetch it, strips scripts/remotes, and production runtime never loads it dynamically.",
+    },
     DuneSky = {
         AssetId = 138907351102721,
         Name = "Dune Sky",

@@ -18,3 +18,11 @@ This catalog tracks third-party environment assets before they are allowed into 
 4. Prefer reusable modular pieces over giant combined meshes.
 5. Record attribution/license requirements before shipping.
 6. Never call `InsertService:LoadAsset()` for marketplace environment content during live gameplay.
+
+## Tree — 580221169
+
+- Creator Store asset: `580221169`
+- Status: approved for Studio-only sanitized auto-import.
+- Runtime policy: never dynamically loaded outside Studio.
+- Sanitization: scripts, remotes, bindables, prompts, click detectors, and sounds are stripped before registration.
+- Lumenreach uses `TreePrimary` when available and falls back to the procedural tree only when the prefab cannot be loaded.

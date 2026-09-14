@@ -57,7 +57,7 @@
 - [ ] Lock-on / soft-target system decision and implementation.
 - [ ] Production enemy pathfinding/navigation.
 - [x] Lumenreach 3D benchmark graybox generated from canonical source.
-- [ ] **PARTIAL:** Asset import + optimization pipeline documented; production asset ingestion still pending.
+- [ ] **PARTIAL:** Asset import/optimization pipeline now includes Studio-only sanitized Creator Store prefab intake; source-controlled production asset ingestion still pending.
 - [x] Poly Haven/approved Sketchfab material/model source policy documented.
 - [x] Source-controlled wind/ambient-motion foundation integrated; production foliage assets and performance tuning remain.
 - [ ] Streaming/performance budgets measured in Studio.
@@ -344,7 +344,7 @@
 - [x] First quest route: guide → Mossglen combat grove.
 - [x] Lumen Guide supply-shop interaction shell.
 - [ ] First advancement location.
-- [ ] Original environment assets.
+- [ ] **PARTIAL:** Approved Creator Store tree prefab (`580221169`) can be sanitized/used automatically in Studio; broader production asset set still pending.
 - [x] Lighting/atmosphere/post-processing baseline integrated and exercised in Studio; final art-direction tuning remains.
 - [ ] Ambient audio/music.
 - [ ] Minimap/map UX decision.

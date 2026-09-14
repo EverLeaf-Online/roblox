@@ -2,6 +2,7 @@ local CollectionService = game:GetService("CollectionService")
 local Workspace = game:GetService("Workspace")
 
 local EnemySpawnerService = require(script.Parent.EnemySpawnerService)
+local EnvironmentPrefabService = require(script.Parent.EnvironmentPrefabService)
 local InteractionService = require(script.Parent.InteractionService)
 local WorldObjectService = require(script.Parent.WorldObjectService)
 
@@ -30,6 +31,18 @@ local function makeBall(parent, name, size, cframe, material, color)
 end
 
 local function makeTree(parent, position, scale, variant)
+    variant = variant or 1
+    local prefabYaw = math.rad((variant * 47) % 360)
+    local prefab = EnvironmentPrefabService.Place(
+        "TreePrimary",
+        parent,
+        CFrame.new(position) * CFrame.Angles(0, prefabYaw, 0),
+        scale
+    )
+    if prefab then
+        return prefab
+    end
+
     local model = Instance.new("Model")
     model.Name = "LumenTree"
     model.Parent = parent
