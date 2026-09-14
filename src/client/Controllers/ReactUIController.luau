@@ -323,7 +323,9 @@ local function Dialogue(props)
     local quests = profile.Quests or {}
     local completed = questId ~= nil and quests.Completed and quests.Completed[questId] == true
     local active = questId ~= nil and quests.Active and quests.Active[questId] ~= nil
-    local questButtonText = if completed then "QUEST COMPLETED" else if active then "QUEST ACTIVE" else "ACCEPT QUEST"
+    local questButtonText = if completed
+        then "QUEST COMPLETED"
+        else if active then "QUEST ACTIVE" else "ACCEPT QUEST"
     local questButtonEnabled = questId ~= nil and not completed and not active
 
     local function acceptQuest()
