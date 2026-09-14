@@ -51,3 +51,10 @@ docs/          canonical design, roadmap, and toolchain notes
 ```
 
 Roblox Studio remains the visual editor/playtest environment. Rojo keeps Studio synchronized with the canonical source tree while the VM handles repeatable headless validation and builds.
+
+## Project tracking
+
+- [Roadmap](docs/ROADMAP.md)
+- [Master checklist](docs/MASTER_CHECKLIST.md)
+- [Canonical game design](docs/GAME_DESIGN.md)
+- [Toolchain](docs/TOOLCHAIN.md)
