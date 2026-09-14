@@ -31,6 +31,62 @@ GameConfig.Bosses = {
     "Belforge Colossus",
 }
 
+GameConfig.DataStore = {
+    Name = "EverLeafPlayerData_v1",
+    SchemaVersion = 1,
+    AutosaveSeconds = 60,
+    SessionLockSeconds = 180,
+    MaxAttempts = 4,
+    RetryBaseSeconds = 1,
+    EnableInStudio = false,
+}
+
+GameConfig.Security = {
+    AllocateStat = {
+        Capacity = 8,
+        RefillPerSecond = 4,
+    },
+    BasicAttack = {
+        Capacity = 6,
+        RefillPerSecond = 5,
+    },
+}
+
+GameConfig.Movement = {
+    DefaultPlaneZ = 0,
+    DepthTolerance = 1.5,
+    HardCorrectionDepth = 5,
+    ServerCheckInterval = 0.1,
+    CameraDistance = 32,
+    CameraHeight = 5,
+    CameraLookHeight = 2.5,
+    CameraResponsiveness = 10,
+}
+
+GameConfig.DerivedStats = {
+    BaseHP = 100,
+    HPPerLevel = 12,
+    HPPerMight = 5,
+    BaseMP = 50,
+    MPPerLevel = 4,
+    MPPerInsight = 6,
+}
+
+GameConfig.Combat = {
+    DefaultMastery = 0.25,
+    MinimumMastery = 0.1,
+    MaximumMastery = 1,
+    BeginnerAttackPower = 5,
+    BeginnerStatScale = 1.5,
+    BasicAttackCooldown = 0.55,
+    BasicAttackRange = 10,
+    BasicAttackDepthRange = 3,
+}
+
+GameConfig.Development = {
+    SpawnTrainingDummyInStudio = true,
+}
+
 GameConfig.Monetization = {
     RobuxPowerPurchasesAllowed = false,
     CosmeticOnly = true,

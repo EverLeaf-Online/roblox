@@ -1,7 +1,9 @@
 build/
+Packages/
 *.rbxl
 *.rbxlx
 *.rbxm
 *.rbxmx
 .DS_Store
 Thumbs.db
+*.bak.*

@@ -1,13 +1,10 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
+local ProgressionMath = require(ReplicatedStorage.Shared.Math.ProgressionMath)
 
 local ProgressionService = {}
 
-function ProgressionService.ExpToNextLevel(level)
-    -- Intentionally simple foundation curve for the prototype. Content tuning
-    -- can change this without altering the authority model.
-    return math.floor(50 + (level ^ 1.6) * 25)
-end
+ProgressionService.ExpToNextLevel = ProgressionMath.ExpToNextLevel
 
 function ProgressionService.GrantExp(profile, amount)
     if type(amount) ~= "number" or amount <= 0 then
@@ -19,7 +16,7 @@ function ProgressionService.GrantExp(profile, amount)
     profile.Exp += amount
 
     while profile.Level < GameConfig.LevelCap do
-        local needed = ProgressionService.ExpToNextLevel(profile.Level)
+        local needed = ProgressionMath.ExpToNextLevel(profile.Level)
         if profile.Exp < needed then
             break
         end

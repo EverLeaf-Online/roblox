@@ -1,22 +1,38 @@
 # EverLeaf Roblox
 
-New Roblox game project for EverLeaf, built with Luau and Rojo.
+Original Roblox RPG project for EverLeaf, built with Luau and Rojo.
 
 ## Development
 
-The canonical source lives in this repository and is mirrored on the EverLeaf VM at:
+Canonical source repository: `EverLeaf-Online/roblox`.
+
+The EverLeaf ARM64 build host keeps its working tree at:
 
 ```text
 /opt/roblox/game
 ```
 
-Build a Roblox place file on the VM:
+Install the pinned Rokit tools:
+
+```bash
+rokit install
+```
+
+Run the complete pre-push validation:
+
+```bash
+./check.sh
+```
+
+The validation gate runs StyLua formatting checks, Selene linting, Lune headless tests, and a Rojo place build.
+
+Build only:
 
 ```bash
 ./build.sh
 ```
 
-The generated place is written to:
+Generated place:
 
 ```text
 build/game.rbxlx
@@ -26,9 +42,12 @@ build/game.rbxlx
 
 ```text
 src/
-  client/   LocalScripts and client systems
-  server/   ServerScripts and authoritative game systems
-  shared/   Shared modules and configuration
+  client/      client controllers and replicated presentation state
+  server/      authoritative game systems and server-only content
+  shared/      shared configuration and pure gameplay math
+
+tests/         headless Luau tests run with Lune
+docs/          canonical design, roadmap, and toolchain notes
 ```
 
-Roblox Studio remains the visual editor and playtest environment; Rojo keeps Studio synchronized with the source tree.
+Roblox Studio remains the visual editor/playtest environment. Rojo keeps Studio synchronized with the canonical source tree while the VM handles repeatable headless validation and builds.
