@@ -186,9 +186,54 @@ return table.freeze({
             table.freeze({ Type = "Collect", Target = "slag_core", Required = 4 }),
         }),
         Reward = table.freeze({
-            Exp = 1000,
+            Exp = 1100,
             Currencies = table.freeze({ Shards = 35 }),
             Items = table.freeze({ field_tonic = 2 }),
+        }),
+    }),
+    brasshaven_teeth_in_gears = table.freeze({
+        DisplayName = "Teeth in the Gears",
+        MinimumLevel = 13,
+        MinimumAdvancementTier = 1,
+        StartNpcId = "belforge_foreman",
+        PrerequisiteQuests = table.freeze({ "brasshaven_core_sample" }),
+        Objectives = table.freeze({
+            table.freeze({ Type = "Defeat", Target = "gearjaw_hound", Required = 5 }),
+            table.freeze({ Type = "Collect", Target = "gearjaw_tooth", Required = 4 }),
+        }),
+        Reward = table.freeze({
+            Exp = 1200,
+            Currencies = table.freeze({ Shards = 42 }),
+        }),
+    }),
+    brasshaven_cinder_signal = table.freeze({
+        DisplayName = "Cinders in the Ducts",
+        MinimumLevel = 14,
+        MinimumAdvancementTier = 1,
+        StartNpcId = "belforge_foreman",
+        PrerequisiteQuests = table.freeze({ "brasshaven_teeth_in_gears" }),
+        Objectives = table.freeze({
+            table.freeze({ Type = "Defeat", Target = "cindercoil", Required = 4 }),
+            table.freeze({ Type = "Collect", Target = "cinder_coil", Required = 4 }),
+        }),
+        Reward = table.freeze({
+            Exp = 1400,
+            Currencies = table.freeze({ Shards = 48 }),
+        }),
+    }),
+    brasshaven_pressure_bastion = table.freeze({
+        DisplayName = "The Pressure Bastion",
+        MinimumLevel = 15,
+        MinimumAdvancementTier = 1,
+        StartNpcId = "belforge_foreman",
+        PrerequisiteQuests = table.freeze({ "brasshaven_cinder_signal" }),
+        Objectives = table.freeze({
+            table.freeze({ Type = "Defeat", Target = "pressure_bastion", Required = 1 }),
+            table.freeze({ Type = "Collect", Target = "pressure_seal", Required = 1 }),
+        }),
+        Reward = table.freeze({
+            Exp = 1800,
+            Currencies = table.freeze({ Shards = 60, Marks = 1 }),
         }),
     }),
 })

@@ -18,6 +18,9 @@ local RIG_BY_MONSTER = table.freeze({
     mosswarden = "quadruped",
     rivet_scuttler = "quadruped",
     slagmite = "slime",
+    gearjaw_hound = "quadruped",
+    cindercoil = "wisp",
+    pressure_bastion = "quadruped",
     lumen_wisp = "wisp",
 })
 

@@ -99,7 +99,7 @@
 - [x] Hidden Whisperroot Hollow and persistent one-time Wayfarer cache reward implemented.
 - [x] First Lumenreach field boss implemented: Mosswarden, Root of the Old Grove.
 - [x] Lumenreach → Brasshaven progression gate is functional and region unlock rewards are supported.
-- [x] Brasshaven Foundry Threshold now has a playable chapter opener: Rivet Scuttlers, Slagmites, drops, encounter pockets, and Vale's first three quests.
+- [x] Brasshaven Foundry Threshold now has a playable Level 10–16 route: Rivet Scuttlers, Slagmites, Gearjaw Hounds, Cindercoils, Pressure Bastion elite, drops, encounter pockets, and six Vale quests.
 - [x] Brasshaven Foundry Threshold starter shell is physically reachable with a working return gate.
 - [x] Region travel now moves the character transactionally and updates the saved/current respawn target.
 - [x] Dedicated full buy/sell shop screen implemented beyond dialogue preview buttons; Studio interaction/balance QA remains.
@@ -364,7 +364,7 @@
 - [x] Ground-spawn wave system with underground emergence, dust/debris, invulnerability, stagger, and trigger-state machine.
 - [x] Spawn trigger states: Idle → Triggered → Spawning → Active → Cooldown.
 - [x] Wave cooldown requires players to leave and re-enter before retriggering.
-- [x] Spawn regions placed for Mosslings, Skeletons, Slimes, Ridgebeaks, Bramblebacks, Wisps, elites, Mosswarden, Rivet Scuttlers, and Slagmites.
+- [x] Spawn regions placed for Mosslings, Skeletons, Slimes, Ridgebeaks, Bramblebacks, Wisps, Lumenreach elites/Mosswarden, Rivet Scuttlers, Slagmites, Gearjaw Hounds, Cindercoils, and Pressure Bastion.
 - [ ] Production hitbox/hurtbox and enemy knockback/stagger-resistance rules.
 - [ ] Studio tune pathfinding, spawn density, anti-farm timing, and multiplayer target behavior.
 - [ ] Replace any remaining simple/procedural monster visuals that fail the final art-quality bar.

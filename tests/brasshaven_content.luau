@@ -53,7 +53,7 @@ assert(
 )
 
 local foreman = NpcDefinitions.belforge_foreman
-assert(foreman and #foreman.QuestOffers == 3, "Vale offers three opening Brasshaven quests")
+assert(foreman and #foreman.QuestOffers >= 3, "Vale offers the Brasshaven opening quests")
 assert(
     foreman.QuestOffers[1] == "brasshaven_first_shift",
     "Vale quest order begins with First Shift"

@@ -606,6 +606,97 @@ local function dressEncounterAreas(parent)
         SpawnDelay = 0.38,
         RespawnTime = 29,
     })
+
+    local gearworksCenter = ORIGIN + Vector3.new(-78, 0, 76)
+    makeLabel(parent, gearworksCenter + Vector3.new(0, 16, 0), "GEARWORKS YARD")
+    makeScrapPile(parent, gearworksCenter + Vector3.new(-18, 0, -8), math.rad(9), 1.0)
+    makeScrapPile(parent, gearworksCenter + Vector3.new(15, 0, 11), math.rad(-38), 0.92)
+    for index = 1, 5 do
+        local wheel = makePart(
+            parent,
+            "GearworksWheel" .. tostring(index),
+            Vector3.new(0.55, 4.2 + index * 0.4, 4.2 + index * 0.4),
+            CFrame.new(gearworksCenter + Vector3.new(-14 + index * 7, 2.5, -18))
+                * CFrame.Angles(0, 0, math.rad(90 + index * 14)),
+            Enum.Material.Metal,
+            if index % 2 == 0 then Color3.fromRGB(142, 96, 49) else Color3.fromRGB(72, 69, 64)
+        )
+        wheel.Shape = Enum.PartType.Cylinder
+        wheel.CanCollide = false
+    end
+
+    local cinderCenter = ORIGIN + Vector3.new(83, 0, -72)
+    makeLabel(parent, cinderCenter + Vector3.new(0, 17, 0), "CINDER DUCTS")
+    makeHotVent(parent, cinderCenter + Vector3.new(-12, 0, -7), 0.9)
+    makeHotVent(parent, cinderCenter + Vector3.new(15, 0, 10), 0.78)
+    makeHotVent(parent, cinderCenter + Vector3.new(4, 0, 18), 0.62)
+    for index = 1, 4 do
+        local pipe = makePart(
+            parent,
+            "CinderPipe" .. tostring(index),
+            Vector3.new(3.2, 3.2, 18),
+            CFrame.new(cinderCenter + Vector3.new(-19 + index * 12, 4.2, -18))
+                * CFrame.Angles(0, math.rad(90), 0),
+            Enum.Material.Metal,
+            Color3.fromRGB(83, 75, 66)
+        )
+        pipe.Shape = Enum.PartType.Cylinder
+        pipe.CanCollide = false
+    end
+
+    local bastionCenter = ORIGIN + Vector3.new(122, 0, -40)
+    makeLabel(parent, bastionCenter + Vector3.new(0, 18, 0), "REGULATOR ROW")
+    makeScrapPile(parent, bastionCenter + Vector3.new(-16, 0, 13), math.rad(52), 0.75)
+    for index = -2, 2 do
+        local regulator = makePart(
+            parent,
+            "Regulator" .. tostring(index + 3),
+            Vector3.new(4.5, 8.5, 4.5),
+            CFrame.new(bastionCenter + Vector3.new(index * 8, 4.25, -16)),
+            Enum.Material.Metal,
+            Color3.fromRGB(76, 71, 65)
+        )
+        regulator.Shape = Enum.PartType.Cylinder
+        regulator.CanCollide = false
+        local band = makePart(
+            parent,
+            "RegulatorBand" .. tostring(index + 3),
+            Vector3.new(4.8, 0.55, 4.8),
+            CFrame.new(bastionCenter + Vector3.new(index * 8, 4.5, -16)),
+            Enum.Material.Metal,
+            Color3.fromRGB(153, 103, 49)
+        )
+        band.Shape = Enum.PartType.Cylinder
+        band.CanCollide = false
+    end
+
+    makeMonsterSpawnTrigger(parent, "BrasshavenGearjawHounds", gearworksCenter, {
+        MonsterType = "GearjawHound",
+        SpawnAmount = 4,
+        TriggerRadius = 31,
+        SpawnRadius = 15,
+        MaxAliveMonster = 4,
+        SpawnDelay = 0.22,
+        RespawnTime = 27,
+    })
+    makeMonsterSpawnTrigger(parent, "BrasshavenCindercoils", cinderCenter, {
+        MonsterType = "Cindercoil",
+        SpawnAmount = 3,
+        TriggerRadius = 30,
+        SpawnRadius = 14,
+        MaxAliveMonster = 3,
+        SpawnDelay = 0.28,
+        RespawnTime = 29,
+    })
+    makeMonsterSpawnTrigger(parent, "BrasshavenPressureBastion", bastionCenter, {
+        MonsterType = "PressureBastion",
+        SpawnAmount = 1,
+        TriggerRadius = 24,
+        SpawnRadius = 6,
+        MaxAliveMonster = 1,
+        SpawnDelay = 0,
+        RespawnTime = 100,
+    })
 end
 
 function BrasshavenWorldService.Init()

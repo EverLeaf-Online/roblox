@@ -202,6 +202,27 @@ return table.freeze({
         StackLimit = 999,
         SellPrice = table.freeze({ Currency = "Shards", Amount = 4 }),
     }),
+    gearjaw_tooth = table.freeze({
+        DisplayName = "Gearjaw Tooth",
+        Description = "A serrated drive tooth torn from a Brasshaven hunting construct.",
+        Type = "Material",
+        StackLimit = 999,
+        SellPrice = table.freeze({ Currency = "Shards", Amount = 5 }),
+    }),
+    cinder_coil = table.freeze({
+        DisplayName = "Cinder Coil",
+        Description = "A copper induction coil still carrying a trace of furnace heat.",
+        Type = "Material",
+        StackLimit = 999,
+        SellPrice = table.freeze({ Currency = "Shards", Amount = 5 }),
+    }),
+    pressure_seal = table.freeze({
+        DisplayName = "Pressure Seal",
+        Description = "A stamped regulator seal recovered from a Pressure Bastion elite.",
+        Type = "Quest",
+        StackLimit = 20,
+        SellPrice = table.freeze({ Currency = "Shards", Amount = 12 }),
+    }),
     mosswarden_core = table.freeze({
         DisplayName = "Mosswarden Core",
         Type = "Quest",

@@ -816,6 +816,231 @@ local function buildSlagmite()
     return model
 end
 
+local function buildGearjawHound()
+    local definition = MonsterConfig.Get("gearjaw_hound")
+    local model, root =
+        makeBase(definition.TemplateName, definition.DisplayName, Vector3.new(3.2, 2.8, 5.2), 1.0)
+    model:SetAttribute("AgentRadius", 2.3)
+    model:SetAttribute("AgentHeight", 4.2)
+
+    local iron = Color3.fromRGB(67, 67, 64)
+    local brass = Color3.fromRGB(150, 101, 48)
+    local tooth = Color3.fromRGB(181, 181, 169)
+    local ember = Color3.fromRGB(242, 124, 54)
+
+    local body =
+        makePart(model, "Body", Vector3.new(4.9, 2.6, 6.0), iron, Enum.Material.DiamondPlate)
+    makeMotor(root, body, "BodyJoint", Vector3.new(0, 0.3, 0))
+
+    local shoulderShell = makePart(
+        model,
+        "ShoulderShell",
+        Vector3.new(4.3, 1.4, 3.4),
+        brass,
+        Enum.Material.Metal,
+        Enum.PartType.Ball
+    )
+    makeMotor(root, shoulderShell, "ShoulderShellJoint", Vector3.new(0, 1.25, -0.55))
+
+    local head = makePart(model, "Head", Vector3.new(2.8, 1.8, 2.8), iron, Enum.Material.Metal)
+    makeMotor(root, head, "HeadJoint", Vector3.new(0, 0.6, -3.9))
+
+    local muzzle =
+        makePart(model, "Muzzle", Vector3.new(2.2, 1.0, 1.45), brass, Enum.Material.Metal)
+    makeMotor(root, muzzle, "MuzzleJoint", Vector3.new(0, 0.2, -5.0))
+
+    for index, side in { -1, 1 } do
+        local eye = makePart(
+            model,
+            side < 0 and "LeftEye" or "RightEye",
+            Vector3.new(0.28, 0.28, 0.15),
+            ember,
+            Enum.Material.Neon,
+            Enum.PartType.Ball
+        )
+        makeMotor(
+            root,
+            eye,
+            side < 0 and "LeftEyeJoint" or "RightEyeJoint",
+            Vector3.new(side * 0.58, 0.83, -5.0)
+        )
+        for toothIndex = 1, 3 do
+            local jawTooth = makePart(
+                model,
+                string.format("JawTooth%d_%d", index, toothIndex),
+                Vector3.new(0.22, 0.6, 0.22),
+                tooth,
+                Enum.Material.Metal
+            )
+            makeMotor(
+                root,
+                jawTooth,
+                string.format("JawToothJoint%d_%d", index, toothIndex),
+                Vector3.new(side * (0.34 + toothIndex * 0.19), -0.35, -5.72),
+                CFrame.Angles(math.rad(-16), 0, math.rad(side * 9))
+            )
+        end
+    end
+
+    for _, spec in
+        {
+            { "FrontLeft", -1.65, -1.65 },
+            { "FrontRight", 1.65, -1.65 },
+            { "BackLeft", -1.65, 1.8 },
+            { "BackRight", 1.65, 1.8 },
+        }
+    do
+        local leg = makePart(
+            model,
+            spec[1] .. "Leg",
+            Vector3.new(0.58, 2.25, 0.62),
+            brass,
+            Enum.Material.Metal
+        )
+        makeMotor(root, leg, spec[1] .. "Hip", Vector3.new(spec[2], -1.55, spec[3]))
+    end
+
+    local tail = makePart(model, "Tail", Vector3.new(0.46, 0.46, 3.2), brass, Enum.Material.Metal)
+    makeMotor(root, tail, "TailJoint", Vector3.new(0, 0.7, 3.9), CFrame.Angles(math.rad(-18), 0, 0))
+    return model
+end
+
+local function buildCindercoil()
+    local definition = MonsterConfig.Get("cindercoil")
+    local model, root =
+        makeBase(definition.TemplateName, definition.DisplayName, Vector3.new(2.3, 2.3, 2.3), 2.9)
+    model:SetAttribute("AgentRadius", 1.7)
+    model:SetAttribute("AgentHeight", 4.2)
+
+    local copper = Color3.fromRGB(164, 91, 47)
+    local dark = Color3.fromRGB(68, 59, 53)
+    local ember = Color3.fromRGB(255, 116, 45)
+
+    local body = makePart(
+        model,
+        "Body",
+        Vector3.new(3.2, 3.2, 3.2),
+        dark,
+        Enum.Material.Metal,
+        Enum.PartType.Ball
+    )
+    makeMotor(root, body, "BodyJoint", Vector3.new(0, 0.55, 0))
+
+    local core = makePart(
+        model,
+        "EmberCore",
+        Vector3.new(1.6, 1.6, 1.6),
+        ember,
+        Enum.Material.Neon,
+        Enum.PartType.Ball
+    )
+    core.Transparency = 0.06
+    makeMotor(root, core, "CoreJoint", Vector3.new(0, 0.55, -1.5))
+
+    for index = 1, 4 do
+        local ring = makePart(
+            model,
+            "CoilRing" .. tostring(index),
+            Vector3.new(0.35, 3.8 + index * 0.15, 3.8 + index * 0.15),
+            copper,
+            Enum.Material.Metal
+        )
+        ring.Shape = Enum.PartType.Cylinder
+        makeMotor(
+            root,
+            ring,
+            "CoilRingJoint" .. tostring(index),
+            Vector3.new(0, 0.5, 0.15 + index * 0.08),
+            CFrame.Angles(0, 0, math.rad(90 + index * 13))
+        )
+    end
+
+    for index = 1, 3 do
+        local tail = makePart(
+            model,
+            "WispTail" .. index,
+            Vector3.new(0.45, 0.45, 2.4 + index * 0.55),
+            copper,
+            Enum.Material.Metal
+        )
+        makeMotor(
+            root,
+            tail,
+            "TailJoint" .. index,
+            Vector3.new((index - 2) * 0.65, -0.45, 2.0 + index * 0.5),
+            CFrame.Angles(math.rad(16 + index * 6), 0, math.rad((index - 2) * 11))
+        )
+    end
+
+    local light = Instance.new("PointLight")
+    light.Color = ember
+    light.Brightness = 1.5
+    light.Range = 12
+    light.Parent = core
+    return model
+end
+
+local function buildPressureBastion()
+    local definition = MonsterConfig.Get("pressure_bastion")
+    local model = buildRivetScuttler()
+    model.Name = definition.TemplateName
+    model:ScaleTo(1.48)
+    model:SetAttribute("AgentRadius", 3.1)
+    model:SetAttribute("AgentHeight", 5.5)
+    local humanoid = model:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid.DisplayName = definition.DisplayName
+    end
+    local root = model:FindFirstChild("HumanoidRootPart")
+    if root then
+        local tank = makePart(
+            model,
+            "PressureTank",
+            Vector3.new(2.3, 3.8, 2.3),
+            Color3.fromRGB(92, 84, 72),
+            Enum.Material.Metal,
+            Enum.PartType.Cylinder
+        )
+        makeMotor(
+            root,
+            tank,
+            "PressureTankJoint",
+            Vector3.new(0, 2.0, 0.8),
+            CFrame.Angles(0, 0, math.rad(90))
+        )
+        local gauge = makePart(
+            model,
+            "PressureGauge",
+            Vector3.new(1.3, 1.3, 0.28),
+            Color3.fromRGB(227, 195, 125),
+            Enum.Material.Metal,
+            Enum.PartType.Cylinder
+        )
+        makeMotor(
+            root,
+            gauge,
+            "GaugeJoint",
+            Vector3.new(0, 2.1, -1.35),
+            CFrame.Angles(0, math.rad(90), 0)
+        )
+        local warning = makePart(
+            model,
+            "WarningCore",
+            Vector3.new(0.8, 0.8, 0.8),
+            Color3.fromRGB(255, 83, 42),
+            Enum.Material.Neon,
+            Enum.PartType.Ball
+        )
+        makeMotor(root, warning, "WarningCoreJoint", Vector3.new(0, 0.8, -3.9))
+        local light = Instance.new("PointLight")
+        light.Color = warning.Color
+        light.Brightness = 1.7
+        light.Range = 14
+        light.Parent = warning
+    end
+    return model
+end
+
 local function buildMosswarden()
     local definition = MonsterConfig.Get("mosswarden")
     local model = buildBrambleback()
@@ -875,6 +1100,9 @@ local builders = {
     royal_glowcap = buildRoyalGlowcap,
     rivet_scuttler = buildRivetScuttler,
     slagmite = buildSlagmite,
+    gearjaw_hound = buildGearjawHound,
+    cindercoil = buildCindercoil,
+    pressure_bastion = buildPressureBastion,
     mosswarden = buildMosswarden,
 }
 
