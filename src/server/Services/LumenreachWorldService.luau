@@ -1065,9 +1065,11 @@ local function prepareGround(world)
 
     local boundaryThickness = 8
     local boundaryHeight = 90
-    -- Keep collision in front of the scenic ridge instead of at the absolute terrain edge.
-    local halfWidth = WORLD_WIDTH * 0.5 - 58
-    local halfDepth = WORLD_DEPTH * 0.5 - 52
+    -- Keep only a small safety inset so all visible grass remains playable.
+    -- The terrain ridges themselves provide the natural visual boundary.
+    local boundaryInset = 12
+    local halfWidth = WORLD_WIDTH * 0.5 - boundaryInset
+    local halfDepth = WORLD_DEPTH * 0.5 - boundaryInset
     local boundarySpecs = {
         {
             "NorthBoundary",
