@@ -258,7 +258,7 @@ local function HUD(props)
         }),
         Currency = React.createElement(Panel, {
             AnchorPoint = Vector2.new(1, 0),
-            Position = UDim2.new(1, -22, 0, 22),
+            Position = UDim2.new(1, -22, 0, 96),
             Size = UDim2.fromOffset(224, 72),
             Children = {
                 Shards = React.createElement(Label, {
@@ -313,15 +313,21 @@ end
 
 local function Dialogue(props)
     local description = props.Description
+    local profile = props.Profile or {}
     local status, setStatus = React.useState("E to interact · Left click to attack · Q to dodge")
     if not description then
         return nil
     end
 
     local questId = description.QuestOffers and description.QuestOffers[1]
+    local quests = profile.Quests or {}
+    local completed = questId ~= nil and quests.Completed and quests.Completed[questId] == true
+    local active = questId ~= nil and quests.Active and quests.Active[questId] ~= nil
+    local questButtonText = if completed then "QUEST COMPLETED" else if active then "QUEST ACTIVE" else "ACCEPT QUEST"
+    local questButtonEnabled = questId ~= nil and not completed and not active
 
     local function acceptQuest()
-        if not questId then
+        if not questButtonEnabled then
             return
         end
         local ok, result = ActionClient.Invoke("quest.start", {
@@ -352,11 +358,12 @@ local function Dialogue(props)
             Size = UDim2.fromOffset(250, 48),
             BackgroundColor3 = Color3.fromRGB(45, 65, 61),
             BorderSizePixel = 0,
-            Text = "ACCEPT QUEST",
-            TextColor3 = COLORS.Text,
+            Text = questButtonText,
+            TextColor3 = if questButtonEnabled then COLORS.Text else COLORS.Muted,
             TextSize = 14,
             Font = Enum.Font.GothamBold,
-            AutoButtonColor = true,
+            AutoButtonColor = questButtonEnabled,
+            Active = questButtonEnabled,
             [React.Event.Activated] = acceptQuest,
         }, roundedChildren(nil, 9))
     end
@@ -528,6 +535,7 @@ local function App()
         }),
         Dialogue = interaction and React.createElement(Dialogue, {
             Description = interaction,
+            Profile = profile,
             OnClose = function()
                 setInteraction(nil)
             end,
