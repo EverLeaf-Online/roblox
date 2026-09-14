@@ -60,11 +60,6 @@
     },
     "MaterialService": {
       "$className": "MaterialService",
-      "$properties": {
-        "GrassName": "ForestGround",
-        "RockName": "MossyRock",
-        "GroundName": "WoodChipPath"
-      },
       "ForestGround": {
         "$className": "MaterialVariant",
         "$properties": {

@@ -6,7 +6,7 @@ local MATERIALS = {
         NormalMap = "rbxassetid://120186366475714",
         RoughnessMap = "rbxassetid://140381828962512",
         StudsPerTile = 14,
-        OverrideProperty = "GrassName",
+        OverrideMaterial = Enum.Material.Grass,
     },
     MossyRock = {
         BaseMaterial = Enum.Material.Rock,
@@ -14,7 +14,7 @@ local MATERIALS = {
         NormalMap = "rbxassetid://96893029091015",
         RoughnessMap = "rbxassetid://84185533532288",
         StudsPerTile = 10,
-        OverrideProperty = "RockName",
+        OverrideMaterial = Enum.Material.Rock,
     },
     MossWood = {
         BaseMaterial = Enum.Material.WoodPlanks,
@@ -29,7 +29,7 @@ local MATERIALS = {
         NormalMap = "rbxassetid://130811469027211",
         RoughnessMap = "rbxassetid://115321092703074",
         StudsPerTile = 12,
-        OverrideProperty = "GroundName",
+        OverrideMaterial = Enum.Material.Ground,
     },
     WoodStonePathway = {
         BaseMaterial = Enum.Material.Cobblestone,
@@ -62,8 +62,8 @@ local function install()
             variant.MaterialPattern = Enum.MaterialPattern.Organic
             variant.Parent = MaterialService
 
-            if definition.OverrideProperty then
-                MaterialService[definition.OverrideProperty] = name
+            if definition.OverrideMaterial then
+                MaterialService:SetBaseMaterialOverride(definition.OverrideMaterial, name)
             end
         end)
 

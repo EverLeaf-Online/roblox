@@ -4,7 +4,7 @@ return table.freeze({
     ForestGround = table.freeze({
         DisplayName = "EverLeaf Forest Ground",
         BaseMaterial = Enum.Material.Grass,
-        OverrideProperty = "GrassName",
+        OverrideMaterial = Enum.Material.Grass,
         StudsPerTile = 14,
         Pattern = Enum.MaterialPattern.Organic,
         PolyHavenId = "forrest_ground_01",
@@ -19,7 +19,7 @@ return table.freeze({
     MossyRock = table.freeze({
         DisplayName = "EverLeaf Mossy Rock",
         BaseMaterial = Enum.Material.Rock,
-        OverrideProperty = "RockName",
+        OverrideMaterial = Enum.Material.Rock,
         StudsPerTile = 10,
         Pattern = Enum.MaterialPattern.Organic,
         PolyHavenId = "mossy_rock",
@@ -48,7 +48,7 @@ return table.freeze({
     WoodChipPath = table.freeze({
         DisplayName = "EverLeaf Wood Chip Path",
         BaseMaterial = Enum.Material.Ground,
-        OverrideProperty = "GroundName",
+        OverrideMaterial = Enum.Material.Ground,
         StudsPerTile = 12,
         Pattern = Enum.MaterialPattern.Organic,
         PolyHavenId = "wood_chip_path",
