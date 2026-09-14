@@ -30,6 +30,11 @@ local COLORS = table.freeze({
     Accent = Color3.fromRGB(102, 211, 154),
     AccentSoft = Color3.fromRGB(54, 111, 83),
     AccentDark = Color3.fromRGB(37, 80, 61),
+    Lumen = Color3.fromRGB(121, 244, 183),
+    LumenPale = Color3.fromRGB(205, 255, 229),
+    Bark = Color3.fromRGB(68, 50, 36),
+    BarkLight = Color3.fromRGB(104, 78, 52),
+    Moss = Color3.fromRGB(58, 103, 72),
     Health = Color3.fromRGB(207, 78, 81),
     Mana = Color3.fromRGB(72, 135, 218),
     Exp = Color3.fromRGB(102, 211, 154),
@@ -89,6 +94,39 @@ local function Label(props)
 end
 
 local function Panel(props)
+    local children = table.clone(props.Children or {})
+    children.SurfaceGradient = React.createElement("UIGradient", {
+        Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(29, 45, 40)),
+            ColorSequenceKeypoint.new(0.48, props.BackgroundColor3 or COLORS.Panel),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 18, 17)),
+        }),
+        Rotation = 110,
+        Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 0.08),
+            NumberSequenceKeypoint.new(0.55, 0.22),
+            NumberSequenceKeypoint.new(1, 0.04),
+        }),
+    })
+    if props.Ornamented then
+        children.TopEtch = React.createElement("Frame", {
+            Position = UDim2.fromOffset(14, 7),
+            Size = UDim2.new(1, -28, 0, 1),
+            BackgroundColor3 = props.OrnamentColor or COLORS.Lumen,
+            BackgroundTransparency = 0.62,
+            BorderSizePixel = 0,
+            ZIndex = (props.ZIndex or 1) + 1,
+        })
+        children.BottomEtch = React.createElement("Frame", {
+            AnchorPoint = Vector2.new(0, 1),
+            Position = UDim2.new(0, 14, 1, -7),
+            Size = UDim2.new(1, -28, 0, 1),
+            BackgroundColor3 = props.OrnamentColor or COLORS.Lumen,
+            BackgroundTransparency = 0.78,
+            BorderSizePixel = 0,
+            ZIndex = (props.ZIndex or 1) + 1,
+        })
+    end
     return React.createElement(
         "Frame",
         {
@@ -103,7 +141,7 @@ local function Panel(props)
             ZIndex = props.ZIndex or 1,
         },
         withChrome(
-            props.Children,
+            children,
             props.Radius or 12,
             props.StrokeColor or COLORS.Border,
             props.StrokeTransparency or 0.35,
@@ -118,6 +156,21 @@ local function Button(props)
         or if props.Tone == "accent"
             then COLORS.AccentDark
             else if props.Tone == "danger" then Color3.fromRGB(91, 45, 46) else COLORS.Surface
+    local children = {
+        Gradient = React.createElement("UIGradient", {
+            Color = ColorSequence.new(background:Lerp(Color3.new(1, 1, 1), 0.08), background),
+            Rotation = 90,
+            Transparency = NumberSequence.new(0.06),
+        }),
+        Edge = React.createElement("Frame", {
+            Position = UDim2.fromOffset(7, 4),
+            Size = UDim2.new(1, -14, 0, 1),
+            BackgroundColor3 = props.Tone == "accent" and COLORS.Lumen or COLORS.BorderStrong,
+            BackgroundTransparency = active and 0.55 or 0.85,
+            BorderSizePixel = 0,
+            ZIndex = (props.ZIndex or 4) + 1,
+        }),
+    }
     return React.createElement("TextButton", {
         AnchorPoint = props.AnchorPoint,
         Position = props.Position,
@@ -135,7 +188,7 @@ local function Button(props)
         Selectable = active,
         ZIndex = props.ZIndex or 4,
         [React.Event.Activated] = if active then props.OnActivated else nil,
-    }, withChrome(nil, props.Radius or 8, props.StrokeColor or COLORS.Border, 0.52, 1))
+    }, withChrome(children, props.Radius or 8, props.StrokeColor or COLORS.Border, 0.52, 1))
 end
 
 local function Pill(props)
@@ -200,6 +253,146 @@ local function Bar(props)
             }),
         }, 6, COLORS.Border, 0.62, 1)
     )
+end
+
+local function LeafGlyph(props)
+    local z = props.ZIndex or 4
+    local color = props.Color or COLORS.Lumen
+    return React.createElement("Frame", {
+        AnchorPoint = props.AnchorPoint,
+        Position = props.Position,
+        Size = props.Size or UDim2.fromOffset(28, 28),
+        BackgroundTransparency = 1,
+        ZIndex = z,
+    }, {
+        LeafA = React.createElement("Frame", {
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            Position = UDim2.fromScale(0.43, 0.44),
+            Size = UDim2.fromOffset(11, 18),
+            Rotation = -38,
+            BackgroundColor3 = color,
+            BorderSizePixel = 0,
+            ZIndex = z + 1,
+        }, withChrome(nil, 999)),
+        LeafB = React.createElement("Frame", {
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            Position = UDim2.fromScale(0.62, 0.58),
+            Size = UDim2.fromOffset(8, 14),
+            Rotation = 42,
+            BackgroundColor3 = color:Lerp(Color3.new(1, 1, 1), 0.16),
+            BorderSizePixel = 0,
+            ZIndex = z + 1,
+        }, withChrome(nil, 999)),
+        Stem = React.createElement("Frame", {
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            Position = UDim2.fromScale(0.51, 0.64),
+            Size = UDim2.fromOffset(2, 18),
+            Rotation = 34,
+            BackgroundColor3 = COLORS.LumenPale,
+            BackgroundTransparency = 0.18,
+            BorderSizePixel = 0,
+            ZIndex = z + 2,
+        }, withChrome(nil, 999)),
+    })
+end
+
+local function ShardGlyph(props)
+    local z = props.ZIndex or 4
+    return React.createElement("Frame", {
+        AnchorPoint = props.AnchorPoint,
+        Position = props.Position,
+        Size = props.Size or UDim2.fromOffset(30, 30),
+        BackgroundTransparency = 1,
+        ZIndex = z,
+    }, {
+        Left = React.createElement("Frame", {
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            Position = UDim2.fromScale(0.34, 0.58),
+            Size = UDim2.fromOffset(7, 13),
+            Rotation = -14,
+            BackgroundColor3 = Color3.fromRGB(71, 184, 137),
+            BorderSizePixel = 0,
+            ZIndex = z + 1,
+        }, withChrome(nil, 2, COLORS.Lumen, 0.25, 1)),
+        Main = React.createElement(
+            "Frame",
+            {
+                AnchorPoint = Vector2.new(0.5, 0.5),
+                Position = UDim2.fromScale(0.54, 0.46),
+                Size = UDim2.fromOffset(9, 18),
+                Rotation = 4,
+                BackgroundColor3 = COLORS.Lumen,
+                BorderSizePixel = 0,
+                ZIndex = z + 2,
+            },
+            withChrome({
+                Shine = React.createElement("Frame", {
+                    Position = UDim2.fromOffset(2, 2),
+                    Size = UDim2.fromOffset(2, 9),
+                    BackgroundColor3 = COLORS.LumenPale,
+                    BackgroundTransparency = 0.12,
+                    BorderSizePixel = 0,
+                    ZIndex = z + 3,
+                }, withChrome(nil, 999)),
+            }, 2, COLORS.LumenPale, 0.18, 1)
+        ),
+        Right = React.createElement("Frame", {
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            Position = UDim2.fromScale(0.72, 0.62),
+            Size = UDim2.fromOffset(6, 11),
+            Rotation = 18,
+            BackgroundColor3 = Color3.fromRGB(85, 216, 163),
+            BorderSizePixel = 0,
+            ZIndex = z + 1,
+        }, withChrome(nil, 2, COLORS.Lumen, 0.35, 1)),
+    })
+end
+
+local function MarkGlyph(props)
+    local z = props.ZIndex or 4
+    return React.createElement("Frame", {
+        AnchorPoint = props.AnchorPoint,
+        Position = props.Position,
+        Size = props.Size or UDim2.fromOffset(30, 30),
+        BackgroundTransparency = 1,
+        ZIndex = z,
+    }, {
+        Outer = React.createElement(
+            "Frame",
+            {
+                AnchorPoint = Vector2.new(0.5, 0.5),
+                Position = UDim2.fromScale(0.5, 0.5),
+                Size = UDim2.fromOffset(20, 20),
+                BackgroundColor3 = COLORS.Gold,
+                BorderSizePixel = 0,
+                ZIndex = z + 1,
+            },
+            withChrome({
+                Inner = React.createElement(
+                    "Frame",
+                    {
+                        AnchorPoint = Vector2.new(0.5, 0.5),
+                        Position = UDim2.fromScale(0.5, 0.5),
+                        Size = UDim2.fromOffset(12, 12),
+                        BackgroundColor3 = COLORS.Bark,
+                        BorderSizePixel = 0,
+                        ZIndex = z + 2,
+                    },
+                    withChrome({
+                        Rune = React.createElement("Frame", {
+                            AnchorPoint = Vector2.new(0.5, 0.5),
+                            Position = UDim2.fromScale(0.5, 0.5),
+                            Size = UDim2.fromOffset(4, 9),
+                            Rotation = 45,
+                            BackgroundColor3 = Color3.fromRGB(255, 228, 145),
+                            BorderSizePixel = 0,
+                            ZIndex = z + 3,
+                        }, withChrome(nil, 1)),
+                    }, 999)
+                ),
+            }, 999, Color3.fromRGB(255, 231, 159), 0.12, 1)
+        ),
+    })
 end
 
 local function prettyId(value)
@@ -336,7 +529,15 @@ local function Objective(props)
         Visible = not props.Hidden,
         BackgroundColor3 = COLORS.PanelDeep,
         BackgroundTransparency = 0.08,
+        Ornamented = true,
+        OrnamentColor = ready and COLORS.Gold or COLORS.Lumen,
         Children = {
+            Crest = React.createElement(LeafGlyph, {
+                Position = UDim2.fromOffset(286, 10),
+                Size = UDim2.fromOffset(24, 24),
+                Color = ready and COLORS.Gold or COLORS.Lumen,
+                ZIndex = 4,
+            }),
             Accent = React.createElement("Frame", {
                 Position = UDim2.fromOffset(0, 14),
                 Size = UDim2.fromOffset(3, 74),
@@ -388,11 +589,13 @@ local function HUD(props)
 
     return React.createElement(React.Fragment, nil, {
         Status = React.createElement(Panel, {
-            Position = UDim2.fromOffset(24, 52),
-            Size = UDim2.fromOffset(306, 112),
+            Position = UDim2.fromOffset(24, 78),
+            Size = UDim2.fromOffset(306, 118),
             BackgroundColor3 = COLORS.PanelDeep,
             BackgroundTransparency = 0.08,
             StrokeColor = COLORS.BorderStrong,
+            Ornamented = true,
+            OrnamentColor = COLORS.Lumen,
             Children = {
                 LevelPill = React.createElement(Pill, {
                     Position = UDim2.fromOffset(16, 12),
@@ -436,48 +639,35 @@ local function HUD(props)
         }),
         Currency = React.createElement(Panel, {
             AnchorPoint = Vector2.new(1, 0),
-            Position = UDim2.new(1, -24, 0, 52),
-            Size = UDim2.fromOffset(214, 70),
+            Position = UDim2.new(1, -24, 0, 78),
+            Size = UDim2.fromOffset(214, 76),
             BackgroundColor3 = COLORS.PanelDeep,
             BackgroundTransparency = 0.1,
+            Ornamented = true,
+            OrnamentColor = COLORS.Gold,
             Visible = compactVisible,
             Children = {
                 ShardsIcon = React.createElement(
                     "Frame",
                     {
-                        Position = UDim2.fromOffset(13, 9),
-                        Size = UDim2.fromOffset(28, 24),
+                        Position = UDim2.fromOffset(11, 9),
+                        Size = UDim2.fromOffset(34, 27),
                         BackgroundColor3 = COLORS.AccentDark,
+                        BackgroundTransparency = 0.08,
                         BorderSizePixel = 0,
                         ZIndex = 3,
                     },
                     withChrome({
-                        Crystal = React.createElement(
-                            "Frame",
-                            {
-                                AnchorPoint = Vector2.new(0.5, 0.5),
-                                Position = UDim2.fromScale(0.5, 0.5),
-                                Size = UDim2.fromOffset(9, 9),
-                                Rotation = 45,
-                                BackgroundColor3 = COLORS.Accent,
-                                BorderSizePixel = 0,
-                                ZIndex = 4,
-                            },
-                            withChrome({
-                                Core = React.createElement("Frame", {
-                                    AnchorPoint = Vector2.new(0.5, 0.5),
-                                    Position = UDim2.fromScale(0.5, 0.5),
-                                    Size = UDim2.fromOffset(4, 4),
-                                    BackgroundColor3 = Color3.fromRGB(213, 250, 228),
-                                    BorderSizePixel = 0,
-                                    ZIndex = 5,
-                                }, withChrome(nil, 1)),
-                            }, 2, COLORS.Accent, 0.15, 1)
-                        ),
-                    }, 999, COLORS.BorderStrong, 0.55, 1)
+                        Glyph = React.createElement(ShardGlyph, {
+                            Position = UDim2.fromScale(0.5, 0.5),
+                            AnchorPoint = Vector2.new(0.5, 0.5),
+                            Size = UDim2.fromOffset(28, 24),
+                            ZIndex = 4,
+                        }),
+                    }, 8, COLORS.Lumen, 0.4, 1)
                 ),
                 Shards = React.createElement(Label, {
-                    Position = UDim2.fromOffset(48, 9),
+                    Position = UDim2.fromOffset(52, 10),
                     Size = UDim2.new(1, -60, 0, 24),
                     Text = string.format("%d  Shards", tonumber(currencies.Shards) or 0),
                     Align = Enum.TextXAlignment.Right,
@@ -487,38 +677,24 @@ local function HUD(props)
                 MarksIcon = React.createElement(
                     "Frame",
                     {
-                        Position = UDim2.fromOffset(13, 37),
-                        Size = UDim2.fromOffset(28, 24),
-                        BackgroundColor3 = Color3.fromRGB(92, 72, 45),
+                        Position = UDim2.fromOffset(11, 41),
+                        Size = UDim2.fromOffset(34, 27),
+                        BackgroundColor3 = Color3.fromRGB(79, 61, 40),
+                        BackgroundTransparency = 0.06,
                         BorderSizePixel = 0,
                         ZIndex = 3,
                     },
                     withChrome({
-                        Coin = React.createElement(
-                            "Frame",
-                            {
-                                AnchorPoint = Vector2.new(0.5, 0.5),
-                                Position = UDim2.fromScale(0.5, 0.5),
-                                Size = UDim2.fromOffset(11, 11),
-                                BackgroundColor3 = COLORS.Gold,
-                                BorderSizePixel = 0,
-                                ZIndex = 4,
-                            },
-                            withChrome({
-                                Center = React.createElement("Frame", {
-                                    AnchorPoint = Vector2.new(0.5, 0.5),
-                                    Position = UDim2.fromScale(0.5, 0.5),
-                                    Size = UDim2.fromOffset(5, 5),
-                                    BackgroundColor3 = Color3.fromRGB(92, 72, 45),
-                                    BorderSizePixel = 0,
-                                    ZIndex = 5,
-                                }, withChrome(nil, 999)),
-                            }, 999, Color3.fromRGB(255, 226, 137), 0.12, 1)
-                        ),
-                    }, 999, Color3.fromRGB(142, 111, 63), 0.45, 1)
+                        Glyph = React.createElement(MarkGlyph, {
+                            Position = UDim2.fromScale(0.5, 0.5),
+                            AnchorPoint = Vector2.new(0.5, 0.5),
+                            Size = UDim2.fromOffset(28, 24),
+                            ZIndex = 4,
+                        }),
+                    }, 8, COLORS.Gold, 0.42, 1)
                 ),
                 Marks = React.createElement(Label, {
-                    Position = UDim2.fromOffset(48, 37),
+                    Position = UDim2.fromOffset(52, 42),
                     Size = UDim2.new(1, -60, 0, 24),
                     Text = string.format("%d  Marks", tonumber(currencies.Marks) or 0),
                     Align = Enum.TextXAlignment.Right,
@@ -698,6 +874,8 @@ local function Dialogue(props)
             StrokeColor = COLORS.BorderStrong,
             StrokeTransparency = 0.18,
             StrokeThickness = 1.2,
+            Ornamented = true,
+            OrnamentColor = COLORS.Lumen,
             ZIndex = 20,
             Children = {
                 Accent = React.createElement("Frame", {
@@ -707,8 +885,14 @@ local function Dialogue(props)
                     BorderSizePixel = 0,
                     ZIndex = 22,
                 }),
+                Crest = React.createElement(LeafGlyph, {
+                    Position = UDim2.fromOffset(18, 15),
+                    Size = UDim2.fromOffset(30, 30),
+                    Color = COLORS.Lumen,
+                    ZIndex = 23,
+                }),
                 Kicker = React.createElement(Label, {
-                    Position = UDim2.fromOffset(22, 14),
+                    Position = UDim2.fromOffset(54, 14),
                     Size = UDim2.fromOffset(260, 18),
                     Text = "WAYFARER INTERACTION",
                     TextSize = 10,
@@ -717,8 +901,8 @@ local function Dialogue(props)
                     ZIndex = 22,
                 }),
                 Title = React.createElement(Label, {
-                    Position = UDim2.fromOffset(22, 34),
-                    Size = UDim2.new(1, -98, 0, 34),
+                    Position = UDim2.fromOffset(54, 34),
+                    Size = UDim2.new(1, -130, 0, 34),
                     Text = description.DisplayName or "Traveler",
                     TextSize = 24,
                     Bold = true,
@@ -1834,9 +2018,18 @@ local function MainMenu(props)
                     TextColor = selected and COLORS.PanelDeep or COLORS.Muted,
                     ZIndex = 35,
                 }),
+                Leaf = if selected
+                    then React.createElement(LeafGlyph, {
+                        Position = UDim2.new(1, -28, 0.5, 0),
+                        AnchorPoint = Vector2.new(0.5, 0.5),
+                        Size = UDim2.fromOffset(18, 18),
+                        Color = COLORS.Lumen,
+                        ZIndex = 36,
+                    })
+                    else nil,
                 Name = React.createElement(Label, {
                     Position = UDim2.fromOffset(44, 0),
-                    Size = UDim2.new(1, -52, 1, 0),
+                    Size = UDim2.new(1, -78, 1, 0),
                     Text = tabName,
                     TextSize = 10,
                     Bold = true,
@@ -1863,6 +2056,8 @@ local function MainMenu(props)
             StrokeColor = COLORS.BorderStrong,
             StrokeTransparency = 0.16,
             StrokeThickness = 1.2,
+            Ornamented = true,
+            OrnamentColor = COLORS.Lumen,
             ZIndex = 30,
             Children = {
                 Header = React.createElement(
@@ -1882,9 +2077,15 @@ local function MainMenu(props)
                             BorderSizePixel = 0,
                             ZIndex = 33,
                         }),
+                        Crest = React.createElement(LeafGlyph, {
+                            Position = UDim2.fromOffset(18, 16),
+                            Size = UDim2.fromOffset(30, 30),
+                            Color = COLORS.Lumen,
+                            ZIndex = 34,
+                        }),
                         Brand = React.createElement(Label, {
-                            Position = UDim2.fromOffset(22, 9),
-                            Size = UDim2.fromOffset(250, 26),
+                            Position = UDim2.fromOffset(54, 9),
+                            Size = UDim2.fromOffset(218, 26),
                             Text = "EVERLEAF",
                             TextSize = 22,
                             Bold = true,
@@ -1892,8 +2093,8 @@ local function MainMenu(props)
                             ZIndex = 33,
                         }),
                         Subtitle = React.createElement(Label, {
-                            Position = UDim2.fromOffset(22, 34),
-                            Size = UDim2.fromOffset(340, 18),
+                            Position = UDim2.fromOffset(54, 34),
+                            Size = UDim2.fromOffset(308, 18),
                             Text = string.format(
                                 "%s · Level %d",
                                 string.upper(activeTab),
