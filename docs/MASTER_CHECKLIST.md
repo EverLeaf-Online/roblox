@@ -1,7 +1,7 @@
 # EverLeaf Roblox — Master Checklist
 
 **Canonical status:** 2026-09-14
-**Latest gameplay checkpoint:** visible equipment — server-replicated weapon silhouettes for starter/family weapons across respawn and equipment changes
+**Latest gameplay checkpoint:** family combat identity — server-authoritative basic-attack profiles plus family-specific poses and hit VFX
 **Purpose:** detailed implementation/status tracker for the entire project.
 **Roadmap:** [`ROADMAP.md`](ROADMAP.md)
 
@@ -268,6 +268,7 @@
 - [x] Equipped weapon presentation is server-replicated with distinct blade, bow, focus, twin-knife, and maul silhouettes; Studio pose/alignment QA remains.
 - [x] First advancement requires The Five Paths trial: Wayfarer Proving Circle + Gravebone Captain, after Mosswarden progression.
 - [x] First advancement implemented with server validation, permanent family binding, +3 starting SP, starter skill grant/hotbar assignment, family-aware basic attacks, and starter-weapon delivery.
+- [x] First families now have distinct basic-attack profiles: ranged Thornrunner/Lumenweaver, fast Veilstrider cadence, heavy Ironbloom/Brasshand melee, with matching client presentation.
 - [x] Equipment family/tier/level restrictions are validated server-side.
 - [ ] Implement level-30 advancements.
 - [ ] Implement level-70 advancements.

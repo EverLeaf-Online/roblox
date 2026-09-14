@@ -110,6 +110,7 @@ Every client-callable RemoteFunction is rate-limited. `GameAction` uses an expli
 ## Client layers
 
 - Controllers: movement, camera, combat, React UI root, screen navigation.
+- Presentation: family-aware combat pose/projectile/impact effects remain client-only while attack eligibility, targeting, cooldown, and damage remain server authoritative.
 - Services: validated action client and public catalog client.
 - State: profile store, party event store, UI store.
 - Production UI: React Lua + ReactRoblox mounted once under `PlayerGui`; HUD/dialogue are the first migrated surfaces, with character, inventory, equipment, skills, quests, shop, party, settings, and boss screens following the same component tree.

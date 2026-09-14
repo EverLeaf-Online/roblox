@@ -15,6 +15,23 @@ local function getRoot(model)
     return model and model:FindFirstChild("HumanoidRootPart")
 end
 
+local function basicAttackDefinition(profile)
+    local family = type(profile.FamilyId) == "string" and ClassFamilyDefinitions[profile.FamilyId]
+        or nil
+    local attack = family and family.BasicAttack or nil
+    return {
+        PrimaryStat = family and family.PrimaryStat or "Might",
+        Range = attack and attack.Range or GameConfig.Combat.BasicAttackRange,
+        VerticalRange = attack and attack.VerticalRange
+            or GameConfig.Combat.BasicAttackVerticalRange,
+        ArcDegrees = attack and attack.ArcDegrees or GameConfig.Combat.BasicAttackArcDegrees,
+        Cooldown = attack and attack.Cooldown or GameConfig.Combat.BasicAttackCooldown,
+        AttackPower = attack and attack.AttackPower or GameConfig.Combat.BeginnerAttackPower,
+        StatScale = attack and attack.StatScale or GameConfig.Combat.BeginnerStatScale,
+        Mastery = attack and attack.Mastery or GameConfig.Combat.DefaultMastery,
+    }
+end
+
 function CombatService.BasicAttack(player, profile)
     local character = player.Character
     local humanoid = character and character:FindFirstChildOfClass("Humanoid")
@@ -23,10 +40,11 @@ function CombatService.BasicAttack(player, profile)
         return false, "character_unavailable"
     end
 
+    local attack = basicAttackDefinition(profile)
     local target = TargetingService.FindBestEnemy(player, {
-        Range = GameConfig.Combat.BasicAttackRange,
-        VerticalRange = GameConfig.Combat.BasicAttackVerticalRange,
-        ArcDegrees = GameConfig.Combat.BasicAttackArcDegrees,
+        Range = attack.Range,
+        VerticalRange = attack.VerticalRange,
+        ArcDegrees = attack.ArcDegrees,
         RequireLineOfSight = GameConfig.Combat.RequireLineOfSight,
     })
     if not target then
@@ -37,27 +55,22 @@ function CombatService.BasicAttack(player, profile)
     if not targetRoot then
         return false, "target_unavailable"
     end
-    if
-        (targetRoot.Position - playerRoot.Position).Magnitude > GameConfig.Combat.BasicAttackRange
-    then
+    if (targetRoot.Position - playerRoot.Position).Magnitude > attack.Range then
         return false, "out_of_range"
     end
 
     local now = os.clock()
     local previous = lastAttackAt[player] or 0
-    if now - previous < GameConfig.Combat.BasicAttackCooldown then
+    if now - previous < attack.Cooldown then
         return false, "cooldown"
     end
 
     lastAttackAt[player] = now
-    local family = type(profile.FamilyId) == "string" and ClassFamilyDefinitions[profile.FamilyId]
-        or nil
-    local primaryStat = family and family.PrimaryStat or "Might"
     local damage, reason = DamageService.RollBasicDamage(profile, {
-        PrimaryStat = primaryStat,
-        AttackPower = GameConfig.Combat.BeginnerAttackPower,
-        StatScale = GameConfig.Combat.BeginnerStatScale,
-        Mastery = GameConfig.Combat.DefaultMastery,
+        PrimaryStat = attack.PrimaryStat,
+        AttackPower = attack.AttackPower,
+        StatScale = attack.StatScale,
+        Mastery = attack.Mastery,
     })
     if not damage then
         return false, reason
@@ -81,6 +94,7 @@ function CombatService.BasicAttack(player, profile)
                     Damage = 0,
                     Dodged = true,
                     TargetHealth = math.max(0, targetHumanoid.Health),
+                    TargetPosition = targetRoot.Position,
                 }
         end
         return false, hitResult
@@ -91,6 +105,7 @@ function CombatService.BasicAttack(player, profile)
         {
             Damage = hitResult,
             TargetHealth = math.max(0, targetHumanoid.Health),
+            TargetPosition = targetRoot.Position,
         }
 end
 
