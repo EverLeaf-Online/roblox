@@ -14,21 +14,30 @@
     },
     "tree_stump_01": {
       "role": "TreeStump",
-      "roblox_model_asset_id": 108442673083674,
+      "roblox_model_asset_id": 111453055456477,
       "source_fbx": "https://dl.polyhaven.org/file/ph-assets/Models/fbx/1k/tree_stump_01/tree_stump_01_1k.fbx",
-      "status": "Approved"
+      "status": "Approved optimized textured GLB",
+      "optimized_glb": "assets/polyhaven/models/tree_stump_01/tree_stump_01_roblox.glb",
+      "optimized_polygons": 27998,
+      "optimized_glb_bytes": 3647808
     },
     "dead_tree_trunk": {
       "role": "FallenTreeTrunk",
-      "roblox_model_asset_id": 119607451904702,
+      "roblox_model_asset_id": 76250166585487,
       "source_fbx": "https://dl.polyhaven.org/file/ph-assets/Models/fbx/1k/dead_tree_trunk/dead_tree_trunk_1k.fbx",
-      "status": "Approved"
+      "status": "Approved optimized textured GLB",
+      "optimized_glb": "assets/polyhaven/models/dead_tree_trunk/dead_tree_trunk_roblox.glb",
+      "optimized_polygons": 28000,
+      "optimized_glb_bytes": 3158208
     },
     "pine_roots": {
       "role": "PineRoots",
-      "roblox_model_asset_id": 103715602023577,
+      "roblox_model_asset_id": 71542327988536,
       "source_fbx": "https://dl.polyhaven.org/file/ph-assets/Models/fbx/1k/pine_roots/pine_roots_1k.fbx",
-      "status": "Approved"
+      "status": "Approved optimized textured GLB",
+      "optimized_glb": "assets/polyhaven/models/pine_roots/pine_roots_roblox.glb",
+      "optimized_polygons": 13951,
+      "optimized_glb_bytes": 3308888
     }
   }
 }

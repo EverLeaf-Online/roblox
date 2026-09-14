@@ -26,8 +26,8 @@ Source collection: Poly Haven **Pine Forest** (CC0). The downloaded high/working
 | EverLeaf role | Poly Haven source | Roblox asset ID | Status |
 |---|---|---:|---|
 | `TreePrimary` | `pine_sapling_small` | `124246481535142` | Approved, optimized textured GLB |
-| `TreeStump` | `tree_stump_01` | `108442673083674` | Approved |
-| `FallenTreeTrunk` | `dead_tree_trunk` | `119607451904702` | Approved |
-| `PineRoots` | `pine_roots` | `103715602023577` | Approved |
+| `TreeStump` | `tree_stump_01` | `111453055456477` | Approved, optimized textured GLB |
+| `FallenTreeTrunk` | `dead_tree_trunk` | `76250166585487` | Approved, optimized textured GLB |
+| `PineRoots` | `pine_roots` | `71542327988536` | Approved, optimized textured GLB |
 
-All four models are EverLeaf-owned Roblox uploads sourced from CC0 files. The loader sanitizes them before prefab registration. `TreePrimary` replaces the broken Creator Store tree `580221169`; that old asset is no longer an active Lumenreach dependency. Procedural geometry remains only as a fail-safe when a trusted prefab cannot be loaded.
+All four models are EverLeaf-owned Roblox uploads sourced from CC0 files. Each active forest prefab is now a self-contained textured GLB; the loader sanitizes it before prefab registration. `TreePrimary` replaces the broken Creator Store tree `580221169`; that old asset is no longer an active Lumenreach dependency. Procedural geometry remains only as a fail-safe when a trusted prefab cannot be loaded.

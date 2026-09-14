@@ -10,3 +10,7 @@ Thumbs.db
 
 # Large local Poly Haven model source working set; reproducible from manifest.
 assets/polyhaven/models/
+
+# Python tooling cache
+__pycache__/
+*.pyc

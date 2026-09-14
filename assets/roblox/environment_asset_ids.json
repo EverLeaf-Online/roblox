@@ -1,9 +1,9 @@
 {
   "DeadTreeTrunk": {
-    "Model": 119607451904702
+    "Model": 76250166585487
   },
   "PineRoots": {
-    "Model": 103715602023577
+    "Model": 71542327988536
   },
   "PineSaplingSmall": {
     "BarkColor": 77401003804409,
@@ -16,6 +16,6 @@
     "TreeModel": 124246481535142
   },
   "TreeStump": {
-    "Model": 108442673083674
+    "Model": 111453055456477
   }
 }

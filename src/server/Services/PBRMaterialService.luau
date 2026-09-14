@@ -30,11 +30,33 @@ local function ensureVariant(name, definition)
     return variant
 end
 
+local function applyBaseOverride(name, definition)
+    if not activeVariants[name] or not definition.OverrideMaterial then
+        return
+    end
+
+    local ok, err = pcall(function()
+        MaterialService:SetBaseMaterialOverride(definition.OverrideMaterial, name)
+    end)
+    if not ok then
+        warn(
+            string.format(
+                "[PBRMaterialService] Failed to override %s with %s: %s",
+                tostring(definition.OverrideMaterial),
+                name,
+                tostring(err)
+            )
+        )
+    end
+end
+
 function PBRMaterialService.Init()
     table.clear(activeVariants)
     for name, definition in Definitions do
         local ok, err = pcall(function()
-            ensureVariant(name, definition)
+            if ensureVariant(name, definition) then
+                applyBaseOverride(name, definition)
+            end
         end)
         if not ok then
             warn(
@@ -54,6 +76,7 @@ function PBRMaterialService.Init()
         end
 
         activeVariants[child.Name] = child
+        applyBaseOverride(child.Name, definition)
         task.defer(function()
             local world = workspace:FindFirstChild("EverLeafGeneratedWorld")
             if world then
@@ -91,10 +114,11 @@ end
 function PBRMaterialService.ApplyGeneratedWorld(world)
     for _, descendant in world:GetDescendants() do
         if descendant:IsA("BasePart") then
-            if descendant.Material == Enum.Material.WoodPlanks then
+            local explicitVariant = descendant:GetAttribute("EverLeafMaterialVariant")
+            if type(explicitVariant) == "string" and explicitVariant ~= "" then
+                PBRMaterialService.Apply(descendant, explicitVariant)
+            elseif descendant.Material == Enum.Material.WoodPlanks then
                 PBRMaterialService.Apply(descendant, "MossWood")
-            elseif descendant.Material == Enum.Material.Cobblestone then
-                PBRMaterialService.Apply(descendant, "WoodStonePathway")
             end
         end
     end

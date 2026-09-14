@@ -12,6 +12,7 @@ local LumenreachWorldService = {}
 local GENERATED_NAME = "EverLeafGeneratedWorld"
 local WORLD_WIDTH = 620
 local WORLD_DEPTH = 560
+local FOLIAGE_MATERIAL = Enum.Material.SmoothPlastic
 
 local function makePart(parent, name, size, cframe, material, color)
     local part = Instance.new("Part")
@@ -24,6 +25,11 @@ local function makePart(parent, name, size, cframe, material, color)
     part.TopSurface = Enum.SurfaceType.Smooth
     part.BottomSurface = Enum.SurfaceType.Smooth
     part.Parent = parent
+    return part
+end
+
+local function useMaterialVariant(part, variantName)
+    part:SetAttribute("EverLeafMaterialVariant", variantName)
     return part
 end
 
@@ -162,7 +168,7 @@ local function makeTree(parent, position, scale, variant)
             "Canopy" .. index,
             spec[2] * scale,
             CFrame.new(position + spec[1] * scale),
-            Enum.Material.Grass,
+            FOLIAGE_MATERIAL,
             leafPalette[spec[3]]
         )
         leaf.CanCollide = false
@@ -242,7 +248,7 @@ local function makeStump(parent, position, scale)
         "Moss",
         Vector3.new(2.2, 0.65, 2.1) * scale,
         stump.CFrame * CFrame.new(0, 1.0 * scale, 0),
-        Enum.Material.Grass,
+        FOLIAGE_MATERIAL,
         Color3.fromRGB(63, 112, 63)
     ).CanCollide =
         false
@@ -276,7 +282,7 @@ local function makeFern(parent, position, scale)
             CFrame.new(
                 position + Vector3.new(math.cos(angle) * 0.85, 0.72, math.sin(angle) * 0.85) * scale
             ) * CFrame.Angles(math.rad(-20), -angle, math.rad(9)),
-            Enum.Material.Grass,
+            FOLIAGE_MATERIAL,
             green
         )
         blade.CanCollide = false
@@ -305,7 +311,7 @@ local function makeFlowerPatch(parent, position, scale, warm)
             "Stem" .. index,
             Vector3.new(0.12, 1.25, 0.12) * scale,
             CFrame.new(position + offset * scale + Vector3.new(0, 0.62 * scale, 0)),
-            Enum.Material.Grass,
+            FOLIAGE_MATERIAL,
             Color3.fromRGB(65, 121, 68)
         )
         stem.CanCollide = false
@@ -330,10 +336,11 @@ local function makeRock(parent, position, size, rotation)
         "Rock",
         size,
         CFrame.new(position) * CFrame.Angles(rotation.X, rotation.Y, rotation.Z),
-        Enum.Material.Slate,
+        Enum.Material.Rock,
         Color3.fromRGB(83, 91, 92)
     )
-    rock.Shape = Enum.PartType.Block
+    rock.Shape = Enum.PartType.Ball
+    useMaterialVariant(rock, "MossyRock")
     return rock
 end
 
@@ -361,11 +368,48 @@ local function makeRockCluster(parent, position, scale, seed)
             "MossCap",
             Vector3.new(3.8, 0.7, 3.2) * scale,
             CFrame.new(position + Vector3.new(-0.4, 2.85, 0.2) * scale),
-            Enum.Material.Grass,
+            FOLIAGE_MATERIAL,
             Color3.fromRGB(63, 106, 59)
         ).CanCollide =
             false
     end
+    return model
+end
+
+local function makeTrailStones(parent)
+    local model = Instance.new("Model")
+    model.Name = "LumenTrailStones"
+    model.Parent = parent
+
+    local stones = {
+        { Vector3.new(-45, 0.28, 27), math.rad(-58), Vector3.new(5.4, 0.35, 2.8) },
+        { Vector3.new(-35, 0.28, 21), math.rad(-66), Vector3.new(4.6, 0.3, 2.5) },
+        { Vector3.new(-24, 0.28, 15), math.rad(-61), Vector3.new(5.0, 0.32, 2.6) },
+        { Vector3.new(-12, 0.28, 10), math.rad(-78), Vector3.new(4.4, 0.3, 2.4) },
+        { Vector3.new(1, 0.28, 6), math.rad(-86), Vector3.new(5.2, 0.34, 2.7) },
+        { Vector3.new(14, 0.28, 3), math.rad(-88), Vector3.new(4.7, 0.3, 2.5) },
+        { Vector3.new(27, 0.28, -4), math.rad(-38), Vector3.new(5.1, 0.32, 2.7) },
+        { Vector3.new(38, 0.28, -14), math.rad(-31), Vector3.new(4.6, 0.3, 2.4) },
+        { Vector3.new(71, 0.28, 21), math.rad(-87), Vector3.new(5.5, 0.34, 2.8) },
+        { Vector3.new(91, 0.28, 24), math.rad(-88), Vector3.new(5.0, 0.32, 2.6) },
+        { Vector3.new(111, 0.28, 29), math.rad(-82), Vector3.new(4.8, 0.3, 2.5) },
+        { Vector3.new(130, 0.28, 37), math.rad(-73), Vector3.new(5.4, 0.34, 2.8) },
+    }
+
+    for index, entry in stones do
+        local stone = makePart(
+            model,
+            "TrailStone" .. index,
+            entry[3],
+            CFrame.new(entry[1]) * CFrame.Angles(0, entry[2], 0),
+            Enum.Material.Cobblestone,
+            Color3.fromRGB(120, 116, 101)
+        )
+        stone.CanCollide = false
+        stone.CanTouch = false
+        useMaterialVariant(stone, "WoodStonePathway")
+    end
+
     return model
 end
 
@@ -474,7 +518,7 @@ local function makeGrassTuft(parent, position, scale)
                     math.rad(index * 53),
                     math.rad(index * 7 - 14)
                 ),
-            Enum.Material.Grass,
+            FOLIAGE_MATERIAL,
             color
         )
         blade.CanCollide = false
@@ -502,7 +546,7 @@ local function makeBush(parent, position, scale)
             "Leaf" .. index,
             Vector3.new(3.2, 2.8, 3.2) * scale,
             CFrame.new(position + offset),
-            Enum.Material.Grass,
+            FOLIAGE_MATERIAL,
             colors[((index - 1) % #colors) + 1]
         )
         leaf.CanCollide = false
@@ -524,7 +568,7 @@ local function makeCampfire(parent, position)
             Vector3.new(1.4, 0.8, 1.1),
             CFrame.new(position + Vector3.new(math.cos(angle) * 2.2, 0.45, math.sin(angle) * 2.2))
                 * CFrame.Angles(0, -angle, 0),
-            Enum.Material.Slate,
+            Enum.Material.Rock,
             Color3.fromRGB(79, 82, 77)
         )
     end
@@ -826,7 +870,7 @@ local function makeRuins(parent)
         "RuinPillar",
         Vector3.new(4, 14, 4),
         CFrame.new(29, 7, -31),
-        Enum.Material.Cobblestone,
+        Enum.Material.Rock,
         stone
     )
     makePart(
@@ -834,7 +878,7 @@ local function makeRuins(parent)
         "RuinPillar",
         Vector3.new(4, 11, 4),
         CFrame.new(43, 5.5, -31),
-        Enum.Material.Cobblestone,
+        Enum.Material.Rock,
         stone
     )
     makePart(
@@ -842,7 +886,7 @@ local function makeRuins(parent)
         "RuinLintel",
         Vector3.new(18, 3, 4),
         CFrame.new(36, 13, -31),
-        Enum.Material.Cobblestone,
+        Enum.Material.Rock,
         stone
     )
     makePart(
@@ -858,7 +902,7 @@ local function makeRuins(parent)
         "BrokenLintel",
         Vector3.new(9, 2.2, 3.4),
         CFrame.new(22, 1.5, -26) * CFrame.Angles(math.rad(8), math.rad(27), math.rad(17)),
-        Enum.Material.Cobblestone,
+        Enum.Material.Rock,
         Color3.fromRGB(105, 112, 106)
     )
     makePart(
@@ -866,7 +910,7 @@ local function makeRuins(parent)
         "FallenPillar",
         Vector3.new(3.2, 10, 3.2),
         CFrame.new(45, 1.9, -37) * CFrame.Angles(math.rad(82), math.rad(14), math.rad(4)),
-        Enum.Material.Cobblestone,
+        Enum.Material.Rock,
         Color3.fromRGB(102, 110, 105)
     )
     makeRockCluster(parent, Vector3.new(20, 0.2, -36), 0.7, 6)
@@ -1180,6 +1224,8 @@ local function decorate(world)
     for _, entry in rockClusters do
         makeRockCluster(world, entry[1], entry[2], entry[3])
     end
+
+    makeTrailStones(world)
 
     for _, position in
         {

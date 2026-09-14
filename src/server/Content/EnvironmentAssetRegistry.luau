@@ -12,7 +12,7 @@ local EnvironmentAssetRegistry = {
         Notes = "Optimized textured GLB derived from Poly Haven pine_sapling_small; single tree variant, embedded bark/needle materials, Roblox-scale geometry budget.",
     },
     TreeStump = {
-        AssetId = 108442673083674,
+        AssetId = 111453055456477,
         Name = "Tree Stump 01",
         Source = "EverLeaf Roblox asset / Poly Haven CC0",
         Status = "approved_for_sanitized_import",
@@ -20,10 +20,10 @@ local EnvironmentAssetRegistry = {
         GroundToPivot = true,
         AllowRuntimeLoad = true,
         PolyHavenId = "tree_stump_01",
-        Notes = "Phase 1 forest-floor stump from Poly Haven.",
+        Notes = "Optimized textured 1K GLB from Poly Haven; decimated for Roblox while preserving embedded material maps.",
     },
     FallenTreeTrunk = {
-        AssetId = 119607451904702,
+        AssetId = 76250166585487,
         Name = "Dead Tree Trunk",
         Source = "EverLeaf Roblox asset / Poly Haven CC0",
         Status = "approved_for_sanitized_import",
@@ -31,10 +31,10 @@ local EnvironmentAssetRegistry = {
         GroundToPivot = true,
         AllowRuntimeLoad = true,
         PolyHavenId = "dead_tree_trunk",
-        Notes = "Phase 1 fallen-log/deadwood prefab from Poly Haven.",
+        Notes = "Optimized textured 1K GLB from Poly Haven; replaces the earlier raw-FBX upload that could render without its intended surface maps.",
     },
     PineRoots = {
-        AssetId = 103715602023577,
+        AssetId = 71542327988536,
         Name = "Pine Roots",
         Source = "EverLeaf Roblox asset / Poly Haven CC0",
         Status = "approved_for_sanitized_import",
@@ -42,7 +42,7 @@ local EnvironmentAssetRegistry = {
         GroundToPivot = true,
         AllowRuntimeLoad = true,
         PolyHavenId = "pine_roots",
-        Notes = "Phase 1 root/forest-floor detail from Poly Haven.",
+        Notes = "Optimized textured 1K GLB from Poly Haven; dual-material roots retained and decimated to the Phase 1 prop budget.",
     },
     DuneSky = {
         AssetId = 138907351102721,
