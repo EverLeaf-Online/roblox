@@ -352,17 +352,19 @@ local function Dialogue(props)
         end
     end
 
-    local function buyTonic()
-        if not description.ShopId then
+    local function buyShopItem(itemId, displayName)
+        if not description.ShopId or not itemId then
             return
         end
         local ok, result = ActionClient.Invoke("shop.buy", {
             ShopId = description.ShopId,
-            ItemId = "small_tonic",
+            ItemId = itemId,
             Quantity = 1,
         })
         setStatus(
-            if ok then "Small Tonic purchased." else string.format("Shop: %s", tostring(result))
+            if ok
+                then string.format("%s purchased.", displayName or "Item")
+                else string.format("Shop: %s", tostring(result))
         )
     end
 
@@ -382,25 +384,36 @@ local function Dialogue(props)
             [React.Event.Activated] = activateQuestButton,
         }, roundedChildren(nil, 9))
     end
-    if description.ShopId then
-        buttonChildren.Shop = React.createElement("TextButton", {
-            Position = UDim2.fromOffset(286, 166),
-            Size = UDim2.fromOffset(272, 48),
+    for index, shopItem in description.ShopItems or {} do
+        if index > 3 then
+            break
+        end
+        buttonChildren["Shop" .. tostring(index)] = React.createElement("TextButton", {
+            Position = UDim2.fromOffset(22 + (index - 1) * 180, 224),
+            Size = UDim2.fromOffset(170, 52),
             BackgroundColor3 = Color3.fromRGB(45, 65, 61),
             BorderSizePixel = 0,
-            Text = "BUY SMALL TONIC · 2 SHARDS",
+            Text = string.format(
+                "%s\n%s %s",
+                string.upper(shopItem.DisplayName or "ITEM"),
+                tostring(shopItem.Price or "?"),
+                string.upper(description.ShopCurrency or "")
+            ),
             TextColor3 = COLORS.Text,
-            TextSize = 13,
+            TextSize = 11,
+            TextWrapped = true,
             Font = Enum.Font.GothamBold,
             AutoButtonColor = true,
-            [React.Event.Activated] = buyTonic,
+            [React.Event.Activated] = function()
+                buyShopItem(shopItem.ItemId, shopItem.DisplayName)
+            end,
         }, roundedChildren(nil, 9))
     end
 
     return React.createElement(Panel, {
         AnchorPoint = Vector2.new(0.5, 1),
         Position = UDim2.fromScale(0.5, 0.72),
-        Size = UDim2.fromOffset(580, 236),
+        Size = UDim2.fromOffset(580, 296),
         ZIndex = 20,
         Children = {
             Title = React.createElement(Label, {
@@ -428,7 +441,7 @@ local function Dialogue(props)
             Body = React.createElement(Label, {
                 Position = UDim2.fromOffset(22, 55),
                 Size = UDim2.new(1, -44, 0, 68),
-                Text = "The grove beyond the camp is stirring. Test your strength there, then return when you're ready to travel deeper into Lumenreach.",
+                Text = description.DialogueText or "The trails are open. Stay alert out there.",
                 TextSize = 16,
                 Wrapped = true,
                 VerticalAlign = Enum.TextYAlignment.Top,

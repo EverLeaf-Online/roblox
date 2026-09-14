@@ -4,7 +4,11 @@ local Workspace = game:GetService("Workspace")
 local EnemySpawnerService = require(script.Parent.EnemySpawnerService)
 local EnvironmentPrefabService = require(script.Parent.EnvironmentPrefabService)
 local InteractionService = require(script.Parent.InteractionService)
+local InventoryService = require(script.Parent.InventoryService)
 local PBRMaterialService = require(script.Parent.PBRMaterialService)
+local PlayerDataService = require(script.Parent.PlayerDataService)
+local QuestService = require(script.Parent.QuestService)
+local PortalService = require(script.Parent.PortalService)
 local WorldObjectService = require(script.Parent.WorldObjectService)
 
 local LumenreachWorldService = {}
@@ -1672,13 +1676,24 @@ local function makeRuins(parent, origin)
     WorldObjectService.Register(gate, "Portal", "lumenreach_to_brasshaven")
 
     local prompt = Instance.new("ProximityPrompt")
-    prompt.Name = "SealedGatePrompt"
-    prompt.ActionText = "Sealed"
+    prompt.Name = "BrasshavenGatePrompt"
+    prompt.ActionText = "Travel"
     prompt.ObjectText = "Brasshaven Gate · Level 20"
+    prompt.KeyboardKeyCode = Enum.KeyCode.E
     prompt.MaxActivationDistance = 10
     prompt.RequiresLineOfSight = false
-    prompt.Enabled = false
+    prompt.Enabled = true
     prompt.Parent = gate
+    prompt.Triggered:Connect(function(player)
+        local profile = PlayerDataService.Get(player)
+        if not profile then
+            return
+        end
+        local ok = PortalService.Travel(player, profile, "lumenreach_to_brasshaven", gate)
+        if ok then
+            PlayerDataService.NotifyChanged(player)
+        end
+    end)
 
     return model
 end
@@ -2065,6 +2080,308 @@ local function makeGuide(parent, position, yaw)
         InteractionService.Begin(player, "lumen_guide", model)
     end)
 
+    return model
+end
+
+local function makeCampNpc(parent, npcId, displayName, position, yaw, palette, role)
+    local model = Instance.new("Model")
+    model.Name = npcId
+    model.Parent = parent
+    local base = CFrame.new(position) * CFrame.Angles(0, yaw or 0, 0)
+    local cloth = palette.Cloth
+    local accent = palette.Accent
+    local skin = palette.Skin or Color3.fromRGB(214, 181, 146)
+    local leather = palette.Leather or Color3.fromRGB(84, 58, 39)
+
+    local function npcPart(name, size, offset, material, color, rotation)
+        local part = makePart(
+            model,
+            name,
+            size,
+            base * CFrame.new(offset) * (rotation or CFrame.new()),
+            material,
+            color
+        )
+        part.CanCollide = false
+        part.CanTouch = false
+        return part
+    end
+
+    local root = npcPart(
+        "HumanoidRootPart",
+        Vector3.new(2, 6.8, 1.8),
+        Vector3.new(0, 3.4, 0),
+        Enum.Material.SmoothPlastic,
+        Color3.new(0, 0, 0)
+    )
+    root.Transparency = 1
+    npcPart(
+        "Torso",
+        Vector3.new(2.5, 2.5, 1.45),
+        Vector3.new(0, 3.9, 0),
+        Enum.Material.Fabric,
+        cloth
+    )
+    npcPart(
+        "Belt",
+        Vector3.new(2.65, 0.3, 1.55),
+        Vector3.new(0, 2.8, 0),
+        Enum.Material.Fabric,
+        leather
+    )
+    for _, side in { -1, 1 } do
+        npcPart(
+            side < 0 and "LeftLeg" or "RightLeg",
+            Vector3.new(0.78, 2.5, 0.82),
+            Vector3.new(side * 0.58, 1.45, 0),
+            Enum.Material.Fabric,
+            Color3.fromRGB(58, 64, 60)
+        )
+        npcPart(
+            side < 0 and "LeftArm" or "RightArm",
+            Vector3.new(0.72, 2.2, 0.76),
+            Vector3.new(side * 1.55, 3.75, 0),
+            Enum.Material.Fabric,
+            cloth,
+            CFrame.Angles(0, 0, math.rad(side * 5))
+        )
+    end
+    local head = npcPart(
+        "Head",
+        Vector3.new(1.7, 1.7, 1.6),
+        Vector3.new(0, 5.75, 0),
+        Enum.Material.SmoothPlastic,
+        skin
+    )
+    for _, x in { -0.34, 0.34 } do
+        npcPart(
+            x < 0 and "LeftEye" or "RightEye",
+            Vector3.new(0.14, 0.14, 0.07),
+            Vector3.new(x, 5.95, -0.82),
+            Enum.Material.SmoothPlastic,
+            Color3.fromRGB(35, 42, 39)
+        )
+    end
+
+    if role == "Quartermaster" then
+        npcPart(
+            "Apron",
+            Vector3.new(2.0, 2.4, 0.14),
+            Vector3.new(0, 3.65, -0.78),
+            Enum.Material.Fabric,
+            accent
+        )
+        npcPart(
+            "Ledger",
+            Vector3.new(1.2, 0.18, 1.55),
+            Vector3.new(-1.35, 3.0, -0.7),
+            Enum.Material.Wood,
+            Color3.fromRGB(104, 75, 48),
+            CFrame.Angles(math.rad(15), math.rad(14), math.rad(-8))
+        )
+    elseif role == "Scout" then
+        npcPart(
+            "ScoutCape",
+            Vector3.new(2.4, 3.0, 0.16),
+            Vector3.new(0, 3.5, 0.88),
+            Enum.Material.Fabric,
+            accent,
+            CFrame.Angles(math.rad(-6), 0, 0)
+        )
+        npcPart(
+            "Pack",
+            Vector3.new(1.8, 2.0, 0.8),
+            Vector3.new(0, 3.5, 1.1),
+            Enum.Material.Fabric,
+            leather
+        )
+        npcPart(
+            "ShortSpear",
+            Vector3.new(0.18, 5.8, 0.18),
+            Vector3.new(1.75, 3.0, 0.25),
+            Enum.Material.Wood,
+            Color3.fromRGB(77, 54, 35),
+            CFrame.Angles(0, 0, math.rad(-7))
+        )
+    elseif role == "Archivist" then
+        npcPart(
+            "ArchiveMantle",
+            Vector3.new(2.8, 0.65, 1.8),
+            Vector3.new(0, 4.7, 0),
+            Enum.Material.Fabric,
+            accent
+        )
+        npcPart(
+            "Book",
+            Vector3.new(1.2, 0.35, 1.55),
+            Vector3.new(1.3, 2.9, -0.55),
+            Enum.Material.Fabric,
+            Color3.fromRGB(82, 59, 106),
+            CFrame.Angles(math.rad(20), math.rad(-12), math.rad(9))
+        )
+        npcPart(
+            "Headband",
+            Vector3.new(1.82, 0.22, 1.7),
+            Vector3.new(0, 6.22, 0),
+            Enum.Material.Fabric,
+            accent
+        )
+    end
+
+    local nameplate = Instance.new("BillboardGui")
+    nameplate.Size = UDim2.fromOffset(210, 32)
+    nameplate.StudsOffsetWorldSpace = Vector3.new(0, 1.65, 0)
+    nameplate.MaxDistance = 45
+    nameplate.Parent = head
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.fromScale(1, 1)
+    label.BackgroundTransparency = 1
+    label.Text = displayName
+    label.TextColor3 = Color3.fromRGB(226, 243, 230)
+    label.TextStrokeTransparency = 0.25
+    label.Font = Enum.Font.GothamBold
+    label.TextScaled = true
+    label.Parent = nameplate
+
+    model.PrimaryPart = root
+    WorldObjectService.Register(model, "Npc", npcId)
+    local prompt = Instance.new("ProximityPrompt")
+    prompt.ActionText = "Talk"
+    prompt.ObjectText = displayName
+    prompt.KeyboardKeyCode = Enum.KeyCode.E
+    prompt.MaxActivationDistance = 11
+    prompt.RequiresLineOfSight = false
+    prompt.Parent = root
+    prompt.Triggered:Connect(function(player)
+        InteractionService.Begin(player, npcId, model)
+    end)
+    return model
+end
+
+local function makeExplorationTrigger(parent, landmarkId, position, radius)
+    local trigger = Instance.new("Part")
+    trigger.Name = "Explore_" .. landmarkId
+    trigger.Size = Vector3.new(2, 0.4, 2)
+    trigger.CFrame = CFrame.new(position + Vector3.new(0, 0.2, 0))
+    trigger.Anchored = true
+    trigger.CanCollide = false
+    trigger.CanTouch = false
+    trigger.CanQuery = false
+    trigger.Transparency = 1
+    trigger:SetAttribute("LandmarkId", landmarkId)
+    trigger:SetAttribute("TriggerRadius", radius or 14)
+    trigger.Parent = parent
+    CollectionService:AddTag(trigger, "ExplorationTrigger")
+    return trigger
+end
+
+local function makeWhisperrootHollow(parent)
+    local origin = WORLD_ZONES.Waterfall + Vector3.new(-69, 0, -44)
+    local model = Instance.new("Model")
+    model.Name = "WhisperrootHollow"
+    model.Parent = parent
+    makeRockCluster(model, origin + Vector3.new(-8, 0, 0), 1.7, 31)
+    makeRockCluster(model, origin + Vector3.new(8, 0, 0), 1.7, 32)
+    makeRockCluster(model, origin + Vector3.new(0, 5.8, 2), 1.45, 33)
+    makeDryBranches(model, origin + Vector3.new(-5, 0.2, 7), math.rad(24), 0.75)
+    makeCrystal(model, origin + Vector3.new(0, 2.4, 9))
+    makeCrystal(model, origin + Vector3.new(5, 1.9, 6))
+    local cache = makePart(
+        model,
+        "OldWayfarerCache",
+        Vector3.new(4.4, 1.3, 2.8),
+        CFrame.new(origin + Vector3.new(-2, 0.75, 11)) * CFrame.Angles(0, math.rad(-18), 0),
+        Enum.Material.Wood,
+        Color3.fromRGB(89, 63, 42)
+    )
+    cache.CanCollide = true
+
+    local cachePrompt = Instance.new("ProximityPrompt")
+    cachePrompt.Name = "WayfarerCachePrompt"
+    cachePrompt.ActionText = "Search"
+    cachePrompt.ObjectText = "Old Wayfarer Cache"
+    cachePrompt.KeyboardKeyCode = Enum.KeyCode.E
+    cachePrompt.HoldDuration = 0.35
+    cachePrompt.MaxActivationDistance = 9
+    cachePrompt.RequiresLineOfSight = false
+    cachePrompt.Parent = cache
+    cachePrompt.Triggered:Connect(function(player)
+        local profile = PlayerDataService.Get(player)
+        if not profile then
+            return
+        end
+        profile.World.Secrets = profile.World.Secrets or {}
+        if profile.World.Secrets.whisperroot_cache == true then
+            return
+        end
+        local added = InventoryService.Add(profile, "old_wayfinder_page", 1)
+        if not added then
+            return
+        end
+        profile.World.Secrets.whisperroot_cache = true
+        QuestService.Record(profile, "Collect", "old_wayfinder_page", 1)
+        PlayerDataService.NotifyChanged(player)
+    end)
+
+    for index = 1, 3 do
+        local page = makePart(
+            model,
+            "WeatheredPage" .. index,
+            Vector3.new(1.2, 0.05, 1.55),
+            CFrame.new(origin + Vector3.new(-5 + index * 2.1, 1.5, 9.5 + index * 0.4))
+                * CFrame.Angles(math.rad(2), math.rad(index * 23), math.rad(index * 4)),
+            Enum.Material.Fabric,
+            Color3.fromRGB(201, 189, 151)
+        )
+        page.CanCollide = false
+    end
+    makeExplorationTrigger(parent, "whisperroot_hollow", origin + Vector3.new(0, 0, 8), 13)
+    return model
+end
+
+local function makeStoryRemnant(parent, position, yaw)
+    local model = Instance.new("Model")
+    model.Name = "WayfarerRemnant"
+    model.Parent = parent
+    local base = CFrame.new(position) * CFrame.Angles(0, yaw or 0, 0)
+    local crate = makePart(
+        model,
+        "BrokenCrate",
+        Vector3.new(3.2, 1.4, 2.5),
+        base * CFrame.new(0, 0.75, 0),
+        Enum.Material.Wood,
+        Color3.fromRGB(92, 65, 43)
+    )
+    crate.CanCollide = false
+    local bedroll = makePart(
+        model,
+        "FadedBedroll",
+        Vector3.new(1.2, 0.7, 2.8),
+        base * CFrame.new(2.2, 0.45, 0.6) * CFrame.Angles(0, 0, math.rad(12)),
+        Enum.Material.Fabric,
+        Color3.fromRGB(86, 100, 82)
+    )
+    bedroll.Shape = Enum.PartType.Cylinder
+    bedroll.CanCollide = false
+    local marker = makePart(
+        model,
+        "OldWaymark",
+        Vector3.new(0.5, 3.2, 0.5),
+        base * CFrame.new(-2.1, 1.6, -0.4),
+        Enum.Material.Rock,
+        Color3.fromRGB(112, 120, 114)
+    )
+    marker.CanCollide = false
+    local rune = makePart(
+        model,
+        "FadedRune",
+        Vector3.new(0.58, 0.58, 0.08),
+        base * CFrame.new(-2.1, 2.1, -0.68) * CFrame.Angles(0, 0, math.rad(45)),
+        Enum.Material.Neon,
+        Color3.fromRGB(89, 180, 157)
+    )
+    rune.Transparency = 0.35
+    rune.CanCollide = false
     return model
 end
 
@@ -2735,6 +3052,38 @@ function LumenreachWorldService.Init()
     PBRMaterialService.ApplyGeneratedWorld(world)
     makeSpawn(world)
     makeGuide(world, WORLD_ZONES.Camp + Vector3.new(31, 0, 8), math.rad(102))
+    makeCampNpc(
+        world,
+        "camp_quartermaster",
+        "Orin · Quartermaster",
+        WORLD_ZONES.Camp + Vector3.new(-5, 0, 24),
+        math.rad(156),
+        { Cloth = Color3.fromRGB(105, 83, 58), Accent = Color3.fromRGB(154, 115, 68) },
+        "Quartermaster"
+    )
+    makeCampNpc(
+        world,
+        "moss_scout",
+        "Tovin · Mossglen Scout",
+        WORLD_ZONES.Camp + Vector3.new(48, 0, 31),
+        math.rad(-128),
+        { Cloth = Color3.fromRGB(56, 84, 65), Accent = Color3.fromRGB(86, 126, 79) },
+        "Scout"
+    )
+    makeCampNpc(
+        world,
+        "archive_keeper",
+        "Maela · Archive Keeper",
+        WORLD_ZONES.Camp + Vector3.new(-32, 0, -18),
+        math.rad(34),
+        { Cloth = Color3.fromRGB(67, 65, 92), Accent = Color3.fromRGB(132, 104, 157) },
+        "Archivist"
+    )
+
+    makeStoryRemnant(world, WORLD_ZONES.Crossroads + Vector3.new(28, 0, -26), math.rad(26))
+    makeStoryRemnant(world, WORLD_ZONES.Ruins + Vector3.new(-34, 0, -42), math.rad(-41))
+    makeStoryRemnant(world, WORLD_ZONES.Overlook + Vector3.new(46, 2.0, 12), math.rad(79))
+    makeWhisperrootHollow(world)
 
     makeLandmarkLabel(world, WORLD_ZONES.Camp + Vector3.new(8, 15, 4), "LUMENREACH WAYFARER CAMP")
     makeLandmarkLabel(world, WORLD_ZONES.Crossroads + Vector3.new(0, 11, 0), "LUMENWOOD CROSSROADS")
@@ -2748,8 +3097,33 @@ function LumenreachWorldService.Init()
     makeLandmarkLabel(world, WORLD_ZONES.Glowmere + Vector3.new(0, 11, 0), "GLOWMERE POOL")
     makeLandmarkLabel(world, WORLD_ZONES.Overlook + Vector3.new(0, 19, 0), "SUNMOSS OVERLOOK")
 
+    makeExplorationTrigger(world, "lumenwood_crossroads", WORLD_ZONES.Crossroads, 17)
+    makeExplorationTrigger(world, "glowmere_pool", WORLD_ZONES.Glowmere, 22)
+    makeExplorationTrigger(world, "shattered_lumen_arch", WORLD_ZONES.Ruins, 22)
+    makeExplorationTrigger(
+        world,
+        "veilfall_cascade",
+        WORLD_ZONES.Waterfall + Vector3.new(0, 0, 20),
+        22
+    )
+    makeExplorationTrigger(world, "sunmoss_overlook", WORLD_ZONES.Overlook, 20)
+
     EnemySpawnerService.Spawn("training_dummy", WORLD_ZONES.Camp + Vector3.new(51, 4, -7), world)
 
+    makeMonsterSpawnTrigger(
+        world,
+        "LumenwoodMosslings",
+        WORLD_ZONES.Crossroads + Vector3.new(-27, 0, -21),
+        {
+            MonsterType = "LumenMossling",
+            SpawnAmount = 4,
+            TriggerRadius = 25,
+            SpawnRadius = 12,
+            MaxAliveMonster = 4,
+            SpawnDelay = 0.34,
+            RespawnTime = 18,
+        }
+    )
     makeMonsterSpawnTrigger(
         world,
         "ShatteredArchSkeletons",
@@ -2790,6 +3164,71 @@ function LumenreachWorldService.Init()
             MaxAliveMonster = 3,
             SpawnDelay = 0.2,
             RespawnTime = 30,
+        }
+    )
+    makeMonsterSpawnTrigger(world, "BramblebackTrail", Vector3.new(118, 0, 121), {
+        MonsterType = "Brambleback",
+        SpawnAmount = 3,
+        TriggerRadius = 31,
+        SpawnRadius = 15,
+        MaxAliveMonster = 3,
+        SpawnDelay = 0.32,
+        RespawnTime = 35,
+    })
+    makeMonsterSpawnTrigger(
+        world,
+        "VeilfallWisps",
+        WORLD_ZONES.Waterfall + Vector3.new(31, 0, 12),
+        {
+            MonsterType = "LumenWisp",
+            SpawnAmount = 3,
+            TriggerRadius = 29,
+            SpawnRadius = 14,
+            MaxAliveMonster = 3,
+            SpawnDelay = 0.24,
+            RespawnTime = 33,
+        }
+    )
+    makeMonsterSpawnTrigger(
+        world,
+        "GraveboneCaptainRare",
+        WORLD_ZONES.Ruins + Vector3.new(33, 0, -29),
+        {
+            MonsterType = "GraveboneCaptain",
+            SpawnAmount = 1,
+            TriggerRadius = 24,
+            SpawnRadius = 6,
+            MaxAliveMonster = 1,
+            SpawnDelay = 0,
+            RespawnTime = 80,
+        }
+    )
+    makeMonsterSpawnTrigger(
+        world,
+        "RoyalGlowcapRare",
+        WORLD_ZONES.Glowmere + Vector3.new(-32, 0, 29),
+        {
+            MonsterType = "RoyalGlowcap",
+            SpawnAmount = 1,
+            TriggerRadius = 22,
+            SpawnRadius = 6,
+            MaxAliveMonster = 1,
+            SpawnDelay = 0,
+            RespawnTime = 85,
+        }
+    )
+    makeMonsterSpawnTrigger(
+        world,
+        "MosswardenFieldBoss",
+        WORLD_ZONES.CombatGrove + Vector3.new(32, 0, 34),
+        {
+            MonsterType = "Mosswarden",
+            SpawnAmount = 1,
+            TriggerRadius = 38,
+            SpawnRadius = 7,
+            MaxAliveMonster = 1,
+            SpawnDelay = 0,
+            RespawnTime = 180,
         }
     )
 end

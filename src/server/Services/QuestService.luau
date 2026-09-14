@@ -23,6 +23,11 @@ function QuestService.Start(profile, questId)
     if profile.Level < (definition.MinimumLevel or 1) then
         return false, "level_too_low"
     end
+    for _, prerequisiteId in definition.PrerequisiteQuests or {} do
+        if profile.Quests.Completed[prerequisiteId] ~= true then
+            return false, "prerequisite_incomplete"
+        end
+    end
     profile.Quests.Active[questId] = makeState(definition)
     return true
 end

@@ -4,6 +4,7 @@ local Players = game:GetService("Players")
 local EnemyDefinitions = require(script.Parent.Parent.Content.EnemyDefinitions)
 local AchievementService = require(script.Parent.AchievementService)
 local EnemyAIService = require(script.Parent.EnemyAIService)
+local LootDropService = require(script.Parent.LootDropService)
 local MonsterCombat = require(script.Parent.MonsterCombat)
 local PlayerDataService = require(script.Parent.PlayerDataService)
 local QuestService = require(script.Parent.QuestService)
@@ -79,12 +80,16 @@ function EnemyService.Register(enemy, enemyId, onDeath)
             end
         end
 
+        if winner then
+            LootDropService.RollAndSpawn(enemyId, enemy:GetPivot().Position, winner)
+        end
+
         states[enemy] = nil
         EnemyAIService.Detach(enemy)
         MonsterCombat.PlayDeath(enemy)
         CollectionService:RemoveTag(enemy, "EverLeafEnemy")
         if onDeath then
-            task.spawn(onDeath, enemy, definition)
+            task.spawn(onDeath, enemy, definition, winner)
         end
     end)
 

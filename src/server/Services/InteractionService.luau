@@ -1,5 +1,9 @@
+local ItemDefinitions = require(script.Parent.Parent.Content.ItemDefinitions)
 local NpcDefinitions = require(script.Parent.Parent.Content.NpcDefinitions)
+local QuestDefinitions = require(script.Parent.Parent.Content.QuestDefinitions)
+local ShopDefinitions = require(script.Parent.Parent.Content.ShopDefinitions)
 local InteractionSessionService = require(script.Parent.InteractionSessionService)
+local PlayerDataService = require(script.Parent.PlayerDataService)
 local QuestService = require(script.Parent.QuestService)
 local WorldObjectService = require(script.Parent.WorldObjectService)
 
@@ -8,18 +12,88 @@ local openedEvent = Instance.new("BindableEvent")
 
 InteractionService.Opened = openedEvent.Event
 
-function InteractionService.Describe(npcId)
+local function prerequisitesMet(profile, definition)
+    if not profile then
+        return true
+    end
+    if profile.Level < (definition.MinimumLevel or 1) then
+        return false
+    end
+    for _, prerequisiteId in definition.PrerequisiteQuests or {} do
+        if profile.Quests.Completed[prerequisiteId] ~= true then
+            return false
+        end
+    end
+    return true
+end
+
+local function visibleQuestOffers(definition, profile)
+    local result = {}
+    for _, questId in definition.QuestOffers or {} do
+        local quest = QuestDefinitions[questId]
+        if quest then
+            local active = profile and profile.Quests.Active[questId] ~= nil
+            local completed = profile and profile.Quests.Completed[questId] == true
+            if active or (not completed and prerequisitesMet(profile, quest)) then
+                table.insert(result, questId)
+            end
+        end
+    end
+    return result
+end
+
+local function chooseDialogue(definition, profile)
+    local dialogue = definition.Dialogue or {}
+    if #dialogue == 0 then
+        return "The trails are open. Stay alert out there."
+    end
+    if not profile then
+        return dialogue[1]
+    end
+
+    local completedCount = 0
+    for _, questId in definition.QuestOffers or {} do
+        if profile.Quests.Completed[questId] == true then
+            completedCount += 1
+        end
+    end
+    local index = math.clamp(completedCount + 1, 1, #dialogue)
+    return dialogue[index]
+end
+
+function InteractionService.Describe(npcId, profile)
     local definition = NpcDefinitions[npcId]
     if not definition then
         return false, "unknown_npc"
     end
-    return true,
-        {
-            NpcId = npcId,
-            DisplayName = definition.DisplayName,
-            QuestOffers = definition.QuestOffers,
-            ShopId = definition.ShopId,
-        }
+
+    local description = {
+        NpcId = npcId,
+        DisplayName = definition.DisplayName,
+        DialogueText = chooseDialogue(definition, profile),
+        QuestOffers = visibleQuestOffers(definition, profile),
+        ShopId = definition.ShopId,
+    }
+
+    local shop = definition.ShopId and ShopDefinitions[definition.ShopId]
+    if shop then
+        description.ShopDisplayName = shop.DisplayName
+        description.ShopCurrency = shop.Currency
+        description.ShopItems = {}
+        for itemId, price in shop.Items do
+            local item = ItemDefinitions[itemId]
+            table.insert(description.ShopItems, {
+                ItemId = itemId,
+                DisplayName = item and item.DisplayName or itemId,
+                Price = price,
+            })
+        end
+        table.sort(description.ShopItems, function(a, b)
+            return a.DisplayName < b.DisplayName
+        end)
+    end
+
+    return true, description
 end
 
 function InteractionService.Begin(player, npcId, worldObject)
@@ -37,7 +111,7 @@ function InteractionService.Begin(player, npcId, worldObject)
     end
 
     InteractionSessionService.Begin(player, npcId, definition.ShopId)
-    local ok, description = InteractionService.Describe(npcId)
+    local ok, description = InteractionService.Describe(npcId, PlayerDataService.Get(player))
     if ok then
         openedEvent:Fire(player, description)
     end

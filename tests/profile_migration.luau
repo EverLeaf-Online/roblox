@@ -3,6 +3,7 @@ local template = {
     Meta = { SchemaVersion = 2, CreatedAt = 0, LastSeenAt = 0 },
     Level = 1,
     Settings = { Music = 1 },
+    World = { Secrets = {} },
 }
 local ok, migrated = ProfileMigration.Migrate(
     { Meta = { SchemaVersion = 1, CreatedAt = 5 }, Level = 9 },
@@ -22,3 +23,4 @@ local futureOk, reason =
     ProfileMigration.Migrate({ Meta = { SchemaVersion = 3 } }, template, 2, 100)
 assert(not futureOk and reason == "future_schema", "future schema fails closed")
 print("profile migration tests passed")
+assert(type(migrated.World.Secrets) == "table", "new world secrets reconciled")

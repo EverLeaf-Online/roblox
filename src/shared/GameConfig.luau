@@ -35,7 +35,7 @@ GameConfig.Bosses = {
 
 GameConfig.DataStore = {
     Name = "EverLeafPlayerData_v1",
-    SchemaVersion = 2,
+    SchemaVersion = 3,
     AutosaveSeconds = 60,
     SessionLockSeconds = 180,
     MaxAttempts = 4,

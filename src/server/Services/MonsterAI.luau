@@ -2,6 +2,7 @@ local PathfindingService = game:GetService("PathfindingService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
+local MonsterAnimationService = require(script.Parent.MonsterAnimationService)
 local MonsterCombat = require(script.Parent.MonsterCombat)
 
 local MonsterAI = {}
@@ -32,92 +33,13 @@ local function setState(monster, controller, nextState)
     end
     controller.State = nextState
     monster:SetAttribute("MonsterAIState", nextState)
+    MonsterAnimationService.SetState(monster, nextState)
 end
 
 local function face(root, position)
     local flat = Vector3.new(position.X, root.Position.Y, position.Z)
     if (flat - root.Position).Magnitude > 0.05 then
         root.CFrame = CFrame.lookAt(root.Position, flat)
-    end
-end
-
-local function animateVisual(monster, controller, now)
-    local state = controller.State
-    local monsterId = monster:GetAttribute("EnemyId")
-    local moving = state == "Pursue" or state == "Returning"
-    local speed = if moving then 8 else 2.3
-    if monsterId == "peco_peco" and moving then
-        speed = 12
-    elseif monsterId == "slime" and moving then
-        speed = 6
-    end
-
-    local phase = now * speed
-    local swing = math.sin(phase)
-    local amount = if moving then math.rad(24) else math.rad(3)
-    if monsterId == "peco_peco" and moving then
-        amount = math.rad(34)
-    end
-
-    for _, jointName in { "LeftHip", "RightShoulder" } do
-        local joint = monster:FindFirstChild(jointName, true)
-        if joint and joint:IsA("Motor6D") then
-            joint.Transform = CFrame.Angles(swing * amount, 0, 0)
-        end
-    end
-    for _, jointName in { "RightHip", "LeftShoulder" } do
-        local joint = monster:FindFirstChild(jointName, true)
-        if joint and joint:IsA("Motor6D") then
-            joint.Transform = CFrame.Angles(-swing * amount, 0, 0)
-        end
-    end
-
-    local bodyJoint = monster:FindFirstChild("BodyJoint", true)
-    if bodyJoint and bodyJoint:IsA("Motor6D") then
-        local bounce = if moving then math.abs(math.sin(phase)) * 0.24 else math.sin(phase) * 0.05
-        if monsterId == "slime" then
-            bounce = if moving then math.abs(math.sin(phase)) * 0.5 else math.sin(phase) * 0.12
-        end
-        bodyJoint.Transform = CFrame.new(0, bounce, 0)
-            * CFrame.Angles(if moving then math.rad(-3) * math.sin(phase) else 0, 0, 0)
-    end
-
-    if monsterId == "slime" then
-        local body = monster:FindFirstChild("Body")
-        local belly = monster:FindFirstChild("BellyGlow")
-        local squish = math.sin(phase) * (if moving then 0.1 else 0.04)
-        if body and body:IsA("BasePart") then
-            body.Size = Vector3.new(4.6 * (1 + squish), 3.1 * (1 - squish), 4.4 * (1 + squish))
-        end
-        if belly and belly:IsA("BasePart") then
-            belly.Size = Vector3.new(3.1 * (1 + squish), 1.3 * (1 - squish), 3.0 * (1 + squish))
-        end
-    elseif monsterId == "peco_peco" then
-        local tail = monster:FindFirstChild("TailJoint", true)
-        if tail and tail:IsA("Motor6D") then
-            tail.Transform =
-                CFrame.Angles(math.rad(8) * math.sin(phase * 0.7), math.rad(6) * swing, 0)
-        end
-    end
-
-    if state == "Attack" then
-        if monsterId == "skeleton" then
-            local shoulder = monster:FindFirstChild("RightShoulder", true)
-            if shoulder and shoulder:IsA("Motor6D") then
-                shoulder.Transform = CFrame.Angles(math.rad(-72), 0, math.rad(16))
-            end
-        elseif monsterId == "slime" and bodyJoint and bodyJoint:IsA("Motor6D") then
-            bodyJoint.Transform = CFrame.new(0, -0.25, 0) * CFrame.Angles(math.rad(8), 0, 0)
-        elseif monsterId == "peco_peco" then
-            local headJoint = monster:FindFirstChild("HeadJoint", true)
-            if headJoint and headJoint:IsA("Motor6D") then
-                headJoint.Transform = CFrame.new(0, -0.2, -0.55) * CFrame.Angles(math.rad(18), 0, 0)
-            end
-        end
-    elseif state == "Dodge" and monsterId == "skeleton" then
-        if bodyJoint and bodyJoint:IsA("Motor6D") then
-            bodyJoint.Transform = CFrame.Angles(0, 0, math.rad(55) * math.sin(now * 24))
-        end
     end
 end
 
@@ -164,37 +86,42 @@ local function moveWithPath(controller, humanoid, root, destination, now)
 end
 
 local function beginAttack(monster, controller, target, targetRoot, now)
-    if now < controller.NextAttackAt then
+    if controller.State == "Attack" and now < controller.AttackStateUntil then
         return
     end
+    if now < controller.NextAttackAt then
+        setState(monster, controller, "Idle")
+        face(controller.Root, targetRoot.Position)
+        controller.Humanoid:Move(Vector3.zero, false)
+        return
+    end
+
+    local attackWindup = controller.Definition.AttackWindup or 0.4
     controller.NextAttackAt = now + (controller.Definition.AttackCooldown or 1.5)
+    controller.AttackStateUntil = now + math.max(0.55, attackWindup + 0.28)
     controller.AttackToken += 1
     local token = controller.AttackToken
     setState(monster, controller, "Attack")
     face(controller.Root, targetRoot.Position)
     controller.Humanoid:Move(Vector3.zero, false)
 
+    MonsterAnimationService.Restart(monster, "Attack")
     local monsterId = controller.Definition.Id
-    local rightShoulder = monster:FindFirstChild("RightShoulder", true)
-    if monsterId == "skeleton" and rightShoulder and rightShoulder:IsA("Motor6D") then
-        rightShoulder.Transform = CFrame.Angles(math.rad(-65), 0, math.rad(12))
-    elseif monsterId == "slime" then
-        local direction = targetRoot.Position - controller.Root.Position
-        local planar = Vector3.new(direction.X, 0, direction.Z)
-        if planar.Magnitude > 0.05 then
-            planar = planar.Unit
+    local direction = targetRoot.Position - controller.Root.Position
+    local planar = Vector3.new(direction.X, 0, direction.Z)
+    if planar.Magnitude > 0.05 then
+        planar = planar.Unit
+        if monsterId == "slime" or monsterId == "royal_glowcap" then
             controller.Root.AssemblyLinearVelocity = Vector3.new(planar.X * 9, 15, planar.Z * 9)
-        end
-    elseif monsterId == "peco_peco" then
-        local direction = targetRoot.Position - controller.Root.Position
-        local planar = Vector3.new(direction.X, 0, direction.Z)
-        if planar.Magnitude > 0.05 then
-            planar = planar.Unit
+        elseif monsterId == "peco_peco" then
             controller.Root.AssemblyLinearVelocity = Vector3.new(planar.X * 17, 5, planar.Z * 17)
+        elseif monsterId == "brambleback" then
+            controller.Root.AssemblyLinearVelocity = Vector3.new(planar.X * 14, 3, planar.Z * 14)
+        elseif monsterId == "mosswarden" then
+            controller.Root.AssemblyLinearVelocity = Vector3.new(planar.X * 11, 2, planar.Z * 11)
         end
     end
 
-    local attackWindup = controller.Definition.AttackWindup or 0.4
     task.delay(attackWindup, function()
         if not monster.Parent or controller.AttackToken ~= token then
             return
@@ -237,6 +164,7 @@ function MonsterAI.Attach(monster, definition)
         Target = nil,
         State = "Idle",
         NextAttackAt = 0,
+        AttackStateUntil = 0,
         NextPathAt = 0,
         Waypoints = nil,
         WaypointIndex = 0,
@@ -246,6 +174,7 @@ function MonsterAI.Attach(monster, definition)
     }
     controllers[monster] = controller
     monster:SetAttribute("MonsterAIState", "Idle")
+    MonsterAnimationService.SetState(monster, "Idle")
     monster.Destroying:Once(function()
         controllers[monster] = nil
     end)
@@ -258,6 +187,7 @@ function MonsterAI.Detach(monster)
         controller.AttackToken += 1
     end
     controllers[monster] = nil
+    MonsterAnimationService.Detach(monster)
 end
 
 function MonsterAI.GetState(monster)
@@ -278,12 +208,19 @@ end
 
 function MonsterAI.Init()
     RunService.Heartbeat:Connect(function(deltaTime)
+        local frameNow = os.clock()
+        for monster in controllers do
+            if monster.Parent then
+                MonsterAnimationService.Update(monster, frameNow)
+            end
+        end
+
         accumulator += deltaTime
         if accumulator < 0.12 then
             return
         end
         accumulator = 0
-        local now = os.clock()
+        local now = frameNow
 
         for monster, controller in controllers do
             local root = controller.Root
@@ -292,8 +229,6 @@ function MonsterAI.Init()
                 controllers[monster] = nil
                 continue
             end
-
-            animateVisual(monster, controller, now)
 
             if monster:GetAttribute("MonsterEmerging") == true then
                 setState(monster, controller, "Emerging")

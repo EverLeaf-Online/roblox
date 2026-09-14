@@ -1,6 +1,7 @@
 local Debris = game:GetService("Debris")
 local TweenService = game:GetService("TweenService")
 
+local MonsterAnimationService = require(script.Parent.MonsterAnimationService)
 local PlayerDamageService = require(script.Parent.PlayerDamageService)
 
 local MonsterCombat = {}
@@ -14,6 +15,72 @@ local function getHumanoid(monster)
     return monster and monster:FindFirstChildOfClass("Humanoid")
 end
 
+local function playSound(parent, soundId, volume, playbackSpeed)
+    if not parent then
+        return
+    end
+    local sound = Instance.new("Sound")
+    sound.Name = "MonsterSfx"
+    sound.SoundId = soundId
+    sound.Volume = volume or 0.35
+    sound.PlaybackSpeed = playbackSpeed or 1
+    sound.RollOffMaxDistance = 55
+    sound.Parent = parent
+    sound:Play()
+    Debris:AddItem(sound, 3)
+end
+
+local function effectColor(monsterId)
+    if monsterId == "skeleton" or monsterId == "gravebone_captain" then
+        return Color3.fromRGB(231, 223, 196)
+    elseif monsterId == "slime" or monsterId == "royal_glowcap" then
+        return Color3.fromRGB(104, 237, 157)
+    elseif monsterId == "peco_peco" then
+        return Color3.fromRGB(242, 171, 75)
+    elseif monsterId == "brambleback" or monsterId == "mosswarden" then
+        return Color3.fromRGB(121, 187, 96)
+    elseif monsterId == "lumen_wisp" then
+        return Color3.fromRGB(111, 237, 219)
+    end
+    return Color3.fromRGB(219, 211, 172)
+end
+
+local function hitBurst(monster)
+    local root = getRoot(monster)
+    if not root then
+        return
+    end
+    local monsterId = monster:GetAttribute("EnemyId")
+    local color = effectColor(monsterId)
+    local emitter = Instance.new("ParticleEmitter")
+    emitter.Name = "MonsterHitBurst"
+    emitter.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+    emitter.Color = ColorSequence.new(color)
+    emitter.Lifetime = NumberRange.new(0.12, 0.28)
+    emitter.Speed = NumberRange.new(4, 9)
+    emitter.Rate = 0
+    emitter.SpreadAngle = Vector2.new(160, 160)
+    emitter.Size = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 0.45),
+        NumberSequenceKeypoint.new(1, 0),
+    })
+    emitter.Parent = root
+    emitter:Emit(monsterId == "mosswarden" and 22 or 10)
+    Debris:AddItem(emitter, 0.5)
+
+    local highlight = Instance.new("Highlight")
+    highlight.Name = "HitFlash"
+    highlight.FillColor = color
+    highlight.FillTransparency = 0.35
+    highlight.OutlineTransparency = 1
+    highlight.DepthMode = Enum.HighlightDepthMode.Occluded
+    highlight.Parent = monster
+    TweenService:Create(highlight, TweenInfo.new(0.16), { FillTransparency = 1 }):Play()
+    Debris:AddItem(highlight, 0.2)
+
+    playSound(root, "rbxasset://sounds/electronicpingshort.wav", 0.22, rng:NextNumber(0.9, 1.1))
+end
+
 local function makeHealthBar(monster, definition)
     local root = getRoot(monster)
     local humanoid = getHumanoid(monster)
@@ -23,8 +90,10 @@ local function makeHealthBar(monster, definition)
 
     local gui = Instance.new("BillboardGui")
     gui.Name = "MonsterHealthBar"
-    gui.Size = UDim2.fromOffset(110, 28)
-    gui.StudsOffsetWorldSpace = Vector3.new(0, 4.5, 0)
+    gui.Size = if definition.Boss
+        then UDim2.fromOffset(190, 38)
+        else if definition.Elite then UDim2.fromOffset(140, 32) else UDim2.fromOffset(110, 28)
+    gui.StudsOffsetWorldSpace = Vector3.new(0, if definition.Boss then 7 else 4.5, 0)
     gui.AlwaysOnTop = true
     gui.MaxDistance = 85
     gui.Parent = root
@@ -34,7 +103,11 @@ local function makeHealthBar(monster, definition)
     name.Size = UDim2.fromScale(1, 0.5)
     name.BackgroundTransparency = 1
     name.Text = definition.DisplayName or monster.Name
-    name.TextColor3 = Color3.fromRGB(238, 244, 236)
+    name.TextColor3 = if definition.Boss
+        then Color3.fromRGB(255, 212, 112)
+        else if definition.Elite
+            then Color3.fromRGB(210, 177, 255)
+            else Color3.fromRGB(238, 244, 236)
     name.TextStrokeTransparency = 0.35
     name.Font = Enum.Font.GothamMedium
     name.TextScaled = true
@@ -51,7 +124,11 @@ local function makeHealthBar(monster, definition)
     local fill = Instance.new("Frame")
     fill.Name = "Fill"
     fill.Size = UDim2.fromScale(1, 1)
-    fill.BackgroundColor3 = Color3.fromRGB(103, 211, 122)
+    fill.BackgroundColor3 = if definition.Boss
+        then Color3.fromRGB(205, 114, 76)
+        else if definition.Elite
+            then Color3.fromRGB(152, 109, 220)
+            else Color3.fromRGB(103, 211, 122)
     fill.BorderSizePixel = 0
     fill.Parent = back
 
@@ -101,6 +178,7 @@ local function playFlinch(monster, duration)
     end
     monster:SetAttribute("MonsterReaction", "Hit")
     monster:SetAttribute("MonsterReactionUntil", os.clock() + duration)
+    MonsterAnimationService.Restart(monster, "Hit")
     local original = root.CFrame
     root.CFrame = original * CFrame.Angles(math.rad(-4), 0, math.rad(rng:NextNumber(-5, 5)))
     task.delay(duration, function()
@@ -130,6 +208,7 @@ local function tryDodge(monster, definition)
     monster:SetAttribute("MonsterInvulnerableUntil", now + pause)
     monster:SetAttribute("MonsterReaction", "Dodge")
     monster:SetAttribute("MonsterReactionUntil", now + pause)
+    MonsterAnimationService.Restart(monster, "Dodge")
 
     humanoid:Move(Vector3.zero, false)
     local backward = -root.CFrame.LookVector
@@ -184,6 +263,7 @@ function MonsterCombat.ApplyPlayerHit(monster, definition, damage)
     end
     humanoid:TakeDamage(applied)
     showDamage(monster, applied)
+    hitBurst(monster)
     if humanoid.Health > 0 then
         playFlinch(monster, definition.HitStun or 0.22)
     end
@@ -200,6 +280,7 @@ end
 
 function MonsterCombat.PlayDeath(monster)
     monster:SetAttribute("MonsterReaction", "Dead")
+    MonsterAnimationService.PlayOneShot(monster, "Dead")
     for _, descendant in monster:GetDescendants() do
         if descendant:IsA("BasePart") then
             descendant.CanCollide = false
@@ -214,18 +295,17 @@ function MonsterCombat.PlayDeath(monster)
         root.Anchored = true
 
         local monsterId = monster:GetAttribute("EnemyId")
-        local burstColor = Color3.fromRGB(150, 140, 120)
-        local debrisColor = Color3.fromRGB(150, 140, 120)
-        if monsterId == "skeleton" then
-            burstColor = Color3.fromRGB(224, 219, 194)
-            debrisColor = Color3.fromRGB(210, 205, 180)
-        elseif monsterId == "slime" then
-            burstColor = Color3.fromRGB(99, 224, 145)
-            debrisColor = Color3.fromRGB(91, 190, 126)
-        elseif monsterId == "peco_peco" then
-            burstColor = Color3.fromRGB(226, 155, 72)
-            debrisColor = Color3.fromRGB(201, 126, 57)
-        end
+        local burstColor = effectColor(monsterId)
+        local debrisColor = burstColor
+        local deathSound = if monsterId == "slime" or monsterId == "royal_glowcap"
+            then "rbxasset://sounds/impact_water.mp3"
+            else "rbxasset://sounds/electronicpingshort.wav"
+        playSound(
+            root,
+            deathSound,
+            monsterId == "mosswarden" and 0.55 or 0.32,
+            monsterId == "mosswarden" and 0.7 or 0.82
+        )
 
         local burst = Instance.new("ParticleEmitter")
         burst.Name = "DeathBurst"
@@ -277,18 +357,6 @@ function MonsterCombat.PlayDeath(monster)
                 Vector3.new(rng:NextNumber(-8, 8), rng:NextNumber(7, 14), rng:NextNumber(-8, 8))
             piece.Parent = workspace
             Debris:AddItem(piece, 1.6)
-        end
-
-        local bodyJoint = monster:FindFirstChild("BodyJoint", true)
-        if bodyJoint and bodyJoint:IsA("Motor6D") then
-            local deathTransform = if monsterId == "slime"
-                then CFrame.new(0, -0.55, 0) * CFrame.Angles(0, 0, math.rad(8))
-                else CFrame.Angles(math.rad(68), 0, math.rad(8))
-            TweenService:Create(
-                bodyJoint,
-                TweenInfo.new(0.45, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-                { Transform = deathTransform }
-            ):Play()
         end
     end
 end

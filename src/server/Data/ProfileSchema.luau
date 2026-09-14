@@ -52,6 +52,7 @@ local TEMPLATE = {
         RegionId = "lumenreach",
         SpawnId = "lumenreach_start",
         UnlockedRegions = { lumenreach = true },
+        Secrets = {},
     },
     Achievements = { Unlocked = {} },
     Cosmetics = { Owned = {}, Equipped = {} },

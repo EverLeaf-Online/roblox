@@ -31,6 +31,16 @@ function RewardRules.Validate(reward)
             end
         end
     end
+    if reward.UnlockRegions ~= nil then
+        if type(reward.UnlockRegions) ~= "table" then
+            return false, "invalid_regions"
+        end
+        for _, regionId in reward.UnlockRegions do
+            if type(regionId) ~= "string" or regionId == "" then
+                return false, "invalid_region_reward"
+            end
+        end
+    end
     return true
 end
 
