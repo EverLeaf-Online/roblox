@@ -201,6 +201,256 @@ local function makeCampfire(parent, position)
     return model
 end
 
+local function makeWedge(parent, name, size, cframe, material, color)
+    local wedge = Instance.new("WedgePart")
+    wedge.Name = name
+    wedge.Anchored = true
+    wedge.Size = size
+    wedge.CFrame = cframe
+    wedge.Material = material
+    wedge.Color = color
+    wedge.TopSurface = Enum.SurfaceType.Smooth
+    wedge.BottomSurface = Enum.SurfaceType.Smooth
+    wedge.Parent = parent
+    return wedge
+end
+
+local function makeTent(parent, position, yaw)
+    local model = Instance.new("Model")
+    model.Name = "WayfarerTent"
+    model.Parent = parent
+
+    local base = CFrame.new(position) * CFrame.Angles(0, yaw, 0)
+    local cloth = Color3.fromRGB(76, 104, 91)
+    local trim = Color3.fromRGB(45, 65, 58)
+
+    makeWedge(
+        model,
+        "TentLeft",
+        Vector3.new(8, 5, 0.35),
+        base * CFrame.new(-2, 2.4, 0) * CFrame.Angles(0, 0, math.rad(28)),
+        Enum.Material.Fabric,
+        cloth
+    )
+    makeWedge(
+        model,
+        "TentRight",
+        Vector3.new(8, 5, 0.35),
+        base * CFrame.new(2, 2.4, 0) * CFrame.Angles(0, math.pi, math.rad(28)),
+        Enum.Material.Fabric,
+        cloth
+    )
+    makePart(
+        model,
+        "RidgePole",
+        Vector3.new(0.3, 0.3, 8.5),
+        base * CFrame.new(0, 4.8, 0),
+        Enum.Material.Wood,
+        trim
+    )
+    makePart(
+        model,
+        "Bedroll",
+        Vector3.new(3.2, 0.35, 5.4),
+        base * CFrame.new(0, 0.35, 0.3),
+        Enum.Material.Fabric,
+        Color3.fromRGB(96, 78, 67)
+    )
+    return model
+end
+
+local function makeLantern(parent, position)
+    local model = Instance.new("Model")
+    model.Name = "LumenLantern"
+    model.Parent = parent
+
+    makePart(
+        model,
+        "Post",
+        Vector3.new(0.45, 5, 0.45),
+        CFrame.new(position + Vector3.new(0, 2.5, 0)),
+        Enum.Material.Wood,
+        Color3.fromRGB(68, 49, 36)
+    )
+    makePart(
+        model,
+        "Arm",
+        Vector3.new(2.6, 0.35, 0.35),
+        CFrame.new(position + Vector3.new(1, 4.7, 0)),
+        Enum.Material.Wood,
+        Color3.fromRGB(68, 49, 36)
+    )
+    local glow = makeBall(
+        model,
+        "Glow",
+        Vector3.new(0.8, 0.8, 0.8),
+        CFrame.new(position + Vector3.new(2.1, 4.15, 0)),
+        Enum.Material.Neon,
+        Color3.fromRGB(147, 239, 194)
+    )
+    glow.CanCollide = false
+    local light = Instance.new("PointLight")
+    light.Color = glow.Color
+    light.Brightness = 1.7
+    light.Range = 16
+    light.Shadows = true
+    light.Parent = glow
+    return model
+end
+
+local function makeBridge(parent, position)
+    local model = Instance.new("Model")
+    model.Name = "LumenFootbridge"
+    model.Parent = parent
+    local wood = Color3.fromRGB(101, 73, 49)
+    for index = -5, 5 do
+        makePart(
+            model,
+            "Plank",
+            Vector3.new(4.8, 0.35, 1.15),
+            CFrame.new(position + Vector3.new(0, 0.7 + math.cos(index * 0.3) * 0.22, index * 1.1)),
+            Enum.Material.WoodPlanks,
+            wood
+        )
+    end
+    for _, side in { -1, 1 } do
+        makePart(
+            model,
+            "Rail",
+            Vector3.new(0.22, 0.22, 13),
+            CFrame.new(position + Vector3.new(side * 2.45, 2.1, 0)),
+            Enum.Material.Wood,
+            wood
+        )
+        for index = -5, 5, 2 do
+            makePart(
+                model,
+                "RailPost",
+                Vector3.new(0.25, 2.4, 0.25),
+                CFrame.new(position + Vector3.new(side * 2.45, 1.3, index * 1.1)),
+                Enum.Material.Wood,
+                wood
+            )
+        end
+    end
+    return model
+end
+
+local function makeWaterfall(parent, position)
+    local model = Instance.new("Model")
+    model.Name = "LumenFalls"
+    model.Parent = parent
+
+    local cliffColor = Color3.fromRGB(69, 78, 73)
+    makePart(
+        model,
+        "CliffLeft",
+        Vector3.new(14, 26, 18),
+        CFrame.new(position + Vector3.new(-9, 13, 0)) * CFrame.Angles(0, math.rad(8), math.rad(-3)),
+        Enum.Material.Rock,
+        cliffColor
+    )
+    makePart(
+        model,
+        "CliffRight",
+        Vector3.new(14, 22, 18),
+        CFrame.new(position + Vector3.new(9, 11, 0)) * CFrame.Angles(0, math.rad(-10), math.rad(4)),
+        Enum.Material.Rock,
+        cliffColor
+    )
+    makePart(
+        model,
+        "CliffTop",
+        Vector3.new(18, 7, 18),
+        CFrame.new(position + Vector3.new(0, 20, 0)),
+        Enum.Material.Rock,
+        Color3.fromRGB(78, 89, 80)
+    )
+
+    local water = makePart(
+        model,
+        "Waterfall",
+        Vector3.new(8, 20, 0.7),
+        CFrame.new(position + Vector3.new(0, 10, 7.8)),
+        Enum.Material.Glass,
+        Color3.fromRGB(79, 188, 204)
+    )
+    water.Transparency = 0.28
+    water.CanCollide = false
+    water.Reflectance = 0.08
+
+    local foam = makePart(
+        model,
+        "Foam",
+        Vector3.new(11, 0.5, 6),
+        CFrame.new(position + Vector3.new(0, 0.4, 6.8)),
+        Enum.Material.Neon,
+        Color3.fromRGB(198, 244, 236)
+    )
+    foam.Transparency = 0.45
+    foam.CanCollide = false
+    return model
+end
+
+local function makeFireflyCluster(parent, center)
+    local model = Instance.new("Model")
+    model.Name = "FireflyCluster"
+    model.Parent = parent
+    local offsets = {
+        Vector3.new(-3, 2.5, 1),
+        Vector3.new(2, 3.2, -2),
+        Vector3.new(4, 1.8, 2),
+        Vector3.new(-1, 4.1, -3),
+        Vector3.new(1.5, 2.1, 3.5),
+        Vector3.new(-4, 3.4, -1.5),
+    }
+    for index, offset in offsets do
+        local glow = makeBall(
+            model,
+            "Firefly" .. index,
+            Vector3.new(0.22, 0.22, 0.22),
+            CFrame.new(center + offset),
+            Enum.Material.Neon,
+            Color3.fromRGB(170, 255, 177)
+        )
+        glow.CanCollide = false
+        glow.CastShadow = false
+        local light = Instance.new("PointLight")
+        light.Color = glow.Color
+        light.Brightness = 0.5
+        light.Range = 5
+        light.Parent = glow
+    end
+    return model
+end
+
+local function makeRockSpire(parent, position, scale)
+    local model = Instance.new("Model")
+    model.Name = "LumenRockSpire"
+    model.Parent = parent
+    local color = Color3.fromRGB(76, 87, 81)
+    makeRock(
+        model,
+        position + Vector3.new(0, 5 * scale, 0),
+        Vector3.new(10, 12, 10) * scale,
+        Vector3.new(0.05, 0.4, 0.08)
+    )
+    makeRock(
+        model,
+        position + Vector3.new(1, 13 * scale, -1),
+        Vector3.new(7, 10, 7) * scale,
+        Vector3.new(0.1, -0.2, 0.12)
+    )
+    local crown = makeRock(
+        model,
+        position + Vector3.new(-1, 20 * scale, 0),
+        Vector3.new(4, 8, 4) * scale,
+        Vector3.new(-0.1, 0.2, -0.06)
+    )
+    crown.Color = color
+    return model
+end
+
 local function makeRuins(parent)
     local stone = Color3.fromRGB(116, 123, 117)
     makePart(
@@ -379,6 +629,30 @@ local function prepareGround(world)
         Enum.Material.Ground,
         Color3.fromRGB(82, 96, 64)
     )
+    makePart(
+        world,
+        "NorthRise",
+        Vector3.new(82, 7, 52),
+        CFrame.new(28, 2.8, -72) * CFrame.Angles(math.rad(-4), math.rad(5), 0),
+        Enum.Material.Grass,
+        Color3.fromRGB(67, 96, 59)
+    )
+    makePart(
+        world,
+        "WestShelf",
+        Vector3.new(56, 9, 70),
+        CFrame.new(-92, 3.4, -25) * CFrame.Angles(math.rad(2), math.rad(-7), 0),
+        Enum.Material.Rock,
+        Color3.fromRGB(75, 84, 77)
+    )
+    makeWedge(
+        world,
+        "NorthApproachSlope",
+        Vector3.new(28, 7, 26),
+        CFrame.new(11, 1.2, -49) * CFrame.Angles(0, math.rad(5), 0),
+        Enum.Material.Ground,
+        Color3.fromRGB(91, 100, 69)
+    )
 
     local pathColor = Color3.fromRGB(131, 116, 86)
     makePart(
@@ -499,6 +773,19 @@ local function decorate(world)
     end
 
     makeCampfire(world, Vector3.new(-59, 0, 31))
+    makeTent(world, Vector3.new(-72, 0.2, 28), math.rad(18))
+    makeTent(world, Vector3.new(-66, 0.2, 17), math.rad(-24))
+    makeLantern(world, Vector3.new(-47, 0, 30))
+    makeLantern(world, Vector3.new(-29, 0, 22))
+    makeLantern(world, Vector3.new(-8, 0, 10))
+    makeLantern(world, Vector3.new(17, 0, 4))
+    makeBridge(world, Vector3.new(-17, 0.2, -44))
+    makeWaterfall(world, Vector3.new(-92, 0, -66))
+    makeRockSpire(world, Vector3.new(104, 0, -68), 1.25)
+    makeRockSpire(world, Vector3.new(108, 0, 72), 0.95)
+    makeFireflyCluster(world, Vector3.new(-44, 0, -26))
+    makeFireflyCluster(world, Vector3.new(29, 0, -46))
+    makeFireflyCluster(world, Vector3.new(67, 0, 50))
     makeRuins(world)
 end
 
@@ -534,6 +821,7 @@ function LumenreachWorldService.Init()
     makeLandmarkLabel(world, Vector3.new(-49, 11, 35), "LUMENREACH WAYFARER CAMP")
     makeLandmarkLabel(world, Vector3.new(48, 9, 28), "MOSSGLEN COMBAT GROVE")
     makeLandmarkLabel(world, Vector3.new(37, 18, -31), "SHATTERED LUMEN ARCH")
+    makeLandmarkLabel(world, Vector3.new(-92, 30, -59), "VEILFALL CASCADE")
 
     EnemySpawnerService.Spawn("training_dummy", Vector3.new(-29, 4, 33), world)
     EnemySpawnerService.Spawn("lumen_mossling", Vector3.new(38, 3, 23), world)
