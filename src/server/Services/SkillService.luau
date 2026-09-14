@@ -1,6 +1,8 @@
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SkillDefinitions = require(script.Parent.Parent.Content.SkillDefinitions)
 local ResourceService = require(script.Parent.ResourceService)
+local SkillUseRules = require(ReplicatedStorage.Shared.Logic.SkillUseRules)
 local SkillEffectService = require(script.Parent.SkillEffectService)
 
 local SkillService = {}
@@ -60,26 +62,43 @@ function SkillService.TryBeginUse(player, profile, skillId)
         cooldowns[player] = state
     end
     local now = os.clock()
-    if (state[skillId] or 0) > now then
-        return false, "cooldown"
-    end
+    local previousCooldown = state[skillId] or 0
     local mpCost = definition.MPCost or 0
+    local resourceSnapshot = ResourceService.GetSnapshot(player, profile)
+    local allowed, reason =
+        SkillUseRules.CanBegin(now, previousCooldown, resourceSnapshot.CurrentMP, mpCost)
+    if not allowed then
+        return false, reason
+    end
     if mpCost > 0 then
-        local spent, reason = ResourceService.SpendMP(player, profile, mpCost)
+        local spent, spendReason = ResourceService.SpendMP(player, profile, mpCost)
         if not spent then
-            return false, reason
+            return false, spendReason
         end
     end
     state[skillId] = now + (definition.Cooldown or 0)
-    return true, definition
+    return true, definition, { PreviousCooldown = previousCooldown, MPCost = mpCost }
 end
 
 function SkillService.Use(player, profile, skillId)
-    local ok, definitionOrReason = SkillService.TryBeginUse(player, profile, skillId)
+    local ok, definitionOrReason, transaction = SkillService.TryBeginUse(player, profile, skillId)
     if not ok then
         return false, definitionOrReason
     end
-    return SkillEffectService.Execute(player, profile, definitionOrReason)
+
+    local effectOk, result = SkillEffectService.Execute(player, profile, definitionOrReason)
+    if effectOk then
+        return true, result
+    end
+
+    local state = cooldowns[player]
+    if state then
+        state[skillId] = transaction.PreviousCooldown
+    end
+    if transaction.MPCost > 0 then
+        ResourceService.RestoreMP(player, profile, transaction.MPCost)
+    end
+    return false, result
 end
 
 Players.PlayerRemoving:Connect(function(player)

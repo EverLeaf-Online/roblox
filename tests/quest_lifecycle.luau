@@ -1,0 +1,11 @@
+local QuestLifecycle = require("../src/shared/Logic/QuestLifecycle")
+local objectives = { { Type = "Defeat", Target = "mossling", Required = 2 } }
+local state = QuestLifecycle.NewState(#objectives)
+assert(state.Progress[1] == 0 and state.ReadyToTurnIn == false, "new quest state")
+local changed, ready = QuestLifecycle.Record(state, objectives, "Defeat", "mossling", 1)
+assert(changed and not ready and state.Progress[1] == 1, "first kill progresses without completing")
+changed, ready = QuestLifecycle.Record(state, objectives, "Defeat", "mossling", 1)
+assert(changed and ready and state.Progress[1] == 2, "second kill marks turn-in ready")
+changed = QuestLifecycle.Record(state, objectives, "Defeat", "mossling", 1)
+assert(not changed, "completed objective must not keep mutating")
+print("quest lifecycle tests passed")

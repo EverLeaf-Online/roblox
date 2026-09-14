@@ -74,6 +74,9 @@ GameConfig.Movement = {
     DodgeDuration = 0.22,
     DodgeCooldown = 0.8,
     MaxHorizontalSpeed = 58,
+    MaxVerticalSpeed = 180,
+    DisplacementSlack = 7,
+    TeleportGraceSeconds = 0.75,
     GamepadDeadzone = 0.15,
     ServerCheckInterval = 0.1,
 }

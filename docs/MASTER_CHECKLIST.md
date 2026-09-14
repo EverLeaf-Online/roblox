@@ -59,7 +59,7 @@
 - [x] Lumenreach 3D benchmark graybox generated from canonical source.
 - [ ] **PARTIAL:** Asset import + optimization pipeline documented; production asset ingestion still pending.
 - [x] Poly Haven/approved Sketchfab material/model source policy documented.
-- [ ] Foliage/wind solution audited and integrated.
+- [x] Source-controlled wind/ambient-motion foundation integrated; production foliage assets and performance tuning remain.
 - [ ] Streaming/performance budgets measured in Studio.
 - [ ] First production-quality environment benchmark scene.
 
@@ -168,11 +168,11 @@
 
 - [x] Original 2.5D controller prototype retired after 3D pivot.
 - [x] Full 3D camera-relative movement controller foundation.
-- [x] A/D horizontal movement works in Studio.
+- [x] Full camera-relative WASD movement works in Studio.
 - [x] Jumping works in Studio.
-- [x] W/S depth input is constrained/recentered by current prototype behavior.
-- [x] Server plane/depth sanity service.
-- [x] Side-camera controller foundation.
+- [x] Free 3D forward/back/strafe movement is active; old depth-plane behavior is retired.
+- [x] Server movement sanity enforces speed plus horizontal/vertical displacement limits with teleport grace.
+- [x] Third-person orbit camera foundation with collision.
 - [x] First real Studio movement playtest completed.
 - [ ] Tune camera distance/framing/responsiveness.
 - [ ] Tune walk speed/acceleration/deceleration.
@@ -182,7 +182,7 @@
 - [ ] Drop-through platforms if retained.
 - [ ] Moving-platform support if needed.
 - [ ] Edge/ledge/collision polish.
-- [ ] Server movement exploit/speed sanity checks beyond depth.
+- [x] Server horizontal speed plus horizontal/vertical displacement sanity checks with explicit teleport grace.
 
 ## 8. Combat — player attack
 
@@ -199,9 +199,9 @@
 - [x] Pure damage-math headless tests.
 
 ### Player-facing attack loop
-- [ ] **PARTIAL:** latest input is bound to `Z`/R2; end-to-end Studio verification still pending.
-- [ ] Attack must produce an unmistakable visible action.
-- [ ] Attack animation.
+- [x] Left-click / R2 basic attack verified end-to-end in Studio.
+- [x] Basic attack produces a visible procedural swing.
+- [x] Procedural basic-attack animation foundation.
 - [ ] Facing-aware attack direction.
 - [ ] Production hitbox/hurtbox implementation.
 - [ ] Hit-confirm feedback.
@@ -217,7 +217,7 @@
 ## 9. Skills
 
 - [x] Skill-definition schema foundation.
-- [x] Skill service foundation for learning, cooldowns, and MP spend; targeting/effects still pending.
+- [x] Skill learning/cooldown/MP foundation plus generic targeting/effect execution; player-facing skill flow still pending.
 - [x] SP spending/validation foundation.
 - [x] Skill rank/max-rank architecture.
 - [ ] Skill prerequisites.
@@ -228,7 +228,7 @@
 - [x] Server skill cooldown foundation.
 - [ ] Targeting shapes/ranges.
 - [ ] Skill animation/VFX/SFX hooks.
-- [x] Persistent 8-slot skill hotbar data/service foundation; production UI pending.
+- [x] Persistent 8-slot skill hotbar data/service foundation with React hotbar shell; binding/use UX remains pending.
 - [ ] Keyboard/controller bindings.
 - [ ] Skill tree UI.
 
@@ -243,14 +243,14 @@
 - [x] Reward handoff on death.
 - [x] Respawn callback foundation.
 - [x] Studio training dummy prototype.
-- [ ] Hostile enemy AI.
-- [ ] Aggro acquisition.
+- [x] Hostile enemy AI foundation (idle/pursue/attack) is integrated; production navigation/telegraphs remain.
+- [x] Range-based aggro acquisition foundation.
 - [ ] Aggro leash/reset.
 - [x] Enemy pursuit converted to full XYZ movement foundation.
 - [ ] Production pathfinding/navigation around 3D obstacles.
 - [ ] Enemy attack windup/telegraph.
-- [ ] Enemy damage to player.
-- [ ] Enemy attack cooldowns.
+- [x] Enemy-to-player damage path is integrated.
+- [x] Enemy attack cooldown foundation.
 - [ ] Enemy knockback/stagger resistance.
 - [ ] Elite variants.
 - [ ] Spawn regions/population management.
@@ -259,8 +259,8 @@
 ## 11. Player damage / death
 
 - [ ] Defense/damage-taken calculation.
-- [ ] Enemy-to-player validated damage path.
-- [ ] Invulnerability frames rules.
+- [x] Enemy-to-player validated damage path.
+- [x] Prototype 0.15s player damage i-frame exists; tuning remains.
 - [ ] Knockback on player.
 - [ ] Death state.
 - [ ] Respawn flow.
@@ -307,8 +307,8 @@
 
 - [ ] Generic interactable framework.
 - [x] NPC-definition registry foundation.
-- [ ] NPC interaction range/server validation.
-- [ ] Dialogue system.
+- [x] NPC interaction range/server validation on interaction start; action-time distance revalidation still pending.
+- [x] React NPC dialogue system foundation.
 - [x] Quest-definition registry foundation.
 - [x] Active/completed quest persistence foundation.
 - [ ] Quest prerequisites.
@@ -316,8 +316,8 @@
 - [ ] Collect quests.
 - [ ] Talk/exploration quests.
 - [x] Quest reward pipeline foundation.
-- [ ] Quest tracker UI.
-- [ ] Dialogue UI.
+- [x] React objective tracker foundation.
+- [x] React dialogue UI with quest/shop actions.
 
 ## 15. Shops / services
 
@@ -345,7 +345,7 @@
 - [x] Lumen Guide supply-shop interaction shell.
 - [ ] First advancement location.
 - [ ] Original environment assets.
-- [ ] Lighting/post-processing.
+- [x] Lighting/atmosphere/post-processing baseline integrated and exercised in Studio; final art-direction tuning remains.
 - [ ] Ambient audio/music.
 - [ ] Minimap/map UX decision.
 
@@ -387,21 +387,21 @@
 - [x] Wally dependency manifest/lockfile + Rojo `ReplicatedStorage.Packages` mapping.
 - [x] Custom UI-capture contract releases cursor and suppresses camera/movement/combat while interactive UI is open.
 - [ ] **PARTIAL:** React production HUD renders HP/MP/EXP/level/currencies/objective/hotbar; Studio UX verification and final visual polish remain.
-- [ ] **PARTIAL:** HP bar implemented in React; Studio verification/polish pending.
-- [ ] **PARTIAL:** MP bar implemented in React; Studio verification/polish pending.
-- [ ] **PARTIAL:** EXP bar implemented in React; Studio verification/polish pending.
-- [ ] **PARTIAL:** Level display implemented in React; Studio verification/polish pending.
-- [ ] **PARTIAL:** Currency display implemented in React; Studio verification/polish pending.
+- [x] React HP bar verified in Studio; polish/scalability remains.
+- [x] React MP bar verified in Studio; polish/scalability remains.
+- [x] React EXP bar verified in Studio; polish/scalability remains.
+- [x] React level display verified in Studio; polish/scalability remains.
+- [x] React currency display verified in Studio; polish/scalability remains.
 - [x] Persistent 8-slot skill hotbar data/service foundation; React hotbar shell implemented.
 - [ ] Buff/debuff display.
-- [ ] Character/stat panel.
-- [ ] Inventory/equipment UI.
-- [ ] Quest UI.
-- [ ] **PARTIAL:** NPC dialogue migrated to React with clickable quest/shop actions; Studio verification/polish pending.
+- [ ] **PARTIAL:** React character/stat menu shell is source-complete; Studio interaction/polish pending.
+- [ ] **PARTIAL:** React inventory/equipment menu shell is source-complete; interaction/polish pending.
+- [ ] **PARTIAL:** React quest menu shell is source-complete; interaction/polish pending.
+- [x] React NPC dialogue with clickable quest/shop actions verified in Studio; visual polish remains.
 - [ ] **PARTIAL:** Shop action is exposed through the React dialogue shell; dedicated shop screen pending.
 - [ ] Boss HP UI.
 - [ ] Notifications/toasts.
-- [ ] Settings menu.
+- [ ] **PARTIAL:** React settings menu shell is source-complete; controls/persistence UX verification pending.
 - [ ] Responsive layout testing.
 
 ## 20. Art / animation / audio
@@ -447,11 +447,11 @@
 - [x] Server owns progression mutations.
 - [x] Server owns currency mutations.
 - [x] Server owns combat damage calculation.
-- [x] Server validates basic attack target/range/depth/cooldown.
+- [x] Server validates basic attack target/range/vertical tolerance/facing/LOS/cooldown.
 - [x] Rate limiter foundation.
 - [x] Data session locks.
 - [ ] Audit every future remote for type/range/state validation.
-- [ ] Movement speed/teleport exploit checks.
+- [x] Movement speed and displacement/teleport sanity checks foundation.
 - [ ] Inventory/equipment dupe tests.
 - [ ] Currency/economy abuse tests.
 - [ ] Quest/reward replay abuse tests.
@@ -467,8 +467,8 @@
 - [x] Rojo headless build gate.
 - [x] First Studio Rojo sync test.
 - [x] First movement/jump Studio test.
-- [x] `Z` basic attack verified end-to-end in Studio with server damage and hit feedback.
-- [ ] Add unit tests for services that can be pure-tested.
+- [x] Left-click basic attack verified end-to-end in Studio with server damage and visible swing.
+- [x] Added pure regression coverage for quest lifecycle, rewards, inventory/equipment rules, skills, payload bounds, profile migration, and movement sanity.
 - [ ] Add regression tests for progression curves.
 - [ ] Add DataStore/session-lock test scenarios.
 - [ ] Add 2+ client Studio test scenarios.
@@ -510,12 +510,12 @@
 
 # Current highest-priority queue — Phase B game shell
 
-1. [ ] **PARTIAL:** Production HUD shell is source-complete for HP/MP/EXP/level/currencies/objective/hotbar; Studio verification/polish pending.
-2. [ ] Build inventory/equipment/character/skills/quests/settings screen shells.
+1. [ ] **PARTIAL:** React HUD shell is Studio-verified for HP/MP/EXP/level/currencies/objective/hotbar; responsive/final visual polish pending.
+2. [ ] **PARTIAL:** Character/inventory/equipment/skills/quests/settings React menu shell exists; wire interactions and verify all screens in Studio.
 3. [x] Add physical Lumenreach benchmark graybox + NPC/portal world-object registration.
-4. [ ] **PARTIAL:** First hostile Lumen Mossling is integrated with AI/player damage; Studio verification pending.
+4. [x] Hostile Lumen Mossling combat/AI/player-damage loop has been exercised in Studio; production navigation/telegraphs remain.
 5. [ ] Finish death/respawn presentation and safe spawn flow.
-6. [ ] **PARTIAL:** Lumen Guide dialogue/quest/shop shell is integrated; Studio verification/polish pending.
+6. [x] Lumen Guide dialogue, quest accept/progress/turn-in, and shop-action shell are Studio-verified; dedicated shop UI/polish remain.
 7. [ ] Add first real skill-use/hotbar flow through `SkillEffectService`.
 8. [ ] Add party UI/invite flow and a private-instance shell.
 9. [ ] Add Belforge boss-entry/encounter shell using the generic state machine.

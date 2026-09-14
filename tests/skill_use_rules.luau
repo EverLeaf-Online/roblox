@@ -1,0 +1,8 @@
+local SkillUseRules = require("../src/shared/Logic/SkillUseRules")
+local ok, reason = SkillUseRules.CanBegin(10, 9, 20, 5)
+assert(ok and reason == nil, "ready skill can begin")
+ok, reason = SkillUseRules.CanBegin(10, 11, 20, 5)
+assert(not ok and reason == "cooldown", "cooldown enforced")
+ok, reason = SkillUseRules.CanBegin(10, 9, 4, 5)
+assert(not ok and reason == "insufficient_mp", "MP enforced")
+print("skill use tests passed")

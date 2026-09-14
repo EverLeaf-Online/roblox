@@ -1,14 +1,12 @@
 local QuestDefinitions = require(script.Parent.Parent.Content.QuestDefinitions)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local QuestLifecycle = require(ReplicatedStorage.Shared.Logic.QuestLifecycle)
 local RewardService = require(script.Parent.RewardService)
 
 local QuestService = {}
 
 local function makeState(definition)
-    local progress = {}
-    for index, _ in definition.Objectives do
-        progress[index] = 0
-    end
-    return { Progress = progress }
+    return QuestLifecycle.NewState(#definition.Objectives)
 end
 
 function QuestService.Start(profile, questId)
@@ -36,22 +34,11 @@ function QuestService.Record(profile, objectiveType, targetId, amount)
     for questId, state in profile.Quests.Active do
         local definition = QuestDefinitions[questId]
         if definition then
-            local complete = true
-            for index, objective in definition.Objectives do
-                local current = state.Progress[index] or 0
-                if objective.Type == objectiveType and objective.Target == targetId then
-                    current = math.min(objective.Required, current + amount)
-                    state.Progress[index] = current
-                    changed = true
-                end
-                if current < objective.Required then
-                    complete = false
-                end
-            end
-            if complete and not state.ReadyToTurnIn then
-                state.ReadyToTurnIn = true
+            local questChanged, ready =
+                QuestLifecycle.Record(state, definition.Objectives, objectiveType, targetId, amount)
+            changed = questChanged or changed
+            if questChanged and ready then
                 table.insert(completedNow, questId)
-                changed = true
             end
         end
     end

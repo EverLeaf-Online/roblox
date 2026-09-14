@@ -1,0 +1,10 @@
+local InventoryRules = require("../src/shared/Logic/InventoryRules")
+assert(InventoryRules.IsValidQuantity(1), "positive integer quantity")
+assert(not InventoryRules.IsValidQuantity(1.5), "fractional quantity rejected")
+local slots = { { ItemId = "tonic", Quantity = 8 } }
+assert(InventoryRules.CanAdd(slots, 2, "tonic", 2, 10), "fills existing stack")
+assert(InventoryRules.CanAdd(slots, 2, "tonic", 3, 10), "uses one additional slot")
+assert(not InventoryRules.CanAdd(slots, 1, "tonic", 3, 10), "capacity enforced")
+assert(InventoryRules.IsValidEquipmentSlot("Weapon"), "weapon slot valid")
+assert(not InventoryRules.IsValidEquipmentSlot("Backpack"), "unknown equipment slot rejected")
+print("inventory/equipment tests passed")

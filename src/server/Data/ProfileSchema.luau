@@ -1,5 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
+local ProfileMigration = require(ReplicatedStorage.Shared.Logic.ProfileMigration)
 
 local ProfileSchema = {}
 
@@ -62,27 +63,11 @@ local TEMPLATE = {
 }
 
 function ProfileSchema.DeepCopy(value)
-    if type(value) ~= "table" then
-        return value
-    end
-    local copy = {}
-    for key, child in value do
-        copy[ProfileSchema.DeepCopy(key)] = ProfileSchema.DeepCopy(child)
-    end
-    return copy
+    return ProfileMigration.DeepCopy(value)
 end
 
 function ProfileSchema.Reconcile(target, template)
-    template = template or TEMPLATE
-    for key, defaultValue in template do
-        local currentValue = target[key]
-        if currentValue == nil or type(currentValue) ~= type(defaultValue) then
-            target[key] = ProfileSchema.DeepCopy(defaultValue)
-        elseif type(defaultValue) == "table" then
-            ProfileSchema.Reconcile(currentValue, defaultValue)
-        end
-    end
-    return target
+    return ProfileMigration.Reconcile(target, template or TEMPLATE)
 end
 
 function ProfileSchema.New()
@@ -94,21 +79,7 @@ function ProfileSchema.New()
 end
 
 function ProfileSchema.Migrate(raw)
-    local profile = if type(raw) == "table"
-        then ProfileSchema.DeepCopy(raw)
-        else ProfileSchema.New()
-    local meta = if type(profile.Meta) == "table" then profile.Meta else {}
-    local oldVersion = tonumber(meta.SchemaVersion) or 1
-    if oldVersion > GameConfig.DataStore.SchemaVersion then
-        return false, "future_schema"
-    end
-    ProfileSchema.Reconcile(profile)
-    profile.Meta.SchemaVersion = GameConfig.DataStore.SchemaVersion
-    if profile.Meta.CreatedAt == 0 then
-        profile.Meta.CreatedAt = os.time()
-    end
-    profile.Meta.LastSeenAt = os.time()
-    return true, profile
+    return ProfileMigration.Migrate(raw, TEMPLATE, GameConfig.DataStore.SchemaVersion, os.time())
 end
 
 function ProfileSchema.PublicSnapshot(profile)

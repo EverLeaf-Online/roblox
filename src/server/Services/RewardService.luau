@@ -1,3 +1,5 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RewardRules = require(ReplicatedStorage.Shared.Logic.RewardRules)
 local CurrencyService = require(script.Parent.CurrencyService)
 local InventoryService = require(script.Parent.InventoryService)
 local ProgressionService = require(script.Parent.ProgressionService)
@@ -5,8 +7,9 @@ local ProgressionService = require(script.Parent.ProgressionService)
 local RewardService = {}
 
 function RewardService.Grant(profile, reward)
-    if type(reward) ~= "table" then
-        return false, "invalid_reward"
+    local valid, validationReason = RewardRules.Validate(reward)
+    if not valid then
+        return false, validationReason
     end
 
     if reward.Items then

@@ -1,16 +1,8 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local InventoryRules = require(ReplicatedStorage.Shared.Logic.InventoryRules)
 local InventoryService = require(script.Parent.InventoryService)
 
 local EquipmentService = {}
-local validSlots = {
-    Weapon = true,
-    Head = true,
-    Body = true,
-    Legs = true,
-    Accessory = true,
-    Ring1 = true,
-    Ring2 = true,
-}
-
 function EquipmentService.Equip(profile, inventoryIndex)
     local inventory = profile.Inventory
     local slot = inventory and inventory.Slots and inventory.Slots[inventoryIndex]
@@ -22,7 +14,7 @@ function EquipmentService.Equip(profile, inventoryIndex)
         return false, "not_equipment"
     end
     local equipmentSlot = definition.EquipmentSlot
-    if not validSlots[equipmentSlot] then
+    if not InventoryRules.IsValidEquipmentSlot(equipmentSlot) then
         return false, "invalid_equipment_slot"
     end
 
@@ -44,7 +36,7 @@ function EquipmentService.Equip(profile, inventoryIndex)
 end
 
 function EquipmentService.Unequip(profile, equipmentSlot)
-    if not validSlots[equipmentSlot] then
+    if not InventoryRules.IsValidEquipmentSlot(equipmentSlot) then
         return false, "invalid_equipment_slot"
     end
     local itemId = profile.Equipment[equipmentSlot]

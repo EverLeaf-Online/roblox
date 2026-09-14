@@ -1,0 +1,8 @@
+local MovementSanityMath = require("../src/shared/Math/MovementSanityMath")
+local ok = MovementSanityMath.IsDisplacementAllowed(3, 2, 0, 0.1, 58, 7, 180)
+assert(ok, "normal movement allowed")
+ok = MovementSanityMath.IsDisplacementAllowed(30, 0, 0, 0.1, 58, 7, 180)
+assert(not ok, "horizontal teleport rejected")
+ok = MovementSanityMath.IsDisplacementAllowed(0, 40, 0, 0.1, 58, 7, 180)
+assert(not ok, "vertical teleport rejected")
+print("movement sanity tests passed")

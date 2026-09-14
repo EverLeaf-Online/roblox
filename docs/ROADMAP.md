@@ -14,13 +14,13 @@ EverLeaf is now a full 3D third-person action RPG/MMO. The earlier 2.5D movement
 
 Immediate 3D priorities:
 
-- production-quality third-person movement and camera;
+- third-person movement/camera foundation is live; anti-teleport displacement checks now complement velocity caps;
 - left-click/R2 basic combat with spatial targeting;
 - sprint/dodge/jump/interact controls;
 - true XYZ enemy pursuit and navigation;
 - Lumenreach 3D benchmark graybox — source-generated foundation landed 2026-09-14;
 - lighting/atmosphere/terrain/foliage quality baseline;
-- asset import/optimization/licensing pipeline;
+- asset import/optimization/licensing pipeline; real sanitized mesh/PBR ingestion remains the next visual-quality milestone;
 - first production-quality environmental benchmark area.
 
 We are building structure first. Do not stop to fully polish one feature while major game domains are still missing.
@@ -68,7 +68,12 @@ Architecture closure completed:
 
 **Phase A exit passed:** every major game domain now has a canonical module/service boundary and a defined connection to neighboring systems. Feature completeness is deliberately deferred.
 
-### Phase B — 3D foundation + complete game shell — ACTIVE NEXT
+
+### Current verified Phase B baseline — 2026-09-14
+
+Studio-verified today: third-person movement/camera, sprint/jump/dodge, left-click basic attack, hostile Mossling combat/player damage, React HUD/dialogue, Lumen Guide quest accept/progress/turn-in, and Rojo/Wally/React sync. Source-complete but not yet fully Studio-verified/polished: the multi-tab RPG menu shell, generic skills, party/instance/boss shells, and several backend service boundaries. The environment remains prototype-quality until sanitized mesh/PBR assets replace procedural primitives.
+
+### Phase B — 3D foundation + complete game shell — ACTIVE
 
 Build the production-direction 3D gameplay foundation, then make every major player-facing route exist with placeholder content:
 

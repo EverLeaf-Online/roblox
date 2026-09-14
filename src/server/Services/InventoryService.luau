@@ -1,10 +1,8 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local InventoryRules = require(ReplicatedStorage.Shared.Logic.InventoryRules)
 local ItemDefinitions = require(script.Parent.Parent.Content.ItemDefinitions)
 
 local InventoryService = {}
-
-local function validQuantity(quantity)
-    return type(quantity) == "number" and quantity % 1 == 0 and quantity > 0
-end
 
 local function ensure(profile)
     profile.Inventory = profile.Inventory or { Capacity = 48, Slots = {} }
@@ -28,21 +26,12 @@ end
 
 function InventoryService.CanAdd(profile, itemId, quantity)
     local definition = ItemDefinitions[itemId]
-    if not definition or not validQuantity(quantity) then
+    if not definition or not InventoryRules.IsValidQuantity(quantity) then
         return false
     end
     local inventory = ensure(profile)
     local stackLimit = definition.StackLimit or 1
-    local remaining = quantity
-    for _, slot in inventory.Slots do
-        if slot.ItemId == itemId and slot.Quantity < stackLimit then
-            remaining -= math.min(remaining, stackLimit - slot.Quantity)
-            if remaining <= 0 then
-                return true
-            end
-        end
-    end
-    return #inventory.Slots + math.ceil(remaining / stackLimit) <= inventory.Capacity
+    return InventoryRules.CanAdd(inventory.Slots, inventory.Capacity, itemId, quantity, stackLimit)
 end
 
 function InventoryService.Add(profile, itemId, quantity)
@@ -50,7 +39,7 @@ function InventoryService.Add(profile, itemId, quantity)
     if not definition then
         return false, "unknown_item"
     end
-    if not validQuantity(quantity) then
+    if not InventoryRules.IsValidQuantity(quantity) then
         return false, "invalid_quantity"
     end
     if not InventoryService.CanAdd(profile, itemId, quantity) then
@@ -82,7 +71,7 @@ function InventoryService.RemoveAt(profile, slotIndex, quantity)
     if type(slotIndex) ~= "number" or slotIndex % 1 ~= 0 then
         return false, "invalid_slot"
     end
-    if not validQuantity(quantity) then
+    if not InventoryRules.IsValidQuantity(quantity) then
         return false, "invalid_quantity"
     end
     local slots = ensure(profile).Slots
@@ -102,7 +91,7 @@ function InventoryService.RemoveAt(profile, slotIndex, quantity)
 end
 
 function InventoryService.Remove(profile, itemId, quantity)
-    if not validQuantity(quantity) then
+    if not InventoryRules.IsValidQuantity(quantity) then
         return false, "invalid_quantity"
     end
     if InventoryService.Count(profile, itemId) < quantity then
