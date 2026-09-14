@@ -10,6 +10,10 @@ local WorldObjectService = require(script.Parent.WorldObjectService)
 local LumenreachWorldService = {}
 
 local GENERATED_NAME = "EverLeafGeneratedWorld"
+local WORLD_WIDTH = 620
+local WORLD_DEPTH = 560
+local TREE_PREFAB_SCALE = 0.22
+local FOREST_PROP_SCALE = 0.35
 
 local function makePart(parent, name, size, cframe, material, color)
     local part = Instance.new("Part")
@@ -38,7 +42,7 @@ local function makeTree(parent, position, scale, variant)
         "TreePrimary",
         parent,
         CFrame.new(position) * CFrame.Angles(0, prefabYaw, 0),
-        scale
+        scale * TREE_PREFAB_SCALE
     )
     if prefab then
         return prefab
@@ -144,7 +148,7 @@ local function makeFallenLog(parent, position, yaw, scale)
         "FallenTreeTrunk",
         parent,
         CFrame.new(position) * CFrame.Angles(0, yaw, 0),
-        scale
+        scale * FOREST_PROP_SCALE
     )
     if prefab then
         return prefab
@@ -184,7 +188,7 @@ local function makeStump(parent, position, scale)
         "TreeStump",
         parent,
         CFrame.new(position) * CFrame.Angles(0, math.rad(17), 0),
-        scale
+        scale * FOREST_PROP_SCALE
     )
     if prefab then
         return prefab
@@ -219,7 +223,7 @@ local function makePineRoots(parent, position, yaw, scale)
         "PineRoots",
         parent,
         CFrame.new(position) * CFrame.Angles(0, yaw, 0),
-        scale
+        scale * FOREST_PROP_SCALE
     )
     if prefab then
         return prefab
@@ -959,22 +963,31 @@ local function prepareGround(world)
     local terrain = Workspace:FindFirstChildOfClass("Terrain")
     if terrain then
         terrain:Clear()
-        terrain:FillBlock(CFrame.new(0, -5, 0), Vector3.new(250, 10, 230), Enum.Material.Grass)
+        terrain:FillBlock(
+            CFrame.new(0, -5, 0),
+            Vector3.new(WORLD_WIDTH, 10, WORLD_DEPTH),
+            Enum.Material.Grass
+        )
 
         -- Keep the playable core readable and mostly level. Terrain masses live on the perimeter.
         terrain:FillBlock(CFrame.new(-55, -0.75, 34), Vector3.new(72, 3, 58), Enum.Material.Ground)
         terrain:FillBlock(CFrame.new(48, -0.85, 28), Vector3.new(76, 2.8, 66), Enum.Material.Grass)
 
         local perimeterHills = {
-            { Vector3.new(-118, -13, 66), 24, Enum.Material.Grass },
-            { Vector3.new(-120, -12, -52), 26, Enum.Material.Rock },
-            { Vector3.new(-72, -16, -105), 22, Enum.Material.Grass },
-            { Vector3.new(8, -17, -112), 24, Enum.Material.Grass },
-            { Vector3.new(82, -15, -102), 25, Enum.Material.Rock },
-            { Vector3.new(118, -13, -48), 24, Enum.Material.Rock },
-            { Vector3.new(122, -15, 50), 23, Enum.Material.Grass },
-            { Vector3.new(72, -16, 108), 22, Enum.Material.Grass },
-            { Vector3.new(-22, -17, 112), 21, Enum.Material.Grass },
+            { Vector3.new(-292, -10, 170), 48, Enum.Material.Grass },
+            { Vector3.new(-300, -8, 55), 52, Enum.Material.Rock },
+            { Vector3.new(-292, -12, -95), 50, Enum.Material.Rock },
+            { Vector3.new(-235, -14, -238), 48, Enum.Material.Grass },
+            { Vector3.new(-95, -16, -255), 46, Enum.Material.Grass },
+            { Vector3.new(70, -16, -260), 48, Enum.Material.Rock },
+            { Vector3.new(225, -13, -235), 52, Enum.Material.Rock },
+            { Vector3.new(292, -9, -120), 48, Enum.Material.Rock },
+            { Vector3.new(300, -9, 35), 50, Enum.Material.Grass },
+            { Vector3.new(285, -11, 185), 48, Enum.Material.Grass },
+            { Vector3.new(175, -14, 255), 46, Enum.Material.Grass },
+            { Vector3.new(10, -15, 265), 48, Enum.Material.Grass },
+            { Vector3.new(-150, -14, 255), 46, Enum.Material.Grass },
+            { Vector3.new(-270, -11, 225), 48, Enum.Material.Rock },
         }
         for _, hill in perimeterHills do
             terrain:FillBall(hill[1], hill[2], hill[3])
@@ -993,6 +1006,14 @@ local function prepareGround(world)
                 CFrame.new(30, 0.3, -19) * CFrame.Angles(0, math.rad(-30), 0),
                 Vector3.new(10, 1.1, 44),
             },
+            {
+                CFrame.new(92, 0.25, 24) * CFrame.Angles(0, math.rad(-88), 0),
+                Vector3.new(14, 1.1, 118),
+            },
+            {
+                CFrame.new(154, 0.25, 47) * CFrame.Angles(0, math.rad(-68), 0),
+                Vector3.new(14, 1.1, 76),
+            },
         }
         for _, segment in pathSegments do
             terrain:FillBlock(segment[1], segment[2], Enum.Material.Ground)
@@ -1005,12 +1026,53 @@ local function prepareGround(world)
     local foundation = makePart(
         world,
         "InvisibleFoundation",
-        Vector3.new(250, 2, 230),
+        Vector3.new(WORLD_WIDTH, 2, WORLD_DEPTH),
         CFrame.new(0, -9, 0),
         Enum.Material.SmoothPlastic,
         Color3.new(0, 0, 0)
     )
     foundation.Transparency = 1
+
+    local boundaryThickness = 8
+    local boundaryHeight = 90
+    local halfWidth = WORLD_WIDTH * 0.5
+    local halfDepth = WORLD_DEPTH * 0.5
+    local boundarySpecs = {
+        {
+            "NorthBoundary",
+            Vector3.new(WORLD_WIDTH, boundaryHeight, boundaryThickness),
+            CFrame.new(0, boundaryHeight * 0.5 - 2, -halfDepth),
+        },
+        {
+            "SouthBoundary",
+            Vector3.new(WORLD_WIDTH, boundaryHeight, boundaryThickness),
+            CFrame.new(0, boundaryHeight * 0.5 - 2, halfDepth),
+        },
+        {
+            "WestBoundary",
+            Vector3.new(boundaryThickness, boundaryHeight, WORLD_DEPTH),
+            CFrame.new(-halfWidth, boundaryHeight * 0.5 - 2, 0),
+        },
+        {
+            "EastBoundary",
+            Vector3.new(boundaryThickness, boundaryHeight, WORLD_DEPTH),
+            CFrame.new(halfWidth, boundaryHeight * 0.5 - 2, 0),
+        },
+    }
+    for _, spec in boundarySpecs do
+        local wall = makePart(
+            world,
+            spec[1],
+            spec[2],
+            spec[3],
+            Enum.Material.SmoothPlastic,
+            Color3.new(0, 0, 0)
+        )
+        wall.Transparency = 1
+        wall.CanCollide = true
+        wall.CanTouch = false
+        wall.CanQuery = false
+    end
 end
 
 local function decorate(world)
@@ -1038,6 +1100,39 @@ local function decorate(world)
         { Vector3.new(-77, 0, 76), 0.88, 3 },
     }
     for _, entry in trees do
+        makeTree(world, entry[1], entry[2], entry[3])
+    end
+
+    local outerTrees = {
+        { Vector3.new(-225, 0, 168), 1.05, 1 },
+        { Vector3.new(-205, 0, 126), 0.9, 2 },
+        { Vector3.new(-218, 0, 62), 1.08, 3 },
+        { Vector3.new(-222, 0, -12), 0.94, 1 },
+        { Vector3.new(-214, 0, -86), 1.02, 2 },
+        { Vector3.new(-188, 0, -156), 0.92, 3 },
+        { Vector3.new(-134, 0, -196), 1.05, 1 },
+        { Vector3.new(-70, 0, -212), 0.9, 2 },
+        { Vector3.new(8, 0, -218), 1.08, 3 },
+        { Vector3.new(84, 0, -208), 0.94, 1 },
+        { Vector3.new(148, 0, -184), 1.04, 2 },
+        { Vector3.new(202, 0, -142), 0.92, 3 },
+        { Vector3.new(224, 0, -72), 1.05, 1 },
+        { Vector3.new(226, 0, 6), 0.9, 2 },
+        { Vector3.new(218, 0, 82), 1.08, 3 },
+        { Vector3.new(198, 0, 148), 0.94, 1 },
+        { Vector3.new(150, 0, 198), 1.04, 2 },
+        { Vector3.new(82, 0, 214), 0.92, 3 },
+        { Vector3.new(8, 0, 220), 1.05, 1 },
+        { Vector3.new(-72, 0, 214), 0.9, 2 },
+        { Vector3.new(-142, 0, 202), 1.08, 3 },
+        { Vector3.new(-198, 0, 182), 0.94, 1 },
+        { Vector3.new(122, 0, 95), 0.86, 2 },
+        { Vector3.new(154, 0, 68), 0.92, 3 },
+        { Vector3.new(174, 0, 42), 0.82, 1 },
+        { Vector3.new(144, 0, 12), 0.9, 2 },
+        { Vector3.new(118, 0, -28), 0.86, 3 },
+    }
+    for _, entry in outerTrees do
         makeTree(world, entry[1], entry[2], entry[3])
     end
 
@@ -1211,14 +1306,14 @@ function LumenreachWorldService.Init()
     makeGuide(world, Vector3.new(-48, 2, 35))
 
     makeLandmarkLabel(world, Vector3.new(-49, 11, 35), "LUMENREACH WAYFARER CAMP")
-    makeLandmarkLabel(world, Vector3.new(48, 9, 28), "MOSSGLEN COMBAT GROVE")
+    makeLandmarkLabel(world, Vector3.new(148, 9, 42), "MOSSGLEN COMBAT GROVE")
     makeLandmarkLabel(world, Vector3.new(37, 18, -31), "SHATTERED LUMEN ARCH")
     makeLandmarkLabel(world, Vector3.new(-92, 30, -59), "VEILFALL CASCADE")
 
     EnemySpawnerService.Spawn("training_dummy", Vector3.new(-29, 4, 33), world)
-    EnemySpawnerService.Spawn("lumen_mossling", Vector3.new(38, 3, 23), world)
-    EnemySpawnerService.Spawn("lumen_mossling", Vector3.new(54, 3, 35), world)
-    EnemySpawnerService.Spawn("lumen_mossling", Vector3.new(59, 3, 16), world)
+    EnemySpawnerService.Spawn("lumen_mossling", Vector3.new(132, 3, 34), world)
+    EnemySpawnerService.Spawn("lumen_mossling", Vector3.new(151, 3, 48), world)
+    EnemySpawnerService.Spawn("lumen_mossling", Vector3.new(166, 3, 29), world)
 end
 
 return LumenreachWorldService
