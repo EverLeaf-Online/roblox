@@ -781,23 +781,45 @@ local function App()
         local healthConnection = nil
         local maxConnection = nil
 
+        local bindGeneration = 0
+
         local function bindCharacter(character)
+            bindGeneration += 1
+            local generation = bindGeneration
+
             if healthConnection then
                 healthConnection:Disconnect()
+                healthConnection = nil
             end
             if maxConnection then
                 maxConnection:Disconnect()
+                maxConnection = nil
             end
+
+            setInteraction(nil)
+            setMenuOpen(false)
+            setDead(false)
+            player:SetAttribute("EverLeafUiCapture", false)
+
             local humanoid = character:WaitForChild("Humanoid")
+            if generation ~= bindGeneration or character ~= player.Character then
+                return
+            end
+
             setHealth(humanoid.Health)
             setMaxHealth(humanoid.MaxHealth)
             setDead(humanoid.Health <= 0)
             healthConnection = humanoid.HealthChanged:Connect(function(value)
+                if generation ~= bindGeneration then
+                    return
+                end
                 setHealth(value)
                 setDead(value <= 0)
             end)
             maxConnection = humanoid:GetPropertyChangedSignal("MaxHealth"):Connect(function()
-                setMaxHealth(humanoid.MaxHealth)
+                if generation == bindGeneration then
+                    setMaxHealth(humanoid.MaxHealth)
+                end
             end)
         end
 

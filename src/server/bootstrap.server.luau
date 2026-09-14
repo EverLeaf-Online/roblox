@@ -109,10 +109,16 @@ local function onPlayerAdded(player)
     DeathService.InitPlayer(player)
 
     player.CharacterAdded:Connect(function()
-        task.defer(CharacterStatsService.Apply, player, true)
+        task.defer(function()
+            CharacterStatsService.Apply(player, true)
+            PlayerDataService.NotifyChanged(player)
+        end)
     end)
     if player.Character then
-        task.defer(CharacterStatsService.Apply, player, true)
+        task.defer(function()
+            CharacterStatsService.Apply(player, true)
+            PlayerDataService.NotifyChanged(player)
+        end)
     end
 
     if player.Parent == Players then
