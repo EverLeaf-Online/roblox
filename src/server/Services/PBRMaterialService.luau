@@ -23,7 +23,6 @@ local function ensureVariant(name, definition)
 
     local variant = MaterialService:FindFirstChild(name)
     if not variant or not variant:IsA("MaterialVariant") then
-        warn(string.format("[PBRMaterialService] Missing authored MaterialVariant %s", name))
         return nil
     end
 
@@ -43,6 +42,25 @@ function PBRMaterialService.Init()
             )
         end
     end
+
+    MaterialService.ChildAdded:Connect(function(child)
+        if not child:IsA("MaterialVariant") then
+            return
+        end
+
+        local definition = Definitions[child.Name]
+        if not definition or not isReady(definition) then
+            return
+        end
+
+        activeVariants[child.Name] = child
+        task.defer(function()
+            local world = workspace:FindFirstChild("EverLeafGeneratedWorld")
+            if world then
+                PBRMaterialService.ApplyGeneratedWorld(world)
+            end
+        end)
+    end)
 end
 
 function PBRMaterialService.IsActive(name)

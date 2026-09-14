@@ -1,6 +1,4 @@
 local MaterialService = game:GetService("MaterialService")
-local RunService = game:GetService("RunService")
-
 local MATERIALS = {
     ForestGround = {
         BaseMaterial = Enum.Material.Grass,
@@ -42,42 +40,42 @@ local MATERIALS = {
     },
 }
 
-local installPending = false
-
 local function install()
-    if RunService:IsRunning() then
-        installPending = true
-        warn("[EverLeaf PBR] Play mode is active; PBR refresh queued for when Play stops.")
-        return false
-    end
-
-    installPending = false
+    local installed = 0
 
     for name, definition in MATERIALS do
-        local existing = MaterialService:FindFirstChild(name)
-        if existing and not existing:IsA("MaterialVariant") then
-            existing:Destroy()
-            existing = nil
-        end
+        local ok, err = pcall(function()
+            local existing = MaterialService:FindFirstChild(name)
+            if existing and not existing:IsA("MaterialVariant") then
+                existing:Destroy()
+                existing = nil
+            end
 
-        local variant = existing or Instance.new("MaterialVariant")
-        variant.Name = name
-        variant.BaseMaterial = definition.BaseMaterial
-        variant.ColorMap = definition.ColorMap
-        variant.NormalMap = definition.NormalMap
-        variant.RoughnessMap = definition.RoughnessMap
-        variant.MetalnessMap = ""
-        variant.StudsPerTile = definition.StudsPerTile
-        variant.MaterialPattern = Enum.MaterialPattern.Organic
-        variant.Parent = MaterialService
+            local variant = existing or Instance.new("MaterialVariant")
+            variant.Name = name
+            variant.BaseMaterial = definition.BaseMaterial
+            variant.ColorMap = definition.ColorMap
+            variant.NormalMap = definition.NormalMap
+            variant.RoughnessMap = definition.RoughnessMap
+            variant.MetalnessMap = ""
+            variant.StudsPerTile = definition.StudsPerTile
+            variant.MaterialPattern = Enum.MaterialPattern.Organic
+            variant.Parent = MaterialService
 
-        if definition.OverrideProperty then
-            MaterialService[definition.OverrideProperty] = name
+            if definition.OverrideProperty then
+                MaterialService[definition.OverrideProperty] = name
+            end
+        end)
+
+        if ok then
+            installed += 1
+        else
+            warn(string.format("[EverLeaf PBR] Failed to author %s: %s", name, tostring(err)))
         end
     end
 
-    print("[EverLeaf PBR] Installed/refreshed 5 PBR MaterialVariants.")
-    return true
+    print(string.format("[EverLeaf PBR] Installed/refreshed %d PBR MaterialVariants.", installed))
+    return installed == 5
 end
 
 local toolbar = plugin:CreateToolbar("EverLeaf")
@@ -89,19 +87,6 @@ local button = toolbar:CreateButton(
 button.ClickableWhenViewportHidden = true
 button.Click:Connect(install)
 
--- If the plugin is loaded while Play is active, detect the return to Edit mode.
--- RunService has no Stopped event, so poll the run state from the plugin thread.
-task.spawn(function()
-    local wasRunning = RunService:IsRunning()
-    while true do
-        task.wait(0.5)
-        local running = RunService:IsRunning()
-        if wasRunning and not running and installPending then
-            task.defer(install)
-        end
-        wasRunning = running
-    end
-end)
-
--- Refresh automatically whenever the plugin loads in edit mode.
+-- Plugin capability is what the protected MaterialVariant properties require,
+-- so author them immediately whenever the plugin loads.
 task.defer(install)
