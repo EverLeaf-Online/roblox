@@ -1,6 +1,7 @@
 # EverLeaf Roblox — Master Checklist
 
 **Canonical status:** 2026-09-14
+**Latest gameplay checkpoint:** `31a24bb` — first-region gameplay/content pass
 **Purpose:** detailed implementation/status tracker for the entire project.
 **Roadmap:** [`ROADMAP.md`](ROADMAP.md)
 
@@ -35,26 +36,32 @@
 
 - [x] Server-authoritative basic attack, range/facing/LOS validation, damage, cooldown, and enemy reward handoff.
 - [x] Server-authoritative Beginner Strike with MP/cooldown rollback on failed effect.
-- [ ] Floating damage numbers.
-- [ ] Hit confirm VFX/SFX and stronger impact presentation.
-- [ ] Enemy attack windup/telegraph.
-- [ ] Aggro leash/reset.
-- [ ] Production obstacle-aware navigation/pathfinding.
-- [ ] Knockback/stagger rules for player/enemies where appropriate.
-- [ ] Reward/loot presentation after kill.
+- [x] Monster floating damage numbers.
+- [x] Monster hit-confirm VFX/SFX and hit-flinch presentation.
+- [x] Enemy attack windup with damage applied at the impact moment.
+- [x] Aggro leash/reset and return-to-home behavior.
+- [x] PathfindingService pursuit foundation around obstacles.
+- [x] Monster dodge reactions, cooldowns, brief invulnerability, and backward evade movement.
+- [x] Visible world loot drops with ownership, labels, pickup prompts, and despawn timing.
+- [x] Per-monster death VFX/debris/SFX foundation.
+- [ ] Production player/enemy knockback/stagger rules where appropriate.
+- [ ] Studio-tune pathfinding, dodge rates, attack ranges, and combat feel across all Lumenreach encounters.
+- [ ] Multiplayer threat/target-selection and party-combat QA.
 
 ### C. Lumenreach environment production pass
 
-- [x] Terrain/grass baseline is visually acceptable enough to keep iterating.
+- [x] Lumenreach rebuilt as a larger 900×760 explorable region with separated destinations and connected trail network.
+- [x] Wayfarer Camp, Lumenwood Crossroads, Shattered Lumen Arch, Mossglen Combat Grove, Veilfall Cascade, Glowmere Pool, and Sunmoss Overlook established.
 - [x] Poly Haven PBR material pipeline is live for forest ground, mossy rock, moss wood, wood-chip path, and wood/stone pathway.
-- [ ] **BLOCKER:** Replace current Creator Store tree prefab (`580221169`); it still produces fallen/visually poor trees and is not acceptable for Phase 1.
-- [ ] Import/author a new upright production tree/foliage set with correct pivots, collisions, scale, and script-free sanitization.
-- [ ] Replace placeholder/fake logs and stumps with production assets/materials.
-- [ ] Upgrade rocks and rock clusters with production meshes/PBR.
-- [ ] Upgrade ruins and camp props; remove obvious wedge/graybox shapes.
-- [ ] Improve shrubs/flowers/ground clutter without blocking navigation.
-- [ ] Strengthen camp, combat-grove, arch, and waterfall landmark readability.
-- [ ] Final lighting/sky/atmosphere pass for Phase 1.
+- [x] Bad/fallen Creator Store tree dependency replaced with approved original/Poly Haven environment assets and procedural foliage fallbacks.
+- [x] Production-oriented trees, ferns, deadwood, rock faces, mossy rock sets, stumps, roots, logs, mushrooms, cattails, and waystones integrated.
+- [x] Oversized/unintegrated cliff meshes and black stacked-rock formations corrected and blended into terrain.
+- [x] Starter camp rebuilt with larger tents, proper supplies, map table, benches, lanterns, signpost, and custom guide/NPC composition.
+- [x] World density pass added continuous forest bands, roadside clusters, undergrowth, deadwood, rocks, and landmark dressing.
+- [x] Camera collision stabilized so non-solid foliage/decor no longer causes view snapping.
+- [x] Environmental storytelling pass adds old wayfarer remnants and hidden Whisperroot Hollow.
+- [ ] Full player-height visual QA for every imported mesh, rock/cliff, root, log, and path obstruction.
+- [ ] Final lighting/sky/atmosphere art-direction pass for Phase 1.
 - [ ] Measure frame time, memory, streaming, and foliage-density budgets in Studio.
 
 ### D. UI / RPG shell
@@ -75,15 +82,25 @@
 
 ### E. RPG/content closure
 
-- [x] Guide → Mossling quest route exists and explicit turn-in works.
+- [x] Guide → Mossling starter quest route exists and explicit turn-in works.
+- [x] Mossling spawn restored so the starter quest is completable in the rebuilt world.
 - [x] Consumable architecture and server-side use path exist.
 - [x] Inventory/equipment persistence foundations exist.
-- [ ] Add first visible starter loot drops/pickups.
-- [ ] Add first starter equipment/reward path.
-- [ ] Finish shop UI and one complete buy/use loop.
-- [ ] Add level-up feedback and tune level 1–30 early EXP curve.
-- [ ] First advancement hook/location/quest shell.
-- [ ] Unseal/implement the Lumenreach → Brasshaven transition shell at the appropriate progression gate.
+- [x] Visible starter loot drops/pickups implemented.
+- [x] Data-driven drop tables and quantity/chance rules implemented for the current Lumenreach monster set.
+- [x] Starter equipment/reward path added (`Wayfarer Scout Blade`, `Mossguard Charm`, tonics/materials).
+- [x] Three camp NPCs added beyond Ilyra: Orin (quartermaster), Tovin (scout), and Maela (archive keeper).
+- [x] NPC dialogue now changes with progression and quest availability.
+- [x] Starter/tutorial, hunting, exploration, boss, and region-unlock quest chains added.
+- [x] Quest prerequisites, Collect objectives, and Explore objectives implemented.
+- [x] Landmark exploration triggers wired for Crossroads, Glowmere, Shattered Arch, Veilfall, Sunmoss, and Whisperroot Hollow.
+- [x] Basic multi-item shop inventories exposed through NPC dialogue for supply/outfitter/archive vendors.
+- [x] Hidden Whisperroot Hollow and persistent one-time Wayfarer cache reward implemented.
+- [x] First Lumenreach field boss implemented: Mosswarden, Root of the Old Grove.
+- [x] Lumenreach → Brasshaven progression gate is functional and region unlock rewards are supported.
+- [ ] Dedicated full shop screen/polish beyond dialogue-based shop inventory buttons.
+- [ ] Level-up feedback and final level 1–30 EXP tuning.
+- [ ] First advancement hook/location/quest flow.
 - [ ] Belforge boss-entry shell only to the extent required for Phase 1 progression continuity.
 
 ### F. Phase 1 exit validation
@@ -141,14 +158,14 @@
 - [x] Modern lighting/atmosphere baseline service.
 - [ ] Production hitbox/hurtbox system.
 - [ ] Lock-on / soft-target system decision and implementation.
-- [ ] Production enemy pathfinding/navigation.
+- [x] **PARTIAL:** PathfindingService pursuit/navigation is source-complete; full Studio obstacle/edge-case tuning remains.
 - [x] Lumenreach 3D benchmark graybox generated from canonical source.
-- [ ] **PARTIAL:** Asset import/optimization pipeline includes sanitized Creator Store prefab intake and working Poly Haven PBR material authoring; production foliage/model ingestion remains incomplete.
+- [x] Asset import/optimization pipeline supports sanitized runtime prefab intake plus approved Poly Haven PBR/model assets, manifests, fallbacks, and grounding/collision controls.
 - [x] Poly Haven/approved Sketchfab material/model source policy documented.
 - [x] Poly Haven 1K PBR source set downloaded, hash-manifested, uploaded to Roblox (15/15 approved), wired to generated asset IDs, and Studio MaterialVariants verified.
-- [x] Source-controlled wind/ambient-motion foundation integrated; production foliage assets and performance tuning remain.
+- [x] Source-controlled wind/ambient-motion foundation integrated; production foliage assets are in use, with performance tuning still pending.
 - [ ] Streaming/performance budgets measured in Studio.
-- [ ] **PARTIAL:** First production-quality environment benchmark scene is in active replacement pass: Poly Haven PBR materials are live and the Pine Forest prefab kit is wired; foliage density, rock/ruin/camp prop replacement and performance verification remain.
+- [x] **PARTIAL:** Lumenreach environment replacement/content-density pass is substantially complete; player-height visual QA and performance verification remain.
 
 ## 1. Repository / development environment
 
@@ -280,7 +297,7 @@
 - [x] Cooldown validation.
 - [x] Remote rate limiting.
 - [x] Range validation.
-- [x] Depth-plane validation.
+- [x] Full 3D range/facing/line-of-sight validation.
 - [x] Might-based damage foundation.
 - [x] Mastery/variance damage roll.
 - [x] Pure damage-math headless tests.
@@ -321,27 +338,28 @@
 
 ## 10. Enemies
 
-- [x] Enemy definition table foundation.
-- [x] Enemy registration/tagging.
-- [x] Enemy Humanoid HP setup.
-- [x] Server target validity checks.
-- [x] Damage contribution tracking.
-- [x] Death callback.
-- [x] Reward handoff on death.
-- [x] Respawn callback foundation.
-- [x] Studio training dummy prototype.
-- [x] Hostile enemy AI foundation (idle/pursue/attack) is integrated; production navigation/telegraphs remain.
-- [x] Range-based aggro acquisition foundation.
-- [ ] Aggro leash/reset.
-- [x] Enemy pursuit converted to full XYZ movement foundation.
-- [ ] Production pathfinding/navigation around 3D obstacles.
-- [ ] Enemy attack windup/telegraph.
-- [x] Enemy-to-player damage path is integrated.
-- [x] Enemy attack cooldown foundation.
-- [ ] Enemy knockback/stagger resistance.
-- [ ] Elite variants.
-- [ ] Spawn regions/population management.
-- [ ] Anti-farm/respawn tuning where needed.
+- [x] Enemy definition/config table foundation with editable HP, damage, speed, ranges, cooldowns, dodge, leash, and respawn stats.
+- [x] Enemy registration/tagging, Humanoid HP setup, target validation, damage contribution tracking, death callback, rewards, and respawn foundation.
+- [x] Runtime `ServerStorage/Monsters` templates generated for current monster families.
+- [x] Training Dummy, Lumen Mossling, Gravebone Skeleton, Glowcap Slime, and Suncrest Ridgebeak implemented.
+- [x] New Lumenreach families implemented: Brambleback and Lumen Wisp.
+- [x] Elite variants implemented: Gravebone Captain and Royal Glowcap.
+- [x] First field boss implemented: Mosswarden, Root of the Old Grove.
+- [x] Idle/pursue/attack/hit/dodge/death AI state integration.
+- [x] Range-based nearest-player aggro acquisition.
+- [x] Aggro leash/reset and return-to-home behavior.
+- [x] Full XYZ pursuit with PathfindingService navigation foundation.
+- [x] Enemy attack windup/impact timing and attack cooldowns.
+- [x] Enemy-to-player damage path integrated.
+- [x] Monster dodge chance/cooldown/invulnerability/backstep behavior.
+- [x] Authored code-driven keyframe clips for starter monster idle/walk/attack/hit/dodge/death states.
+- [x] Ground-spawn wave system with underground emergence, dust/debris, invulnerability, stagger, and trigger-state machine.
+- [x] Spawn trigger states: Idle → Triggered → Spawning → Active → Cooldown.
+- [x] Wave cooldown requires players to leave and re-enter before retriggering.
+- [x] Spawn regions placed for Mosslings, Skeletons, Slimes, Ridgebeaks, Bramblebacks, Wisps, elites, and Mosswarden.
+- [ ] Production hitbox/hurtbox and enemy knockback/stagger-resistance rules.
+- [ ] Studio tune pathfinding, spawn density, anti-farm timing, and multiplayer target behavior.
+- [ ] Replace any remaining simple/procedural monster visuals that fail the final art-quality bar.
 
 ## 11. Player damage / death
 
@@ -361,15 +379,17 @@
 - [x] Shards ledger.
 - [x] Marks ledger.
 - [x] Add/spend/can-afford currency operations.
-- [x] Enemy reward can grant EXP/currency.
+- [x] Enemy rewards can grant EXP/currency.
+- [x] Quest rewards can grant EXP, currencies, items, and region unlocks.
+- [x] Item drop definitions for current Lumenreach monsters.
+- [x] Drop chance/min/max quantity rules.
+- [x] Winner-owned visible loot drops.
+- [x] Pickup prompts, inventory validation, quest Collect progress, and timed cleanup.
+- [x] Loot presentation uses labeled glowing world orbs with type-based visual colors.
 - [ ] Finalize purpose/source/sink for Shards.
 - [ ] Finalize purpose/source/sink for Marks.
-- [ ] Item drop definitions.
-- [ ] Drop chance/quantity rules.
-- [ ] Loot ownership rules.
-- [ ] Pickup behavior.
-- [ ] Party loot behavior.
-- [ ] Loot presentation.
+- [ ] Party loot ownership/sharing rules.
+- [ ] Rare-drop presentation and loot-notification polish.
 
 ## 13. Inventory / equipment / items
 
@@ -392,19 +412,28 @@
 
 ## 14. NPC / interaction / quests
 
-- [ ] Generic interactable framework.
+- [x] Generic registered world-object interaction framework for NPCs/portals.
 - [x] NPC-definition registry foundation.
-- [x] NPC interaction range/server validation on interaction start; action-time distance revalidation still pending.
+- [x] NPC interaction range/server validation on interaction start.
 - [x] React NPC dialogue system foundation.
+- [x] Progression-aware NPC dialogue text and visible quest offers.
 - [x] Quest-definition registry foundation.
 - [x] Active/completed quest persistence foundation.
-- [ ] Quest prerequisites.
-- [x] Defeat-objective progression foundation wired to enemy deaths.
-- [ ] Collect quests.
-- [ ] Talk/exploration quests.
-- [x] Quest reward pipeline foundation.
+- [x] Quest prerequisite validation.
+- [x] Defeat-objective progression wired to enemy deaths.
+- [x] Collect-objective progression wired to loot pickup.
+- [x] Explore-objective progression wired to landmark triggers.
+- [x] Quest reward pipeline supports EXP/currency/items/region unlocks.
 - [x] React objective tracker foundation.
 - [x] React dialogue UI with quest/shop actions.
+- [x] Lumenreach starter/tutorial quest chain.
+- [x] Lumenreach hunting quest chain.
+- [x] Lumenreach exploration quest chain including Whisperroot Hollow.
+- [x] Mosswarden field-boss quest.
+- [x] Brasshaven passage/unlock quest.
+- [ ] Talk-objective type if future quest design needs it.
+- [ ] Quest journal filtering/sorting/presentation polish.
+- [ ] Action-time NPC distance revalidation audit for every future interaction mutation.
 
 ## 15. Shops / services
 
@@ -413,28 +442,42 @@
 - [x] Server-authoritative sell-flow foundation with interaction-session requirement.
 - [x] Shop price/currency validation foundation.
 - [x] Inventory-space validation foundation.
-- [ ] Shop UI.
+- [x] Lumen Supply inventory expanded beyond one hardcoded tonic.
+- [x] Mossglen Scout Outfitter shop added.
+- [x] Wayfarer Archive Exchange shop added.
+- [x] Dialogue shop UI can display and purchase multiple configured items.
+- [ ] Dedicated shop window with item details, quantities, buy/sell tabs, and polished navigation.
 - [ ] Storage/bank design decision.
 - [ ] Enhancement/crafting design decision.
 
 ## 16. World — Lumenreach
 
 - [x] World visual bible/concept direction.
-- [x] Source-generated 3D benchmark graybox.
-- [x] Wayfarer Camp spawn/tutorial area foundation.
-- [x] Benchmark field boundaries and traversable ground.
-- [x] Placeholder ground/path/pond/ruin composition.
-- [ ] Camera obstruction/framing review in finished environment geometry.
-- [ ] **PARTIAL:** Brasshaven portal world object placed/registered; transition remains sealed.
-- [x] Lumen Guide physical NPC placement + interaction prompt.
-- [x] Training dummy + Lumen Mossling spawn placements.
-- [x] First quest route: guide → Mossglen combat grove.
-- [x] Lumen Guide supply-shop interaction shell.
+- [x] Lumenreach rebuilt into a 900×760 full 3D first region.
+- [x] Wayfarer Camp spawn/tutorial area rebuilt and populated.
+- [x] Lumenwood Crossroads navigation hub.
+- [x] Shattered Lumen Arch destination/ruins.
+- [x] Mossglen Combat Grove encounter zone.
+- [x] Veilfall Cascade waterfall/wetland destination.
+- [x] Glowmere Pool bridge/wetland destination.
+- [x] Sunmoss Overlook northern loop destination.
+- [x] Connected trail network and route beacons/waystones.
+- [x] Forest-density and roadside environmental dressing pass.
+- [x] Approved imported environment assets integrated with runtime sanitization and procedural fallbacks.
+- [x] Bad oversized cliff/rock placements corrected and terrain-supported.
+- [x] Camera obstruction issue from foliage/decor corrected.
+- [x] Custom Ilyra guide model and three additional camp NPCs placed with interaction prompts.
+- [x] Training dummy and full first-region monster/wave placement.
+- [x] Hidden Whisperroot Hollow added with persistent one-time cache reward.
+- [x] Wayfarer environmental-story remnants added around the region.
+- [x] Major landmark exploration triggers wired into quests.
+- [x] Brasshaven portal world object is active and gated by profile region unlock/minimum-level rules.
 - [ ] First advancement location.
-- [ ] **BLOCKER:** Creator Store tree prefab (`580221169`) sanitizes/loads, but its current orientation/visual result is unacceptable (fallen trees); replace it rather than polishing this prefab further.
-- [x] Lighting/atmosphere/post-processing baseline integrated and exercised in Studio; final art-direction tuning remains.
+- [ ] Full player-height collision/asset-placement QA across the entire rebuilt region.
+- [ ] Final lighting/atmosphere tuning.
 - [ ] Ambient audio/music.
 - [ ] Minimap/map UX decision.
+- [ ] Performance/streaming/density profiling in Studio.
 
 ## 17. World — Brasshaven
 
@@ -493,17 +536,17 @@
 
 ## 20. Art / animation / audio
 
-- [ ] Original EverLeaf Roblox visual style bible.
-- [ ] Character animation set.
+- [ ] Original EverLeaf Roblox visual style bible finalized.
+- [ ] Player character animation set.
 - [ ] Weapon animation sets.
-- [ ] Enemy animation sets.
-- [ ] Boss animation set.
-- [ ] Combat VFX language.
-- [ ] Environment VFX.
+- [x] **PARTIAL:** Starter/current monster families have authored code-driven idle/walk/attack/hit/dodge/death clips; production animation polish and future families remain.
+- [x] **PARTIAL:** Monster hit/death VFX/SFX language exists with per-family color/debris differences; full production effects library remains.
+- [ ] Boss-specific production animation set beyond the shared Mosswarden quadruped rig.
+- [ ] Environment VFX production pass.
 - [ ] UI iconography.
 - [ ] Original SFX library.
 - [ ] Original music direction/tracks.
-- [ ] Replace every prototype/placeholder asset before release.
+- [ ] Replace every remaining prototype/placeholder asset before release.
 
 ## 21. Social / multiplayer
 
@@ -595,18 +638,18 @@
 
 ---
 
-# Current highest-priority queue — Phase B game shell
+# Current highest-priority queue — Phase 1 closure / QA
 
-1. [ ] **PARTIAL:** React HUD shell is Studio-verified; responsive/final visual polish pending.
-2. [ ] **PARTIAL:** Character/inventory/equipment/skills/quests/settings React menu interactions are source-complete; verify all screens in Studio.
-3. [x] Add physical Lumenreach benchmark graybox + NPC/portal world-object registration.
-4. [x] Hostile Lumen Mossling combat/AI/player-damage loop has been exercised in Studio; production navigation/telegraphs remain.
-5. [ ] **PARTIAL:** Safe respawn + React death overlay are source-complete; Studio verification/polish pending.
-6. [x] Lumen Guide dialogue, quest accept/progress/turn-in, and shop-action shell are Studio-verified; dedicated shop UI/polish remain.
-7. [ ] **PARTIAL:** Starter Beginner Strike is learned/assigned to slot 1 and keyboard 1–8 invokes `SkillEffectService`; Studio verification/controller binding pending.
-8. [ ] Add party UI/invite flow and a private-instance shell.
-9. [ ] Add Belforge boss-entry/encounter shell using the generic state machine.
-10. [ ] Make the Lumenreach → Brasshaven route traversable with placeholder content.
+1. [ ] Full in-Studio walk-through of the rebuilt Lumenreach from player height; fix floating, buried, oversized, incomplete, or obstructive assets.
+2. [ ] Exercise every monster wave/elite/boss trigger in Studio, including emergence height, pathfinding, attack timing, dodge, leash, death, cooldown, and leave/re-enter behavior.
+3. [ ] Complete a fresh-profile starter quest chain through Mosswarden and the Brasshaven unlock without developer intervention.
+4. [ ] Verify visible loot pickup, Collect objectives, equipment rewards, all three shops, and the Whisperroot one-time cache across death/rejoin.
+5. [ ] Multiplayer smoke test: target selection, damage ownership, loot ownership, simultaneous trigger activation, and party/network behavior.
+6. [ ] Finish dedicated shop UX and reward/quest/level-up notifications.
+7. [ ] Finalize first-advancement class-family names and implement the first advancement quest/location flow.
+8. [ ] Tune level 1–30 EXP, monster stats, spawn density, drop rates, Shard/Mark sinks, and boss rewards.
+9. [ ] Performance profile the dense Lumenreach build for frame time, memory, streaming, and listener leaks.
+10. [ ] Complete keyboard/mouse + controller blocking-flow QA and the full no-red-Output Phase 1 run.
 
 # Definition of the first meaningful playable milestone
 
