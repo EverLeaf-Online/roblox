@@ -447,9 +447,187 @@ local function Dialogue(props)
     })
 end
 
+local function MainMenu(props)
+    local profile = props.Profile or {}
+    local activeTab, setActiveTab = React.useState("CHARACTER")
+    local catalog = CatalogClient.Get() or {}
+    local tabs = { "CHARACTER", "INVENTORY", "SKILLS", "QUESTS", "SETTINGS" }
+
+    local bodyLines = {}
+    if activeTab == "CHARACTER" then
+        local stats = profile.Stats or {}
+        bodyLines = {
+            string.format(
+                "Level %d · AP %d · SP %d",
+                tonumber(profile.Level) or 1,
+                tonumber(profile.AP) or 0,
+                tonumber(profile.SP) or 0
+            ),
+            string.format("Might %d", tonumber(stats.Might) or 0),
+            string.format("Finesse %d", tonumber(stats.Finesse) or 0),
+            string.format("Insight %d", tonumber(stats.Insight) or 0),
+            string.format("Fortune %d", tonumber(stats.Fortune) or 0),
+            string.format("Advancement Tier %d", tonumber(profile.AdvancementTier) or 0),
+        }
+    elseif activeTab == "INVENTORY" then
+        local inventory = profile.Inventory or {}
+        for index, slot in inventory.Slots or {} do
+            local definition = catalog.Items and catalog.Items[slot.ItemId]
+            table.insert(
+                bodyLines,
+                string.format(
+                    "%02d  %s  x%d",
+                    index,
+                    definition and definition.DisplayName or tostring(slot.ItemId),
+                    tonumber(slot.Quantity) or 0
+                )
+            )
+        end
+        if #bodyLines == 0 then
+            bodyLines = { "Inventory is empty." }
+        end
+        local equipment = profile.Equipment or {}
+        table.insert(bodyLines, "")
+        table.insert(bodyLines, "EQUIPPED")
+        for _, slotName in { "Weapon", "Head", "Body", "Legs", "Accessory", "Ring1", "Ring2" } do
+            local itemId = equipment[slotName]
+            local definition = itemId and itemId ~= "" and catalog.Items and catalog.Items[itemId]
+            table.insert(
+                bodyLines,
+                string.format("%s: %s", slotName, definition and definition.DisplayName or "—")
+            )
+        end
+    elseif activeTab == "SKILLS" then
+        local skills = profile.Skills or {}
+        for skillId, rank in skills.Learned or {} do
+            local definition = catalog.Skills and catalog.Skills[skillId]
+            table.insert(
+                bodyLines,
+                string.format(
+                    "%s  Rank %s",
+                    definition and definition.DisplayName or tostring(skillId),
+                    tostring(rank)
+                )
+            )
+        end
+        if #bodyLines == 0 then
+            bodyLines =
+                { "No skills learned yet.", "Skill tree and advancement choices are coming next." }
+        end
+    elseif activeTab == "QUESTS" then
+        local quests = profile.Quests or {}
+        table.insert(bodyLines, "ACTIVE")
+        local activeCount = 0
+        for questId, state in quests.Active or {} do
+            activeCount += 1
+            local definition = catalog.Quests and catalog.Quests[questId]
+            local suffix = if state.ReadyToTurnIn then " · READY TO TURN IN" else ""
+            table.insert(
+                bodyLines,
+                (definition and definition.DisplayName or tostring(questId)) .. suffix
+            )
+        end
+        if activeCount == 0 then
+            table.insert(bodyLines, "No active quests.")
+        end
+        table.insert(bodyLines, "")
+        table.insert(bodyLines, "COMPLETED")
+        local completedCount = 0
+        for questId, done in quests.Completed or {} do
+            if done then
+                completedCount += 1
+                local definition = catalog.Quests and catalog.Quests[questId]
+                table.insert(bodyLines, definition and definition.DisplayName or tostring(questId))
+            end
+        end
+        if completedCount == 0 then
+            table.insert(bodyLines, "None yet.")
+        end
+    else
+        local settings = profile.Settings or {}
+        bodyLines = {
+            string.format(
+                "Music Volume: %d%%",
+                math.floor((tonumber(settings.MusicVolume) or 1) * 100 + 0.5)
+            ),
+            string.format(
+                "SFX Volume: %d%%",
+                math.floor((tonumber(settings.SfxVolume) or 1) * 100 + 0.5)
+            ),
+            string.format(
+                "Damage Numbers: %s",
+                settings.ShowDamageNumbers == false and "Off" or "On"
+            ),
+            "Interactive controls will be wired into this panel next.",
+        }
+    end
+
+    local tabChildren = {}
+    for index, tabName in tabs do
+        tabChildren[tabName] = React.createElement("TextButton", {
+            Position = UDim2.fromOffset(18 + (index - 1) * 128, 62),
+            Size = UDim2.fromOffset(118, 38),
+            BackgroundColor3 = if activeTab == tabName
+                then Color3.fromRGB(61, 100, 84)
+                else COLORS.PanelSoft,
+            BorderSizePixel = 0,
+            Text = tabName,
+            TextColor3 = COLORS.Text,
+            TextSize = 11,
+            Font = Enum.Font.GothamBold,
+            [React.Event.Activated] = function()
+                setActiveTab(tabName)
+            end,
+        }, roundedChildren(nil, 7))
+    end
+
+    local bodyText = table.concat(bodyLines, "\n")
+    return React.createElement(Panel, {
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Position = UDim2.fromScale(0.5, 0.5),
+        Size = UDim2.fromOffset(666, 470),
+        ZIndex = 30,
+        Children = {
+            Title = React.createElement(Label, {
+                Position = UDim2.fromOffset(20, 14),
+                Size = UDim2.new(1, -90, 0, 34),
+                Text = "EVERLEAF",
+                TextSize = 25,
+                Bold = true,
+                Color = Color3.fromRGB(196, 236, 211),
+                ZIndex = 31,
+            }),
+            Close = React.createElement("TextButton", {
+                AnchorPoint = Vector2.new(1, 0),
+                Position = UDim2.new(1, -16, 0, 14),
+                Size = UDim2.fromOffset(42, 36),
+                BackgroundColor3 = Color3.fromRGB(47, 53, 52),
+                BorderSizePixel = 0,
+                Text = "×",
+                TextColor3 = COLORS.Text,
+                TextSize = 22,
+                Font = Enum.Font.GothamBold,
+                ZIndex = 32,
+                [React.Event.Activated] = props.OnClose,
+            }, roundedChildren(nil, 8)),
+            Tabs = React.createElement(React.Fragment, nil, tabChildren),
+            Body = React.createElement(Label, {
+                Position = UDim2.fromOffset(24, 118),
+                Size = UDim2.new(1, -48, 1, -142),
+                Text = bodyText,
+                TextSize = 16,
+                VerticalAlign = Enum.TextYAlignment.Top,
+                Wrapped = true,
+                ZIndex = 31,
+            }),
+        },
+    })
+end
+
 local function App()
     local profile, setProfile = React.useState(ProfileStore.Get())
     local interaction, setInteraction = React.useState(nil)
+    local menuOpen, setMenuOpen = React.useState(false)
     local health, setHealth = React.useState(100)
     local maxHealth, setMaxHealth = React.useState(100)
 
@@ -515,7 +693,7 @@ local function App()
     end, {})
 
     React.useEffect(function()
-        player:SetAttribute("EverLeafUiCapture", interaction ~= nil)
+        player:SetAttribute("EverLeafUiCapture", interaction ~= nil or menuOpen)
         return function()
             player:SetAttribute("EverLeafUiCapture", false)
         end
@@ -534,7 +712,7 @@ local function App()
         return function()
             connection:Disconnect()
         end
-    end, { interaction })
+    end, { interaction, menuOpen })
 
     return React.createElement("ScreenGui", {
         ResetOnSpawn = false,
@@ -546,8 +724,14 @@ local function App()
             Profile = profile,
             Health = health,
             MaxHealth = maxHealth,
-            DialogueOpen = interaction ~= nil,
+            DialogueOpen = interaction ~= nil or menuOpen,
         }),
+        Menu = menuOpen and React.createElement(MainMenu, {
+            Profile = profile,
+            OnClose = function()
+                setMenuOpen(false)
+            end,
+        }) or nil,
         Dialogue = interaction and React.createElement(Dialogue, {
             Description = interaction,
             Profile = profile,
