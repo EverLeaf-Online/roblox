@@ -89,10 +89,17 @@ local button = toolbar:CreateButton(
 button.ClickableWhenViewportHidden = true
 button.Click:Connect(install)
 
--- If the plugin is loaded while Play is active, install immediately after Play stops.
-RunService.Stopped:Connect(function()
-    if installPending then
-        task.defer(install)
+-- If the plugin is loaded while Play is active, detect the return to Edit mode.
+-- RunService has no Stopped event, so poll the run state from the plugin thread.
+task.spawn(function()
+    local wasRunning = RunService:IsRunning()
+    while true do
+        task.wait(0.5)
+        local running = RunService:IsRunning()
+        if wasRunning and not running and installPending then
+            task.defer(install)
+        end
+        wasRunning = running
     end
 end)
 
