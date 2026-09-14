@@ -1,3 +1,5 @@
+local GeneratedPBRAssetIds = require(script.Parent.GeneratedPBRAssetIds)
+
 return table.freeze({
     ForestGround = table.freeze({
         DisplayName = "EverLeaf Forest Ground",
@@ -11,7 +13,8 @@ return table.freeze({
             Normal = "assets/polyhaven/forest_ground/forest_ground_normal_1k.jpg",
             Roughness = "assets/polyhaven/forest_ground/forest_ground_roughness_1k.jpg",
         }),
-        RobloxAssetIds = table.freeze({ Color = 0, Normal = 0, Roughness = 0 }),
+        RobloxAssetIds = GeneratedPBRAssetIds.ForestGround
+            or table.freeze({ Color = 0, Normal = 0, Roughness = 0 }),
     }),
     MossyRock = table.freeze({
         DisplayName = "EverLeaf Mossy Rock",
@@ -25,7 +28,8 @@ return table.freeze({
             Normal = "assets/polyhaven/mossy_rock/mossy_rock_normal_1k.jpg",
             Roughness = "assets/polyhaven/mossy_rock/mossy_rock_roughness_1k.jpg",
         }),
-        RobloxAssetIds = table.freeze({ Color = 0, Normal = 0, Roughness = 0 }),
+        RobloxAssetIds = GeneratedPBRAssetIds.MossyRock
+            or table.freeze({ Color = 0, Normal = 0, Roughness = 0 }),
     }),
     MossWood = table.freeze({
         DisplayName = "EverLeaf Moss Wood",
@@ -38,7 +42,8 @@ return table.freeze({
             Normal = "assets/polyhaven/moss_wood/moss_wood_normal_1k.jpg",
             Roughness = "assets/polyhaven/moss_wood/moss_wood_roughness_1k.jpg",
         }),
-        RobloxAssetIds = table.freeze({ Color = 0, Normal = 0, Roughness = 0 }),
+        RobloxAssetIds = GeneratedPBRAssetIds.MossWood
+            or table.freeze({ Color = 0, Normal = 0, Roughness = 0 }),
     }),
     WoodChipPath = table.freeze({
         DisplayName = "EverLeaf Wood Chip Path",
@@ -52,7 +57,8 @@ return table.freeze({
             Normal = "assets/polyhaven/wood_chip_path/wood_chip_path_normal_1k.jpg",
             Roughness = "assets/polyhaven/wood_chip_path/wood_chip_path_roughness_1k.jpg",
         }),
-        RobloxAssetIds = table.freeze({ Color = 0, Normal = 0, Roughness = 0 }),
+        RobloxAssetIds = GeneratedPBRAssetIds.WoodChipPath
+            or table.freeze({ Color = 0, Normal = 0, Roughness = 0 }),
     }),
     WoodStonePathway = table.freeze({
         DisplayName = "EverLeaf Wood Stone Pathway",
@@ -65,6 +71,7 @@ return table.freeze({
             Normal = "assets/polyhaven/wood_stone_pathway/wood_stone_pathway_normal_1k.jpg",
             Roughness = "assets/polyhaven/wood_stone_pathway/wood_stone_pathway_roughness_1k.jpg",
         }),
-        RobloxAssetIds = table.freeze({ Color = 0, Normal = 0, Roughness = 0 }),
+        RobloxAssetIds = GeneratedPBRAssetIds.WoodStonePathway
+            or table.freeze({ Color = 0, Normal = 0, Roughness = 0 }),
     }),
 })

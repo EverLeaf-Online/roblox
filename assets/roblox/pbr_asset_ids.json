@@ -1,0 +1,27 @@
+{
+  "ForestGround": {
+    "Color": 107344079410100,
+    "Normal": 120186366475714,
+    "Roughness": 140381828962512
+  },
+  "MossWood": {
+    "Color": 77089458184667,
+    "Normal": 120659903163403,
+    "Roughness": 100854560520124
+  },
+  "MossyRock": {
+    "Color": 101823683881386,
+    "Normal": 96893029091015,
+    "Roughness": 84185533532288
+  },
+  "WoodChipPath": {
+    "Color": 104765563977781,
+    "Normal": 130811469027211,
+    "Roughness": 115321092703074
+  },
+  "WoodStonePathway": {
+    "Color": 139474808529273,
+    "Normal": 70914826798460,
+    "Roughness": 94534825378988
+  }
+}
