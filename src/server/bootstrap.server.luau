@@ -9,6 +9,7 @@ local CombatService = require(script.Parent.Services.CombatService)
 local DeathService = require(script.Parent.Services.DeathService)
 local EnemyAIService = require(script.Parent.Services.EnemyAIService)
 local EnemySpawnerService = require(script.Parent.Services.EnemySpawnerService)
+local EquipmentVisualService = require(script.Parent.Services.EquipmentVisualService)
 local ExplorationService = require(script.Parent.Services.ExplorationService)
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
 local MonsterAnimationService = require(script.Parent.Services.MonsterAnimationService)
@@ -93,6 +94,10 @@ end
 
 local function replicateProfile(player)
     CharacterStatsService.Apply(player, false)
+    local profile = PlayerDataService.Get(player)
+    if profile then
+        EquipmentVisualService.Apply(player, profile)
+    end
     local snapshot = SnapshotService.Build(player)
     if snapshot then
         profileChanged:FireClient(player, snapshot)
@@ -136,12 +141,19 @@ local function onPlayerAdded(player)
                 WorldTravelService.SetRespawn(player, profile.World.SpawnId)
             end
             CharacterStatsService.Apply(player, true)
+            if profile then
+                EquipmentVisualService.Apply(player, profile)
+            end
             PlayerDataService.NotifyChanged(player)
         end)
     end)
     if player.Character then
         task.defer(function()
             CharacterStatsService.Apply(player, true)
+            local profile = PlayerDataService.Get(player)
+            if profile then
+                EquipmentVisualService.Apply(player, profile)
+            end
             PlayerDataService.NotifyChanged(player)
         end)
     end

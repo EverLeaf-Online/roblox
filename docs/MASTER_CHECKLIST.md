@@ -1,7 +1,7 @@
 # EverLeaf Roblox — Master Checklist
 
 **Canonical status:** 2026-09-14
-**Latest gameplay checkpoint:** first-family starter gear — five path weapons, family restrictions, advancement grants, equipment stat scaling
+**Latest gameplay checkpoint:** visible equipment — server-replicated weapon silhouettes for starter/family weapons across respawn and equipment changes
 **Purpose:** detailed implementation/status tracker for the entire project.
 **Roadmap:** [`ROADMAP.md`](ROADMAP.md)
 
@@ -265,6 +265,7 @@
 - [x] Level gates locked: Ironbloom/Thornrunner/Veilstrider at 8; Lumenweaver/Brasshand at 10.
 - [x] Primary stat/role identities defined for all five first families; deeper secondary-stat scaling remains for later tuning.
 - [x] First-family starter weapons defined and granted: Rootsteel Bastion Blade, Briarstring Fieldbow, Prismatic Lumen Focus, Veilglass Twin Knives, and Rivethead Forge Maul.
+- [x] Equipped weapon presentation is server-replicated with distinct blade, bow, focus, twin-knife, and maul silhouettes; Studio pose/alignment QA remains.
 - [x] First advancement requires The Five Paths trial: Wayfarer Proving Circle + Gravebone Captain, after Mosswarden progression.
 - [x] First advancement implemented with server validation, permanent family binding, +3 starting SP, starter skill grant/hotbar assignment, family-aware basic attacks, and starter-weapon delivery.
 - [x] Equipment family/tier/level restrictions are validated server-side.

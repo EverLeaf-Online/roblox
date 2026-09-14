@@ -44,7 +44,7 @@ Schema version 2 owns:
 
 ### Items/economy
 
-- InventoryService / EquipmentService / ConsumableService
+- InventoryService / EquipmentService / EquipmentVisualService / ConsumableService
 - CurrencyService / RewardService / ShopService
 - CraftingService
 - EnhancementService and StorageService hooks (disabled until their designs are approved)
@@ -135,7 +135,7 @@ Controllers are fault-isolated at startup so one stalled subsystem cannot block 
 4. all Lune tests (currently gameplay math + state-machine regression tests);
 5. Rojo headless place build.
 
-The current dependency checker reports 65 server services with no cycles; Selene reports zero warnings/errors, the Lune regression suite passes, and both Rojo outputs build successfully.
+The current dependency checker reports 66 server services with no cycles; Selene reports zero warnings/errors, the Lune regression suite passes, and both Rojo outputs build successfully.
 
 ## Phase A completion rule
 
