@@ -1,7 +1,7 @@
 # EverLeaf Roblox — Master Checklist
 
 **Canonical status:** 2026-09-14
-**Latest gameplay checkpoint:** family combat identity — server-authoritative basic-attack profiles plus family-specific poses and hit VFX
+**Latest gameplay checkpoint:** combat consequence/recovery — monster knockback/stagger plus out-of-combat HP/MP regeneration
 **Purpose:** detailed implementation/status tracker for the entire project.
 **Roadmap:** [`ROADMAP.md`](ROADMAP.md)
 
@@ -44,7 +44,7 @@
 - [x] Monster dodge reactions, cooldowns, brief invulnerability, and backward evade movement.
 - [x] Visible world loot drops with ownership, labels, pickup prompts, and despawn timing.
 - [x] Per-monster death VFX/debris/SFX foundation.
-- [ ] Production player/enemy knockback/stagger rules where appropriate.
+- [x] Monster attacks now apply data-driven player knockback, launch, and short stagger rules with movement-sanity grace; player-side enemy hit-flinch already exists.
 - [ ] Studio-tune pathfinding, dodge rates, attack ranges, and combat feel across all Lumenreach encounters.
 - [ ] Multiplayer threat/target-selection and party-combat QA.
 
@@ -67,6 +67,7 @@
 ### D. UI / RPG shell
 
 - [x] React HUD: HP, MP, EXP, level, currencies, objective tracker, and hotbar.
+- [x] Out-of-combat HP/MP regeneration is server-driven with combat delays, Insight-scaled MP recovery, and percentage/floor HP recovery.
 - [x] React HUD survives death/respawn.
 - [x] Character AP allocation action is wired.
 - [x] Inventory use/equip/unequip actions are wired.

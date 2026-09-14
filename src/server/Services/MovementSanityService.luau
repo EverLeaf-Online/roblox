@@ -33,6 +33,10 @@ function MovementSanityService.AllowTeleport(player, graceSeconds)
     state.GraceUntil = os.clock() + (graceSeconds or GameConfig.Movement.TeleportGraceSeconds)
 end
 
+function MovementSanityService.AllowExternalImpulse(player, graceSeconds)
+    MovementSanityService.AllowTeleport(player, graceSeconds or 0.55)
+end
+
 local function correctPlayer(player)
     local character = player.Character
     if not character then
@@ -48,7 +52,11 @@ local function correctPlayer(player)
 
     humanoid.UseJumpPower = true
     humanoid.JumpPower = GameConfig.Movement.JumpPower
-    humanoid.WalkSpeed = math.clamp(humanoid.WalkSpeed, 0, GameConfig.Movement.SprintSpeed)
+    if player:GetAttribute("EverLeafStaggered") == true then
+        humanoid.WalkSpeed = 0
+    else
+        humanoid.WalkSpeed = math.clamp(humanoid.WalkSpeed, 0, GameConfig.Movement.SprintSpeed)
+    end
 
     local velocity = root.AssemblyLinearVelocity
     local horizontal = Vector3.new(velocity.X, 0, velocity.Z)

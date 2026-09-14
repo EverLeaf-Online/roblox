@@ -87,6 +87,9 @@ local function getWorldMoveDirection()
 end
 
 local function tryJump()
+    if player:GetAttribute("EverLeafStaggered") == true then
+        return
+    end
     if not humanoid or humanoid.Health <= 0 then
         return
     end
@@ -97,6 +100,9 @@ local function tryJump()
 end
 
 local function tryDodge()
+    if player:GetAttribute("EverLeafStaggered") == true then
+        return
+    end
     if not humanoid or not root or humanoid.Health <= 0 then
         return
     end
@@ -179,6 +185,14 @@ function ThirdPersonController.Start()
             end
 
             local now = os.clock()
+            if player:GetAttribute("EverLeafStaggered") == true then
+                dodgeUntil = 0
+                dodgeDirection = Vector3.zero
+                humanoid.AutoRotate = true
+                humanoid.WalkSpeed = 0
+                humanoid:Move(Vector3.zero, false)
+                return
+            end
             if dodgeUntil > 0 then
                 if now < dodgeUntil and root and root.Parent then
                     humanoid.WalkSpeed = 0

@@ -105,6 +105,16 @@ GameConfig.DerivedStats = {
     MPPerInsight = 6,
 }
 
+GameConfig.Resources = {
+    RegenTickSeconds = 1,
+    MPRegenDelay = 3.5,
+    HPRegenDelay = 6,
+    BaseMPPerSecond = 2,
+    MPPerInsightPerSecond = 0.12,
+    MinimumHPPerSecond = 2,
+    HPPercentPerSecond = 0.015,
+}
+
 GameConfig.Combat = {
     DefaultMastery = 0.25,
     MinimumMastery = 0.1,
@@ -116,6 +126,7 @@ GameConfig.Combat = {
     BasicAttackVerticalRange = 6,
     BasicAttackArcDegrees = 120,
     RequireLineOfSight = true,
+    PlayerDamageIFrames = 0.15,
 }
 
 GameConfig.Graphics = {

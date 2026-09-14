@@ -292,10 +292,17 @@ function MonsterCombat.ApplyPlayerHit(monster, definition, damage)
 end
 
 function MonsterCombat.DamagePlayer(monster, player, definition)
+    local root = getRoot(monster)
     return PlayerDamageService.Apply(
         player,
         definition.Damage or 5,
-        monster:GetAttribute("EnemyId")
+        monster:GetAttribute("EnemyId"),
+        {
+            SourcePosition = root and root.Position or nil,
+            Knockback = definition.PlayerKnockback or 0,
+            Knockup = definition.PlayerKnockup or 0,
+            Stagger = definition.PlayerStagger or 0,
+        }
     )
 end
 

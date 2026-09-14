@@ -5,6 +5,7 @@ local ClassFamilyDefinitions = require(script.Parent.Parent.Content.ClassFamilyD
 local DamageService = require(script.Parent.DamageService)
 local EnemyService = require(script.Parent.EnemyService)
 local MonsterCombat = require(script.Parent.MonsterCombat)
+local ResourceService = require(script.Parent.ResourceService)
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
 local TargetingService = require(script.Parent.TargetingService)
 
@@ -66,6 +67,7 @@ function CombatService.BasicAttack(player, profile)
     end
 
     lastAttackAt[player] = now
+    ResourceService.MarkCombat(player, profile)
     local damage, reason = DamageService.RollBasicDamage(profile, {
         PrimaryStat = attack.PrimaryStat,
         AttackPower = attack.AttackPower,
