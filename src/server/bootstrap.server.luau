@@ -1,5 +1,6 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
 
 local ActionService = require(script.Parent.Services.ActionService)
 local CatalogService = require(script.Parent.Services.CatalogService)
@@ -59,6 +60,15 @@ PartyService.Init()
 InteractionSessionService.Init()
 StatusEffectService.Init()
 WorldVisualService.Init()
+Players.RespawnTime = 3
+
+local function assignSafeRespawn(player)
+    local world = Workspace:FindFirstChild("EverLeafGeneratedWorld")
+    local spawn = world and world:FindFirstChild("LumenreachSpawn")
+    if spawn and spawn:IsA("SpawnLocation") then
+        player.RespawnLocation = spawn
+    end
+end
 
 local function replicateProfile(player)
     CharacterStatsService.Apply(player, false)
@@ -95,6 +105,7 @@ local function onPlayerAdded(player)
         return
     end
 
+    assignSafeRespawn(player)
     DeathService.InitPlayer(player)
 
     player.CharacterAdded:Connect(function()

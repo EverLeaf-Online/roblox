@@ -229,7 +229,7 @@
 - [ ] Targeting shapes/ranges.
 - [ ] Skill animation/VFX/SFX hooks.
 - [x] Persistent 8-slot skill hotbar data/service foundation with React hotbar shell; binding/use UX remains pending.
-- [ ] Keyboard/controller bindings.
+- [ ] **PARTIAL:** Keyboard hotbar 1–8 skill-use bindings are source-complete; controller bindings/Studio verification pending.
 - [ ] Skill tree UI.
 
 ## 10. Enemies
@@ -263,10 +263,10 @@
 - [x] Prototype 0.15s player damage i-frame exists; tuning remains.
 - [ ] Knockback on player.
 - [ ] Death state.
-- [ ] Respawn flow.
-- [ ] Safe respawn location rules.
+- [ ] **PARTIAL:** Safe-spawn respawn flow + death overlay are source-complete; Studio verification/polish pending.
+- [x] Lumenreach Wayfarer Camp safe respawn is assigned server-side.
 - [ ] Death penalties decision.
-- [ ] HUD feedback for damage/death.
+- [ ] **PARTIAL:** React death overlay is source-complete; damage feedback/polish pending.
 
 ## 12. Rewards / currencies / loot
 
@@ -394,14 +394,14 @@
 - [x] React currency display verified in Studio; polish/scalability remains.
 - [x] Persistent 8-slot skill hotbar data/service foundation; React hotbar shell implemented.
 - [ ] Buff/debuff display.
-- [ ] **PARTIAL:** React character/stat menu shell is source-complete; Studio interaction/polish pending.
-- [ ] **PARTIAL:** React inventory/equipment menu shell is source-complete; interaction/polish pending.
-- [ ] **PARTIAL:** React quest menu shell is source-complete; interaction/polish pending.
+- [ ] **PARTIAL:** React character/stat menu now supports server-authoritative AP allocation; Studio verification/polish pending.
+- [ ] **PARTIAL:** React inventory/equipment menu now exposes use/equip/unequip actions; Studio verification/polish pending.
+- [ ] **PARTIAL:** React quest menu shell is source-complete; further filtering/polish pending.
 - [x] React NPC dialogue with clickable quest/shop actions verified in Studio; visual polish remains.
 - [ ] **PARTIAL:** Shop action is exposed through the React dialogue shell; dedicated shop screen pending.
 - [ ] Boss HP UI.
 - [ ] Notifications/toasts.
-- [ ] **PARTIAL:** React settings menu shell is source-complete; controls/persistence UX verification pending.
+- [ ] **PARTIAL:** React settings controls now mutate music/SFX/damage-number preferences server-side; Studio verification/polish pending.
 - [ ] Responsive layout testing.
 
 ## 20. Art / animation / audio
@@ -510,13 +510,13 @@
 
 # Current highest-priority queue — Phase B game shell
 
-1. [ ] **PARTIAL:** React HUD shell is Studio-verified for HP/MP/EXP/level/currencies/objective/hotbar; responsive/final visual polish pending.
-2. [ ] **PARTIAL:** Character/inventory/equipment/skills/quests/settings React menu shell exists; wire interactions and verify all screens in Studio.
+1. [ ] **PARTIAL:** React HUD shell is Studio-verified; responsive/final visual polish pending.
+2. [ ] **PARTIAL:** Character/inventory/equipment/skills/quests/settings React menu interactions are source-complete; verify all screens in Studio.
 3. [x] Add physical Lumenreach benchmark graybox + NPC/portal world-object registration.
 4. [x] Hostile Lumen Mossling combat/AI/player-damage loop has been exercised in Studio; production navigation/telegraphs remain.
-5. [ ] Finish death/respawn presentation and safe spawn flow.
+5. [ ] **PARTIAL:** Safe respawn + React death overlay are source-complete; Studio verification/polish pending.
 6. [x] Lumen Guide dialogue, quest accept/progress/turn-in, and shop-action shell are Studio-verified; dedicated shop UI/polish remain.
-7. [ ] Add first real skill-use/hotbar flow through `SkillEffectService`.
+7. [ ] **PARTIAL:** Starter Beginner Strike is learned/assigned to slot 1 and keyboard 1–8 invokes `SkillEffectService`; Studio verification/controller binding pending.
 8. [ ] Add party UI/invite flow and a private-instance shell.
 9. [ ] Add Belforge boss-entry/encounter shell using the generic state machine.
 10. [ ] Make the Lumenreach → Brasshaven route traversable with placeholder content.

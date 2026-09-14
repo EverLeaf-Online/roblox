@@ -450,10 +450,42 @@ end
 local function MainMenu(props)
     local profile = props.Profile or {}
     local activeTab, setActiveTab = React.useState("CHARACTER")
+    local status, setStatus = React.useState("M toggles menu · Esc closes")
     local catalog = CatalogClient.Get() or {}
     local tabs = { "CHARACTER", "INVENTORY", "SKILLS", "QUESTS", "SETTINGS" }
 
+    local function invoke(action, payload, successText)
+        local ok, result = ActionClient.Invoke(action, payload)
+        if ok then
+            setStatus(successText or "Updated.")
+        else
+            setStatus(string.format("%s: %s", action, tostring(result)))
+        end
+    end
+
     local bodyLines = {}
+    local actionChildren = {}
+    local actionCount = 0
+
+    local function addAction(key, text, callback, width)
+        local buttonWidth = width or 116
+        local x = 22 + actionCount * (buttonWidth + 10)
+        actionCount += 1
+        actionChildren[key] = React.createElement("TextButton", {
+            Position = UDim2.fromOffset(x, 390),
+            Size = UDim2.fromOffset(buttonWidth, 42),
+            BackgroundColor3 = Color3.fromRGB(45, 65, 61),
+            BorderSizePixel = 0,
+            Text = text,
+            TextColor3 = COLORS.Text,
+            TextSize = 11,
+            Font = Enum.Font.GothamBold,
+            AutoButtonColor = true,
+            ZIndex = 32,
+            [React.Event.Activated] = callback,
+        }, roundedChildren(nil, 7))
+    end
+
     if activeTab == "CHARACTER" then
         local stats = profile.Stats or {}
         bodyLines = {
@@ -469,8 +501,15 @@ local function MainMenu(props)
             string.format("Fortune %d", tonumber(stats.Fortune) or 0),
             string.format("Advancement Tier %d", tonumber(profile.AdvancementTier) or 0),
         }
+        for _, statName in { "Might", "Finesse", "Insight", "Fortune" } do
+            addAction("Add" .. statName, "+1 " .. string.upper(statName), function()
+                invoke("stat.allocate", { StatName = statName, Amount = 1 }, "+1 " .. statName)
+            end, 136)
+        end
     elseif activeTab == "INVENTORY" then
         local inventory = profile.Inventory or {}
+        local firstConsumable = nil
+        local firstEquipment = nil
         for index, slot in inventory.Slots or {} do
             local definition = catalog.Items and catalog.Items[slot.ItemId]
             table.insert(
@@ -482,6 +521,11 @@ local function MainMenu(props)
                     tonumber(slot.Quantity) or 0
                 )
             )
+            if definition and definition.Type == "Consumable" and not firstConsumable then
+                firstConsumable = { Index = index, ItemId = slot.ItemId }
+            elseif definition and definition.Type == "Equipment" and not firstEquipment then
+                firstEquipment = { Index = index, ItemId = slot.ItemId }
+            end
         end
         if #bodyLines == 0 then
             bodyLines = { "Inventory is empty." }
@@ -497,6 +541,25 @@ local function MainMenu(props)
                 string.format("%s: %s", slotName, definition and definition.DisplayName or "—")
             )
         end
+        if firstConsumable then
+            addAction("UseItem", "USE " .. string.upper(firstConsumable.ItemId), function()
+                invoke("inventory.use", { ItemId = firstConsumable.ItemId }, "Consumable used.")
+            end, 170)
+        end
+        if firstEquipment then
+            addAction("EquipItem", "EQUIP ITEM", function()
+                invoke(
+                    "equipment.equip",
+                    { InventoryIndex = firstEquipment.Index },
+                    "Item equipped."
+                )
+            end, 150)
+        end
+        if equipment.Weapon and equipment.Weapon ~= "" then
+            addAction("UnequipWeapon", "UNEQUIP WEAPON", function()
+                invoke("equipment.unequip", { Slot = "Weapon" }, "Weapon unequipped.")
+            end, 170)
+        end
     elseif activeTab == "SKILLS" then
         local skills = profile.Skills or {}
         for skillId, rank in skills.Learned or {} do
@@ -511,9 +574,23 @@ local function MainMenu(props)
             )
         end
         if #bodyLines == 0 then
-            bodyLines =
-                { "No skills learned yet.", "Skill tree and advancement choices are coming next." }
+            bodyLines = { "No skills learned yet." }
         end
+        table.insert(bodyLines, "")
+        table.insert(bodyLines, "Press 1–8 in gameplay to use assigned hotbar skills.")
+        addAction("LearnStrike", "RANK UP STRIKE", function()
+            invoke("skill.learn", { SkillId = "beginner_strike" }, "Beginner Strike ranked up.")
+        end, 170)
+        addAction("AssignStrike", "ASSIGN SLOT 1", function()
+            invoke(
+                "skill.hotbar",
+                { Index = 1, SkillId = "beginner_strike" },
+                "Beginner Strike assigned to slot 1."
+            )
+        end, 160)
+        addAction("UseStrike", "USE SLOT 1", function()
+            invoke("skill.use", { SkillId = "beginner_strike" }, "Beginner Strike used.")
+        end, 140)
     elseif activeTab == "QUESTS" then
         local quests = profile.Quests or {}
         table.insert(bodyLines, "ACTIVE")
@@ -545,21 +622,40 @@ local function MainMenu(props)
         end
     else
         local settings = profile.Settings or {}
+        local music = tonumber(settings.MusicVolume) or 1
+        local sfx = tonumber(settings.SfxVolume) or 1
         bodyLines = {
-            string.format(
-                "Music Volume: %d%%",
-                math.floor((tonumber(settings.MusicVolume) or 1) * 100 + 0.5)
-            ),
-            string.format(
-                "SFX Volume: %d%%",
-                math.floor((tonumber(settings.SfxVolume) or 1) * 100 + 0.5)
-            ),
+            string.format("Music Volume: %d%%", math.floor(music * 100 + 0.5)),
+            string.format("SFX Volume: %d%%", math.floor(sfx * 100 + 0.5)),
             string.format(
                 "Damage Numbers: %s",
                 settings.ShowDamageNumbers == false and "Off" or "On"
             ),
-            "Interactive controls will be wired into this panel next.",
         }
+        addAction("MusicDown", "MUSIC -", function()
+            invoke("settings.update", { Key = "MusicVolume", Value = math.max(0, music - 0.1) })
+        end, 110)
+        addAction("MusicUp", "MUSIC +", function()
+            invoke("settings.update", { Key = "MusicVolume", Value = math.min(1, music + 0.1) })
+        end, 110)
+        addAction("SfxDown", "SFX -", function()
+            invoke("settings.update", { Key = "SfxVolume", Value = math.max(0, sfx - 0.1) })
+        end, 110)
+        addAction("SfxUp", "SFX +", function()
+            invoke("settings.update", { Key = "SfxVolume", Value = math.min(1, sfx + 0.1) })
+        end, 110)
+        addAction(
+            "DamageToggle",
+            "DAMAGE " .. (settings.ShowDamageNumbers == false and "ON" or "OFF"),
+            function()
+                invoke(
+                    "settings.update",
+                    { Key = "ShowDamageNumbers", Value = settings.ShowDamageNumbers == false },
+                    "Damage-number preference updated."
+                )
+            end,
+            120
+        )
     end
 
     local tabChildren = {}
@@ -575,8 +671,10 @@ local function MainMenu(props)
             TextColor3 = COLORS.Text,
             TextSize = 11,
             Font = Enum.Font.GothamBold,
+            ZIndex = 31,
             [React.Event.Activated] = function()
                 setActiveTab(tabName)
+                setStatus(tabName .. " panel")
             end,
         }, roundedChildren(nil, 7))
     end
@@ -613,14 +711,54 @@ local function MainMenu(props)
             Tabs = React.createElement(React.Fragment, nil, tabChildren),
             Body = React.createElement(Label, {
                 Position = UDim2.fromOffset(24, 118),
-                Size = UDim2.new(1, -48, 1, -142),
+                Size = UDim2.new(1, -48, 0, 230),
                 Text = bodyText,
-                TextSize = 16,
+                TextSize = 15,
                 VerticalAlign = Enum.TextYAlignment.Top,
                 Wrapped = true,
                 ZIndex = 31,
             }),
+            Status = React.createElement(Label, {
+                Position = UDim2.fromOffset(24, 352),
+                Size = UDim2.new(1, -48, 0, 28),
+                Text = status,
+                TextSize = 12,
+                Color = COLORS.Muted,
+                ZIndex = 31,
+            }),
+            Actions = React.createElement(React.Fragment, nil, actionChildren),
         },
+    })
+end
+
+local function DeathOverlay()
+    return React.createElement("Frame", {
+        Size = UDim2.fromScale(1, 1),
+        BackgroundColor3 = Color3.fromRGB(5, 8, 8),
+        BackgroundTransparency = 0.28,
+        BorderSizePixel = 0,
+        ZIndex = 80,
+    }, {
+        Title = React.createElement(Label, {
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            Position = UDim2.fromScale(0.5, 0.46),
+            Size = UDim2.fromOffset(420, 54),
+            Text = "FALLEN",
+            TextSize = 34,
+            Bold = true,
+            Align = Enum.TextXAlignment.Center,
+            ZIndex = 81,
+        }),
+        Subtitle = React.createElement(Label, {
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            Position = UDim2.fromScale(0.5, 0.53),
+            Size = UDim2.fromOffset(520, 34),
+            Text = "Returning to Lumenreach Wayfarer Camp...",
+            TextSize = 16,
+            Color = COLORS.Muted,
+            Align = Enum.TextXAlignment.Center,
+            ZIndex = 81,
+        }),
     })
 end
 
@@ -630,6 +768,7 @@ local function App()
     local menuOpen, setMenuOpen = React.useState(false)
     local health, setHealth = React.useState(100)
     local maxHealth, setMaxHealth = React.useState(100)
+    local dead, setDead = React.useState(false)
 
     React.useEffect(function()
         local connection = ProfileStore.Subscribe(setProfile)
@@ -652,7 +791,11 @@ local function App()
             local humanoid = character:WaitForChild("Humanoid")
             setHealth(humanoid.Health)
             setMaxHealth(humanoid.MaxHealth)
-            healthConnection = humanoid.HealthChanged:Connect(setHealth)
+            setDead(humanoid.Health <= 0)
+            healthConnection = humanoid.HealthChanged:Connect(function(value)
+                setHealth(value)
+                setDead(value <= 0)
+            end)
             maxConnection = humanoid:GetPropertyChangedSignal("MaxHealth"):Connect(function()
                 setMaxHealth(humanoid.MaxHealth)
             end)
@@ -693,26 +836,35 @@ local function App()
     end, {})
 
     React.useEffect(function()
-        player:SetAttribute("EverLeafUiCapture", interaction ~= nil or menuOpen)
+        player:SetAttribute("EverLeafUiCapture", interaction ~= nil or menuOpen or dead)
         return function()
             player:SetAttribute("EverLeafUiCapture", false)
         end
-    end, { interaction })
+    end, { interaction, menuOpen, dead })
 
     React.useEffect(function()
         local connection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
-            if
-                not gameProcessed
-                and input.KeyCode == Enum.KeyCode.Escape
-                and interaction ~= nil
-            then
-                setInteraction(nil)
+            if gameProcessed or dead then
+                return
+            end
+
+            if input.KeyCode == Enum.KeyCode.M and interaction == nil then
+                setMenuOpen(not menuOpen)
+                return
+            end
+
+            if input.KeyCode == Enum.KeyCode.Escape then
+                if interaction ~= nil then
+                    setInteraction(nil)
+                elseif menuOpen then
+                    setMenuOpen(false)
+                end
             end
         end)
         return function()
             connection:Disconnect()
         end
-    end, { interaction, menuOpen })
+    end, { interaction, menuOpen, dead })
 
     return React.createElement("ScreenGui", {
         ResetOnSpawn = false,
@@ -739,6 +891,7 @@ local function App()
                 setInteraction(nil)
             end,
         }) or nil,
+        Death = dead and React.createElement(DeathOverlay) or nil,
     })
 end
 

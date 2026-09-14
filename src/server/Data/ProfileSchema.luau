@@ -41,8 +41,8 @@ local TEMPLATE = {
         Ring2 = "",
     },
     Skills = {
-        Learned = {},
-        Hotbar = {},
+        Learned = { beginner_strike = 1 },
+        Hotbar = { ["1"] = "beginner_strike" },
     },
     Quests = {
         Active = {},

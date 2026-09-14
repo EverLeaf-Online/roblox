@@ -7,10 +7,14 @@ local PartyService = require(script.Parent.PartyService)
 local PayloadValidationService = require(script.Parent.PayloadValidationService)
 local ShopService = require(script.Parent.ShopService)
 local SkillService = require(script.Parent.SkillService)
+local StatService = require(script.Parent.StatService)
 
 local ActionService = {}
 local handlers = {}
 
+handlers["stat.allocate"] = function(_, profile, payload)
+    return StatService.Allocate(profile, payload.StatName, payload.Amount or 1)
+end
 handlers["inventory.use"] = function(player, profile, payload)
     return ConsumableService.Use(player, profile, payload.ItemId)
 end
