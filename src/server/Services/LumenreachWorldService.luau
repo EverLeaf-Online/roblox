@@ -29,38 +29,216 @@ local function makeBall(parent, name, size, cframe, material, color)
     return part
 end
 
-local function makeTree(parent, position, scale)
+local function makeTree(parent, position, scale, variant)
     local model = Instance.new("Model")
     model.Name = "LumenTree"
     model.Parent = parent
 
-    local trunk = makePart(
+    variant = variant or 1
+    local trunkColor = if variant == 2
+        then Color3.fromRGB(72, 49, 34)
+        else if variant == 3 then Color3.fromRGB(88, 61, 40) else Color3.fromRGB(78, 55, 39)
+    local leafPalette = {
+        Color3.fromRGB(49, 92, 54),
+        Color3.fromRGB(60, 111, 61),
+        Color3.fromRGB(72, 126, 66),
+        Color3.fromRGB(84, 139, 72),
+    }
+
+    local trunkLower = makePart(
         model,
-        "Trunk",
-        Vector3.new(2.2, 10, 2.2) * scale,
-        CFrame.new(position + Vector3.new(0, 5 * scale, 0)),
+        "TrunkLower",
+        Vector3.new(2.8, 6.5, 2.8) * scale,
+        CFrame.new(position + Vector3.new(0, 3.25 * scale, 0))
+            * CFrame.Angles(math.rad(variant - 2), math.rad(variant * 11), math.rad(2 - variant)),
         Enum.Material.Wood,
-        Color3.fromRGB(78, 55, 39)
+        trunkColor
     )
-    local crownLower = makeBall(
+    local trunkUpper = makePart(
         model,
-        "CrownLower",
-        Vector3.new(9, 7, 9) * scale,
-        CFrame.new(position + Vector3.new(0, 10 * scale, 0)),
-        Enum.Material.Grass,
-        Color3.fromRGB(65, 112, 62)
+        "TrunkUpper",
+        Vector3.new(2.1, 6.8, 2.1) * scale,
+        CFrame.new(position + Vector3.new(0.35 * scale, 9.2 * scale, 0.15 * scale))
+            * CFrame.Angles(math.rad(-2), math.rad(variant * 17), math.rad(3)),
+        Enum.Material.Wood,
+        trunkColor
     )
-    local crownUpper = makeBall(
+
+    local branchSpecs = {
+        { Vector3.new(0.4, 10.3, 0), Vector3.new(4.8, 13.1, -1.8), 0.65 },
+        { Vector3.new(0.1, 9.6, 0.2), Vector3.new(-4.2, 12.3, 1.5), 0.58 },
+        { Vector3.new(0.4, 11.1, 0.1), Vector3.new(1.8, 14.7, 3.8), 0.5 },
+    }
+    if variant == 2 then
+        branchSpecs[1][2] = Vector3.new(5.4, 12.2, 2.5)
+        branchSpecs[2][2] = Vector3.new(-3.4, 13.6, -2.8)
+    elseif variant == 3 then
+        branchSpecs[3][2] = Vector3.new(-1.5, 15.4, 4.3)
+    end
+
+    for index, spec in branchSpecs do
+        local a = position + spec[1] * scale
+        local b = position + spec[2] * scale
+        local delta = b - a
+        local branch = makePart(
+            model,
+            "Branch" .. index,
+            Vector3.new(0.9, 0.9, delta.Magnitude) * Vector3.new(scale, scale, 1),
+            CFrame.lookAt((a + b) * 0.5, b),
+            Enum.Material.Wood,
+            trunkColor
+        )
+        branch.CanCollide = false
+    end
+
+    local lobes = {
+        { Vector3.new(-3.8, 13.0, 0.9), Vector3.new(6.8, 5.4, 6.4), 1 },
+        { Vector3.new(3.6, 13.6, -1.2), Vector3.new(7.1, 5.8, 6.7), 2 },
+        { Vector3.new(0.2, 16.2, 1.2), Vector3.new(7.8, 6.1, 7.2), 3 },
+        { Vector3.new(-1.9, 15.0, -3.1), Vector3.new(5.7, 4.8, 5.6), 2 },
+        { Vector3.new(2.8, 16.4, 3.0), Vector3.new(5.4, 4.6, 5.2), 4 },
+        { Vector3.new(0.7, 18.7, -0.6), Vector3.new(5.5, 4.8, 5.3), 3 },
+    }
+    if variant == 2 then
+        lobes[1][1] = Vector3.new(-4.5, 12.7, -1.8)
+        lobes[3][1] = Vector3.new(0.8, 16.8, 0)
+    elseif variant == 3 then
+        lobes[2][1] = Vector3.new(4.2, 14.2, 1.8)
+        lobes[5][1] = Vector3.new(-2.9, 17.0, 3.4)
+    end
+
+    for index, spec in lobes do
+        local leaf = makeBall(
+            model,
+            "Canopy" .. index,
+            spec[2] * scale,
+            CFrame.new(position + spec[1] * scale),
+            Enum.Material.Grass,
+            leafPalette[spec[3]]
+        )
+        leaf.CanCollide = false
+        CollectionService:AddTag(leaf, "EverLeafWindSway")
+    end
+
+    model.PrimaryPart = trunkLower
+    trunkUpper.CanCollide = true
+    return model
+end
+
+local function makeFallenLog(parent, position, yaw, scale)
+    local model = Instance.new("Model")
+    model.Name = "FallenLog"
+    model.Parent = parent
+    local base = CFrame.new(position) * CFrame.Angles(0, yaw, math.rad(6))
+    local bark = Color3.fromRGB(70, 49, 34)
+    makePart(
         model,
-        "CrownUpper",
-        Vector3.new(7, 6, 7) * scale,
-        CFrame.new(position + Vector3.new(1.3 * scale, 14 * scale, 0)),
-        Enum.Material.Grass,
-        Color3.fromRGB(83, 137, 72)
+        "Log",
+        Vector3.new(1.9, 1.7, 9) * scale,
+        base * CFrame.new(0, 0.9 * scale, 0),
+        Enum.Material.Wood,
+        bark
     )
-    CollectionService:AddTag(crownLower, "EverLeafWindSway")
-    CollectionService:AddTag(crownUpper, "EverLeafWindSway")
-    model.PrimaryPart = trunk
+    for _, z in { -3.1, 2.3 } do
+        local branch = makePart(
+            model,
+            "BrokenBranch",
+            Vector3.new(0.55, 0.55, 3.2) * scale,
+            base
+                * CFrame.new(0.4 * scale, 1.35 * scale, z * scale)
+                * CFrame.Angles(math.rad(35), math.rad(28), 0),
+            Enum.Material.Wood,
+            bark
+        )
+        branch.CanCollide = false
+    end
+    return model
+end
+
+local function makeStump(parent, position, scale)
+    local model = Instance.new("Model")
+    model.Name = "TreeStump"
+    model.Parent = parent
+    local stump = makePart(
+        model,
+        "Stump",
+        Vector3.new(2.6, 2.3, 2.6) * scale,
+        CFrame.new(position + Vector3.new(0, 1.15 * scale, 0))
+            * CFrame.Angles(0, math.rad(17), math.rad(4)),
+        Enum.Material.Wood,
+        Color3.fromRGB(76, 53, 36)
+    )
+    makeBall(
+        model,
+        "Moss",
+        Vector3.new(2.2, 0.65, 2.1) * scale,
+        stump.CFrame * CFrame.new(0, 1.0 * scale, 0),
+        Enum.Material.Grass,
+        Color3.fromRGB(63, 112, 63)
+    ).CanCollide =
+        false
+    return model
+end
+
+local function makeFern(parent, position, scale)
+    local model = Instance.new("Model")
+    model.Name = "LumenFern"
+    model.Parent = parent
+    local green = Color3.fromRGB(57, 112, 67)
+    for index = 1, 7 do
+        local angle = (index - 1) * (math.pi * 2 / 7)
+        local blade = makePart(
+            model,
+            "Frond" .. index,
+            Vector3.new(0.22, 0.42, 3.3) * scale,
+            CFrame.new(
+                position + Vector3.new(math.cos(angle) * 0.85, 0.72, math.sin(angle) * 0.85) * scale
+            ) * CFrame.Angles(math.rad(-20), -angle, math.rad(9)),
+            Enum.Material.Grass,
+            green
+        )
+        blade.CanCollide = false
+        blade.CastShadow = false
+        CollectionService:AddTag(blade, "EverLeafWindSway")
+    end
+    return model
+end
+
+local function makeFlowerPatch(parent, position, scale, warm)
+    local model = Instance.new("Model")
+    model.Name = "WildflowerPatch"
+    model.Parent = parent
+    local flowerColor = if warm
+        then Color3.fromRGB(242, 191, 113)
+        else Color3.fromRGB(173, 157, 230)
+    local offsets = {
+        Vector3.new(-1.3, 0, -0.5),
+        Vector3.new(0.2, 0, 0.8),
+        Vector3.new(1.5, 0, -0.2),
+        Vector3.new(-0.4, 0, 1.6),
+    }
+    for index, offset in offsets do
+        local stem = makePart(
+            model,
+            "Stem" .. index,
+            Vector3.new(0.12, 1.25, 0.12) * scale,
+            CFrame.new(position + offset * scale + Vector3.new(0, 0.62 * scale, 0)),
+            Enum.Material.Grass,
+            Color3.fromRGB(65, 121, 68)
+        )
+        stem.CanCollide = false
+        stem.CastShadow = false
+        local bloom = makeBall(
+            model,
+            "Bloom" .. index,
+            Vector3.new(0.42, 0.28, 0.42) * scale,
+            CFrame.new(position + offset * scale + Vector3.new(0, 1.28 * scale, 0)),
+            Enum.Material.SmoothPlastic,
+            flowerColor
+        )
+        bloom.CanCollide = false
+        bloom.CastShadow = false
+    end
     return model
 end
 
@@ -75,6 +253,107 @@ local function makeRock(parent, position, size, rotation)
     )
     rock.Shape = Enum.PartType.Block
     return rock
+end
+
+local function makeRockCluster(parent, position, scale, seed)
+    local model = Instance.new("Model")
+    model.Name = "RockCluster"
+    model.Parent = parent
+    local specs = {
+        { Vector3.new(0, 1.3, 0), Vector3.new(5.8, 3.1, 4.8), Vector3.new(0.12, 0.4, 0.08) },
+        { Vector3.new(3.1, 0.9, -1.4), Vector3.new(3.6, 2.2, 3.2), Vector3.new(0.2, -0.2, 0.18) },
+        { Vector3.new(-2.8, 0.7, 1.7), Vector3.new(2.9, 1.8, 3.5), Vector3.new(-0.1, 0.8, 0.12) },
+    }
+    for index, spec in specs do
+        local rock = makeRock(
+            model,
+            position + spec[1] * scale,
+            spec[2] * scale,
+            spec[3] + Vector3.new(0, (seed or 1) * index * 0.08, 0)
+        )
+        rock.Color = if index == 1 then Color3.fromRGB(76, 84, 83) else Color3.fromRGB(91, 98, 95)
+    end
+    if seed and seed % 2 == 0 then
+        makeBall(
+            model,
+            "MossCap",
+            Vector3.new(3.8, 0.7, 3.2) * scale,
+            CFrame.new(position + Vector3.new(-0.4, 2.85, 0.2) * scale),
+            Enum.Material.Grass,
+            Color3.fromRGB(63, 106, 59)
+        ).CanCollide =
+            false
+    end
+    return model
+end
+
+local function makeSupplyStack(parent, position, yaw)
+    local model = Instance.new("Model")
+    model.Name = "WayfarerSupplies"
+    model.Parent = parent
+    local base = CFrame.new(position) * CFrame.Angles(0, yaw, 0)
+    local wood = Color3.fromRGB(105, 77, 50)
+    makePart(
+        model,
+        "CrateA",
+        Vector3.new(3.6, 2.5, 3.2),
+        base * CFrame.new(0, 1.25, 0),
+        Enum.Material.WoodPlanks,
+        wood
+    )
+    makePart(
+        model,
+        "CrateB",
+        Vector3.new(2.7, 2.1, 2.5),
+        base * CFrame.new(2.8, 1.05, 0.4),
+        Enum.Material.WoodPlanks,
+        Color3.fromRGB(91, 67, 45)
+    )
+    local sack = makeBall(
+        model,
+        "SupplySack",
+        Vector3.new(2.0, 2.5, 1.8),
+        base * CFrame.new(-2.2, 1.25, 0.8),
+        Enum.Material.Fabric,
+        Color3.fromRGB(118, 103, 76)
+    )
+    sack.CanCollide = false
+    return model
+end
+
+local function makeSignpost(parent, position, yaw)
+    local model = Instance.new("Model")
+    model.Name = "WayfarerSignpost"
+    model.Parent = parent
+    local base = CFrame.new(position) * CFrame.Angles(0, yaw, 0)
+    local wood = Color3.fromRGB(78, 56, 38)
+    makePart(
+        model,
+        "Post",
+        Vector3.new(0.5, 5.5, 0.5),
+        base * CFrame.new(0, 2.75, 0),
+        Enum.Material.Wood,
+        wood
+    )
+    local armA = makePart(
+        model,
+        "ArrowCamp",
+        Vector3.new(4.3, 0.8, 0.35),
+        base * CFrame.new(1.55, 4.35, 0),
+        Enum.Material.WoodPlanks,
+        Color3.fromRGB(111, 80, 48)
+    )
+    local armB = makePart(
+        model,
+        "ArrowRuins",
+        Vector3.new(3.8, 0.8, 0.35),
+        base * CFrame.new(-1.35, 3.3, 0) * CFrame.Angles(0, math.pi, 0),
+        Enum.Material.WoodPlanks,
+        Color3.fromRGB(99, 71, 45)
+    )
+    armA.CanCollide = false
+    armB.CanCollide = false
+    return model
 end
 
 local function makeCrystal(parent, position)
@@ -488,10 +767,28 @@ local function makeRuins(parent)
         parent,
         "RuinWall",
         Vector3.new(3, 7, 18),
-        CFrame.new(50, 3.5, -22),
+        CFrame.new(50, 3.5, -22) * CFrame.Angles(0, math.rad(-7), math.rad(2)),
         Enum.Material.Rock,
         Color3.fromRGB(89, 96, 91)
     )
+    makePart(
+        parent,
+        "BrokenLintel",
+        Vector3.new(9, 2.2, 3.4),
+        CFrame.new(22, 1.5, -26) * CFrame.Angles(math.rad(8), math.rad(27), math.rad(17)),
+        Enum.Material.Cobblestone,
+        Color3.fromRGB(105, 112, 106)
+    )
+    makePart(
+        parent,
+        "FallenPillar",
+        Vector3.new(3.2, 10, 3.2),
+        CFrame.new(45, 1.9, -37) * CFrame.Angles(math.rad(82), math.rad(14), math.rad(4)),
+        Enum.Material.Cobblestone,
+        Color3.fromRGB(102, 110, 105)
+    )
+    makeRockCluster(parent, Vector3.new(20, 0.2, -36), 0.7, 6)
+    makeRockCluster(parent, Vector3.new(52, 0.2, -37), 0.65, 7)
     makeCrystal(parent, Vector3.new(36, 3.2, -25))
 
     local gate = makePart(
@@ -671,57 +968,74 @@ end
 
 local function decorate(world)
     local trees = {
-        { Vector3.new(-94, 0, 53), 1.15 },
-        { Vector3.new(-84, 0, 8), 0.9 },
-        { Vector3.new(-53, 0, -43), 1.1 },
-        { Vector3.new(-2, 0, -70), 1.25 },
-        { Vector3.new(24, 0, -67), 0.95 },
-        { Vector3.new(70, 0, -50), 1.15 },
-        { Vector3.new(91, 0, -8), 1.0 },
-        { Vector3.new(91, 0, 52), 1.2 },
-        { Vector3.new(58, 0, 70), 0.95 },
-        { Vector3.new(11, 0, 80), 1.15 },
-        { Vector3.new(-40, 0, 83), 0.9 },
+        { Vector3.new(-104, 0, 61), 1.15, 1 },
+        { Vector3.new(-94, 0, 53), 0.95, 2 },
+        { Vector3.new(-91, 0, 21), 1.05, 3 },
+        { Vector3.new(-84, 0, 8), 0.82, 1 },
+        { Vector3.new(-72, 0, -18), 0.92, 2 },
+        { Vector3.new(-53, 0, -43), 1.05, 3 },
+        { Vector3.new(-29, 0, -74), 0.88, 1 },
+        { Vector3.new(-2, 0, -76), 1.12, 2 },
+        { Vector3.new(24, 0, -72), 0.9, 3 },
+        { Vector3.new(50, 0, -66), 1.0, 1 },
+        { Vector3.new(75, 0, -55), 1.08, 2 },
+        { Vector3.new(94, 0, -31), 0.9, 3 },
+        { Vector3.new(101, 0, -2), 1.0, 1 },
+        { Vector3.new(96, 0, 31), 0.86, 2 },
+        { Vector3.new(91, 0, 61), 1.08, 3 },
+        { Vector3.new(67, 0, 78), 0.92, 1 },
+        { Vector3.new(36, 0, 86), 1.02, 2 },
+        { Vector3.new(7, 0, 84), 1.08, 3 },
+        { Vector3.new(-22, 0, 88), 0.9, 1 },
+        { Vector3.new(-50, 0, 82), 1.02, 2 },
+        { Vector3.new(-77, 0, 76), 0.88, 3 },
     }
     for _, entry in trees do
-        makeTree(world, entry[1], entry[2])
+        makeTree(world, entry[1], entry[2], entry[3])
     end
 
-    local rocks = {
-        { Vector3.new(-55, 2, -20), Vector3.new(7, 4, 5), Vector3.new(0.1, 0.7, 0.15) },
-        { Vector3.new(-28, 1.5, -60), Vector3.new(5, 3, 6), Vector3.new(0.2, 0.2, 0.1) },
-        { Vector3.new(14, 2, -52), Vector3.new(8, 4, 4), Vector3.new(0.05, 1.0, 0.2) },
-        { Vector3.new(70, 2.5, 12), Vector3.new(7, 5, 6), Vector3.new(0.2, 0.4, 0.25) },
-        { Vector3.new(54, 1.4, 57), Vector3.new(6, 3, 7), Vector3.new(0.2, 0.8, 0.05) },
+    local rockClusters = {
+        { Vector3.new(-58, 0, -21), 0.95, 1 },
+        { Vector3.new(-30, 0, -62), 0.78, 2 },
+        { Vector3.new(12, 0, -56), 1.0, 3 },
+        { Vector3.new(74, 0, 9), 0.92, 4 },
+        { Vector3.new(58, 0, 61), 0.86, 5 },
+        { Vector3.new(-90, 0, 11), 0.72, 8 },
     }
-    for _, entry in rocks do
-        makeRock(world, entry[1], entry[2], entry[3])
+    for _, entry in rockClusters do
+        makeRockCluster(world, entry[1], entry[2], entry[3])
     end
 
     for _, position in
         {
-            Vector3.new(-46, 3, -33),
-            Vector3.new(-6, 3, -58),
-            Vector3.new(55, 3, -14),
-            Vector3.new(82, 3, 37),
+            Vector3.new(-46, 2.1, -33),
+            Vector3.new(-6, 2.1, -58),
+            Vector3.new(55, 2.1, -14),
+            Vector3.new(82, 2.1, 37),
         }
     do
         makeCrystal(world, position)
     end
 
     local bushPositions = {
-        Vector3.new(-80, 0, 58),
+        Vector3.new(-86, 0, 58),
+        Vector3.new(-79, 0, 42),
         Vector3.new(-72, 0, 24),
-        Vector3.new(-58, 0, -18),
+        Vector3.new(-61, 0, -18),
+        Vector3.new(-51, 0, -31),
+        Vector3.new(-34, 0, -36),
         Vector3.new(-23, 0, -34),
+        Vector3.new(-8, 0, -48),
         Vector3.new(16, 0, -41),
         Vector3.new(30, 0, 52),
+        Vector3.new(44, 0, 60),
         Vector3.new(64, 0, 45),
         Vector3.new(76, 0, 5),
+        Vector3.new(82, 0, 24),
         Vector3.new(44, 0, -50),
     }
     for index, position in bushPositions do
-        makeBush(world, position, 0.7 + (index % 3) * 0.12)
+        makeBush(world, position, 0.6 + (index % 4) * 0.1)
     end
 
     local grassPositions = {
@@ -743,22 +1057,73 @@ local function decorate(world)
         Vector3.new(74, 0, 33),
         Vector3.new(81, 0, -17),
         Vector3.new(31, 0, -56),
+        Vector3.new(-96, 0, -4),
+        Vector3.new(-66, 0, -51),
+        Vector3.new(10, 0, 63),
+        Vector3.new(54, 0, -37),
+        Vector3.new(88, 0, 55),
+        Vector3.new(-36, 0, 69),
     }
     for index, position in grassPositions do
-        makeGrassTuft(world, position, 0.7 + (index % 4) * 0.1)
+        makeGrassTuft(world, position, 0.65 + (index % 4) * 0.1)
     end
+
+    local fernPositions = {
+        Vector3.new(-82, 0, 50),
+        Vector3.new(-75, 0, 46),
+        Vector3.new(-66, 0, -22),
+        Vector3.new(-42, 0, -40),
+        Vector3.new(-15, 0, -55),
+        Vector3.new(9, 0, -61),
+        Vector3.new(30, 0, -61),
+        Vector3.new(69, 0, -44),
+        Vector3.new(84, 0, -2),
+        Vector3.new(78, 0, 48),
+        Vector3.new(55, 0, 67),
+        Vector3.new(21, 0, 73),
+        Vector3.new(-8, 0, 72),
+        Vector3.new(-43, 0, 74),
+        Vector3.new(-73, 0, 66),
+    }
+    for index, position in fernPositions do
+        makeFern(world, position, 0.72 + (index % 3) * 0.12)
+    end
+
+    local flowerPatches = {
+        { Vector3.new(-71, 0, 55), 0.9, true },
+        { Vector3.new(-55, 0, 7), 0.8, false },
+        { Vector3.new(-26, 0, -44), 0.85, true },
+        { Vector3.new(18, 0, -48), 0.78, false },
+        { Vector3.new(45, 0, 54), 0.9, true },
+        { Vector3.new(72, 0, 42), 0.82, false },
+        { Vector3.new(25, 0, 62), 0.75, false },
+        { Vector3.new(-35, 0, 68), 0.88, true },
+    }
+    for _, entry in flowerPatches do
+        makeFlowerPatch(world, entry[1], entry[2], entry[3])
+    end
+
+    makeFallenLog(world, Vector3.new(-79, 0.2, -3), math.rad(33), 0.9)
+    makeFallenLog(world, Vector3.new(71, 0.2, -28), math.rad(-52), 0.82)
+    makeFallenLog(world, Vector3.new(42, 0.2, 69), math.rad(74), 0.76)
+    makeStump(world, Vector3.new(-62, 0, 67), 0.9)
+    makeStump(world, Vector3.new(83, 0, 17), 0.72)
+    makeStump(world, Vector3.new(12, 0, -66), 0.8)
 
     makeCampfire(world, Vector3.new(-59, 0, 31))
     makeTent(world, Vector3.new(-72, 0.2, 28), math.rad(18))
     makeTent(world, Vector3.new(-66, 0.2, 17), math.rad(-24))
+    makeSupplyStack(world, Vector3.new(-77, 0, 36), math.rad(-15))
+    makeSupplyStack(world, Vector3.new(-61, 0, 45), math.rad(24))
+    makeSignpost(world, Vector3.new(-38, 0, 25), math.rad(-58))
     makeLantern(world, Vector3.new(-47, 0, 30))
     makeLantern(world, Vector3.new(-29, 0, 22))
     makeLantern(world, Vector3.new(-8, 0, 10))
     makeLantern(world, Vector3.new(17, 0, 4))
     makeBridge(world, Vector3.new(-17, 0.2, -44))
     makeWaterfall(world, Vector3.new(-92, 0, -66))
-    makeRockSpire(world, Vector3.new(104, 0, -68), 1.25)
-    makeRockSpire(world, Vector3.new(108, 0, 72), 0.95)
+    makeRockSpire(world, Vector3.new(104, 0, -68), 1.05)
+    makeRockSpire(world, Vector3.new(108, 0, 72), 0.82)
     makeFireflyCluster(world, Vector3.new(-44, 0, -26))
     makeFireflyCluster(world, Vector3.new(29, 0, -46))
     makeFireflyCluster(world, Vector3.new(67, 0, 50))
