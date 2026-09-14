@@ -50,7 +50,9 @@ local function importAsset(entry)
 
     local visualRoot = chooseVisualRoot(containerOrError)
     local registered, reason =
-        EnvironmentPrefabService.Register(entry.PrefabName, visualRoot, entry.AssetId)
+        EnvironmentPrefabService.Register(entry.PrefabName, visualRoot, entry.AssetId, {
+            AutoUpright = entry.AutoUpright == true,
+        })
     if not registered then
         visualRoot:Destroy()
         warn(

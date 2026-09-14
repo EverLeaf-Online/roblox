@@ -5,7 +5,8 @@ local EnvironmentAssetRegistry = {
         Source = "Roblox Creator Store",
         Status = "approved_for_studio_sanitized_import",
         PrefabName = "TreePrimary",
-        Notes = "Approved development tree candidate. Studio-only loader may fetch it, strips scripts/remotes, and production runtime never loads it dynamically.",
+        AutoUpright = true,
+        Notes = "Approved development tree candidate. Studio-only loader sanitizes it and auto-orients the trunk upright before prefab registration; production runtime never loads it dynamically.",
     },
     DuneSky = {
         AssetId = 138907351102721,

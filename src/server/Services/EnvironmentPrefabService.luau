@@ -75,12 +75,93 @@ function EnvironmentPrefabService.Get(prefabName)
     return prefab
 end
 
-function EnvironmentPrefabService.Register(prefabName, instance, sourceAssetId)
+local function findTrunkLikePart(instance)
+    local best = nil
+    local bestScore = -math.huge
+    local candidates = { instance }
+    for _, descendant in instance:GetDescendants() do
+        table.insert(candidates, descendant)
+    end
+
+    for _, candidate in candidates do
+        if candidate:IsA("BasePart") then
+            local lower = string.lower(candidate.Name)
+            local nameScore = 0
+            if string.find(lower, "trunk", 1, true) then
+                nameScore = 1000
+            elseif string.find(lower, "stem", 1, true) then
+                nameScore = 800
+            elseif string.find(lower, "tree", 1, true) then
+                nameScore = 300
+            elseif string.find(lower, "wood", 1, true) then
+                nameScore = 150
+            end
+
+            local longest = math.max(candidate.Size.X, candidate.Size.Y, candidate.Size.Z)
+            local score = nameScore + longest
+            if score > bestScore then
+                best = candidate
+                bestScore = score
+            end
+        end
+    end
+
+    return best
+end
+
+local function autoUprightTree(instance)
+    local trunk = findTrunkLikePart(instance)
+    if not trunk then
+        return false
+    end
+
+    local localAxis
+    if trunk.Size.X >= trunk.Size.Y and trunk.Size.X >= trunk.Size.Z then
+        localAxis = Vector3.xAxis
+    elseif trunk.Size.Z >= trunk.Size.X and trunk.Size.Z >= trunk.Size.Y then
+        localAxis = Vector3.zAxis
+    else
+        localAxis = Vector3.yAxis
+    end
+
+    local worldAxis = trunk.CFrame:VectorToWorldSpace(localAxis)
+    if worldAxis.Y < 0 then
+        worldAxis = -worldAxis
+    end
+
+    local dot = math.clamp(worldAxis:Dot(Vector3.yAxis), -1, 1)
+    if dot > 0.985 then
+        return true
+    end
+
+    local rotationAxis = worldAxis:Cross(Vector3.yAxis)
+    if rotationAxis.Magnitude < 0.001 then
+        rotationAxis = Vector3.xAxis
+    else
+        rotationAxis = rotationAxis.Unit
+    end
+    local angle = math.acos(dot)
+    local pivot = instance:IsA("Model") and instance:GetPivot() or instance.CFrame
+    local rotation = CFrame.fromAxisAngle(rotationAxis, angle)
+
+    if instance:IsA("Model") then
+        instance:PivotTo(CFrame.new(pivot.Position) * rotation * (pivot - pivot.Position))
+    elseif instance:IsA("BasePart") then
+        instance.CFrame = CFrame.new(pivot.Position) * rotation * (pivot - pivot.Position)
+    end
+
+    return true
+end
+
+function EnvironmentPrefabService.Register(prefabName, instance, sourceAssetId, options)
     if type(prefabName) ~= "string" or prefabName == "" or typeof(instance) ~= "Instance" then
         return false, "invalid_prefab"
     end
 
     normalizeModel(instance)
+    if options and options.AutoUpright then
+        autoUprightTree(instance)
+    end
     instance.Name = prefabName
     instance:SetAttribute("SourceAssetId", sourceAssetId)
     instance.Parent = getFolder()
