@@ -16,7 +16,8 @@ return table.freeze({
             Mastery = 0.35,
             Range = 12,
             VerticalRange = 8,
-            DepthRange = 3,
+            ArcDegrees = 140,
+            RequireLineOfSight = true,
         }),
     }),
     steady_footing = table.freeze({

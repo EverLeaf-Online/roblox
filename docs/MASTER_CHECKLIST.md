@@ -40,6 +40,29 @@
 - [x] Architecture-level tests for newly added pure logic.
 - [x] Final dependency/cycle/security review.
 
+## 0B. Full 3D pivot — ACTIVE
+
+- [x] 2.5D direction retired.
+- [x] Third-person camera-relative WASD/gamepad movement foundation.
+- [x] Mouse/right-stick orbit camera foundation with camera collision.
+- [x] Sprint foundation (`Shift` / L3).
+- [x] Grounded jump foundation (`Space` / A).
+- [x] Dodge foundation (`Q` / B).
+- [x] Basic attack moved to left-click / R2.
+- [x] Server targeting converted from X/Y/Z-plane gates to 3D range + facing cone + LOS.
+- [x] Enemy pursuit converted to full XYZ movement.
+- [x] Z-plane movement correction removed.
+- [x] Modern lighting/atmosphere baseline service.
+- [ ] Production hitbox/hurtbox system.
+- [ ] Lock-on / soft-target system decision and implementation.
+- [ ] Production enemy pathfinding/navigation.
+- [ ] Lumenreach 3D graybox.
+- [ ] Asset import + optimization pipeline established.
+- [ ] Poly Haven/approved Sketchfab material/model source policy documented.
+- [ ] Foliage/wind solution audited and integrated.
+- [ ] Streaming/performance budgets measured in Studio.
+- [ ] First production-quality environment benchmark scene.
+
 ## 1. Repository / development environment
 
 - [x] `EverLeaf-Online/roblox` created as canonical repository.
@@ -141,9 +164,10 @@
 - [ ] Implement level-70 advancements.
 - [ ] Implement level-120 advancements.
 
-## 7. Movement / 2.5D traversal
+## 7. Movement / 3D traversal
 
-- [x] Client 2.5D movement controller prototype.
+- [x] Original 2.5D controller prototype retired after 3D pivot.
+- [x] Full 3D camera-relative movement controller foundation.
 - [x] A/D horizontal movement works in Studio.
 - [x] Jumping works in Studio.
 - [x] W/S depth input is constrained/recentered by current prototype behavior.
@@ -222,7 +246,8 @@
 - [ ] Hostile enemy AI.
 - [ ] Aggro acquisition.
 - [ ] Aggro leash/reset.
-- [ ] 2.5D pursuit.
+- [x] Enemy pursuit converted to full XYZ movement foundation.
+- [ ] Production pathfinding/navigation around 3D obstacles.
 - [ ] Enemy attack windup/telegraph.
 - [ ] Enemy damage to player.
 - [ ] Enemy attack cooldowns.
@@ -497,7 +522,7 @@
 
 Do **not** call M1 complete until a fresh player can enter Studio and, without debug knowledge:
 
-- move and jump naturally in the 2.5D field,
+- move, sprint, jump, and dodge naturally in the 3D world,
 - understand the camera,
 - visibly perform a basic attack,
 - hit and kill a hostile enemy,

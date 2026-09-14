@@ -80,9 +80,7 @@ function EnemyAIService.Init()
                 end
             elseif targetRoot then
                 state.State = "Pursue"
-                humanoid:MoveTo(
-                    Vector3.new(targetRoot.Position.X, root.Position.Y, root.Position.Z)
-                )
+                humanoid:MoveTo(targetRoot.Position)
             end
         end
     end)

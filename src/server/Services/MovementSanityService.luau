@@ -1,6 +1,6 @@
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
 
@@ -19,21 +19,15 @@ local function correctPlayer(player)
         return
     end
 
-    local planeZ = player:GetAttribute("MovementPlaneZ")
-    if type(planeZ) ~= "number" then
-        planeZ = GameConfig.Movement.DefaultPlaneZ
-    end
+    humanoid.UseJumpPower = true
+    humanoid.JumpPower = GameConfig.Movement.JumpPower
+    humanoid.WalkSpeed = math.clamp(humanoid.WalkSpeed, 0, GameConfig.Movement.SprintSpeed)
 
-    local offset = root.Position.Z - planeZ
-    if math.abs(offset) > GameConfig.Movement.HardCorrectionDepth then
-        local position = root.Position
-        local rotation = root.CFrame.Rotation
-        root.CFrame = CFrame.new(position.X, position.Y, planeZ) * rotation
-    end
-
-    if math.abs(offset) > GameConfig.Movement.DepthTolerance then
-        local velocity = root.AssemblyLinearVelocity
-        root.AssemblyLinearVelocity = Vector3.new(velocity.X, velocity.Y, 0)
+    local velocity = root.AssemblyLinearVelocity
+    local horizontal = Vector3.new(velocity.X, 0, velocity.Z)
+    if horizontal.Magnitude > GameConfig.Movement.MaxHorizontalSpeed then
+        horizontal = horizontal.Unit * GameConfig.Movement.MaxHorizontalSpeed
+        root.AssemblyLinearVelocity = Vector3.new(horizontal.X, velocity.Y, horizontal.Z)
     end
 end
 

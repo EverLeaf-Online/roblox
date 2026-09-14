@@ -7,6 +7,22 @@
 
 ## Development strategy
 
+
+### 3D pivot decision — 2026-09-14
+
+EverLeaf is now a full 3D third-person action RPG/MMO. The earlier 2.5D movement/camera/depth-plane approach is retired. Phase A persistence, progression, inventory, skills, quests, economy, party, boss, security, admin, and deployment architecture is preserved.
+
+Immediate 3D priorities:
+
+- production-quality third-person movement and camera;
+- left-click/R2 basic combat with spatial targeting;
+- sprint/dodge/jump/interact controls;
+- true XYZ enemy pursuit and navigation;
+- Lumenreach 3D graybox;
+- lighting/atmosphere/terrain/foliage quality baseline;
+- asset import/optimization/licensing pipeline;
+- first production-quality environmental benchmark area.
+
 We are building structure first. Do not stop to fully polish one feature while major game domains are still missing.
 
 ### Phase A — Complete architecture — COMPLETE
@@ -52,10 +68,13 @@ Architecture closure completed:
 
 **Phase A exit passed:** every major game domain now has a canonical module/service boundary and a defined connection to neighboring systems. Feature completeness is deliberately deferred.
 
-### Phase B — Complete game shell — ACTIVE NEXT
+### Phase B — 3D foundation + complete game shell — ACTIVE NEXT
 
-Make every major player-facing route exist with placeholder content:
+Build the production-direction 3D gameplay foundation, then make every major player-facing route exist with placeholder content:
 
+- full 3D third-person locomotion/camera/sprint/dodge/interact foundation;
+- 3D combat targeting, hitbox/hurtbox, enemy navigation, and spatial encounter foundation;
+- graphics/environment pipeline for optimized meshes, PBR materials, lighting, atmosphere, foliage, wind, and streaming;
 - character start/onboarding;
 - HUD and all major menus;
 - class/advancement flow;
@@ -67,7 +86,7 @@ Make every major player-facing route exist with placeholder content:
 - boss entry/completion loop;
 - Lumenreach → Brasshaven progression shell.
 
-**Phase B exit:** a player can traverse the intended game loop end-to-end even though content and presentation remain sparse.
+**Phase B exit:** a player can traverse a representative 3D Lumenreach slice and the intended game loop end-to-end even though content density and presentation remain incomplete.
 
 ### Phase C — Content production
 

@@ -139,3 +139,16 @@ At Phase A closure the dependency checker reports 51 server services with no cyc
 ## Phase A completion rule
 
 Phase A means every major game domain has a canonical home, explicit authority boundary, persistent/runtime ownership model, and defined connection to neighboring systems. It **does not** mean the content, UI, balance, animation, map art, or gameplay polish is complete. Those belong to Phases B–E.
+
+
+## 3D physical gameplay layer
+
+The canonical physical layer is full 3D. There is no fixed combat plane and no Z-axis correction.
+
+- `ThirdPersonController` owns camera-relative locomotion, sprint, jump, and dodge input.
+- `CameraController` owns the scriptable orbit camera, collision pull-in, mouse/right-stick look, and cursor lock during gameplay.
+- `CombatController` maps left-click/R2 to server-authoritative attacks and aligns the avatar with camera intent before melee.
+- `TargetingService` performs server-side 3D range, facing-cone, vertical-tolerance, and optional line-of-sight selection.
+- `EnemyAIService` pursues targets in XYZ space; production enemies will graduate to pathfinding/navigation as maps become nontrivial.
+- `MovementSanityService` enforces locomotion limits without constraining players to a plane.
+- World art must assume StreamingEnabled-scale construction, modular environment kits, collision proxies, and measured mesh/material budgets.

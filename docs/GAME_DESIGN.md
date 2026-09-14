@@ -21,7 +21,7 @@ This repository is a clean, original Roblox RPG built from scratch.
 - Later advancements: levels 30, 70, and 120.
 - Damage uses mastery-based variance rather than a single deterministic roll.
 - HP/MP growth, attack cadence, knockback, and aggro are first-class combat systems.
-- Movement direction: 2.5D field-map traversal.
+- Movement direction: full 3D third-person traversal with camera-relative WASD/gamepad movement.
 
 ## World/content baseline
 
@@ -38,10 +38,25 @@ Build a secure level 1–30 vertical slice with:
 3. Advancement eligibility framework without hardcoding undecided class-family names.
 4. Server-owned currency ledger for Shards and Marks.
 5. Networking boundary where clients request actions but never submit authoritative rewards/state.
-6. 2.5D movement/combat foundations.
+6. Full 3D third-person movement/combat foundations.
 7. First Lumenreach/Brasshaven content scaffolds.
 8. Buildable Rojo place output and repeatable VM build workflow.
 
 ## Authority rule
 
 The client may request an action (allocate AP, use skill, attack target, interact, etc.). The server validates the request, calculates the result, mutates state, and replicates the outcome. The client never tells the server how much EXP, currency, damage, loot, or progression it earned.
+
+
+## 3D world and visual direction
+
+EverLeaf is a full 3D stylized-realism action RPG/MMO. The visual target is dense, atmospheric fantasy rather than blocky prototype presentation or photorealism.
+
+- Third-person orbit camera with mouse/right-stick control.
+- Camera-relative WASD/gamepad movement, sprint, jump, dodge, and interaction controls.
+- 3D melee cones/arcs, line-of-sight checks, hitboxes/hurtboxes, knockback, and spatial enemy AI.
+- Lumenreach: lush high-fantasy wilderness, layered foliage, ruins, cliffs, water, fog, wind, and strong landmark silhouettes.
+- Brasshaven: industrial fantasy, stone/metal architecture, furnaces, smoke, emissive materials, machinery, and vertical spaces.
+- PBR-capable materials and optimized meshes are preferred where they materially improve the scene.
+- Large-world content must be built for streaming, modular reuse, collision proxies, sensible mesh density, and LOD/performance discipline.
+
+The completed Phase A server/gameplay architecture remains canonical; only the physical movement, camera, targeting, AI traversal, map construction, and presentation layers changed with the 3D pivot.

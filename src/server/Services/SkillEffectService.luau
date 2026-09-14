@@ -12,10 +12,11 @@ function SkillEffectService.Execute(player, profile, definition)
     end
 
     if effect.Type == "DamageNearest" then
-        local target = TargetingService.FindNearestEnemy(player, {
+        local target = TargetingService.FindBestEnemy(player, {
             Range = effect.Range or 10,
             VerticalRange = effect.VerticalRange or 8,
-            DepthRange = effect.DepthRange or 3,
+            ArcDegrees = effect.ArcDegrees or 140,
+            RequireLineOfSight = effect.RequireLineOfSight ~= false,
         })
         if not target then
             return false, "no_target"

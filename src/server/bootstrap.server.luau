@@ -17,6 +17,7 @@ local PlayerDataService = require(script.Parent.Services.PlayerDataService)
 local RateLimiterService = require(script.Parent.Services.RateLimiterService)
 local SnapshotService = require(script.Parent.Services.SnapshotService)
 local StatusEffectService = require(script.Parent.Services.StatusEffectService)
+local WorldVisualService = require(script.Parent.Services.WorldVisualService)
 local StatService = require(script.Parent.Services.StatService)
 
 local remotes = ReplicatedStorage:FindFirstChild(Net.RemoteFolderName)
@@ -53,6 +54,7 @@ EnemyAIService.Init()
 PartyService.Init()
 InteractionSessionService.Init()
 StatusEffectService.Init()
+WorldVisualService.Init()
 
 local function replicateProfile(player)
     CharacterStatsService.Apply(player, false)
@@ -83,7 +85,6 @@ local function onPlayerAdded(player)
         return
     end
 
-    player:SetAttribute("MovementPlaneZ", GameConfig.Movement.DefaultPlaneZ)
     DeathService.InitPlayer(player)
 
     player.CharacterAdded:Connect(function()

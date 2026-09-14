@@ -58,5 +58,6 @@ Roblox Studio remains the visual editor/playtest environment. Rojo keeps Studio 
 - [Roadmap](docs/ROADMAP.md)
 - [Master checklist](docs/MASTER_CHECKLIST.md)
 - [Canonical game design](docs/GAME_DESIGN.md)
+- [3D art pipeline](docs/ART_PIPELINE_3D.md)
 - [Toolchain](docs/TOOLCHAIN.md)
 - [Deployment](docs/DEPLOYMENT.md)

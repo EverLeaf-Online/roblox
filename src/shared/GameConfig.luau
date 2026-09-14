@@ -67,14 +67,27 @@ GameConfig.Security = {
 }
 
 GameConfig.Movement = {
-    DefaultPlaneZ = 0,
-    DepthTolerance = 1.5,
-    HardCorrectionDepth = 5,
+    WalkSpeed = 16,
+    SprintSpeed = 24,
+    JumpPower = 50,
+    DodgeSpeed = 42,
+    DodgeCooldown = 0.8,
+    MaxHorizontalSpeed = 58,
+    GamepadDeadzone = 0.15,
     ServerCheckInterval = 0.1,
-    CameraDistance = 32,
-    CameraHeight = 5,
-    CameraLookHeight = 2.5,
-    CameraResponsiveness = 10,
+}
+
+GameConfig.Camera = {
+    Distance = 10,
+    FocusHeight = 2.5,
+    ShoulderOffset = 1.25,
+    FieldOfView = 70,
+    Responsiveness = 16,
+    MouseSensitivity = 0.0032,
+    GamepadSensitivity = 2.2,
+    MinPitchDegrees = -65,
+    MaxPitchDegrees = 55,
+    CollisionPadding = 0.35,
 }
 
 GameConfig.DerivedStats = {
@@ -93,13 +106,27 @@ GameConfig.Combat = {
     BeginnerAttackPower = 5,
     BeginnerStatScale = 1.5,
     BasicAttackCooldown = 0.55,
-    BasicAttackRange = 10,
-    BasicAttackVerticalRange = 8,
-    BasicAttackDepthRange = 3,
+    BasicAttackRange = 9,
+    BasicAttackVerticalRange = 6,
+    BasicAttackArcDegrees = 120,
+    RequireLineOfSight = true,
+}
+
+GameConfig.Graphics = {
+    Brightness = 2.25,
+    ClockTime = 14.5,
+    ExposureCompensation = 0.05,
+    EnvironmentDiffuseScale = 0.45,
+    EnvironmentSpecularScale = 1,
+    ShadowSoftness = 0.25,
+    AtmosphereDensity = 0.24,
+    AtmosphereHaze = 1.4,
+    AtmosphereGlare = 0.12,
 }
 
 GameConfig.Development = {
     SpawnTrainingDummyInStudio = true,
+    TrainingDummyPosition = Vector3.new(8, 4, 0),
 }
 
 GameConfig.Places = {

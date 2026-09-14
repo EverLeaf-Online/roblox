@@ -16,9 +16,8 @@ local attacking = false
 
 local reasonText = {
     cooldown = "Attack is on cooldown",
-    no_target = "No enemy in range",
+    no_target = "No enemy in front of you",
     out_of_range = "Move closer",
-    out_of_depth = "Target is off the combat plane",
     target_unavailable = "Target is unavailable",
     character_unavailable = "Character is unavailable",
     rate_limited = "Slow down",
@@ -107,6 +106,21 @@ local function playPrototypePunch()
     end)
 end
 
+local function faceCameraDirection()
+    local character = player.Character
+    local root = character and character:FindFirstChild("HumanoidRootPart")
+    local camera = workspace.CurrentCamera
+    if not root or not camera then
+        return
+    end
+
+    local look = Vector3.new(camera.CFrame.LookVector.X, 0, camera.CFrame.LookVector.Z)
+    if look.Magnitude <= 0.001 then
+        return
+    end
+    root.CFrame = CFrame.lookAt(root.Position, root.Position + look.Unit)
+end
+
 local function performAttack()
     if attacking or not attackRemote then
         return
@@ -116,6 +130,7 @@ local function performAttack()
     end
 
     attacking = true
+    faceCameraDirection()
     playPrototypePunch()
 
     task.spawn(function()
@@ -142,8 +157,8 @@ local function performAttack()
     end)
 end
 
-local function createAttackButton()
-    if attackButton and attackButton.Parent then
+local function createTouchAttackButton()
+    if not UserInputService.TouchEnabled or attackButton and attackButton.Parent then
         return
     end
 
@@ -157,49 +172,42 @@ local function createAttackButton()
     button.TextColor3 = Color3.new(1, 1, 1)
     button.Font = Enum.Font.GothamBold
     button.TextSize = 18
-    button.Text = "ATTACK  [Z]"
+    button.Text = "ATTACK"
     button.AutoButtonColor = true
     button.ZIndex = 20
     button.Parent = getCombatGui()
     button.Activated:Connect(performAttack)
-
     attackButton = button
 end
 
 function CombatController.Start()
-    createAttackButton()
-    if attackButton then
-        attackButton.Text = "CONNECTING..."
-    end
+    createTouchAttackButton()
 
-    UserInputService.InputBegan:Connect(function(input)
-        if input.KeyCode == Enum.KeyCode.Z or input.KeyCode == Enum.KeyCode.ButtonR2 then
+    UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then
+            return
+        end
+        if
+            input.UserInputType == Enum.UserInputType.MouseButton1
+            or input.KeyCode == Enum.KeyCode.ButtonR2
+        then
             performAttack()
         end
     end)
 
     local remotes = ReplicatedStorage:WaitForChild(Net.RemoteFolderName, 5)
     if not remotes then
-        if attackButton then
-            attackButton.Text = "COMBAT OFFLINE"
-        end
         warn("[CombatController] EverLeafRemotes folder was not found")
         return
     end
 
     local remote = remotes:WaitForChild(Net.Functions.BasicAttack, 5)
     if not remote or not remote:IsA("RemoteFunction") then
-        if attackButton then
-            attackButton.Text = "COMBAT OFFLINE"
-        end
         warn("[CombatController] BasicAttack RemoteFunction was not found")
         return
     end
 
     attackRemote = remote
-    if attackButton then
-        attackButton.Text = "ATTACK  [Z]"
-    end
 end
 
 return CombatController

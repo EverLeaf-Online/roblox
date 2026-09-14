@@ -4,7 +4,7 @@ local CameraController = require(script.Parent.Controllers.CameraController)
 local CatalogClient = require(script.Parent.Services.CatalogClient)
 local CombatController = require(script.Parent.Controllers.CombatController)
 local ScreenController = require(script.Parent.Controllers.ScreenController)
-local SideScrollerController = require(script.Parent.Controllers.SideScrollerController)
+local ThirdPersonController = require(script.Parent.Controllers.ThirdPersonController)
 local Net = require(ReplicatedStorage.Shared.Net)
 local PartyStore = require(script.Parent.State.PartyStore)
 local ProfileStore = require(script.Parent.State.ProfileStore)
@@ -21,7 +21,7 @@ end
 -- Controllers are deliberately fault-isolated. A missing dependency or slow
 -- startup in one system must never prevent unrelated client systems from
 -- initializing.
-startController("SideScrollerController", SideScrollerController)
+startController("ThirdPersonController", ThirdPersonController)
 startController("CameraController", CameraController)
 startController("CombatController", CombatController)
 startController("ScreenController", ScreenController)
