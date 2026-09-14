@@ -22,14 +22,17 @@ local function findNearestTarget(playerRoot)
             local targetRoot = getRoot(candidate) or candidate.PrimaryPart
             if targetRoot then
                 local delta = targetRoot.Position - playerRoot.Position
-                local planarDistance = Vector2.new(delta.X, delta.Y).Magnitude
+                local horizontalDistance = math.abs(delta.X)
+                local verticalDistance = math.abs(delta.Y)
+                local depthDistance = math.abs(delta.Z)
                 if
-                    planarDistance <= GameConfig.Combat.BasicAttackRange
-                    and math.abs(delta.Z) <= GameConfig.Combat.BasicAttackDepthRange
-                    and planarDistance < nearestDistance
+                    horizontalDistance <= GameConfig.Combat.BasicAttackRange
+                    and verticalDistance <= GameConfig.Combat.BasicAttackVerticalRange
+                    and depthDistance <= GameConfig.Combat.BasicAttackDepthRange
+                    and horizontalDistance < nearestDistance
                 then
                     nearest = candidate
-                    nearestDistance = planarDistance
+                    nearestDistance = horizontalDistance
                 end
             end
         end
@@ -63,8 +66,10 @@ function CombatService.BasicAttack(player, profile)
     end
 
     local delta = targetRoot.Position - playerRoot.Position
-    local planarDistance = Vector2.new(delta.X, delta.Y).Magnitude
-    if planarDistance > GameConfig.Combat.BasicAttackRange then
+    if math.abs(delta.X) > GameConfig.Combat.BasicAttackRange then
+        return false, "out_of_range"
+    end
+    if math.abs(delta.Y) > GameConfig.Combat.BasicAttackVerticalRange then
         return false, "out_of_range"
     end
     if math.abs(delta.Z) > GameConfig.Combat.BasicAttackDepthRange then

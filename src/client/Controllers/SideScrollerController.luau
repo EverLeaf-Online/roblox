@@ -22,11 +22,13 @@ local function setDigital(direction, inputState)
     return Enum.ContextActionResult.Sink
 end
 
-local function onJump(_, inputState)
-    if inputState == Enum.UserInputState.Begin and humanoid then
-        humanoid.Jump = true
+local function tryJump()
+    if not humanoid or humanoid.Health <= 0 then
+        return
     end
-    return Enum.ContextActionResult.Sink
+
+    humanoid.Jump = true
+    humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
 end
 
 local function attachCharacter(character)
@@ -43,19 +45,19 @@ function SideScrollerController.Start()
         return setDigital(1, state)
     end, true, Enum.KeyCode.D, Enum.KeyCode.Right, Enum.KeyCode.DPadRight)
 
-    ContextActionService:BindAction(
-        "EverLeafJump",
-        onJump,
-        true,
-        Enum.KeyCode.Space,
-        Enum.KeyCode.ButtonA
-    )
     ContextActionService:SetTitle("EverLeafMoveLeft", "◀")
     ContextActionService:SetTitle("EverLeafMoveRight", "▶")
-    ContextActionService:SetTitle("EverLeafJump", "Jump")
     ContextActionService:SetPosition("EverLeafMoveLeft", UDim2.fromScale(0.06, 0.78))
     ContextActionService:SetPosition("EverLeafMoveRight", UDim2.fromScale(0.16, 0.78))
-    ContextActionService:SetPosition("EverLeafJump", UDim2.fromScale(0.88, 0.72))
+
+    UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then
+            return
+        end
+        if input.KeyCode == Enum.KeyCode.Space or input.KeyCode == Enum.KeyCode.ButtonA then
+            tryJump()
+        end
+    end)
 
     UserInputService.InputChanged:Connect(function(input)
         if input.KeyCode == Enum.KeyCode.Thumbstick1 then

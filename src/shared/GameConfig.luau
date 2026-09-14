@@ -80,6 +80,7 @@ GameConfig.Combat = {
     BeginnerStatScale = 1.5,
     BasicAttackCooldown = 0.55,
     BasicAttackRange = 10,
+    BasicAttackVerticalRange = 8,
     BasicAttackDepthRange = 3,
 }
 
