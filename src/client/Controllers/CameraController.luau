@@ -14,12 +14,14 @@ local character = nil
 local yaw = 0
 local pitch = math.rad(-10)
 local gamepadLook = Vector2.zero
+local cameraArmLength = nil
 
 local function attachCharacter(newCharacter)
     character = newCharacter
     root = newCharacter:WaitForChild("HumanoidRootPart")
     local look = root.CFrame.LookVector
     yaw = math.atan2(-look.X, -look.Z)
+    cameraArmLength = nil
 end
 
 local function cameraInputBlocked()
@@ -36,6 +38,47 @@ local function updateMouseState()
         UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
         UserInputService.MouseIconEnabled = false
     end
+end
+
+local function getCameraCollisionDistance(focus, idealOffset)
+    local idealDistance = idealOffset.Magnitude
+    if idealDistance <= 0.001 then
+        return 0
+    end
+
+    local excluded = {}
+    if character then
+        table.insert(excluded, character)
+    end
+
+    local rayParams = RaycastParams.new()
+    rayParams.FilterType = Enum.RaycastFilterType.Exclude
+    rayParams.IgnoreWater = true
+
+    for _ = 1, 10 do
+        rayParams.FilterDescendantsInstances = excluded
+        local ray = Workspace:Raycast(focus, idealOffset, rayParams)
+        if not ray then
+            return idealDistance
+        end
+
+        local hit = ray.Instance
+        local blocksCamera = hit == Workspace.Terrain
+        if hit:IsA("BasePart") then
+            blocksCamera = hit.CanCollide and hit.Transparency < 0.95
+        end
+
+        if blocksCamera then
+            return math.max(
+                GameConfig.Camera.MinimumCollisionDistance,
+                ray.Distance - GameConfig.Camera.CollisionPadding
+            )
+        end
+
+        table.insert(excluded, hit)
+    end
+
+    return idealDistance
 end
 
 function CameraController.Start()
@@ -86,22 +129,42 @@ function CameraController.Start()
                 )
             end
 
+            local currentCamera = Workspace.CurrentCamera
+            if not currentCamera then
+                return
+            end
+            camera = currentCamera
+            if camera.CameraType ~= Enum.CameraType.Scriptable then
+                camera.CameraType = Enum.CameraType.Scriptable
+            end
+            camera.FieldOfView = GameConfig.Camera.FieldOfView
+
             local focus = root.Position + Vector3.new(0, GameConfig.Camera.FocusHeight, 0)
             local orbit = CFrame.fromOrientation(pitch, yaw, 0)
-            local desiredPosition = focus
-                - orbit.LookVector * GameConfig.Camera.Distance
+            local idealOffset = -orbit.LookVector * GameConfig.Camera.Distance
                 + orbit.RightVector * GameConfig.Camera.ShoulderOffset
+            local idealDistance = idealOffset.Magnitude
+            local targetArmLength = getCameraCollisionDistance(focus, idealOffset)
 
-            local rayParams = RaycastParams.new()
-            rayParams.FilterType = Enum.RaycastFilterType.Exclude
-            rayParams.FilterDescendantsInstances = if character then { character } else {}
-            rayParams.IgnoreWater = false
-
-            local ray = Workspace:Raycast(focus, desiredPosition - focus, rayParams)
-            if ray then
-                desiredPosition = ray.Position + ray.Normal * GameConfig.Camera.CollisionPadding
+            if cameraArmLength == nil or targetArmLength < cameraArmLength then
+                -- Initialize at the safe distance and pull in immediately so the
+                -- camera never clips through solid geometry.
+                cameraArmLength = targetArmLength
+            else
+                -- Ease back out after an obstruction clears. This hysteresis prevents
+                -- foliage edges or rapidly changing ray hits from making the view pop.
+                local recoveryAlpha = 1
+                    - math.exp(-GameConfig.Camera.CollisionRecoveryResponsiveness * deltaTime)
+                cameraArmLength += (targetArmLength - cameraArmLength) * recoveryAlpha
             end
 
+            cameraArmLength = math.clamp(
+                cameraArmLength,
+                GameConfig.Camera.MinimumCollisionDistance,
+                idealDistance
+            )
+
+            local desiredPosition = focus + idealOffset.Unit * cameraArmLength
             local desired = CFrame.lookAt(desiredPosition, focus)
             local alpha = 1 - math.exp(-GameConfig.Camera.Responsiveness * deltaTime)
             camera.CFrame = camera.CFrame:Lerp(desired, alpha)

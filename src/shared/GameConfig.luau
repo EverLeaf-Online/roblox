@@ -92,6 +92,8 @@ GameConfig.Camera = {
     MinPitchDegrees = -65,
     MaxPitchDegrees = 55,
     CollisionPadding = 0.35,
+    MinimumCollisionDistance = 1.75,
+    CollisionRecoveryResponsiveness = 7,
 }
 
 GameConfig.DerivedStats = {
