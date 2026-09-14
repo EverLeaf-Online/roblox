@@ -95,7 +95,7 @@
 - [x] Starter/tutorial, hunting, exploration, boss, region-unlock, and first Brasshaven quest chains added.
 - [x] Quest prerequisites, Collect objectives, and Explore objectives implemented.
 - [x] Landmark exploration triggers wired for Crossroads, Glowmere, Shattered Arch, Veilfall, Sunmoss, and Whisperroot Hollow.
-- [x] Basic multi-item shop inventories exposed through NPC dialogue for supply/outfitter/archive vendors.
+- [x] Multi-item shops exist for Lumenreach supply/outfitter/archive vendors plus Brasshaven Foundry Supply and Belforge Mark Exchange.
 - [x] Hidden Whisperroot Hollow and persistent one-time Wayfarer cache reward implemented.
 - [x] First Lumenreach field boss implemented: Mosswarden, Root of the Old Grove.
 - [x] Lumenreach → Brasshaven progression gate is functional and region unlock rewards are supported.
@@ -394,8 +394,8 @@
 - [x] Winner-owned visible loot drops.
 - [x] Pickup prompts, inventory validation, quest Collect progress, and timed cleanup.
 - [x] Loot presentation uses labeled glowing world orbs with type-based visual colors.
-- [ ] Finalize purpose/source/sink for Shards.
-- [ ] Finalize purpose/source/sink for Marks.
+- [x] Shards have an active early-game sink path through Lumenreach shops and Brasshaven Foundry Supply; broader late-game economy tuning remains.
+- [x] Marks now have a dedicated Belforge exchange with gated equipment rewards; later boss/event sink expansion remains.
 - [ ] Party loot ownership/sharing rules.
 - [ ] Rare-drop presentation and loot-notification polish.
 

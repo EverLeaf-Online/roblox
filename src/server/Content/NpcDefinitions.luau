@@ -60,6 +60,24 @@ return table.freeze({
         }),
         QuestOffers = table.freeze({ "first_advancement_trial" }),
     }),
+    foundry_quartermaster = table.freeze({
+        DisplayName = "Nera · Foundry Quartermaster",
+        RegionId = "brasshaven",
+        Dialogue = table.freeze({
+            "Brasshaven gear is built to survive heat, grit, and bad decisions. Shards spend clean here; bring anything you do not need back to the counter.",
+        }),
+        QuestOffers = table.freeze({}),
+        ShopId = "foundry_supply",
+    }),
+    belforge_mark_broker = table.freeze({
+        DisplayName = "Cale · Mark Broker",
+        RegionId = "brasshaven",
+        Dialogue = table.freeze({
+            "Marks are proof, not loose change. I exchange them for gear that the foundry does not sell over an ordinary counter.",
+        }),
+        QuestOffers = table.freeze({}),
+        ShopId = "belforge_mark_exchange",
+    }),
     belforge_foreman = table.freeze({
         DisplayName = "Vale · Belforge Foreman",
         RegionId = "brasshaven",

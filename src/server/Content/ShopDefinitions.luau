@@ -28,4 +28,24 @@ return table.freeze({
             field_tonic = 7,
         }),
     }),
+    foundry_supply = table.freeze({
+        DisplayName = "Foundry Threshold Supply",
+        Currency = "Shards",
+        FeaturedItemId = "foundry_guard_vest",
+        Items = table.freeze({
+            field_tonic = 8,
+            foundry_guard_vest = 42,
+            ashrunner_coat = 42,
+            emberloop_charm = 58,
+        }),
+    }),
+    belforge_mark_exchange = table.freeze({
+        DisplayName = "Belforge Mark Exchange",
+        Currency = "Marks",
+        FeaturedItemId = "belforge_wayfarer_ring",
+        Items = table.freeze({
+            belforge_wayfarer_ring = 3,
+            tempered_mark_charm = 5,
+        }),
+    }),
 })

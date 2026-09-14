@@ -274,6 +274,128 @@ local function makeForeman(parent, position)
     end)
 end
 
+local function makeFoundryVendor(parent, npcId, displayName, position, palette)
+    local model = Instance.new("Model")
+    model.Name = npcId
+    model.Parent = parent
+    local base = CFrame.new(position) * CFrame.Angles(0, math.rad(180), 0)
+
+    local function bodyPart(name, size, offset, material, color)
+        local part = makePart(model, name, size, base * CFrame.new(offset), material, color)
+        part.CanCollide = false
+        part.CanTouch = false
+        return part
+    end
+
+    local root = bodyPart(
+        "HumanoidRootPart",
+        Vector3.new(2, 6.4, 1.8),
+        Vector3.new(0, 3.2, 0),
+        Enum.Material.SmoothPlastic,
+        Color3.new(0, 0, 0)
+    )
+    root.Transparency = 1
+    bodyPart(
+        "Torso",
+        Vector3.new(2.5, 2.55, 1.5),
+        Vector3.new(0, 3.8, 0),
+        Enum.Material.Fabric,
+        palette.Cloth
+    )
+    bodyPart(
+        "Apron",
+        Vector3.new(2.1, 2.2, 0.14),
+        Vector3.new(0, 3.5, -0.82),
+        Enum.Material.Fabric,
+        palette.Accent
+    )
+    for _, side in { -1, 1 } do
+        bodyPart(
+            side < 0 and "LeftLeg" or "RightLeg",
+            Vector3.new(0.8, 2.4, 0.85),
+            Vector3.new(side * 0.58, 1.4, 0),
+            Enum.Material.Fabric,
+            Color3.fromRGB(54, 53, 51)
+        )
+        bodyPart(
+            side < 0 and "LeftArm" or "RightArm",
+            Vector3.new(0.72, 2.15, 0.78),
+            Vector3.new(side * 1.55, 3.75, 0),
+            Enum.Material.Fabric,
+            palette.Cloth
+        )
+    end
+    local head = bodyPart(
+        "Head",
+        Vector3.new(1.7, 1.7, 1.6),
+        Vector3.new(0, 5.7, 0),
+        Enum.Material.SmoothPlastic,
+        palette.Skin
+    )
+    bodyPart(
+        "WorkCap",
+        Vector3.new(1.95, 0.38, 1.82),
+        Vector3.new(0, 6.46, 0),
+        Enum.Material.Metal,
+        palette.Accent
+    )
+
+    local plate = Instance.new("BillboardGui")
+    plate.Size = UDim2.fromOffset(240, 34)
+    plate.StudsOffsetWorldSpace = Vector3.new(0, 1.72, 0)
+    plate.MaxDistance = 50
+    plate.Parent = head
+    local text = Instance.new("TextLabel")
+    text.Size = UDim2.fromScale(1, 1)
+    text.BackgroundColor3 = Color3.fromRGB(29, 25, 21)
+    text.BackgroundTransparency = 0.16
+    text.Text = string.upper(displayName)
+    text.TextColor3 = palette.Text
+    text.TextStrokeTransparency = 0.35
+    text.Font = Enum.Font.GothamBold
+    text.TextScaled = true
+    text.Parent = plate
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 7)
+    corner.Parent = text
+    local edge = Instance.new("UIStroke")
+    edge.Color = palette.Accent
+    edge.Transparency = 0.3
+    edge.Parent = text
+
+    local counter = makePart(
+        model,
+        "Counter",
+        Vector3.new(7, 2.6, 2.6),
+        base * CFrame.new(0, 1.3, -3.6),
+        Enum.Material.WoodPlanks,
+        Color3.fromRGB(79, 60, 44)
+    )
+    counter.CanCollide = true
+    makePart(
+        model,
+        "CounterTrim",
+        Vector3.new(7.2, 0.28, 2.8),
+        base * CFrame.new(0, 2.72, -3.6),
+        Enum.Material.Metal,
+        palette.Accent
+    ).CanCollide =
+        false
+
+    model.PrimaryPart = root
+    WorldObjectService.Register(model, "Npc", npcId)
+    local prompt = Instance.new("ProximityPrompt")
+    prompt.ActionText = "Trade"
+    prompt.ObjectText = displayName
+    prompt.KeyboardKeyCode = Enum.KeyCode.E
+    prompt.MaxActivationDistance = 11
+    prompt.RequiresLineOfSight = false
+    prompt.Parent = root
+    prompt.Triggered:Connect(function(player)
+        InteractionService.Begin(player, npcId, model)
+    end)
+end
+
 local function makeBelforgeGate(parent, position)
     local model = Instance.new("Model")
     model.Name = "BelforgeEntrance"
@@ -586,6 +708,30 @@ function BrasshavenWorldService.Init()
     makeReturnGate(world, ORIGIN + Vector3.new(-142, 0, 0))
     makeBelforgeGate(world, ORIGIN + Vector3.new(158, 0, 0))
     makeForeman(world, ORIGIN + Vector3.new(126, 0, 24))
+    makeFoundryVendor(
+        world,
+        "foundry_quartermaster",
+        "Nera · Foundry Quartermaster",
+        ORIGIN + Vector3.new(-78, 0, 30),
+        {
+            Cloth = Color3.fromRGB(74, 67, 58),
+            Accent = Color3.fromRGB(157, 109, 55),
+            Skin = Color3.fromRGB(191, 151, 118),
+            Text = Color3.fromRGB(239, 207, 151),
+        }
+    )
+    makeFoundryVendor(
+        world,
+        "belforge_mark_broker",
+        "Cale · Mark Broker",
+        ORIGIN + Vector3.new(-48, 0, 30),
+        {
+            Cloth = Color3.fromRGB(58, 63, 69),
+            Accent = Color3.fromRGB(105, 131, 139),
+            Skin = Color3.fromRGB(210, 171, 134),
+            Text = Color3.fromRGB(185, 224, 229),
+        }
+    )
     makeLabel(world, ORIGIN + Vector3.new(-58, 22, 0), "BRASSHAVEN · FOUNDRY THRESHOLD")
     makeLabel(world, ORIGIN + Vector3.new(104, 25, 0), "BELFORGE EASTWORKS · SEALED")
 
