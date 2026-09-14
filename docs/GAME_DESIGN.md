@@ -29,7 +29,7 @@ This repository is a clean, original Roblox RPG built from scratch.
   - Lumenweaver — Prismatic Lumen Focus.
   - Veilstrider — Veilglass Twin Knives.
   - Brasshand — Rivethead Forge Maul.
-- Later advancements: levels 30, 70, and 120.
+- Later advancements: levels 30, 70, and 120. Level 30 is implemented as a deterministic deepening of the chosen family; later branch structure remains future design work.
 - Damage uses mastery-based variance rather than a single deterministic roll.
 - HP/MP growth, attack cadence, knockback, and aggro are first-class combat systems.
 - Movement direction: full 3D third-person traversal with camera-relative WASD/gamepad movement.

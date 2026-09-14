@@ -6,7 +6,10 @@ local InventoryService = require(script.Parent.InventoryService)
 
 local AdvancementService = {}
 local FIRST_TRIAL_QUEST_ID = "first_advancement_trial"
+local SECOND_PREREQUISITE_QUEST_ID = "belforge_gate_sentinel"
+local SECOND_ADVANCEMENT_LEVEL = GameConfig.Progression.LaterAdvancementLevels[1] or 30
 local STARTING_SP = GameConfig.Progression.SPPerLevelAfterFirstAdvancement
+local SECOND_ADVANCEMENT_SP = GameConfig.Progression.SPPerLevelAfterFirstAdvancement
 
 function AdvancementService.GetFamily(familyId)
     return ClassFamilyDefinitions[familyId]
@@ -30,6 +33,23 @@ function AdvancementService.CanFirstAdvance(profile, familyId)
         return false, "unknown_family"
     end
     return AdvancementRules.CanFirstAdvance(profile, family, FIRST_TRIAL_QUEST_ID)
+end
+
+function AdvancementService.CanSecondAdvance(profile)
+    if type(profile) ~= "table" then
+        return false, "invalid_state"
+    end
+    local familyId = profile.FamilyId
+    local family = type(familyId) == "string" and ClassFamilyDefinitions[familyId] or nil
+    if not family then
+        return false, "unknown_family"
+    end
+    return AdvancementRules.CanSecondAdvance(
+        profile,
+        family,
+        SECOND_ADVANCEMENT_LEVEL,
+        SECOND_PREREQUISITE_QUEST_ID
+    )
 end
 
 local function assignStarterSkill(profile, starterSkillId)
@@ -102,6 +122,30 @@ function AdvancementService.FirstAdvance(profile, familyId)
             StarterItemId = starterItemId,
             StarterItemEquipped = starterItemEquipped,
             GrantedSP = STARTING_SP,
+        }
+end
+
+function AdvancementService.SecondAdvance(profile)
+    local ok, reason = AdvancementService.CanSecondAdvance(profile)
+    if not ok then
+        return false, reason
+    end
+
+    local family = ClassFamilyDefinitions[profile.FamilyId]
+    local advancement = family.SecondAdvancement
+    profile.AdvancementTier = 2
+    profile.SP += SECOND_ADVANCEMENT_SP
+    local hotbarSlot = assignStarterSkill(profile, advancement.StarterSkillId)
+
+    return true,
+        {
+            Tier = 2,
+            FamilyId = profile.FamilyId,
+            FamilyDisplayName = family.DisplayName,
+            AdvancementDisplayName = advancement.DisplayName,
+            StarterSkillId = advancement.StarterSkillId,
+            StarterSkillHotbarSlot = hotbarSlot,
+            GrantedSP = SECOND_ADVANCEMENT_SP,
         }
 end
 

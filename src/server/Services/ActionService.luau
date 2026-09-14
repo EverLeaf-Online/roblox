@@ -56,10 +56,19 @@ handlers["advancement.first"] = function(player, profile, payload)
     if not InteractionSessionService.ValidateNpc(player, payload.NpcId) then
         return false, "interaction_session_required"
     end
-    if not InteractionService.IsAdvancementMentor(payload.NpcId) then
+    if not InteractionService.IsAdvancementMentor(payload.NpcId, 1) then
         return false, "invalid_mentor"
     end
     return AdvancementService.FirstAdvance(profile, payload.FamilyId)
+end
+handlers["advancement.second"] = function(player, profile, payload)
+    if not InteractionSessionService.ValidateNpc(player, payload.NpcId) then
+        return false, "interaction_session_required"
+    end
+    if not InteractionService.IsAdvancementMentor(payload.NpcId, 2) then
+        return false, "invalid_mentor"
+    end
+    return AdvancementService.SecondAdvance(profile)
 end
 handlers["party.create"] = function(player)
     local ok, reason = PartyService.Create(player)

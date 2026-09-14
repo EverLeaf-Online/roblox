@@ -819,13 +819,19 @@ local function Dialogue(props)
         })
     end
     if description.AdvancementMentor and props.OnOpenAdvancement then
+        local currentTier = tonumber(profile.AdvancementTier) or 0
+        local targetTier = tonumber(description.AdvancementTargetTier) or 1
+        local advancementText = if targetTier == 1
+            then if currentTier >= 1 then "FIRST PATH BOUND" else "CHOOSE FIRST PATH"
+            else if currentTier >= targetTier
+                then string.format("TIER %d COMPLETE", targetTier)
+                else string.format("ADVANCE TO TIER %d", targetTier)
         actionChildren.Advancement = React.createElement(Button, {
             Position = UDim2.fromOffset(22, questId and 250 or 198),
             Size = UDim2.fromOffset(220, 44),
-            Text = (tonumber(profile.AdvancementTier) or 0) >= 1 and "PATH ALREADY BOUND"
-                or "CHOOSE FIRST PATH",
+            Text = advancementText,
             Tone = "accent",
-            Active = (tonumber(profile.AdvancementTier) or 0) == 0,
+            Active = currentTier == targetTier - 1,
             OnActivated = props.OnOpenAdvancement,
             ZIndex = 24,
         })
@@ -1019,6 +1025,18 @@ local function CharacterPanel(profile, invoke)
     local level = tonumber(profile.Level) or 1
     local ap = tonumber(profile.AP) or 0
     local sp = tonumber(profile.SP) or 0
+    local advancementTier = tonumber(profile.AdvancementTier) or 0
+    local catalog = CatalogClient.Get() or {}
+    local family = type(profile.FamilyId) == "string"
+            and profile.FamilyId ~= ""
+            and catalog.Families
+            and catalog.Families[profile.FamilyId]
+        or nil
+    local advancementTitle = if family
+        then if advancementTier >= 2 and family.SecondAdvancement
+            then family.SecondAdvancement.DisplayName
+            else family.DisplayName
+        else nil
     local children = {
         Summary = React.createElement(Panel, {
             Position = UDim2.fromOffset(0, 0),
@@ -1037,19 +1055,9 @@ local function CharacterPanel(profile, invoke)
                 Tier = React.createElement(Label, {
                     Position = UDim2.fromOffset(18, 43),
                     Size = UDim2.fromOffset(300, 24),
-                    Text = if type(profile.FamilyId) == "string"
-                            and profile.FamilyId ~= ""
-                        then string.format(
-                            "%s · Tier %d",
-                            (
-                                (CatalogClient.Get() or {}).Families
-                                and (CatalogClient.Get() or {}).Families[profile.FamilyId]
-                                and (CatalogClient.Get() or {}).Families[profile.FamilyId].DisplayName
-                            )
-                                or prettyId(profile.FamilyId),
-                            tonumber(profile.AdvancementTier) or 0
-                        )
-                        else "Unbound Wayfarer · Tier 0",
+                    Text = advancementTitle
+                            and string.format("%s · Tier %d", advancementTitle, advancementTier)
+                        or "Unbound Wayfarer · Tier 0",
                     TextSize = 12,
                     Color = COLORS.Muted,
                     ZIndex = 5,
@@ -2623,6 +2631,7 @@ local function App()
                     Profile = profile,
                     Catalog = CatalogClient.Get() or {},
                     MentorNpcId = interaction.NpcId,
+                    TargetTier = interaction.AdvancementTargetTier,
                     OnClose = function()
                         setAdvancementOpen(false)
                     end,

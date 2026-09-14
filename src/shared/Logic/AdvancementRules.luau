@@ -30,6 +30,45 @@ function AdvancementRules.CanFirstAdvance(profile, familyDefinition, trialQuestI
     return true
 end
 
+function AdvancementRules.CanSecondAdvance(
+    profile,
+    familyDefinition,
+    requiredLevel,
+    prerequisiteQuestId
+)
+    if type(profile) ~= "table" or type(familyDefinition) ~= "table" then
+        return false, "invalid_state"
+    end
+    if tonumber(profile.AdvancementTier) ~= 1 then
+        return false,
+            if (tonumber(profile.AdvancementTier) or 0) >= 2
+                then "already_advanced"
+                else "first_advancement_required"
+    end
+    if type(profile.FamilyId) ~= "string" or profile.FamilyId == "" then
+        return false, "family_required"
+    end
+    if type(familyDefinition.SecondAdvancement) ~= "table" then
+        return false, "second_advancement_undefined"
+    end
+    requiredLevel = tonumber(requiredLevel)
+    if not requiredLevel or requiredLevel < 1 or requiredLevel % 1 ~= 0 then
+        return false, "invalid_requirement"
+    end
+    if (tonumber(profile.Level) or 1) < requiredLevel then
+        return false, "level_too_low"
+    end
+    if type(prerequisiteQuestId) == "string" and prerequisiteQuestId ~= "" then
+        local completed = profile.Quests
+            and profile.Quests.Completed
+            and profile.Quests.Completed[prerequisiteQuestId] == true
+        if not completed then
+            return false, "trial_incomplete"
+        end
+    end
+    return true
+end
+
 function AdvancementRules.CanUseFamilySkill(profile, skillDefinition)
     if type(skillDefinition) ~= "table" then
         return false, "invalid_skill"

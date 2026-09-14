@@ -45,6 +45,13 @@ local function chooseDialogue(definition, profile)
         return dialogue[1]
     end
 
+    if definition.AdvancementMentor then
+        local targetTier = tonumber(definition.AdvancementTargetTier) or 1
+        if (tonumber(profile.AdvancementTier) or 0) >= targetTier and #dialogue >= 2 then
+            return dialogue[#dialogue]
+        end
+    end
+
     if definition.AdvancementMentor and type(definition.AdvancementQuestId) == "string" then
         local questId = definition.AdvancementQuestId
         if profile.Quests.Completed[questId] == true then
@@ -78,6 +85,7 @@ function InteractionService.Describe(npcId, profile)
         QuestOffers = visibleQuestOffers(definition, profile),
         ShopId = definition.ShopId,
         AdvancementMentor = definition.AdvancementMentor == true,
+        AdvancementTargetTier = tonumber(definition.AdvancementTargetTier) or 1,
     }
 
     local shop = definition.ShopId and ShopDefinitions[definition.ShopId]
@@ -136,9 +144,15 @@ local function npcOffersQuest(npcId, questId)
     return false
 end
 
-function InteractionService.IsAdvancementMentor(npcId)
+function InteractionService.IsAdvancementMentor(npcId, targetTier)
     local definition = NpcDefinitions[npcId]
-    return definition ~= nil and definition.AdvancementMentor == true
+    if not definition or definition.AdvancementMentor ~= true then
+        return false
+    end
+    if targetTier == nil then
+        return true
+    end
+    return (tonumber(definition.AdvancementTargetTier) or 1) == targetTier
 end
 
 function InteractionService.StartOfferedQuest(profile, npcId, questId)

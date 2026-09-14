@@ -56,7 +56,218 @@ local function reasonText(reason, level, requiredLevel, trialComplete)
     return "This choice is permanent for the current character."
 end
 
+local function SecondAdvancementView(props)
+    local profile = props.Profile or {}
+    local catalog = props.Catalog or {}
+    local familyId = profile.FamilyId
+    local family = type(familyId) == "string" and catalog.Families and catalog.Families[familyId]
+        or nil
+    local advancement = family and family.SecondAdvancement or nil
+    local skill = advancement and catalog.Skills and catalog.Skills[advancement.StarterSkillId]
+        or nil
+    local level = tonumber(profile.Level) or 1
+    local tier = tonumber(profile.AdvancementTier) or 0
+    local sentinelComplete = profile.Quests
+        and profile.Quests.Completed
+        and profile.Quests.Completed.belforge_gate_sentinel == true
+    local canAdvance = family ~= nil
+        and advancement ~= nil
+        and tier == 1
+        and level >= 30
+        and sentinelComplete
+    local status, setStatus =
+        React.useState("Your family is fixed. Tier 2 deepens that path rather than replacing it.")
+    local accent = FAMILY_COLORS[familyId] or Color3.fromRGB(221, 151, 72)
+
+    local requirementText = if tier >= 2
+        then "Tier 2 is already sealed for this character."
+        else if level < 30
+            then "Reach Level 30 before speaking the second oath."
+            else if not sentinelComplete
+                then "Complete Sentinel at the Belforge before speaking the second oath."
+                else "Requirements met · Level 30 · Sentinel cleared"
+
+    local function advance()
+        if not canAdvance then
+            setStatus(requirementText)
+            return
+        end
+        local ok, result = ActionClient.Invoke("advancement.second", {
+            NpcId = props.MentorNpcId,
+        })
+        if not ok then
+            setStatus("Second advancement unavailable: " .. tostring(result))
+            NotificationStore.Push("error", "Advancement Failed", tostring(result), 4)
+            return
+        end
+        NotificationStore.Push(
+            "success",
+            "Second Advancement",
+            string.format(
+                "You advanced as %s.",
+                result.AdvancementDisplayName
+                    or (advancement and advancement.DisplayName)
+                    or "Tier 2"
+            ),
+            5
+        )
+        if props.OnClose then
+            props.OnClose()
+        end
+    end
+
+    return React.createElement(React.Fragment, nil, {
+        Backdrop = React.createElement("Frame", {
+            Size = UDim2.fromScale(1, 1),
+            BackgroundColor3 = Color3.fromRGB(5, 7, 7),
+            BackgroundTransparency = 0.22,
+            BorderSizePixel = 0,
+            ZIndex = 58,
+        }),
+        Window = React.createElement("Frame", {
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            Position = UDim2.fromScale(0.5, 0.5),
+            Size = UDim2.fromOffset(720, 470),
+            BackgroundColor3 = Color3.fromRGB(15, 18, 18),
+            BorderSizePixel = 0,
+            ZIndex = 60,
+        }, {
+            Corner = corner(11),
+            Stroke = stroke(Color3.fromRGB(158, 105, 57), 0.16, 1.2),
+            TopAccent = React.createElement("Frame", {
+                Size = UDim2.new(1, 0, 0, 5),
+                BackgroundColor3 = accent,
+                BorderSizePixel = 0,
+                ZIndex = 62,
+            }),
+            Kicker = label({
+                Position = UDim2.fromOffset(26, 24),
+                Size = UDim2.new(1, -90, 0, 18),
+                Text = "SECOND ADVANCEMENT · BELFORGE OATH",
+                TextSize = 9,
+                Bold = true,
+                Color = Color3.fromRGB(224, 166, 92),
+                ZIndex = 62,
+            }),
+            Title = label({
+                Position = UDim2.fromOffset(26, 45),
+                Size = UDim2.new(1, -90, 0, 36),
+                Text = advancement and advancement.DisplayName or "Second Advancement",
+                TextSize = 27,
+                Bold = true,
+                Color = accent,
+                ZIndex = 62,
+            }),
+            Close = React.createElement("TextButton", {
+                AnchorPoint = Vector2.new(1, 0),
+                Position = UDim2.new(1, -18, 0, 18),
+                Size = UDim2.fromOffset(42, 34),
+                BackgroundColor3 = Color3.fromRGB(31, 34, 33),
+                BorderSizePixel = 0,
+                Text = "×",
+                TextColor3 = Color3.fromRGB(236, 239, 237),
+                TextSize = 20,
+                Font = Enum.Font.GothamBold,
+                ZIndex = 64,
+                [React.Event.Activated] = props.OnClose,
+            }, { Corner = corner(7), Stroke = stroke(Color3.fromRGB(101, 90, 78), 0.45) }),
+            Family = label({
+                Position = UDim2.fromOffset(28, 103),
+                Size = UDim2.new(1, -56, 0, 24),
+                Text = family and string.format("%s · %s", family.DisplayName, family.CombatRole)
+                    or "Unknown family",
+                TextSize = 12,
+                Bold = true,
+                Color = Color3.fromRGB(178, 190, 184),
+                ZIndex = 62,
+            }),
+            SummaryPanel = React.createElement("Frame", {
+                Position = UDim2.fromOffset(26, 142),
+                Size = UDim2.new(1, -52, 0, 112),
+                BackgroundColor3 = Color3.fromRGB(23, 28, 26),
+                BorderSizePixel = 0,
+                ZIndex = 61,
+            }, {
+                Corner = corner(9),
+                Stroke = stroke(accent, 0.48, 1),
+                Summary = label({
+                    Position = UDim2.fromOffset(18, 14),
+                    Size = UDim2.new(1, -36, 1, -28),
+                    Text = advancement and advancement.Summary or "",
+                    TextSize = 13,
+                    Wrapped = true,
+                    VerticalAlign = Enum.TextYAlignment.Top,
+                    ZIndex = 62,
+                }),
+            }),
+            SkillKicker = label({
+                Position = UDim2.fromOffset(28, 274),
+                Size = UDim2.fromOffset(200, 17),
+                Text = "TIER-2 TECHNIQUE",
+                TextSize = 8,
+                Bold = true,
+                Color = Color3.fromRGB(221, 151, 72),
+                ZIndex = 62,
+            }),
+            SkillName = label({
+                Position = UDim2.fromOffset(28, 294),
+                Size = UDim2.new(1, -56, 0, 26),
+                Text = skill and skill.DisplayName or "—",
+                TextSize = 17,
+                Bold = true,
+                ZIndex = 62,
+            }),
+            SkillBody = label({
+                Position = UDim2.fromOffset(28, 322),
+                Size = UDim2.new(1, -56, 0, 46),
+                Text = skill and skill.Description or "",
+                TextSize = 10,
+                Wrapped = true,
+                VerticalAlign = Enum.TextYAlignment.Top,
+                Color = Color3.fromRGB(153, 170, 162),
+                ZIndex = 62,
+            }),
+            Requirement = label({
+                Position = UDim2.fromOffset(28, 374),
+                Size = UDim2.new(1, -320, 0, 52),
+                Text = requirementText .. "\n" .. status,
+                TextSize = 9,
+                Wrapped = true,
+                Color = canAdvance and Color3.fromRGB(141, 224, 174)
+                    or Color3.fromRGB(211, 161, 96),
+                ZIndex = 62,
+            }),
+            Confirm = React.createElement("TextButton", {
+                AnchorPoint = Vector2.new(1, 0),
+                Position = UDim2.new(1, -26, 0, 378),
+                Size = UDim2.fromOffset(270, 54),
+                BackgroundColor3 = canAdvance and Color3.fromRGB(105, 67, 43)
+                    or Color3.fromRGB(40, 39, 36),
+                BackgroundTransparency = canAdvance and 0 or 0.18,
+                BorderSizePixel = 0,
+                Text = tier >= 2 and "TIER 2 SEALED" or "SPEAK SECOND OATH",
+                TextColor3 = canAdvance and Color3.fromRGB(247, 220, 173)
+                    or Color3.fromRGB(118, 117, 109),
+                TextSize = 11,
+                Font = Enum.Font.GothamBold,
+                Active = canAdvance,
+                AutoButtonColor = canAdvance,
+                ZIndex = 64,
+                [React.Event.Activated] = advance,
+            }, {
+                Corner = corner(8),
+                Stroke = stroke(accent, canAdvance and 0.24 or 0.65, 1),
+            }),
+        }),
+    })
+end
+
 function AdvancementOverlay.Component(props)
+    local targetTier = tonumber(props.TargetTier) or 1
+    if targetTier == 2 then
+        return SecondAdvancementView(props)
+    end
+
     local profile = props.Profile or {}
     local catalog = props.Catalog or {}
     local families = catalog.Families or {}

@@ -51,7 +51,10 @@ function CatalogService.Build()
             QuestDefinitions,
             { "DisplayName", "MinimumLevel", "MinimumAdvancementTier", "Objectives" }
         ),
-        Npcs = copySelected(NpcDefinitions, { "DisplayName", "RegionId", "AdvancementMentor" }),
+        Npcs = copySelected(
+            NpcDefinitions,
+            { "DisplayName", "RegionId", "AdvancementMentor", "AdvancementTargetTier" }
+        ),
         Regions = copySelected(RegionDefinitions, { "DisplayName", "MinimumLevel", "Kind" }),
         Bosses = copySelected(
             BossDefinitions,
@@ -64,6 +67,7 @@ function CatalogService.Build()
             "FirstAdvancementLevel",
             "StarterSkillId",
             "StarterItemId",
+            "SecondAdvancement",
             "Accent",
             "Summary",
         }),

@@ -6,6 +6,11 @@ return table.freeze({
         FirstAdvancementLevel = 8,
         StarterSkillId = "ironbloom_sunder",
         StarterItemId = "ironbloom_rootsteel_blade",
+        SecondAdvancement = table.freeze({
+            DisplayName = "Ironbloom Bulwark",
+            StarterSkillId = "ironbloom_bastion_crash",
+            Summary = "Set the battlefield around your footing, then break anything that tries to dislodge you.",
+        }),
         BasicAttack = table.freeze({
             Range = 10,
             VerticalRange = 7,
@@ -25,6 +30,11 @@ return table.freeze({
         FirstAdvancementLevel = 8,
         StarterSkillId = "thornrunner_piercing_shot",
         StarterItemId = "thornrunner_briarbow",
+        SecondAdvancement = table.freeze({
+            DisplayName = "Thornrunner Windshot",
+            StarterSkillId = "thornrunner_gale_piercer",
+            Summary = "Turn spacing and sightlines into sustained precision pressure at extreme range.",
+        }),
         BasicAttack = table.freeze({
             Range = 23,
             VerticalRange = 10,
@@ -44,6 +54,11 @@ return table.freeze({
         FirstAdvancementLevel = 10,
         StarterSkillId = "lumenweaver_lumen_bolt",
         StarterItemId = "lumenweaver_focus",
+        SecondAdvancement = table.freeze({
+            DisplayName = "Lumenweaver Prismwright",
+            StarterSkillId = "lumenweaver_prism_lance",
+            Summary = "Shape concentrated Lumen through layered prisms for stronger, cleaner ranged casting.",
+        }),
         BasicAttack = table.freeze({
             Range = 21,
             VerticalRange = 11,
@@ -63,6 +78,11 @@ return table.freeze({
         FirstAdvancementLevel = 8,
         StarterSkillId = "veilstrider_crosscut",
         StarterItemId = "veilstrider_twinknives",
+        SecondAdvancement = table.freeze({
+            DisplayName = "Veilstrider Gloamknife",
+            StarterSkillId = "veilstrider_gloam_rush",
+            Summary = "Collapse distance in a blink and convert narrow openings into decisive close-range pressure.",
+        }),
         BasicAttack = table.freeze({
             Range = 10,
             VerticalRange = 7,
@@ -82,6 +102,11 @@ return table.freeze({
         FirstAdvancementLevel = 10,
         StarterSkillId = "brasshand_kinetic_burst",
         StarterItemId = "brasshand_rivet_maul",
+        SecondAdvancement = table.freeze({
+            DisplayName = "Brasshand Crucible",
+            StarterSkillId = "brasshand_forgebreaker",
+            Summary = "Channel foundry-force through reinforced impacts that punish anything standing in reach.",
+        }),
         BasicAttack = table.freeze({
             Range = 10,
             VerticalRange = 7,

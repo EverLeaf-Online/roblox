@@ -721,6 +721,117 @@ local function makeBelforgeGate(parent, position)
     return model
 end
 
+local function makeBelforgeOathkeeper(parent, position)
+    local model = Instance.new("Model")
+    model.Name = "belforge_oathkeeper"
+    model.Parent = parent
+    local base = CFrame.new(position) * CFrame.Angles(0, math.rad(-90), 0)
+
+    local function bodyPart(name, size, offset, material, color)
+        local part = makePart(model, name, size, base * CFrame.new(offset), material, color)
+        part.CanCollide = false
+        part.CanTouch = false
+        return part
+    end
+
+    local root = bodyPart(
+        "HumanoidRootPart",
+        Vector3.new(2, 6.5, 1.8),
+        Vector3.new(0, 3.25, 0),
+        Enum.Material.SmoothPlastic,
+        Color3.new(0, 0, 0)
+    )
+    root.Transparency = 1
+    bodyPart(
+        "Torso",
+        Vector3.new(2.5, 2.6, 1.5),
+        Vector3.new(0, 3.9, 0),
+        Enum.Material.Fabric,
+        Color3.fromRGB(58, 48, 45)
+    )
+    bodyPart(
+        "OathMantle",
+        Vector3.new(2.8, 0.7, 1.8),
+        Vector3.new(0, 4.75, 0),
+        Enum.Material.Fabric,
+        Color3.fromRGB(142, 90, 53)
+    )
+    for _, side in { -1, 1 } do
+        bodyPart(
+            side < 0 and "LeftLeg" or "RightLeg",
+            Vector3.new(0.8, 2.45, 0.86),
+            Vector3.new(side * 0.58, 1.42, 0),
+            Enum.Material.Fabric,
+            Color3.fromRGB(43, 42, 42)
+        )
+        bodyPart(
+            side < 0 and "LeftArm" or "RightArm",
+            Vector3.new(0.72, 2.2, 0.78),
+            Vector3.new(side * 1.55, 3.78, 0),
+            Enum.Material.Fabric,
+            Color3.fromRGB(58, 48, 45)
+        )
+    end
+    local head = bodyPart(
+        "Head",
+        Vector3.new(1.7, 1.7, 1.6),
+        Vector3.new(0, 5.75, 0),
+        Enum.Material.SmoothPlastic,
+        Color3.fromRGB(194, 154, 121)
+    )
+    bodyPart(
+        "OathBand",
+        Vector3.new(1.85, 0.22, 1.7),
+        Vector3.new(0, 6.22, 0),
+        Enum.Material.Metal,
+        Color3.fromRGB(190, 132, 60)
+    )
+    local seal = bodyPart(
+        "OathSeal",
+        Vector3.new(0.55, 0.55, 0.12),
+        Vector3.new(0.72, 4.3, -0.84),
+        Enum.Material.Neon,
+        Color3.fromRGB(231, 152, 73)
+    )
+    seal.CFrame *= CFrame.Angles(0, 0, math.rad(45))
+
+    local plate = Instance.new("BillboardGui")
+    plate.Size = UDim2.fromOffset(240, 34)
+    plate.StudsOffsetWorldSpace = Vector3.new(0, 1.75, 0)
+    plate.MaxDistance = 48
+    plate.Parent = head
+    local text = Instance.new("TextLabel")
+    text.Size = UDim2.fromScale(1, 1)
+    text.BackgroundColor3 = Color3.fromRGB(27, 22, 21)
+    text.BackgroundTransparency = 0.14
+    text.Text = "MARA · FORGE OATHKEEPER"
+    text.TextColor3 = Color3.fromRGB(245, 207, 145)
+    text.TextStrokeTransparency = 0.34
+    text.Font = Enum.Font.GothamBold
+    text.TextScaled = true
+    text.Parent = plate
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 7)
+    corner.Parent = text
+    local edge = Instance.new("UIStroke")
+    edge.Color = Color3.fromRGB(166, 104, 56)
+    edge.Transparency = 0.26
+    edge.Parent = text
+
+    model.PrimaryPart = root
+    WorldObjectService.Register(model, "Npc", "belforge_oathkeeper")
+    local prompt = Instance.new("ProximityPrompt")
+    prompt.ActionText = "Speak Oath"
+    prompt.ObjectText = "Mara · Forge Oathkeeper"
+    prompt.KeyboardKeyCode = Enum.KeyCode.E
+    prompt.MaxActivationDistance = 11
+    prompt.RequiresLineOfSight = false
+    prompt.Parent = root
+    prompt.Triggered:Connect(function(player)
+        InteractionService.Begin(player, "belforge_oathkeeper", model)
+    end)
+end
+
 local function makeBelforgeAntechamber(parent)
     local model = Instance.new("Model")
     model.Name = "BelforgeAntechamber"
@@ -832,6 +943,7 @@ local function makeBelforgeAntechamber(parent)
         WorldTravelService.Teleport(player, "belforge_threshold_return")
     end)
 
+    makeBelforgeOathkeeper(model, origin + Vector3.new(-8, 0, 17))
     makeLabel(model, origin + Vector3.new(4, 22, 0), "BELFORGE ANTECHAMBER · COLOSSUS SEAL")
     makeLabel(model, origin + Vector3.new(45, 15, 0), "BELFORGE COLOSSUS · ENCOUNTER NOT YET OPEN")
     return model

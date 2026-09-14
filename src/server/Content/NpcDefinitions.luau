@@ -52,6 +52,7 @@ return table.freeze({
         DisplayName = "Seren · Pathkeeper",
         RegionId = "lumenreach",
         AdvancementMentor = true,
+        AdvancementTargetTier = 1,
         AdvancementQuestId = "first_advancement_trial",
         Dialogue = table.freeze({
             "Surviving the grove proves instinct. Choosing a path proves intent. The old Wayfarers kept five disciplines, and none of them forgive hesitation.",
@@ -95,6 +96,17 @@ return table.freeze({
             "eastworks_grid_purge",
             "eastworks_smelter_golem",
         }),
+    }),
+    belforge_oathkeeper = table.freeze({
+        DisplayName = "Mara · Forge Oathkeeper",
+        RegionId = "brasshaven",
+        AdvancementMentor = true,
+        AdvancementTargetTier = 2,
+        Dialogue = table.freeze({
+            "The first path named what you were willing to become. The second names what you can carry. If you reached this chamber at Level 30, your family is ready to deepen its oath.",
+            "Your second oath is sealed. The Belforge does not care about titles, but the techniques you carry beyond this point will.",
+        }),
+        QuestOffers = table.freeze({}),
     }),
     belforge_marshal = table.freeze({
         DisplayName = "Rook · Belforge Marshal",

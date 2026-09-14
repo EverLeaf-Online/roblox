@@ -1,7 +1,7 @@
 # EverLeaf Roblox — Master Checklist
 
 **Canonical status:** 2026-09-14
-**Latest gameplay checkpoint:** source-complete Level 1–30 progression route — Lumenreach 1–10, Brasshaven 10–30, Rook upper-foundry arc, Level-30 Belforge gate, and antechamber continuity
+**Latest gameplay checkpoint:** source-complete Level 1–30 route + Level-30 second advancement — Belforge antechamber, Mara the Forge Oathkeeper, five deterministic Tier-2 family promotions, skills, and secure advancement flow
 **Purpose:** detailed implementation/status tracker for the entire project.
 **Roadmap:** [`ROADMAP.md`](ROADMAP.md)
 
@@ -105,7 +105,7 @@
 - [x] Dedicated full buy/sell shop screen implemented beyond dialogue preview buttons; Studio interaction/balance QA remains.
 - [x] Level-up feedback is implemented and the source-authored Lumenreach 1–10 + Brasshaven 10–30 quest route has no mandatory grind gap in regression tests; Studio combat/economy tuning remains.
 - [x] First advancement hook/location/quest flow implemented with Seren, the Proving Circle, The Five Paths, and five permanent family choices.
-- [x] Level-30 Belforge approach is functional: Sentinel completion + Level 30 unlocks a safe antechamber/return route; the inner Colossus seal remains closed until the real boss encounter is implemented.
+- [x] Level-30 Belforge approach is functional: Sentinel completion + Level 30 unlocks a safe antechamber/return route, Mara handles second advancement there, and the inner Colossus seal remains closed until the real boss encounter is implemented.
 
 ### F. Phase 1 exit validation
 
@@ -272,7 +272,7 @@
 - [x] First advancement implemented with server validation, permanent family binding, +3 starting SP, starter skill grant/hotbar assignment, family-aware basic attacks, and starter-weapon delivery.
 - [x] First families now have distinct basic-attack profiles: ranged Thornrunner/Lumenweaver, fast Veilstrider cadence, heavy Ironbloom/Brasshand melee, with matching client presentation.
 - [x] Equipment family/tier/level restrictions are validated server-side.
-- [ ] Implement level-30 advancements.
+- [x] Level-30 second advancement implemented: Mara in the Belforge antechamber promotes each existing family to a deterministic Tier-2 title, grants its Tier-2 technique/+3 SP, and rejects respec/cross-family/repeat attempts server-side.
 - [ ] Implement level-70 advancements.
 - [ ] Implement level-120 advancements.
 
