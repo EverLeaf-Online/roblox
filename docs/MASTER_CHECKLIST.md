@@ -13,6 +13,92 @@
 
 ---
 
+
+## PHASE 1 — complete starter vertical slice — ACTIVE
+
+### A. Stability / no-breakage gate
+
+- [x] Third-person movement/camera/sprint/jump/dodge Studio-verified.
+- [x] Basic attack Studio-verified.
+- [x] Beginner Strike on hotbar slot 1 Studio-verified.
+- [x] Quest accept/progress/explicit turn-in Studio-verified.
+- [x] Enemy damage/death/respawn Studio-verified.
+- [x] React HUD persists correctly across respawn after persistent `ScreenGui` fix.
+- [x] Main menu opens and interactive actions are Studio-verified.
+- [x] Poly Haven PBR texture assets uploaded to Roblox and all 15 maps approved.
+- [x] Five EverLeaf MaterialVariants can now be authored/refreshed successfully by the Studio plugin.
+- [ ] No red Output errors across a complete fresh-player Phase 1 run.
+- [ ] Fresh-profile/rejoin regression pass.
+- [ ] DataStore failure/session-lock stress pass.
+
+### B. Combat / enemy feel
+
+- [x] Server-authoritative basic attack, range/facing/LOS validation, damage, cooldown, and enemy reward handoff.
+- [x] Server-authoritative Beginner Strike with MP/cooldown rollback on failed effect.
+- [ ] Floating damage numbers.
+- [ ] Hit confirm VFX/SFX and stronger impact presentation.
+- [ ] Enemy attack windup/telegraph.
+- [ ] Aggro leash/reset.
+- [ ] Production obstacle-aware navigation/pathfinding.
+- [ ] Knockback/stagger rules for player/enemies where appropriate.
+- [ ] Reward/loot presentation after kill.
+
+### C. Lumenreach environment production pass
+
+- [x] Terrain/grass baseline is visually acceptable enough to keep iterating.
+- [x] Poly Haven PBR material pipeline is live for forest ground, mossy rock, moss wood, wood-chip path, and wood/stone pathway.
+- [ ] **BLOCKER:** Replace current Creator Store tree prefab (`580221169`); it still produces fallen/visually poor trees and is not acceptable for Phase 1.
+- [ ] Import/author a new upright production tree/foliage set with correct pivots, collisions, scale, and script-free sanitization.
+- [ ] Replace placeholder/fake logs and stumps with production assets/materials.
+- [ ] Upgrade rocks and rock clusters with production meshes/PBR.
+- [ ] Upgrade ruins and camp props; remove obvious wedge/graybox shapes.
+- [ ] Improve shrubs/flowers/ground clutter without blocking navigation.
+- [ ] Strengthen camp, combat-grove, arch, and waterfall landmark readability.
+- [ ] Final lighting/sky/atmosphere pass for Phase 1.
+- [ ] Measure frame time, memory, streaming, and foliage-density budgets in Studio.
+
+### D. UI / RPG shell
+
+- [x] React HUD: HP, MP, EXP, level, currencies, objective tracker, and hotbar.
+- [x] React HUD survives death/respawn.
+- [x] Character AP allocation action is wired.
+- [x] Inventory use/equip/unequip actions are wired.
+- [x] Skill rank/assign/use actions are wired.
+- [x] Quest menu shell exists.
+- [x] Settings mutations are wired.
+- [ ] Responsive layout pass for common desktop resolutions.
+- [ ] Controller navigation/focus pass.
+- [ ] Dedicated shop screen.
+- [ ] Item/equipment tooltips.
+- [ ] Notifications/toasts for rewards, quest updates, errors, and level-up.
+- [ ] Split monolithic `ReactUIController` into maintainable components after Phase 1 behavior is locked.
+
+### E. RPG/content closure
+
+- [x] Guide → Mossling quest route exists and explicit turn-in works.
+- [x] Consumable architecture and server-side use path exist.
+- [x] Inventory/equipment persistence foundations exist.
+- [ ] Add first visible starter loot drops/pickups.
+- [ ] Add first starter equipment/reward path.
+- [ ] Finish shop UI and one complete buy/use loop.
+- [ ] Add level-up feedback and tune level 1–30 early EXP curve.
+- [ ] First advancement hook/location/quest shell.
+- [ ] Unseal/implement the Lumenreach → Brasshaven transition shell at the appropriate progression gate.
+- [ ] Belforge boss-entry shell only to the extent required for Phase 1 progression continuity.
+
+### F. Phase 1 exit validation
+
+- [ ] Fresh player can complete the full starter loop with no manual developer intervention.
+- [ ] Death and respawn do not break UI, controls, quest progress, resources, or hotbar state.
+- [ ] Rejoin preserves expected profile/inventory/equipment/quest state.
+- [ ] Keyboard/mouse full pass.
+- [ ] Gamepad/controller blocking-flow pass.
+- [ ] Multi-client basic party/network smoke test.
+- [ ] Full `./check.sh` gate passes at final Phase 1 checkpoint.
+- [ ] Studio Output contains no red errors during the canonical Phase 1 run.
+
+---
+
 ## 0. Phase A — complete architecture — COMPLETE
 
 - [x] Versioned persistent profile schema owns all major player-state domains.
@@ -57,9 +143,9 @@
 - [ ] Lock-on / soft-target system decision and implementation.
 - [ ] Production enemy pathfinding/navigation.
 - [x] Lumenreach 3D benchmark graybox generated from canonical source.
-- [ ] **PARTIAL:** Asset import/optimization pipeline now includes Studio-only sanitized Creator Store prefab intake; source-controlled production asset ingestion still pending.
+- [ ] **PARTIAL:** Asset import/optimization pipeline includes sanitized Creator Store prefab intake and working Poly Haven PBR material authoring; production foliage/model ingestion remains incomplete.
 - [x] Poly Haven/approved Sketchfab material/model source policy documented.
-- [x] Poly Haven 1K PBR source set downloaded, hash-manifested, and wired to a Roblox MaterialVariant registry; Roblox texture asset uploads remain pending.
+- [x] Poly Haven 1K PBR source set downloaded, hash-manifested, uploaded to Roblox (15/15 approved), wired to generated asset IDs, and Studio MaterialVariants verified.
 - [x] Source-controlled wind/ambient-motion foundation integrated; production foliage assets and performance tuning remain.
 - [ ] Streaming/performance budgets measured in Studio.
 - [ ] First production-quality environment benchmark scene.
@@ -230,7 +316,7 @@
 - [ ] Targeting shapes/ranges.
 - [ ] Skill animation/VFX/SFX hooks.
 - [x] Persistent 8-slot skill hotbar data/service foundation with React hotbar shell; binding/use UX remains pending.
-- [ ] **PARTIAL:** Keyboard hotbar 1–8 skill-use bindings are source-complete; controller bindings/Studio verification pending.
+- [ ] **PARTIAL:** Keyboard hotbar 1–8 skill-use bindings are source-complete and slot 1 Beginner Strike is Studio-verified; controller bindings remain pending.
 - [ ] Skill tree UI.
 
 ## 10. Enemies
@@ -263,11 +349,11 @@
 - [x] Enemy-to-player validated damage path.
 - [x] Prototype 0.15s player damage i-frame exists; tuning remains.
 - [ ] Knockback on player.
-- [ ] Death state.
-- [ ] **PARTIAL:** Safe-spawn respawn flow + death overlay are source-complete; Studio verification/polish pending.
+- [x] Death state and timed respawn loop Studio-verified.
+- [x] Safe-spawn respawn flow + death overlay Studio-verified; presentation polish remains.
 - [x] Lumenreach Wayfarer Camp safe respawn is assigned server-side.
 - [ ] Death penalties decision.
-- [ ] **PARTIAL:** React death overlay is source-complete; damage feedback/polish pending.
+- [x] React death overlay appears during the Studio-verified death/respawn flow; damage-feedback polish remains.
 
 ## 12. Rewards / currencies / loot
 
@@ -345,7 +431,7 @@
 - [x] First quest route: guide → Mossglen combat grove.
 - [x] Lumen Guide supply-shop interaction shell.
 - [ ] First advancement location.
-- [ ] **PARTIAL:** Approved Creator Store tree prefab (`580221169`) can be sanitized/used automatically in Studio; broader production asset set still pending.
+- [ ] **BLOCKER:** Creator Store tree prefab (`580221169`) sanitizes/loads, but its current orientation/visual result is unacceptable (fallen trees); replace it rather than polishing this prefab further.
 - [x] Lighting/atmosphere/post-processing baseline integrated and exercised in Studio; final art-direction tuning remains.
 - [ ] Ambient audio/music.
 - [ ] Minimap/map UX decision.
@@ -387,7 +473,7 @@
 - [x] React Lua + ReactRoblox established as the canonical production UI stack.
 - [x] Wally dependency manifest/lockfile + Rojo `ReplicatedStorage.Packages` mapping.
 - [x] Custom UI-capture contract releases cursor and suppresses camera/movement/combat while interactive UI is open.
-- [ ] **PARTIAL:** React production HUD renders HP/MP/EXP/level/currencies/objective/hotbar; Studio UX verification and final visual polish remain.
+- [x] React production HUD renders HP/MP/EXP/level/currencies/objective/hotbar and persists across respawn in Studio; final responsive/visual polish remains.
 - [x] React HP bar verified in Studio; polish/scalability remains.
 - [x] React MP bar verified in Studio; polish/scalability remains.
 - [x] React EXP bar verified in Studio; polish/scalability remains.
@@ -395,14 +481,14 @@
 - [x] React currency display verified in Studio; polish/scalability remains.
 - [x] Persistent 8-slot skill hotbar data/service foundation; React hotbar shell implemented.
 - [ ] Buff/debuff display.
-- [ ] **PARTIAL:** React character/stat menu now supports server-authoritative AP allocation; Studio verification/polish pending.
-- [ ] **PARTIAL:** React inventory/equipment menu now exposes use/equip/unequip actions; Studio verification/polish pending.
+- [x] React character/stat menu supports server-authoritative AP allocation and menu actions are Studio-verified; polish remains.
+- [x] React inventory/equipment menu exposes use/equip/unequip actions and the menu action shell is Studio-verified; dedicated UX polish remains.
 - [ ] **PARTIAL:** React quest menu shell is source-complete; further filtering/polish pending.
 - [x] React NPC dialogue with clickable quest/shop actions verified in Studio; visual polish remains.
 - [ ] **PARTIAL:** Shop action is exposed through the React dialogue shell; dedicated shop screen pending.
 - [ ] Boss HP UI.
 - [ ] Notifications/toasts.
-- [ ] **PARTIAL:** React settings controls now mutate music/SFX/damage-number preferences server-side; Studio verification/polish pending.
+- [x] React settings controls mutate music/SFX/damage-number preferences server-side; menu action shell is Studio-verified, visual polish remains.
 - [ ] Responsive layout testing.
 
 ## 20. Art / animation / audio
