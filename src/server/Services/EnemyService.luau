@@ -97,4 +97,15 @@ function EnemyService.GetDefinition(enemy)
     return state and state.Definition or nil
 end
 
+function EnemyService.GetActiveEnemies()
+    local active = {}
+    for enemy, state in states do
+        local humanoid = getHumanoid(enemy)
+        if enemy.Parent and not state.Dead and humanoid and humanoid.Health > 0 then
+            table.insert(active, enemy)
+        end
+    end
+    return active
+end
+
 return EnemyService

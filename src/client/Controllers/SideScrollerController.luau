@@ -26,9 +26,11 @@ local function tryJump()
     if not humanoid or humanoid.Health <= 0 then
         return
     end
+    if humanoid.FloorMaterial == Enum.Material.Air then
+        return
+    end
 
     humanoid.Jump = true
-    humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
 end
 
 local function attachCharacter(character)

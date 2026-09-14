@@ -1,4 +1,3 @@
-local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -17,7 +16,7 @@ local function findNearestTarget(playerRoot)
     local nearest = nil
     local nearestDistance = math.huge
 
-    for _, candidate in CollectionService:GetTagged("EverLeafEnemy") do
+    for _, candidate in EnemyService.GetActiveEnemies() do
         if candidate:IsA("Model") and EnemyService.IsValidTarget(candidate) then
             local targetRoot = getRoot(candidate) or candidate.PrimaryPart
             if targetRoot then
