@@ -57,6 +57,74 @@
       "$properties": {
         "StreamingEnabled": true
       }
+    },
+    "MaterialService": {
+      "$className": "MaterialService",
+      "$properties": {
+        "GrassName": "ForestGround",
+        "RockName": "MossyRock",
+        "GroundName": "WoodChipPath"
+      },
+      "ForestGround": {
+        "$className": "MaterialVariant",
+        "$properties": {
+          "BaseMaterial": "Grass",
+          "ColorMap": "rbxassetid://107344079410100",
+          "NormalMap": "rbxassetid://120186366475714",
+          "RoughnessMap": "rbxassetid://140381828962512",
+          "MetalnessMap": "",
+          "StudsPerTile": 14,
+          "MaterialPattern": "Organic"
+        }
+      },
+      "MossyRock": {
+        "$className": "MaterialVariant",
+        "$properties": {
+          "BaseMaterial": "Rock",
+          "ColorMap": "rbxassetid://101823683881386",
+          "NormalMap": "rbxassetid://96893029091015",
+          "RoughnessMap": "rbxassetid://84185533532288",
+          "MetalnessMap": "",
+          "StudsPerTile": 10,
+          "MaterialPattern": "Organic"
+        }
+      },
+      "MossWood": {
+        "$className": "MaterialVariant",
+        "$properties": {
+          "BaseMaterial": "WoodPlanks",
+          "ColorMap": "rbxassetid://77089458184667",
+          "NormalMap": "rbxassetid://120659903163403",
+          "RoughnessMap": "rbxassetid://100854560520124",
+          "MetalnessMap": "",
+          "StudsPerTile": 8,
+          "MaterialPattern": "Organic"
+        }
+      },
+      "WoodChipPath": {
+        "$className": "MaterialVariant",
+        "$properties": {
+          "BaseMaterial": "Ground",
+          "ColorMap": "rbxassetid://104765563977781",
+          "NormalMap": "rbxassetid://130811469027211",
+          "RoughnessMap": "rbxassetid://115321092703074",
+          "MetalnessMap": "",
+          "StudsPerTile": 12,
+          "MaterialPattern": "Organic"
+        }
+      },
+      "WoodStonePathway": {
+        "$className": "MaterialVariant",
+        "$properties": {
+          "BaseMaterial": "Cobblestone",
+          "ColorMap": "rbxassetid://139474808529273",
+          "NormalMap": "rbxassetid://70914826798460",
+          "RoughnessMap": "rbxassetid://94534825378988",
+          "MetalnessMap": "",
+          "StudsPerTile": 10,
+          "MaterialPattern": "Organic"
+        }
+      }
     }
   }
 }

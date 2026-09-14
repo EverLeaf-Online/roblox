@@ -5,13 +5,6 @@ local Definitions = require(script.Parent.Parent.Content.PBRMaterialDefinitions)
 local PBRMaterialService = {}
 local activeVariants = {}
 
-local function contentId(assetId)
-    if type(assetId) ~= "number" or assetId <= 0 then
-        return ""
-    end
-    return "rbxassetid://" .. tostring(assetId)
-end
-
 local function isReady(definition)
     local ids = definition.RobloxAssetIds
     return ids
@@ -28,46 +21,27 @@ local function ensureVariant(name, definition)
         return nil
     end
 
-    local existing = MaterialService:FindFirstChild(name)
-    if existing and not existing:IsA("MaterialVariant") then
-        existing:Destroy()
-        existing = nil
+    local variant = MaterialService:FindFirstChild(name)
+    if not variant or not variant:IsA("MaterialVariant") then
+        warn(string.format("[PBRMaterialService] Missing authored MaterialVariant %s", name))
+        return nil
     end
-    local variant = existing or Instance.new("MaterialVariant")
-    variant.Name = name
-    variant.BaseMaterial = definition.BaseMaterial
-    variant.ColorMap = contentId(definition.RobloxAssetIds.Color)
-    variant.NormalMap = contentId(definition.RobloxAssetIds.Normal)
-    variant.RoughnessMap = contentId(definition.RobloxAssetIds.Roughness)
-    variant.MetalnessMap = ""
-    variant.StudsPerTile = definition.StudsPerTile or 8
-    pcall(function()
-        variant.MaterialPattern = definition.Pattern or Enum.MaterialPattern.Regular
-    end)
-    variant.Parent = MaterialService
-    activeVariants[name] = variant
 
-    if definition.OverrideProperty then
-        local ok, err = pcall(function()
-            MaterialService[definition.OverrideProperty] = name
-        end)
-        if not ok then
-            warn(
-                string.format(
-                    "[PBRMaterialService] Could not set %s override: %s",
-                    definition.OverrideProperty,
-                    tostring(err)
-                )
-            )
-        end
-    end
+    activeVariants[name] = variant
     return variant
 end
 
 function PBRMaterialService.Init()
     table.clear(activeVariants)
     for name, definition in Definitions do
-        ensureVariant(name, definition)
+        local ok, err = pcall(function()
+            ensureVariant(name, definition)
+        end)
+        if not ok then
+            warn(
+                string.format("[PBRMaterialService] Failed to activate %s: %s", name, tostring(err))
+            )
+        end
     end
 end
 
@@ -79,7 +53,20 @@ function PBRMaterialService.Apply(part, name)
     if not part:IsA("BasePart") or not activeVariants[name] then
         return false
     end
-    part.MaterialVariant = name
+    local ok, err = pcall(function()
+        part.MaterialVariant = name
+    end)
+    if not ok then
+        warn(
+            string.format(
+                "[PBRMaterialService] Could not apply %s to %s: %s",
+                name,
+                part:GetFullName(),
+                tostring(err)
+            )
+        )
+        return false
+    end
     return true
 end
 
