@@ -383,7 +383,7 @@
 
 - [x] Temporary client profile state store.
 - [x] Temporary combat feedback label.
-- [ ] Production HUD design system (client UI state/screen registry scaffold now exists).
+- [ ] **PARTIAL:** Production HUD shell now renders HP/MP/EXP/level/currencies/objective/hotbar; Studio UX verification and final design system remain.
 - [ ] HP bar.
 - [ ] MP bar.
 - [ ] EXP bar.
@@ -507,7 +507,7 @@
 
 # Current highest-priority queue — Phase B game shell
 
-1. [ ] Build the production HUD shell (HP/MP/EXP/level/currency/hotbar).
+1. [ ] **PARTIAL:** Production HUD shell is source-complete for HP/MP/EXP/level/currencies/objective/hotbar; Studio verification/polish pending.
 2. [ ] Build inventory/equipment/character/skills/quests/settings screen shells.
 3. [x] Add physical Lumenreach benchmark graybox + NPC/portal world-object registration.
 4. [ ] **PARTIAL:** First hostile Lumen Mossling is integrated with AI/player damage; Studio verification pending.
