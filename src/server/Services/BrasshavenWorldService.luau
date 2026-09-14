@@ -1,5 +1,6 @@
 local Workspace = game:GetService("Workspace")
 
+local InteractionService = require(script.Parent.InteractionService)
 local PlayerDataService = require(script.Parent.PlayerDataService)
 local PortalService = require(script.Parent.PortalService)
 local WorldObjectService = require(script.Parent.WorldObjectService)
@@ -169,6 +170,177 @@ local function makeReturnGate(parent, position)
     end)
 end
 
+local function makeForeman(parent, position)
+    local model = Instance.new("Model")
+    model.Name = "belforge_foreman"
+    model.Parent = parent
+    local base = CFrame.new(position) * CFrame.Angles(0, math.rad(-90), 0)
+
+    local function bodyPart(name, size, offset, material, color)
+        local part = makePart(model, name, size, base * CFrame.new(offset), material, color)
+        part.CanCollide = false
+        part.CanTouch = false
+        return part
+    end
+
+    local root = bodyPart(
+        "HumanoidRootPart",
+        Vector3.new(2, 6.5, 1.8),
+        Vector3.new(0, 3.25, 0),
+        Enum.Material.SmoothPlastic,
+        Color3.new(0, 0, 0)
+    )
+    root.Transparency = 1
+    bodyPart(
+        "Torso",
+        Vector3.new(2.5, 2.6, 1.5),
+        Vector3.new(0, 3.85, 0),
+        Enum.Material.Fabric,
+        Color3.fromRGB(82, 69, 57)
+    )
+    bodyPart(
+        "Apron",
+        Vector3.new(2.15, 2.3, 0.15),
+        Vector3.new(0, 3.55, -0.83),
+        Enum.Material.Fabric,
+        Color3.fromRGB(131, 89, 48)
+    )
+    for _, side in { -1, 1 } do
+        bodyPart(
+            side < 0 and "LeftLeg" or "RightLeg",
+            Vector3.new(0.8, 2.4, 0.85),
+            Vector3.new(side * 0.58, 1.42, 0),
+            Enum.Material.Fabric,
+            Color3.fromRGB(54, 53, 51)
+        )
+        bodyPart(
+            side < 0 and "LeftArm" or "RightArm",
+            Vector3.new(0.72, 2.2, 0.78),
+            Vector3.new(side * 1.55, 3.8, 0),
+            Enum.Material.Fabric,
+            Color3.fromRGB(76, 63, 53)
+        )
+    end
+    local head = bodyPart(
+        "Head",
+        Vector3.new(1.7, 1.7, 1.6),
+        Vector3.new(0, 5.75, 0),
+        Enum.Material.SmoothPlastic,
+        Color3.fromRGB(204, 165, 128)
+    )
+    bodyPart(
+        "HardCap",
+        Vector3.new(1.95, 0.42, 1.8),
+        Vector3.new(0, 6.52, 0),
+        Enum.Material.Metal,
+        Color3.fromRGB(137, 96, 48)
+    )
+
+    local plate = Instance.new("BillboardGui")
+    plate.Size = UDim2.fromOffset(225, 34)
+    plate.StudsOffsetWorldSpace = Vector3.new(0, 1.75, 0)
+    plate.MaxDistance = 50
+    plate.Parent = head
+    local text = Instance.new("TextLabel")
+    text.Size = UDim2.fromScale(1, 1)
+    text.BackgroundColor3 = Color3.fromRGB(29, 25, 21)
+    text.BackgroundTransparency = 0.16
+    text.Text = "VALE · BELFORGE FOREMAN"
+    text.TextColor3 = Color3.fromRGB(237, 209, 154)
+    text.TextStrokeTransparency = 0.35
+    text.Font = Enum.Font.GothamBold
+    text.TextScaled = true
+    text.Parent = plate
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 7)
+    corner.Parent = text
+    local edge = Instance.new("UIStroke")
+    edge.Color = Color3.fromRGB(141, 98, 52)
+    edge.Transparency = 0.3
+    edge.Parent = text
+
+    model.PrimaryPart = root
+    WorldObjectService.Register(model, "Npc", "belforge_foreman")
+    local prompt = Instance.new("ProximityPrompt")
+    prompt.ActionText = "Talk"
+    prompt.ObjectText = "Vale · Belforge Foreman"
+    prompt.KeyboardKeyCode = Enum.KeyCode.E
+    prompt.MaxActivationDistance = 11
+    prompt.RequiresLineOfSight = false
+    prompt.Parent = root
+    prompt.Triggered:Connect(function(player)
+        InteractionService.Begin(player, "belforge_foreman", model)
+    end)
+end
+
+local function makeBelforgeGate(parent, position)
+    local model = Instance.new("Model")
+    model.Name = "BelforgeEntrance"
+    model.Parent = parent
+    local stone = Color3.fromRGB(67, 61, 56)
+    local brass = Color3.fromRGB(152, 103, 48)
+    local iron = Color3.fromRGB(58, 58, 57)
+
+    makePart(
+        model,
+        "GateLeft",
+        Vector3.new(9, 30, 11),
+        CFrame.new(position + Vector3.new(0, 15, -11)),
+        Enum.Material.Brick,
+        stone
+    )
+    makePart(
+        model,
+        "GateRight",
+        Vector3.new(9, 30, 11),
+        CFrame.new(position + Vector3.new(0, 15, 11)),
+        Enum.Material.Brick,
+        stone
+    )
+    makePart(
+        model,
+        "GateTop",
+        Vector3.new(9, 8, 31),
+        CFrame.new(position + Vector3.new(0, 30, 0)),
+        Enum.Material.Metal,
+        brass
+    )
+    local door = makePart(
+        model,
+        "SealedBelforgeDoor",
+        Vector3.new(3, 23, 17),
+        CFrame.new(position + Vector3.new(-1, 11.5, 0)),
+        Enum.Material.DiamondPlate,
+        iron
+    )
+    door.CanCollide = true
+    for index = -2, 2 do
+        local brace = makePart(
+            model,
+            "DoorBrace" .. tostring(index),
+            Vector3.new(3.3, 1.2, 15),
+            CFrame.new(position + Vector3.new(-2.7, 11.5 + index * 4.2, 0)),
+            Enum.Material.Metal,
+            brass
+        )
+        brace.CanCollide = false
+    end
+    local warning = makePart(
+        model,
+        "WarningLumen",
+        Vector3.new(3.5, 1.2, 8),
+        CFrame.new(position + Vector3.new(-2.9, 24.5, 0)),
+        Enum.Material.Neon,
+        Color3.fromRGB(218, 112, 65)
+    )
+    warning.CanCollide = false
+    local light = Instance.new("PointLight")
+    light.Color = Color3.fromRGB(232, 126, 71)
+    light.Brightness = 1.2
+    light.Range = 13
+    light.Parent = warning
+end
+
 function BrasshavenWorldService.Init()
     local previous = Workspace:FindFirstChild(GENERATED_NAME)
     if previous then
@@ -265,8 +437,10 @@ function BrasshavenWorldService.Init()
     WorldTravelService.RegisterSpawn("brasshaven_start", spawn)
 
     makeReturnGate(world, ORIGIN + Vector3.new(-142, 0, 0))
+    makeBelforgeGate(world, ORIGIN + Vector3.new(158, 0, 0))
+    makeForeman(world, ORIGIN + Vector3.new(126, 0, 24))
     makeLabel(world, ORIGIN + Vector3.new(-58, 22, 0), "BRASSHAVEN · FOUNDRY THRESHOLD")
-    makeLabel(world, ORIGIN + Vector3.new(92, 18, -22), "BELFORGE ROAD · UNDER CONSTRUCTION")
+    makeLabel(world, ORIGIN + Vector3.new(104, 25, 0), "BELFORGE EASTWORKS · SEALED")
 
     return world
 end

@@ -1,7 +1,7 @@
 # EverLeaf Roblox — Master Checklist
 
 **Canonical status:** 2026-09-14
-**Latest gameplay checkpoint:** Brasshaven transition shell — physical region travel, region-aware respawn, Foundry Threshold starter area
+**Latest gameplay checkpoint:** Belforge entry shell — sealed eastworks gate, foreman NPC, Phase-1 onward destination
 **Purpose:** detailed implementation/status tracker for the entire project.
 **Roadmap:** [`ROADMAP.md`](ROADMAP.md)
 
@@ -103,7 +103,7 @@
 - [x] Dedicated full buy/sell shop screen implemented beyond dialogue preview buttons; Studio interaction/balance QA remains.
 - [ ] Level-up feedback is implemented; Lumenreach 1–10 pacing is regression-tested; Brasshaven 10–30 tuning remains.
 - [x] First advancement hook/location/quest flow implemented with Seren, the Proving Circle, The Five Paths, and five permanent family choices.
-- [ ] Belforge boss-entry shell only to the extent required for Phase 1 progression continuity.
+- [x] Belforge boss-entry shell exists in Brasshaven with a sealed industrial entrance and Vale the foreman; the actual Level-30 Colossus encounter remains future Brasshaven content.
 
 ### F. Phase 1 exit validation
 

@@ -60,4 +60,13 @@ return table.freeze({
         }),
         QuestOffers = table.freeze({ "first_advancement_trial" }),
     }),
+    belforge_foreman = table.freeze({
+        DisplayName = "Vale · Belforge Foreman",
+        RegionId = "brasshaven",
+        Dialogue = table.freeze({
+            "The Belforge is sealed below the eastworks. The Colossus has not moved, but every pressure gauge says it is awake.",
+            "Nobody opens that gate for an unseasoned Wayfarer. Brasshaven has work enough to harden you before Level 30.",
+        }),
+        QuestOffers = table.freeze({}),
+    }),
 })
