@@ -224,42 +224,87 @@ local function Pill(props)
     )
 end
 
-local function Bar(props)
+local function ResourceMeter(props)
     local fraction = ratio(props.Value or 0, props.Maximum or 1)
+    local z = props.ZIndex or 3
     return React.createElement(
         "Frame",
         {
             Position = props.Position,
             Size = props.Size,
-            BackgroundColor3 = COLORS.PanelDeep,
+            BackgroundColor3 = Color3.fromRGB(8, 15, 14),
+            BackgroundTransparency = 0.02,
             BorderSizePixel = 0,
             ClipsDescendants = true,
-            ZIndex = props.ZIndex or 2,
+            ZIndex = z,
         },
         withChrome({
-            Fill = React.createElement("Frame", {
-                Size = UDim2.fromScale(fraction, 1),
-                BackgroundColor3 = props.Color,
-                BorderSizePixel = 0,
-                ZIndex = (props.ZIndex or 2) + 1,
-            }, withChrome(nil, 6)),
-            Shine = React.createElement("Frame", {
-                Position = UDim2.fromScale(0, 0),
-                Size = UDim2.fromScale(1, 0.38),
-                BackgroundColor3 = Color3.new(1, 1, 1),
-                BackgroundTransparency = 0.88,
-                BorderSizePixel = 0,
-                ZIndex = (props.ZIndex or 2) + 2,
-            }),
-            Text = React.createElement(Label, {
-                Size = UDim2.fromScale(1, 1),
-                Text = props.Text,
-                TextSize = props.TextSize or 11,
-                Bold = true,
-                Align = Enum.TextXAlignment.Center,
-                ZIndex = (props.ZIndex or 2) + 3,
-            }),
-        }, 6, COLORS.Border, 0.62, 1)
+            Tag = React.createElement(
+                "Frame",
+                {
+                    Size = UDim2.fromOffset(42, props.Size.Y.Offset),
+                    BackgroundColor3 = props.TagColor,
+                    BackgroundTransparency = 0.08,
+                    BorderSizePixel = 0,
+                    ZIndex = z + 1,
+                },
+                withChrome({
+                    Text = React.createElement(Label, {
+                        Size = UDim2.fromScale(1, 1),
+                        Text = props.Tag,
+                        TextSize = 10,
+                        Bold = true,
+                        Align = Enum.TextXAlignment.Center,
+                        Color = COLORS.Text,
+                        ZIndex = z + 2,
+                    }),
+                }, 5)
+            ),
+            Track = React.createElement(
+                "Frame",
+                {
+                    Position = UDim2.fromOffset(48, 5),
+                    Size = UDim2.new(1, -55, 1, -10),
+                    BackgroundColor3 = Color3.fromRGB(25, 34, 32),
+                    BorderSizePixel = 0,
+                    ClipsDescendants = true,
+                    ZIndex = z + 1,
+                },
+                withChrome({
+                    Fill = React.createElement(
+                        "Frame",
+                        {
+                            Size = UDim2.fromScale(fraction, 1),
+                            BackgroundColor3 = props.FillColor,
+                            BorderSizePixel = 0,
+                            ZIndex = z + 2,
+                        },
+                        withChrome({
+                            Gradient = React.createElement("UIGradient", {
+                                Color = ColorSequence.new({
+                                    ColorSequenceKeypoint.new(
+                                        0,
+                                        props.FillColor:Lerp(Color3.new(1, 1, 1), 0.12)
+                                    ),
+                                    ColorSequenceKeypoint.new(
+                                        1,
+                                        props.FillColor:Lerp(Color3.new(0, 0, 0), 0.14)
+                                    ),
+                                }),
+                            }),
+                        }, 4)
+                    ),
+                    Value = React.createElement(Label, {
+                        Size = UDim2.fromScale(1, 1),
+                        Text = props.Text,
+                        TextSize = 10,
+                        Bold = true,
+                        Align = Enum.TextXAlignment.Center,
+                        ZIndex = z + 3,
+                    }),
+                }, 4, COLORS.Border, 0.72, 1)
+            ),
+        }, 6, COLORS.BorderStrong, 0.58, 1)
     )
 end
 
@@ -411,55 +456,78 @@ local function Objective(props)
         end
     end
 
+    local accent = ready and COLORS.Gold or COLORS.Lumen
     return React.createElement(Panel, {
         AnchorPoint = Vector2.new(0, 0.5),
-        Position = UDim2.new(0, 26, 0.5, -10),
-        Size = UDim2.fromOffset(324, 104),
+        Position = UDim2.new(0, 26, 0.5, -8),
+        Size = UDim2.fromOffset(338, 112),
         Visible = not props.Hidden,
-        BackgroundColor3 = COLORS.PanelDeep,
-        BackgroundTransparency = 0.08,
-        Ornamented = true,
-        OrnamentColor = ready and COLORS.Gold or COLORS.Lumen,
+        BackgroundColor3 = Color3.fromRGB(10, 18, 17),
+        BackgroundTransparency = 0.04,
+        Radius = 7,
+        StrokeColor = accent,
+        StrokeTransparency = 0.42,
         Children = {
-            Crest = React.createElement(Icon, {
-                Position = UDim2.fromOffset(280, 8),
-                Size = UDim2.fromOffset(30, 30),
-                Image = EverLeafIcons.Objective,
-                ImageTransparency = ready and 0 or 0.05,
-                ZIndex = 4,
-            }),
-            Accent = React.createElement("Frame", {
-                Position = UDim2.fromOffset(0, 14),
-                Size = UDim2.fromOffset(3, 74),
-                BackgroundColor3 = ready and COLORS.Gold or COLORS.Accent,
+            Rail = React.createElement("Frame", {
+                Size = UDim2.fromOffset(5, 112),
+                BackgroundColor3 = accent,
                 BorderSizePixel = 0,
                 ZIndex = 3,
             }),
-            Header = React.createElement(Label, {
-                Position = UDim2.fromOffset(16, 9),
-                Size = UDim2.new(1, -32, 0, 20),
-                Text = ready and "OBJECTIVE · COMPLETE" or "CURRENT OBJECTIVE",
-                TextSize = 10,
+            IconBack = React.createElement(
+                "Frame",
+                {
+                    Position = UDim2.fromOffset(18, 18),
+                    Size = UDim2.fromOffset(46, 46),
+                    BackgroundColor3 = ready and Color3.fromRGB(79, 60, 35)
+                        or Color3.fromRGB(25, 65, 49),
+                    BorderSizePixel = 0,
+                    ZIndex = 3,
+                },
+                withChrome({
+                    Icon = React.createElement(Icon, {
+                        AnchorPoint = Vector2.new(0.5, 0.5),
+                        Position = UDim2.fromScale(0.5, 0.5),
+                        Size = UDim2.fromOffset(34, 34),
+                        Image = EverLeafIcons.Objective,
+                        ZIndex = 4,
+                    }),
+                }, 9, accent, 0.46, 1)
+            ),
+            Kicker = React.createElement(Label, {
+                Position = UDim2.fromOffset(78, 16),
+                Size = UDim2.new(1, -94, 0, 18),
+                Text = ready and "READY TO TURN IN" or "CURRENT OBJECTIVE",
+                TextSize = 9,
                 Bold = true,
-                Color = ready and COLORS.Gold or COLORS.Accent,
-                ZIndex = 3,
+                Color = accent,
+                ZIndex = 4,
             }),
             Title = React.createElement(Label, {
-                Position = UDim2.fromOffset(16, 32),
-                Size = UDim2.new(1, -32, 0, 26),
+                Position = UDim2.fromOffset(78, 34),
+                Size = UDim2.new(1, -94, 0, 28),
                 Text = title,
                 TextSize = 15,
                 Bold = true,
+                ZIndex = 4,
+            }),
+            Divider = React.createElement("Frame", {
+                Position = UDim2.fromOffset(78, 67),
+                Size = UDim2.new(1, -94, 0, 1),
+                BackgroundColor3 = accent,
+                BackgroundTransparency = 0.72,
+                BorderSizePixel = 0,
                 ZIndex = 3,
             }),
             Progress = React.createElement(Label, {
-                Position = UDim2.fromOffset(16, 61),
-                Size = UDim2.new(1, -32, 0, 28),
+                Position = UDim2.fromOffset(78, 72),
+                Size = UDim2.new(1, -94, 0, 28),
                 Text = progressText,
-                TextSize = 11,
+                TextSize = 10,
                 Wrapped = true,
-                Color = ready and COLORS.Gold or COLORS.Muted,
-                ZIndex = 3,
+                Color = COLORS.Muted,
+                VerticalAlign = Enum.TextYAlignment.Top,
+                ZIndex = 4,
             }),
         },
     })
@@ -479,91 +547,149 @@ local function HUD(props)
 
     return React.createElement(React.Fragment, nil, {
         Status = React.createElement(Panel, {
-            Position = UDim2.fromOffset(24, 78),
-            Size = UDim2.fromOffset(306, 118),
-            BackgroundColor3 = COLORS.PanelDeep,
-            BackgroundTransparency = 0.08,
+            Position = UDim2.fromOffset(24, 98),
+            Size = UDim2.fromOffset(326, 130),
+            BackgroundColor3 = Color3.fromRGB(10, 18, 17),
+            BackgroundTransparency = 0.03,
+            Radius = 7,
             StrokeColor = COLORS.BorderStrong,
-            Ornamented = true,
-            OrnamentColor = COLORS.Lumen,
+            StrokeTransparency = 0.42,
             Children = {
-                LevelPill = React.createElement(Pill, {
-                    Position = UDim2.fromOffset(16, 12),
-                    Size = UDim2.fromOffset(72, 24),
-                    Text = string.format("LV %d", level),
-                    Color = COLORS.AccentDark,
-                    TextColor = COLORS.Accent,
+                TopAccent = React.createElement("Frame", {
+                    Position = UDim2.fromOffset(14, 8),
+                    Size = UDim2.new(1, -28, 0, 2),
+                    BackgroundColor3 = COLORS.Lumen,
+                    BackgroundTransparency = 0.28,
+                    BorderSizePixel = 0,
                     ZIndex = 3,
                 }),
+                Level = React.createElement(Label, {
+                    Position = UDim2.fromOffset(16, 14),
+                    Size = UDim2.fromOffset(100, 28),
+                    Text = string.format("LEVEL %d", level),
+                    TextSize = 12,
+                    Bold = true,
+                    Color = COLORS.LumenPale,
+                    ZIndex = 4,
+                }),
                 Region = React.createElement(Label, {
-                    Position = UDim2.fromOffset(98, 11),
-                    Size = UDim2.new(1, -112, 0, 26),
+                    AnchorPoint = Vector2.new(1, 0),
+                    Position = UDim2.new(1, -16, 0, 14),
+                    Size = UDim2.fromOffset(150, 28),
                     Text = "LUMENREACH",
-                    TextSize = 11,
+                    TextSize = 10,
                     Bold = true,
                     Color = COLORS.Muted,
                     Align = Enum.TextXAlignment.Right,
-                    ZIndex = 3,
+                    ZIndex = 4,
                 }),
-                HP = React.createElement(Bar, {
-                    Position = UDim2.fromOffset(16, 45),
-                    Size = UDim2.fromOffset(274, 22),
+                HP = React.createElement(ResourceMeter, {
+                    Position = UDim2.fromOffset(16, 46),
+                    Size = UDim2.fromOffset(294, 30),
+                    Tag = "HP",
+                    TagColor = Color3.fromRGB(117, 44, 48),
+                    FillColor = COLORS.Health,
                     Value = props.Health,
                     Maximum = props.MaxHealth,
-                    Color = COLORS.Health,
                     Text = string.format(
-                        "HP   %d / %d",
+                        "%d / %d",
                         math.floor(props.Health + 0.5),
                         math.floor(props.MaxHealth + 0.5)
                     ),
+                    ZIndex = 4,
                 }),
-                MP = React.createElement(Bar, {
-                    Position = UDim2.fromOffset(16, 75),
-                    Size = UDim2.fromOffset(274, 22),
+                MP = React.createElement(ResourceMeter, {
+                    Position = UDim2.fromOffset(16, 84),
+                    Size = UDim2.fromOffset(294, 30),
+                    Tag = "MP",
+                    TagColor = Color3.fromRGB(45, 79, 126),
+                    FillColor = COLORS.Mana,
                     Value = currentMP,
                     Maximum = maxMP,
-                    Color = COLORS.Mana,
-                    Text = string.format("MP   %d / %d", math.floor(currentMP), math.floor(maxMP)),
+                    Text = string.format("%d / %d", math.floor(currentMP), math.floor(maxMP)),
+                    ZIndex = 4,
                 }),
             },
         }),
         Currency = React.createElement(Panel, {
             AnchorPoint = Vector2.new(1, 0),
-            Position = UDim2.new(1, -24, 0, 78),
-            Size = UDim2.fromOffset(214, 76),
-            BackgroundColor3 = COLORS.PanelDeep,
-            BackgroundTransparency = 0.1,
-            Ornamented = true,
-            OrnamentColor = COLORS.Gold,
+            Position = UDim2.new(1, -24, 0, 98),
+            Size = UDim2.fromOffset(238, 106),
+            BackgroundColor3 = Color3.fromRGB(10, 18, 17),
+            BackgroundTransparency = 0.03,
+            Radius = 7,
+            StrokeColor = COLORS.BorderStrong,
+            StrokeTransparency = 0.42,
             Visible = compactVisible,
             Children = {
-                ShardsIcon = React.createElement(Icon, {
-                    Position = UDim2.fromOffset(9, 5),
-                    Size = UDim2.fromOffset(40, 36),
+                Header = React.createElement(Label, {
+                    Position = UDim2.fromOffset(16, 10),
+                    Size = UDim2.new(1, -32, 0, 18),
+                    Text = "WAYFARER WALLET",
+                    TextSize = 9,
+                    Bold = true,
+                    Color = COLORS.Faint,
+                    ZIndex = 4,
+                }),
+                Divider = React.createElement("Frame", {
+                    Position = UDim2.fromOffset(16, 31),
+                    Size = UDim2.new(1, -32, 0, 1),
+                    BackgroundColor3 = COLORS.BorderStrong,
+                    BackgroundTransparency = 0.72,
+                    BorderSizePixel = 0,
+                    ZIndex = 3,
+                }),
+                ShardIcon = React.createElement(Icon, {
+                    Position = UDim2.fromOffset(14, 37),
+                    Size = UDim2.fromOffset(30, 30),
                     Image = EverLeafIcons.Shard,
                     ZIndex = 4,
                 }),
-                Shards = React.createElement(Label, {
-                    Position = UDim2.fromOffset(52, 10),
-                    Size = UDim2.new(1, -60, 0, 24),
-                    Text = string.format("%d  Shards", tonumber(currencies.Shards) or 0),
-                    Align = Enum.TextXAlignment.Right,
-                    TextSize = 12,
-                    ZIndex = 3,
+                ShardName = React.createElement(Label, {
+                    Position = UDim2.fromOffset(52, 36),
+                    Size = UDim2.fromOffset(92, 30),
+                    Text = "SHARDS",
+                    TextSize = 10,
+                    Bold = true,
+                    Color = COLORS.Muted,
+                    ZIndex = 4,
                 }),
-                MarksIcon = React.createElement(Icon, {
-                    Position = UDim2.fromOffset(9, 37),
-                    Size = UDim2.fromOffset(40, 36),
+                ShardValue = React.createElement(Label, {
+                    AnchorPoint = Vector2.new(1, 0),
+                    Position = UDim2.new(1, -16, 0, 36),
+                    Size = UDim2.fromOffset(70, 30),
+                    Text = tostring(tonumber(currencies.Shards) or 0),
+                    TextSize = 15,
+                    Bold = true,
+                    Align = Enum.TextXAlignment.Right,
+                    Color = COLORS.LumenPale,
+                    ZIndex = 4,
+                }),
+                MarkIcon = React.createElement(Icon, {
+                    Position = UDim2.fromOffset(14, 69),
+                    Size = UDim2.fromOffset(30, 30),
                     Image = EverLeafIcons.Mark,
                     ZIndex = 4,
                 }),
-                Marks = React.createElement(Label, {
-                    Position = UDim2.fromOffset(52, 42),
-                    Size = UDim2.new(1, -60, 0, 24),
-                    Text = string.format("%d  Marks", tonumber(currencies.Marks) or 0),
+                MarkName = React.createElement(Label, {
+                    Position = UDim2.fromOffset(52, 68),
+                    Size = UDim2.fromOffset(92, 30),
+                    Text = "MARKS",
+                    TextSize = 10,
+                    Bold = true,
+                    Color = COLORS.Muted,
+                    ZIndex = 4,
+                }),
+                MarkValue = React.createElement(Label, {
+                    AnchorPoint = Vector2.new(1, 0),
+                    Position = UDim2.new(1, -16, 0, 68),
+                    Size = UDim2.fromOffset(70, 30),
+                    Text = tostring(tonumber(currencies.Marks) or 0),
+                    TextSize = 15,
+                    Bold = true,
                     Align = Enum.TextXAlignment.Right,
-                    TextSize = 12,
-                    ZIndex = 3,
+                    Color = COLORS.Gold,
+                    ZIndex = 4,
                 }),
             },
         }),
@@ -576,8 +702,8 @@ local function HUD(props)
             {
                 AnchorPoint = Vector2.new(0.5, 1),
                 Position = UDim2.new(0.5, 0, 1, -100),
-                Size = UDim2.fromOffset(586, 11),
-                BackgroundColor3 = COLORS.PanelDeep,
+                Size = UDim2.fromOffset(586, 10),
+                BackgroundColor3 = Color3.fromRGB(8, 15, 14),
                 BorderSizePixel = 0,
                 ClipsDescendants = true,
                 Visible = compactVisible,
@@ -589,12 +715,12 @@ local function HUD(props)
                     BackgroundColor3 = COLORS.Exp,
                     BorderSizePixel = 0,
                     ZIndex = 3,
-                }, withChrome(nil, 6)),
-            }, 6, COLORS.Border, 0.58, 1)
+                }, withChrome(nil, 4)),
+            }, 4, COLORS.Border, 0.62, 1)
         ),
         ExpText = React.createElement(Label, {
             AnchorPoint = Vector2.new(0.5, 1),
-            Position = UDim2.new(0.5, 0, 1, -113),
+            Position = UDim2.new(0.5, 0, 1, -112),
             Size = UDim2.fromOffset(300, 18),
             Text = string.format("EXP  %d / %d", exp, needed),
             TextSize = 10,
@@ -1953,41 +2079,52 @@ local function MainMenu(props)
                             BorderSizePixel = 0,
                             ZIndex = 33,
                         }),
-                        Crest = React.createElement(Icon, {
-                            Position = UDim2.fromOffset(15, 11),
-                            Size = UDim2.fromOffset(40, 40),
+                        ActiveIcon = React.createElement(Icon, {
+                            Position = UDim2.fromOffset(16, 16),
+                            Size = UDim2.fromOffset(30, 30),
                             Image = NAV_ICONS[activeTab] or EverLeafIcons.Objective,
                             ZIndex = 34,
                         }),
-                        Brand = React.createElement(Label, {
-                            Position = UDim2.fromOffset(54, 9),
-                            Size = UDim2.fromOffset(218, 26),
-                            Text = "EVERLEAF",
-                            TextSize = 22,
-                            Bold = true,
-                            Color = COLORS.Accent,
-                            ZIndex = 33,
-                        }),
-                        Subtitle = React.createElement(Label, {
-                            Position = UDim2.fromOffset(54, 34),
-                            Size = UDim2.fromOffset(308, 18),
-                            Text = string.format(
-                                "%s · Level %d",
-                                string.upper(activeTab),
-                                tonumber(profile.Level) or 1
-                            ),
+                        ActiveName = React.createElement(Label, {
+                            Position = UDim2.fromOffset(52, 0),
+                            Size = UDim2.fromOffset(150, 64),
+                            Text = string.upper(activeTab),
                             TextSize = 10,
+                            Bold = true,
                             Color = COLORS.Muted,
                             ZIndex = 33,
                         }),
-                        Hint = React.createElement(Label, {
-                            AnchorPoint = Vector2.new(1, 0.5),
-                            Position = UDim2.new(1, -70, 0.5, 0),
-                            Size = UDim2.fromOffset(300, 24),
-                            Text = "C · I · K · J · M   switch panels",
+                        Brand = React.createElement(Label, {
+                            AnchorPoint = Vector2.new(0.5, 0),
+                            Position = UDim2.new(0.5, 0, 0, 7),
+                            Size = UDim2.fromOffset(280, 30),
+                            Text = "EVERLEAF",
+                            TextSize = 24,
+                            Bold = true,
+                            Align = Enum.TextXAlignment.Center,
+                            Color = COLORS.LumenPale,
+                            ZIndex = 33,
+                        }),
+                        BrandLine = React.createElement("Frame", {
+                            AnchorPoint = Vector2.new(0.5, 0),
+                            Position = UDim2.new(0.5, 0, 0, 38),
+                            Size = UDim2.fromOffset(150, 2),
+                            BackgroundColor3 = COLORS.Lumen,
+                            BackgroundTransparency = 0.35,
+                            BorderSizePixel = 0,
+                            ZIndex = 33,
+                        }),
+                        Subtitle = React.createElement(Label, {
+                            AnchorPoint = Vector2.new(0.5, 0),
+                            Position = UDim2.new(0.5, 0, 0, 42),
+                            Size = UDim2.fromOffset(280, 16),
+                            Text = string.format(
+                                "WAYFARER RECORD · LEVEL %d",
+                                tonumber(profile.Level) or 1
+                            ),
                             TextSize = 9,
+                            Align = Enum.TextXAlignment.Center,
                             Color = COLORS.Faint,
-                            Align = Enum.TextXAlignment.Right,
                             ZIndex = 33,
                         }),
                         Close = React.createElement(Button, {
