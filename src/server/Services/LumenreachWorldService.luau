@@ -92,6 +92,115 @@ local function makeCrystal(parent, position)
     return crystal
 end
 
+local function makeGrassTuft(parent, position, scale)
+    local model = Instance.new("Model")
+    model.Name = "GrassTuft"
+    model.Parent = parent
+
+    local color = Color3.fromRGB(74, 126, 68)
+    for index = 1, 3 do
+        local blade = makePart(
+            model,
+            "Blade" .. index,
+            Vector3.new(0.22, 2.6, 1.2) * scale,
+            CFrame.new(position + Vector3.new((index - 2) * 0.35 * scale, 1.2 * scale, 0))
+                * CFrame.Angles(
+                    math.rad(index * 6 - 12),
+                    math.rad(index * 53),
+                    math.rad(index * 7 - 14)
+                ),
+            Enum.Material.Grass,
+            color
+        )
+        blade.CanCollide = false
+        blade.CastShadow = false
+    end
+    return model
+end
+
+local function makeBush(parent, position, scale)
+    local model = Instance.new("Model")
+    model.Name = "LumenBush"
+    model.Parent = parent
+    local colors = {
+        Color3.fromRGB(61, 111, 63),
+        Color3.fromRGB(72, 126, 69),
+        Color3.fromRGB(82, 137, 75),
+    }
+    for index = 1, 5 do
+        local angle = index * math.pi * 0.4
+        local offset =
+            Vector3.new(math.cos(angle) * 1.25 * scale, 1.2 * scale, math.sin(angle) * 1.25 * scale)
+        local leaf = makeBall(
+            model,
+            "Leaf" .. index,
+            Vector3.new(3.2, 2.8, 3.2) * scale,
+            CFrame.new(position + offset),
+            Enum.Material.Grass,
+            colors[((index - 1) % #colors) + 1]
+        )
+        leaf.CanCollide = false
+    end
+    return model
+end
+
+local function makeCampfire(parent, position)
+    local model = Instance.new("Model")
+    model.Name = "WayfarerCampfire"
+    model.Parent = parent
+
+    for index = 1, 8 do
+        local angle = index * math.pi * 0.25
+        makePart(
+            model,
+            "FireRingStone",
+            Vector3.new(1.4, 0.8, 1.1),
+            CFrame.new(position + Vector3.new(math.cos(angle) * 2.2, 0.45, math.sin(angle) * 2.2))
+                * CFrame.Angles(0, -angle, 0),
+            Enum.Material.Slate,
+            Color3.fromRGB(79, 82, 77)
+        )
+    end
+
+    for index = 1, 3 do
+        makePart(
+            model,
+            "Log",
+            Vector3.new(5, 0.65, 0.65),
+            CFrame.new(position + Vector3.new(0, 0.75, 0))
+                * CFrame.Angles(0, math.rad((index - 1) * 60), 0),
+            Enum.Material.Wood,
+            Color3.fromRGB(77, 48, 31)
+        )
+    end
+
+    local ember = makePart(
+        model,
+        "Ember",
+        Vector3.new(1.4, 1.2, 1.4),
+        CFrame.new(position + Vector3.new(0, 1.2, 0)),
+        Enum.Material.Neon,
+        Color3.fromRGB(255, 139, 63)
+    )
+    ember.Shape = Enum.PartType.Ball
+    ember.CanCollide = false
+
+    local light = Instance.new("PointLight")
+    light.Color = Color3.fromRGB(255, 164, 92)
+    light.Brightness = 2.4
+    light.Range = 24
+    light.Shadows = true
+    light.Parent = ember
+
+    local fire = Instance.new("Fire")
+    fire.Color = Color3.fromRGB(255, 179, 83)
+    fire.SecondaryColor = Color3.fromRGB(101, 205, 170)
+    fire.Heat = 6
+    fire.Size = 4.5
+    fire.Parent = ember
+    return model
+end
+
 local function makeRuins(parent)
     local stone = Color3.fromRGB(116, 123, 117)
     makePart(
@@ -350,6 +459,46 @@ local function decorate(world)
         makeCrystal(world, position)
     end
 
+    local bushPositions = {
+        Vector3.new(-80, 0, 58),
+        Vector3.new(-72, 0, 24),
+        Vector3.new(-58, 0, -18),
+        Vector3.new(-23, 0, -34),
+        Vector3.new(16, 0, -41),
+        Vector3.new(30, 0, 52),
+        Vector3.new(64, 0, 45),
+        Vector3.new(76, 0, 5),
+        Vector3.new(44, 0, -50),
+    }
+    for index, position in bushPositions do
+        makeBush(world, position, 0.7 + (index % 3) * 0.12)
+    end
+
+    local grassPositions = {
+        Vector3.new(-87, 0, 39),
+        Vector3.new(-79, 0, 34),
+        Vector3.new(-71, 0, 51),
+        Vector3.new(-61, 0, 18),
+        Vector3.new(-48, 0, 9),
+        Vector3.new(-36, 0, 13),
+        Vector3.new(-18, 0, -27),
+        Vector3.new(-8, 0, -33),
+        Vector3.new(5, 0, -18),
+        Vector3.new(18, 0, 18),
+        Vector3.new(27, 0, 29),
+        Vector3.new(37, 0, 41),
+        Vector3.new(48, 0, 48),
+        Vector3.new(58, 0, 25),
+        Vector3.new(66, 0, 18),
+        Vector3.new(74, 0, 33),
+        Vector3.new(81, 0, -17),
+        Vector3.new(31, 0, -56),
+    }
+    for index, position in grassPositions do
+        makeGrassTuft(world, position, 0.7 + (index % 4) * 0.1)
+    end
+
+    makeCampfire(world, Vector3.new(-59, 0, 31))
     makeRuins(world)
 end
 
