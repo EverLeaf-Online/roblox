@@ -35,10 +35,6 @@ local function attachCharacter(character)
 end
 
 function SideScrollerController.Start()
-    local playerScripts = player:WaitForChild("PlayerScripts")
-    local playerModule = require(playerScripts:WaitForChild("PlayerModule"))
-    playerModule:GetControls():Disable()
-
     ContextActionService:BindAction("EverLeafMoveLeft", function(_, state)
         return setDigital(-1, state)
     end, true, Enum.KeyCode.A, Enum.KeyCode.Left, Enum.KeyCode.DPadLeft)
