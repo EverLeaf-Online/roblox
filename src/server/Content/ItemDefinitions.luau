@@ -223,6 +223,27 @@ return table.freeze({
         StackLimit = 20,
         SellPrice = table.freeze({ Currency = "Shards", Amount = 12 }),
     }),
+    furnace_plate = table.freeze({
+        DisplayName = "Furnace Plate",
+        Description = "A heat-warped armor plate pried from a Furnace Husk.",
+        Type = "Material",
+        StackLimit = 999,
+        SellPrice = table.freeze({ Currency = "Shards", Amount = 6 }),
+    }),
+    arc_cell = table.freeze({
+        DisplayName = "Arc Cell",
+        Description = "A charged glass-and-copper cell harvested from an Arc Siphon.",
+        Type = "Material",
+        StackLimit = 999,
+        SellPrice = table.freeze({ Currency = "Shards", Amount = 6 }),
+    }),
+    railbreaker_pin = table.freeze({
+        DisplayName = "Railbreaker Pin",
+        Description = "A massive locking pin stamped with the eastworks rail authority mark.",
+        Type = "Quest",
+        StackLimit = 20,
+        SellPrice = table.freeze({ Currency = "Shards", Amount = 15 }),
+    }),
     mosswarden_core = table.freeze({
         DisplayName = "Mosswarden Core",
         Type = "Quest",

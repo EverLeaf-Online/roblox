@@ -51,6 +51,19 @@ return table.freeze({
         table.freeze({ ItemId = "gearjaw_tooth", Chance = 1, Min = 2, Max = 4 }),
         table.freeze({ ItemId = "cinder_coil", Chance = 0.65, Min = 1, Max = 2 }),
     }),
+    furnace_husk = table.freeze({
+        table.freeze({ ItemId = "furnace_plate", Chance = 0.86, Min = 1, Max = 2 }),
+        table.freeze({ ItemId = "field_tonic", Chance = 0.08, Min = 1, Max = 1 }),
+    }),
+    arc_siphon = table.freeze({
+        table.freeze({ ItemId = "arc_cell", Chance = 0.84, Min = 1, Max = 2 }),
+        table.freeze({ ItemId = "cinder_coil", Chance = 0.22, Min = 1, Max = 1 }),
+    }),
+    railbreaker = table.freeze({
+        table.freeze({ ItemId = "railbreaker_pin", Chance = 1, Min = 1, Max = 1 }),
+        table.freeze({ ItemId = "furnace_plate", Chance = 1, Min = 2, Max = 4 }),
+        table.freeze({ ItemId = "arc_cell", Chance = 0.7, Min = 1, Max = 2 }),
+    }),
     mosswarden = table.freeze({
         table.freeze({ ItemId = "mosswarden_core", Chance = 1, Min = 1, Max = 1 }),
         table.freeze({ ItemId = "lumen_fragment", Chance = 1, Min = 5, Max = 8 }),

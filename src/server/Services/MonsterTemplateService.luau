@@ -1041,6 +1041,205 @@ local function buildPressureBastion()
     return model
 end
 
+local function buildFurnaceHusk()
+    local definition = MonsterConfig.Get("furnace_husk")
+    local model, root =
+        makeBase(definition.TemplateName, definition.DisplayName, Vector3.new(2.4, 4.8, 2.0), 1.75)
+    model:SetAttribute("AgentRadius", 2.1)
+    model:SetAttribute("AgentHeight", 6.2)
+
+    local iron = Color3.fromRGB(70, 67, 62)
+    local brass = Color3.fromRGB(143, 97, 49)
+    local ember = Color3.fromRGB(248, 116, 45)
+
+    local torso =
+        makePart(model, "Torso", Vector3.new(2.7, 2.7, 1.5), iron, Enum.Material.DiamondPlate)
+    makeMotor(root, torso, "BodyJoint", Vector3.new(0, 0.55, 0))
+    local furnace =
+        makePart(model, "ChestFurnace", Vector3.new(1.55, 1.4, 0.35), ember, Enum.Material.Neon)
+    makeMotor(root, furnace, "ChestFurnaceJoint", Vector3.new(0, 0.65, -0.93))
+    local head = makePart(model, "Head", Vector3.new(1.7, 1.55, 1.55), iron, Enum.Material.Metal)
+    makeMotor(root, head, "HeadJoint", Vector3.new(0, 2.45, 0))
+
+    for _, side in { -1, 1 } do
+        local arm = makePart(
+            model,
+            side < 0 and "LeftArm" or "RightArm",
+            Vector3.new(0.62, 2.8, 0.72),
+            brass,
+            Enum.Material.Metal
+        )
+        makeMotor(
+            root,
+            arm,
+            side < 0 and "LeftShoulder" or "RightShoulder",
+            Vector3.new(side * 1.7, 0.55, 0)
+        )
+        local leg = makePart(
+            model,
+            side < 0 and "LeftLeg" or "RightLeg",
+            Vector3.new(0.72, 3.0, 0.82),
+            iron,
+            Enum.Material.Metal
+        )
+        makeMotor(root, leg, side < 0 and "LeftHip" or "RightHip", Vector3.new(side * 0.7, -2.0, 0))
+        local eye = makePart(
+            model,
+            side < 0 and "LeftEye" or "RightEye",
+            Vector3.new(0.22, 0.22, 0.12),
+            ember,
+            Enum.Material.Neon,
+            Enum.PartType.Ball
+        )
+        makeMotor(
+            root,
+            eye,
+            side < 0 and "LeftEyeJoint" or "RightEyeJoint",
+            Vector3.new(side * 0.38, 2.62, -0.79)
+        )
+    end
+
+    local smokestack =
+        makePart(model, "Smokestack", Vector3.new(0.72, 2.6, 0.72), iron, Enum.Material.Metal)
+    makeMotor(root, smokestack, "SmokestackJoint", Vector3.new(0.9, 2.35, 0.35))
+    local smoke = Instance.new("Smoke")
+    smoke.Color = Color3.fromRGB(89, 83, 77)
+    smoke.Opacity = 0.16
+    smoke.RiseVelocity = 2.5
+    smoke.Size = 2.2
+    smoke.Parent = smokestack
+    return model
+end
+
+local function buildArcSiphon()
+    local definition = MonsterConfig.Get("arc_siphon")
+    local model, root =
+        makeBase(definition.TemplateName, definition.DisplayName, Vector3.new(2.4, 2.4, 2.4), 3.0)
+    model:SetAttribute("AgentRadius", 1.7)
+    model:SetAttribute("AgentHeight", 4.3)
+
+    local steel = Color3.fromRGB(75, 82, 87)
+    local copper = Color3.fromRGB(154, 98, 53)
+    local arc = Color3.fromRGB(103, 208, 255)
+
+    local body = makePart(
+        model,
+        "Body",
+        Vector3.new(3.4, 3.4, 3.4),
+        steel,
+        Enum.Material.Metal,
+        Enum.PartType.Ball
+    )
+    makeMotor(root, body, "BodyJoint", Vector3.new(0, 0.55, 0))
+    local core = makePart(
+        model,
+        "ArcCore",
+        Vector3.new(1.55, 1.55, 1.55),
+        arc,
+        Enum.Material.Neon,
+        Enum.PartType.Ball
+    )
+    core.Transparency = 0.04
+    makeMotor(root, core, "CoreJoint", Vector3.new(0, 0.55, -1.65))
+
+    for index = 1, 3 do
+        local tail = makePart(
+            model,
+            "WispTail" .. index,
+            Vector3.new(0.44, 0.44, 2.8 + index * 0.55),
+            copper,
+            Enum.Material.Metal
+        )
+        makeMotor(
+            root,
+            tail,
+            "TailJoint" .. index,
+            Vector3.new((index - 2) * 0.7, -0.45, 2.15 + index * 0.55),
+            CFrame.Angles(math.rad(14 + index * 6), 0, math.rad((index - 2) * 13))
+        )
+    end
+
+    for index = 1, 4 do
+        local prong = makePart(
+            model,
+            "SiphonProng" .. tostring(index),
+            Vector3.new(0.28, 2.1, 0.28),
+            copper,
+            Enum.Material.Metal
+        )
+        local angle = (index - 1) * math.pi / 2
+        makeMotor(
+            root,
+            prong,
+            "SiphonProngJoint" .. tostring(index),
+            Vector3.new(math.cos(angle) * 1.75, 0.65, math.sin(angle) * 1.75),
+            CFrame.Angles(math.rad(22), 0, -angle)
+        )
+    end
+
+    local light = Instance.new("PointLight")
+    light.Color = arc
+    light.Brightness = 1.7
+    light.Range = 13
+    light.Parent = core
+    return model
+end
+
+local function buildRailbreaker()
+    local definition = MonsterConfig.Get("railbreaker")
+    local model = buildGearjawHound()
+    model.Name = definition.TemplateName
+    model:ScaleTo(1.55)
+    model:SetAttribute("AgentRadius", 3.3)
+    model:SetAttribute("AgentHeight", 6.0)
+    local humanoid = model:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid.DisplayName = definition.DisplayName
+    end
+    local root = model:FindFirstChild("HumanoidRootPart")
+    if root then
+        local plow = makePart(
+            model,
+            "RailPlow",
+            Vector3.new(6.8, 2.4, 1.0),
+            Color3.fromRGB(85, 82, 76),
+            Enum.Material.DiamondPlate
+        )
+        makeMotor(
+            root,
+            plow,
+            "RailPlowJoint",
+            Vector3.new(0, -0.25, -5.9),
+            CFrame.Angles(math.rad(-10), 0, 0)
+        )
+        for _, side in { -1, 1 } do
+            local lamp = makePart(
+                model,
+                side < 0 and "LeftWarningLamp" or "RightWarningLamp",
+                Vector3.new(0.7, 0.7, 0.5),
+                Color3.fromRGB(255, 85, 42),
+                Enum.Material.Neon,
+                Enum.PartType.Ball
+            )
+            makeMotor(
+                root,
+                lamp,
+                side < 0 and "LeftWarningLampJoint" or "RightWarningLampJoint",
+                Vector3.new(side * 2.15, 1.45, -4.8)
+            )
+        end
+        local authority = makePart(
+            model,
+            "AuthorityPlate",
+            Vector3.new(2.8, 1.5, 0.25),
+            Color3.fromRGB(187, 134, 65),
+            Enum.Material.Metal
+        )
+        makeMotor(root, authority, "AuthorityPlateJoint", Vector3.new(0, 2.2, -3.6))
+    end
+    return model
+end
+
 local function buildMosswarden()
     local definition = MonsterConfig.Get("mosswarden")
     local model = buildBrambleback()
@@ -1103,6 +1302,9 @@ local builders = {
     gearjaw_hound = buildGearjawHound,
     cindercoil = buildCindercoil,
     pressure_bastion = buildPressureBastion,
+    furnace_husk = buildFurnaceHusk,
+    arc_siphon = buildArcSiphon,
+    railbreaker = buildRailbreaker,
     mosswarden = buildMosswarden,
 }
 

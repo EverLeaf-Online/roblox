@@ -697,6 +697,98 @@ local function dressEncounterAreas(parent)
         SpawnDelay = 0,
         RespawnTime = 100,
     })
+
+    local sootworksCenter = ORIGIN + Vector3.new(-58, 0, 145)
+    makeLabel(parent, sootworksCenter + Vector3.new(0, 18, 0), "SOOTWORKS DEAD SHIFT")
+    makeScrapPile(parent, sootworksCenter + Vector3.new(-18, 0, -12), math.rad(14), 1.05)
+    makeScrapPile(parent, sootworksCenter + Vector3.new(16, 0, 13), math.rad(-21), 0.9)
+    makeHotVent(parent, sootworksCenter + Vector3.new(22, 0, -10), 0.75)
+    for index = -2, 2 do
+        local locker = makePart(
+            parent,
+            "DeadShiftLocker" .. tostring(index + 3),
+            Vector3.new(3.2, 7.2, 2.4),
+            CFrame.new(sootworksCenter + Vector3.new(index * 4.1, 3.6, 19)),
+            Enum.Material.Metal,
+            Color3.fromRGB(74, 69, 63)
+        )
+        locker.CanCollide = false
+    end
+
+    local dynamoCenter = ORIGIN + Vector3.new(64, 0, -148)
+    makeLabel(parent, dynamoCenter + Vector3.new(0, 19, 0), "DYNAMO GALLERY")
+    for index = 1, 4 do
+        local coil = makePart(
+            parent,
+            "DynamoCoil" .. tostring(index),
+            Vector3.new(0.6, 6.2, 6.2),
+            CFrame.new(dynamoCenter + Vector3.new(-18 + index * 9, 3.2, -14))
+                * CFrame.Angles(0, 0, math.rad(90 + index * 10)),
+            Enum.Material.Metal,
+            Color3.fromRGB(143, 92, 50)
+        )
+        coil.Shape = Enum.PartType.Cylinder
+        coil.CanCollide = false
+        local core = makePart(
+            parent,
+            "DynamoCore" .. tostring(index),
+            Vector3.new(1.2, 1.2, 1.2),
+            CFrame.new(dynamoCenter + Vector3.new(-18 + index * 9, 3.2, -14)),
+            Enum.Material.Neon,
+            Color3.fromRGB(101, 198, 242)
+        )
+        core.Shape = Enum.PartType.Ball
+        core.CanCollide = false
+        local light = Instance.new("PointLight")
+        light.Color = core.Color
+        light.Brightness = 1.0
+        light.Range = 9
+        light.Parent = core
+    end
+
+    local railCenter = ORIGIN + Vector3.new(108, 0, 145)
+    makeLabel(parent, railCenter + Vector3.new(0, 20, 0), "EASTWORKS RAIL YARD")
+    for lane = -2, 2 do
+        local rail = makePart(
+            parent,
+            "RailLine" .. tostring(lane + 3),
+            Vector3.new(1.0, 0.35, 54),
+            CFrame.new(railCenter + Vector3.new(lane * 5, 0.25, 0)),
+            Enum.Material.Metal,
+            Color3.fromRGB(91, 86, 80)
+        )
+        rail.CanCollide = false
+    end
+    makeScrapPile(parent, railCenter + Vector3.new(-18, 0, 17), math.rad(71), 0.88)
+    makeScrapPile(parent, railCenter + Vector3.new(17, 0, -18), math.rad(-48), 0.82)
+
+    makeMonsterSpawnTrigger(parent, "BrasshavenFurnaceHusks", sootworksCenter, {
+        MonsterType = "FurnaceHusk",
+        SpawnAmount = 4,
+        TriggerRadius = 31,
+        SpawnRadius = 15,
+        MaxAliveMonster = 4,
+        SpawnDelay = 0.3,
+        RespawnTime = 30,
+    })
+    makeMonsterSpawnTrigger(parent, "BrasshavenArcSiphons", dynamoCenter, {
+        MonsterType = "ArcSiphon",
+        SpawnAmount = 4,
+        TriggerRadius = 32,
+        SpawnRadius = 15,
+        MaxAliveMonster = 4,
+        SpawnDelay = 0.26,
+        RespawnTime = 29,
+    })
+    makeMonsterSpawnTrigger(parent, "BrasshavenRailbreaker", railCenter, {
+        MonsterType = "Railbreaker",
+        SpawnAmount = 1,
+        TriggerRadius = 28,
+        SpawnRadius = 7,
+        MaxAliveMonster = 1,
+        SpawnDelay = 0,
+        RespawnTime = 115,
+    })
 end
 
 function BrasshavenWorldService.Init()
@@ -712,7 +804,7 @@ function BrasshavenWorldService.Init()
     local ground = makePart(
         world,
         "BrasshavenThresholdGround",
-        Vector3.new(360, 8, 260),
+        Vector3.new(360, 8, 420),
         CFrame.new(ORIGIN + Vector3.new(0, -4, 0)),
         Enum.Material.Slate,
         Color3.fromRGB(71, 67, 61)
@@ -728,6 +820,16 @@ function BrasshavenWorldService.Init()
         Color3.fromRGB(94, 82, 69)
     )
     road.CanCollide = false
+
+    local serviceSpine = makePart(
+        world,
+        "FoundryServiceSpine",
+        Vector3.new(30, 0.8, 330),
+        CFrame.new(ORIGIN + Vector3.new(24, 0.45, 0)),
+        Enum.Material.Cobblestone,
+        Color3.fromRGB(88, 77, 67)
+    )
+    serviceSpine.CanCollide = false
 
     for index = -3, 3 do
         if index ~= 0 then
@@ -755,7 +857,7 @@ function BrasshavenWorldService.Init()
         world,
         "NorthWall",
         Vector3.new(330, 18, 8),
-        CFrame.new(ORIGIN + Vector3.new(0, 9, -122)),
+        CFrame.new(ORIGIN + Vector3.new(0, 9, -202)),
         Enum.Material.Brick,
         wallColor
     )
@@ -763,14 +865,14 @@ function BrasshavenWorldService.Init()
         world,
         "SouthWall",
         Vector3.new(330, 18, 8),
-        CFrame.new(ORIGIN + Vector3.new(0, 9, 122)),
+        CFrame.new(ORIGIN + Vector3.new(0, 9, 202)),
         Enum.Material.Brick,
         wallColor
     )
     makePart(
         world,
         "EastWall",
-        Vector3.new(8, 18, 244),
+        Vector3.new(8, 18, 404),
         CFrame.new(ORIGIN + Vector3.new(166, 9, 0)),
         Enum.Material.Brick,
         wallColor
@@ -778,7 +880,7 @@ function BrasshavenWorldService.Init()
     makePart(
         world,
         "WestWall",
-        Vector3.new(8, 18, 244),
+        Vector3.new(8, 18, 404),
         CFrame.new(ORIGIN + Vector3.new(-166, 9, 0)),
         Enum.Material.Brick,
         wallColor

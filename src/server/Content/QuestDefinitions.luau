@@ -236,4 +236,65 @@ return table.freeze({
             Currencies = table.freeze({ Shards = 60, Marks = 1 }),
         }),
     }),
+    brasshaven_dead_shift = table.freeze({
+        DisplayName = "The Dead Shift",
+        MinimumLevel = 16,
+        MinimumAdvancementTier = 1,
+        StartNpcId = "belforge_foreman",
+        PrerequisiteQuests = table.freeze({ "brasshaven_pressure_bastion" }),
+        Objectives = table.freeze({
+            table.freeze({ Type = "Defeat", Target = "furnace_husk", Required = 5 }),
+            table.freeze({ Type = "Collect", Target = "furnace_plate", Required = 4 }),
+        }),
+        Reward = table.freeze({
+            Exp = 1500,
+            Currencies = table.freeze({ Shards = 55 }),
+        }),
+    }),
+    brasshaven_arc_fault = table.freeze({
+        DisplayName = "Arc Fault",
+        MinimumLevel = 17,
+        MinimumAdvancementTier = 1,
+        StartNpcId = "belforge_foreman",
+        PrerequisiteQuests = table.freeze({ "brasshaven_dead_shift" }),
+        Objectives = table.freeze({
+            table.freeze({ Type = "Defeat", Target = "arc_siphon", Required = 4 }),
+            table.freeze({ Type = "Collect", Target = "arc_cell", Required = 4 }),
+        }),
+        Reward = table.freeze({
+            Exp = 1900,
+            Currencies = table.freeze({ Shards = 62 }),
+        }),
+    }),
+    brasshaven_crossfeed = table.freeze({
+        DisplayName = "Crossfeed Pressure",
+        MinimumLevel = 18,
+        MinimumAdvancementTier = 1,
+        StartNpcId = "belforge_foreman",
+        PrerequisiteQuests = table.freeze({ "brasshaven_arc_fault" }),
+        Objectives = table.freeze({
+            table.freeze({ Type = "Defeat", Target = "furnace_husk", Required = 4 }),
+            table.freeze({ Type = "Defeat", Target = "cindercoil", Required = 4 }),
+        }),
+        Reward = table.freeze({
+            Exp = 1800,
+            Currencies = table.freeze({ Shards = 68 }),
+            Items = table.freeze({ field_tonic = 2 }),
+        }),
+    }),
+    brasshaven_railbreaker = table.freeze({
+        DisplayName = "Break the Railbreaker",
+        MinimumLevel = 19,
+        MinimumAdvancementTier = 1,
+        StartNpcId = "belforge_foreman",
+        PrerequisiteQuests = table.freeze({ "brasshaven_crossfeed" }),
+        Objectives = table.freeze({
+            table.freeze({ Type = "Defeat", Target = "railbreaker", Required = 1 }),
+            table.freeze({ Type = "Collect", Target = "railbreaker_pin", Required = 1 }),
+        }),
+        Reward = table.freeze({
+            Exp = 2500,
+            Currencies = table.freeze({ Shards = 75, Marks = 1 }),
+        }),
+    }),
 })

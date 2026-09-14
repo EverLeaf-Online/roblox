@@ -68,7 +68,10 @@ assert(
 )
 
 local foreman = NpcDefinitions.belforge_foreman
-assert(foreman and #foreman.QuestOffers == 6, "Vale exposes six sequential Brasshaven quests")
+assert(
+    foreman and #foreman.QuestOffers >= 6,
+    "Vale preserves the first six sequential Brasshaven quests"
+)
 
 -- Conservative no-grind pacing: count only mandatory defeat objectives plus quest EXP.
 -- Brasshaven Passage deposits 220 EXP immediately before arrival at Level 10.

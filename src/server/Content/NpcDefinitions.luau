@@ -88,7 +88,11 @@ return table.freeze({
             "The gearworks sent hounds into the yard on their own. Tear the drive teeth out before they reach the main belts.",
             "Now the cinder ducts are moving. Those coils should be dead metal, not hunting Wayfarers through smoke.",
             "A Pressure Bastion has locked itself across the eastworks regulator row. Break it and bring me the seal off its core housing.",
-            "Good work. The Belforge is still sealed, but now you understand why nobody opens that gate before they are ready.",
+            "The night furnace shift never checked out. Their suits are walking empty now. Clear the husks before they reach the worker lanes.",
+            "Arc Siphons are feeding from the old dynamo gallery. Cut them loose and bring me their cells before the grid starts eating itself.",
+            "Pressure is crossing between systems that were never connected. Thin the Furnace Husks and Cindercoils while I isolate the feed.",
+            "The rail yard just lost a whole maintenance line to one machine. Break the Railbreaker and bring me its authority pin.",
+            "You have earned your place in Brasshaven. The Belforge is still sealed, but Level 20 work begins past the threshold you just cleared.",
         }),
         QuestOffers = table.freeze({
             "brasshaven_first_shift",
@@ -97,6 +101,10 @@ return table.freeze({
             "brasshaven_teeth_in_gears",
             "brasshaven_cinder_signal",
             "brasshaven_pressure_bastion",
+            "brasshaven_dead_shift",
+            "brasshaven_arc_fault",
+            "brasshaven_crossfeed",
+            "brasshaven_railbreaker",
         }),
     }),
 })
