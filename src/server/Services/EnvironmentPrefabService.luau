@@ -48,6 +48,62 @@ local function setCollision(instance)
     end
 end
 
+local function contentId(assetId)
+    if type(assetId) ~= "number" or assetId <= 0 then
+        return ""
+    end
+    return "rbxassetid://" .. tostring(assetId)
+end
+
+local function isFoliagePart(part)
+    local lower = string.lower(part.Name)
+    return string.find(lower, "twig", 1, true) ~= nil
+        or string.find(lower, "leaf", 1, true) ~= nil
+        or string.find(lower, "needle", 1, true) ~= nil
+        or string.find(lower, "foliage", 1, true) ~= nil
+end
+
+local function applyAppearance(instance, appearance)
+    if type(appearance) ~= "table" then
+        return
+    end
+
+    local meshParts = {}
+    if instance:IsA("MeshPart") then
+        table.insert(meshParts, instance)
+    end
+    for _, descendant in instance:GetDescendants() do
+        if descendant:IsA("MeshPart") then
+            table.insert(meshParts, descendant)
+        end
+    end
+
+    for _, part in meshParts do
+        local foliage = isFoliagePart(part)
+        local maps = if foliage then appearance.Foliage else appearance.Bark
+        if maps then
+            local surface = part:FindFirstChildOfClass("SurfaceAppearance")
+            if not surface then
+                surface = Instance.new("SurfaceAppearance")
+                surface.Name = "EverLeafSurfaceAppearance"
+                surface.Parent = part
+            end
+            surface.ColorMap = contentId(maps.ColorMap)
+            surface.NormalMap = contentId(maps.NormalMap)
+            surface.RoughnessMap = contentId(maps.RoughnessMap)
+            surface.MetalnessMap = ""
+            if foliage then
+                surface.AlphaMode = Enum.AlphaMode.Transparency
+                part.DoubleSided = true
+            else
+                surface.AlphaMode = Enum.AlphaMode.Overlay
+            end
+            part.Color = Color3.new(1, 1, 1)
+            part.Material = Enum.Material.SmoothPlastic
+        end
+    end
+end
+
 local function normalizeModel(model)
     if model:IsA("BasePart") then
         model.Anchored = true
@@ -159,11 +215,15 @@ function EnvironmentPrefabService.Register(prefabName, instance, sourceAssetId, 
     end
 
     normalizeModel(instance)
+    if options and options.Appearance then
+        applyAppearance(instance, options.Appearance)
+    end
     if options and options.AutoUpright then
         autoUprightTree(instance)
     end
     instance.Name = prefabName
     instance:SetAttribute("SourceAssetId", sourceAssetId)
+    instance:SetAttribute("GroundToPivot", options and options.GroundToPivot == true or false)
     instance.Parent = getFolder()
     return true, instance
 end
@@ -185,9 +245,18 @@ function EnvironmentPrefabService.Place(prefabName, parent, pivot, scale)
             clone:ScaleTo(scale)
         end)
         clone:PivotTo(pivot)
+        if clone:GetAttribute("GroundToPivot") == true then
+            local boundsCFrame, boundsSize = clone:GetBoundingBox()
+            local bottomY = boundsCFrame.Position.Y - boundsSize.Y * 0.5
+            local verticalOffset = pivot.Position.Y - bottomY
+            clone:PivotTo(CFrame.new(0, verticalOffset, 0) * clone:GetPivot())
+        end
     elseif clone:IsA("BasePart") then
         clone.Size *= scale
         clone.CFrame = pivot
+        if clone:GetAttribute("GroundToPivot") == true then
+            clone.CFrame += Vector3.new(0, clone.Size.Y * 0.5, 0)
+        end
     else
         clone:Destroy()
         return nil, "unsupported_prefab_root"

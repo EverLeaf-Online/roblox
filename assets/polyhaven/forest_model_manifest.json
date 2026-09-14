@@ -4,8 +4,12 @@
   "assets": {
     "pine_sapling_small": {
       "role": "TreePrimary",
-      "roblox_model_asset_id": 106862145251341,
+      "roblox_model_asset_id": 124246481535142,
+      "deprecated_raw_model_asset_id": 106862145251341,
       "source_fbx": "https://dl.polyhaven.org/file/ph-assets/Models/fbx/1k/pine_sapling_small/pine_sapling_small_1k.fbx",
+      "optimized_glb": "assets/polyhaven/models/pine_sapling_small/pine_sapling_small_roblox.glb",
+      "optimized_polygons": 19560,
+      "optimized_glb_bytes": 6300564,
       "status": "Approved"
     },
     "tree_stump_01": {

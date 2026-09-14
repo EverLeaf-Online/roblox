@@ -12,8 +12,6 @@ local LumenreachWorldService = {}
 local GENERATED_NAME = "EverLeafGeneratedWorld"
 local WORLD_WIDTH = 620
 local WORLD_DEPTH = 560
-local TREE_PREFAB_SCALE = 0.22
-local FOREST_PROP_SCALE = 0.35
 
 local function makePart(parent, name, size, cframe, material, color)
     local part = Instance.new("Part")
@@ -35,6 +33,39 @@ local function makeBall(parent, name, size, cframe, material, color)
     return part
 end
 
+local function prefabExtents(prefabName)
+    local prefab = EnvironmentPrefabService.Get(prefabName)
+    if not prefab then
+        return nil
+    end
+    if prefab:IsA("Model") then
+        return prefab:GetExtentsSize()
+    elseif prefab:IsA("BasePart") then
+        return prefab.Size
+    end
+    return nil
+end
+
+local function prefabScaleForHeight(prefabName, targetHeight, multiplier)
+    local extents = prefabExtents(prefabName)
+    if not extents or extents.Y <= 0.001 then
+        return multiplier
+    end
+    return (targetHeight / extents.Y) * multiplier
+end
+
+local function prefabScaleForLongest(prefabName, targetLongest, multiplier)
+    local extents = prefabExtents(prefabName)
+    if not extents then
+        return multiplier
+    end
+    local longest = math.max(extents.X, extents.Y, extents.Z)
+    if longest <= 0.001 then
+        return multiplier
+    end
+    return (targetLongest / longest) * multiplier
+end
+
 local function makeTree(parent, position, scale, variant)
     variant = variant or 1
     local prefabYaw = math.rad((variant * 47) % 360)
@@ -42,7 +73,7 @@ local function makeTree(parent, position, scale, variant)
         "TreePrimary",
         parent,
         CFrame.new(position) * CFrame.Angles(0, prefabYaw, 0),
-        scale * TREE_PREFAB_SCALE
+        prefabScaleForHeight("TreePrimary", 22, scale)
     )
     if prefab then
         return prefab
@@ -148,7 +179,7 @@ local function makeFallenLog(parent, position, yaw, scale)
         "FallenTreeTrunk",
         parent,
         CFrame.new(position) * CFrame.Angles(0, yaw, 0),
-        scale * FOREST_PROP_SCALE
+        prefabScaleForLongest("FallenTreeTrunk", 10, scale)
     )
     if prefab then
         return prefab
@@ -188,7 +219,7 @@ local function makeStump(parent, position, scale)
         "TreeStump",
         parent,
         CFrame.new(position) * CFrame.Angles(0, math.rad(17), 0),
-        scale * FOREST_PROP_SCALE
+        prefabScaleForHeight("TreeStump", 3, scale)
     )
     if prefab then
         return prefab
@@ -223,7 +254,7 @@ local function makePineRoots(parent, position, yaw, scale)
         "PineRoots",
         parent,
         CFrame.new(position) * CFrame.Angles(0, yaw, 0),
-        scale * FOREST_PROP_SCALE
+        prefabScaleForLongest("PineRoots", 7, scale)
     )
     if prefab then
         return prefab
@@ -973,24 +1004,23 @@ local function prepareGround(world)
         terrain:FillBlock(CFrame.new(-55, -0.75, 34), Vector3.new(72, 3, 58), Enum.Material.Ground)
         terrain:FillBlock(CFrame.new(48, -0.85, 28), Vector3.new(76, 2.8, 66), Enum.Material.Grass)
 
-        local perimeterHills = {
-            { Vector3.new(-292, -10, 170), 48, Enum.Material.Grass },
-            { Vector3.new(-300, -8, 55), 52, Enum.Material.Rock },
-            { Vector3.new(-292, -12, -95), 50, Enum.Material.Rock },
-            { Vector3.new(-235, -14, -238), 48, Enum.Material.Grass },
-            { Vector3.new(-95, -16, -255), 46, Enum.Material.Grass },
-            { Vector3.new(70, -16, -260), 48, Enum.Material.Rock },
-            { Vector3.new(225, -13, -235), 52, Enum.Material.Rock },
-            { Vector3.new(292, -9, -120), 48, Enum.Material.Rock },
-            { Vector3.new(300, -9, 35), 50, Enum.Material.Grass },
-            { Vector3.new(285, -11, 185), 48, Enum.Material.Grass },
-            { Vector3.new(175, -14, 255), 46, Enum.Material.Grass },
-            { Vector3.new(10, -15, 265), 48, Enum.Material.Grass },
-            { Vector3.new(-150, -14, 255), 46, Enum.Material.Grass },
-            { Vector3.new(-270, -11, 225), 48, Enum.Material.Rock },
+        local perimeterRidges = {
+            { Vector3.new(-292, -18, 150), Enum.Material.Grass, Vector3.new(0, 0, 1) },
+            { Vector3.new(-292, -18, -90), Enum.Material.Basalt, Vector3.new(0, 0, 1) },
+            { Vector3.new(-160, -20, -248), Enum.Material.Grass, Vector3.new(1, 0, 0) },
+            { Vector3.new(75, -20, -255), Enum.Material.Basalt, Vector3.new(1, 0, 0) },
+            { Vector3.new(286, -18, -105), Enum.Material.Basalt, Vector3.new(0, 0, 1) },
+            { Vector3.new(288, -18, 155), Enum.Material.Grass, Vector3.new(0, 0, 1) },
+            { Vector3.new(110, -20, 255), Enum.Material.Grass, Vector3.new(1, 0, 0) },
+            { Vector3.new(-155, -20, 250), Enum.Material.Basalt, Vector3.new(1, 0, 0) },
         }
-        for _, hill in perimeterHills do
-            terrain:FillBall(hill[1], hill[2], hill[3])
+        for _, ridge in perimeterRidges do
+            local center = ridge[1]
+            local material = ridge[2]
+            local axis = ridge[3]
+            terrain:FillBall(center - axis * 34, 38, material)
+            terrain:FillBall(center + Vector3.new(0, 5, 0), 48, material)
+            terrain:FillBall(center + axis * 38 + Vector3.new(0, -2, 0), 40, material)
         end
 
         local pathSegments = {
@@ -1035,8 +1065,9 @@ local function prepareGround(world)
 
     local boundaryThickness = 8
     local boundaryHeight = 90
-    local halfWidth = WORLD_WIDTH * 0.5
-    local halfDepth = WORLD_DEPTH * 0.5
+    -- Keep collision in front of the scenic ridge instead of at the absolute terrain edge.
+    local halfWidth = WORLD_WIDTH * 0.5 - 58
+    local halfDepth = WORLD_DEPTH * 0.5 - 52
     local boundarySpecs = {
         {
             "NorthBoundary",

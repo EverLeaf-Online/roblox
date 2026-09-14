@@ -25,7 +25,7 @@ Source collection: Poly Haven **Pine Forest** (CC0). The downloaded high/working
 
 | EverLeaf role | Poly Haven source | Roblox asset ID | Status |
 |---|---|---:|---|
-| `TreePrimary` | `pine_sapling_small` | `106862145251341` | Approved |
+| `TreePrimary` | `pine_sapling_small` | `124246481535142` | Approved, optimized textured GLB |
 | `TreeStump` | `tree_stump_01` | `108442673083674` | Approved |
 | `FallenTreeTrunk` | `dead_tree_trunk` | `119607451904702` | Approved |
 | `PineRoots` | `pine_roots` | `103715602023577` | Approved |

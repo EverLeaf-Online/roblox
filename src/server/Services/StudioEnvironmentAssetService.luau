@@ -52,6 +52,8 @@ local function importAsset(entry)
     local registered, reason =
         EnvironmentPrefabService.Register(entry.PrefabName, visualRoot, entry.AssetId, {
             AutoUpright = entry.AutoUpright == true,
+            GroundToPivot = entry.GroundToPivot == true,
+            Appearance = entry.Appearance,
         })
     if not registered then
         visualRoot:Destroy()

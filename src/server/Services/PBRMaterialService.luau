@@ -91,12 +91,7 @@ end
 function PBRMaterialService.ApplyGeneratedWorld(world)
     for _, descendant in world:GetDescendants() do
         if descendant:IsA("BasePart") then
-            if
-                descendant.Material == Enum.Material.Rock
-                or descendant.Material == Enum.Material.Slate
-            then
-                PBRMaterialService.Apply(descendant, "MossyRock")
-            elseif descendant.Material == Enum.Material.WoodPlanks then
+            if descendant.Material == Enum.Material.WoodPlanks then
                 PBRMaterialService.Apply(descendant, "MossWood")
             elseif descendant.Material == Enum.Material.Cobblestone then
                 PBRMaterialService.Apply(descendant, "WoodStonePathway")

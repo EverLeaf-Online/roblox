@@ -12,7 +12,8 @@
     "NeedlesColor": 107051695372257,
     "NeedlesNormal": 123643527847304,
     "NeedlesRoughness": 96029717543713,
-    "TreeModel": 106862145251341
+    "RawTreeModelDeprecated": 106862145251341,
+    "TreeModel": 124246481535142
   },
   "TreeStump": {
     "Model": 108442673083674
