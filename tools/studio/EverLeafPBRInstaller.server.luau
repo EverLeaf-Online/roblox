@@ -42,11 +42,16 @@ local MATERIALS = {
     },
 }
 
+local installPending = false
+
 local function install()
     if RunService:IsRunning() then
-        warn("[EverLeaf PBR] Stop Play mode before installing materials.")
+        installPending = true
+        warn("[EverLeaf PBR] Play mode is active; PBR refresh queued for when Play stops.")
         return false
     end
+
+    installPending = false
 
     for name, definition in MATERIALS do
         local existing = MaterialService:FindFirstChild(name)
@@ -83,6 +88,13 @@ local button = toolbar:CreateButton(
 )
 button.ClickableWhenViewportHidden = true
 button.Click:Connect(install)
+
+-- If the plugin is loaded while Play is active, install immediately after Play stops.
+RunService.Stopped:Connect(function()
+    if installPending then
+        task.defer(install)
+    end
+end)
 
 -- Refresh automatically whenever the plugin loads in edit mode.
 task.defer(install)

@@ -17,4 +17,4 @@ try {
 $InstalledPath = Join-Path $RobloxPluginDir "EverLeafPBRInstaller.rbxm"
 Copy-Item -Force $PluginPath $InstalledPath
 Write-Host "Installed EverLeaf PBR Studio plugin to: $InstalledPath"
-Write-Host "Restart Roblox Studio, or disable/re-enable local plugins, then keep the place in Edit mode for the automatic refresh."
+Write-Host "Restart Roblox Studio, or disable/re-enable local plugins. If Play is active, the plugin queues the PBR refresh and installs automatically when Play stops."
