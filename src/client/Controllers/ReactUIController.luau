@@ -462,8 +462,10 @@ end
 
 local function MainMenu(props)
     local profile = props.Profile or {}
-    local activeTab, setActiveTab = React.useState("CHARACTER")
-    local status, setStatus = React.useState("M toggles menu · Esc closes")
+    local activeTab = props.ActiveTab or "CHARACTER"
+    local status, setStatus = React.useState(
+        "C Character · I Inventory · K Skills · J Quests · M Settings · Esc closes"
+    )
     local catalog = CatalogClient.Get() or {}
     local tabs = { "CHARACTER", "INVENTORY", "SKILLS", "QUESTS", "SETTINGS" }
 
@@ -686,7 +688,9 @@ local function MainMenu(props)
             Font = Enum.Font.GothamBold,
             ZIndex = 31,
             [React.Event.Activated] = function()
-                setActiveTab(tabName)
+                if props.OnTabChanged then
+                    props.OnTabChanged(tabName)
+                end
                 setStatus(tabName .. " panel")
             end,
         }, roundedChildren(nil, 7))
@@ -779,6 +783,7 @@ local function App()
     local profile, setProfile = React.useState(ProfileStore.Get())
     local interaction, setInteraction = React.useState(nil)
     local menuOpen, setMenuOpen = React.useState(false)
+    local menuTab, setMenuTab = React.useState("CHARACTER")
     local health, setHealth = React.useState(100)
     local maxHealth, setMaxHealth = React.useState(100)
     local dead, setDead = React.useState(false)
@@ -883,9 +888,24 @@ local function App()
                 return
             end
 
-            if input.KeyCode == Enum.KeyCode.M and interaction == nil then
-                setMenuOpen(not menuOpen)
-                return
+            if interaction == nil then
+                local tabByKey = {
+                    [Enum.KeyCode.C] = "CHARACTER",
+                    [Enum.KeyCode.I] = "INVENTORY",
+                    [Enum.KeyCode.K] = "SKILLS",
+                    [Enum.KeyCode.J] = "QUESTS",
+                    [Enum.KeyCode.M] = "SETTINGS",
+                }
+                local requestedTab = tabByKey[input.KeyCode]
+                if requestedTab then
+                    if menuOpen and menuTab == requestedTab then
+                        setMenuOpen(false)
+                    else
+                        setMenuTab(requestedTab)
+                        setMenuOpen(true)
+                    end
+                    return
+                end
             end
 
             if input.KeyCode == Enum.KeyCode.Escape then
@@ -910,6 +930,8 @@ local function App()
         }),
         Menu = menuOpen and React.createElement(MainMenu, {
             Profile = profile,
+            ActiveTab = menuTab,
+            OnTabChanged = setMenuTab,
             OnClose = function()
                 setMenuOpen(false)
             end,
