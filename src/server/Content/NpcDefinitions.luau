@@ -34,6 +34,7 @@ return table.freeze({
             "gravebone_problem",
             "mossglen_hunt",
             "old_grove_stirs",
+            "quiet_hunts",
         }),
         ShopId = "scout_outfitter",
     }),
@@ -44,7 +45,7 @@ return table.freeze({
             "The first wayfarers marked their route with Lumen stone, not ink. Their stories are still out there if you know where to look.",
             "There is a hollow behind Veilfall that does not appear on any camp map. Find it, and you may understand why the old road was abandoned.",
         }),
-        QuestOffers = table.freeze({ "lumen_echoes" }),
+        QuestOffers = table.freeze({ "lumen_echoes", "lumen_attunement" }),
         ShopId = "archive_exchange",
     }),
     path_mentor = table.freeze({

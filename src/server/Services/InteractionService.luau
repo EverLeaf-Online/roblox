@@ -1,6 +1,8 @@
 local ItemDefinitions = require(script.Parent.Parent.Content.ItemDefinitions)
 local NpcDefinitions = require(script.Parent.Parent.Content.NpcDefinitions)
 local QuestDefinitions = require(script.Parent.Parent.Content.QuestDefinitions)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local QuestAccessRules = require(ReplicatedStorage.Shared.Logic.QuestAccessRules)
 local ShopDefinitions = require(script.Parent.Parent.Content.ShopDefinitions)
 local InteractionSessionService = require(script.Parent.InteractionSessionService)
 local PlayerDataService = require(script.Parent.PlayerDataService)
@@ -16,15 +18,7 @@ local function prerequisitesMet(profile, definition)
     if not profile then
         return true
     end
-    if profile.Level < (definition.MinimumLevel or 1) then
-        return false
-    end
-    for _, prerequisiteId in definition.PrerequisiteQuests or {} do
-        if profile.Quests.Completed[prerequisiteId] ~= true then
-            return false
-        end
-    end
-    return true
+    return QuestAccessRules.CanStart(profile, definition)
 end
 
 local function visibleQuestOffers(definition, profile)

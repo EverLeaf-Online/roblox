@@ -1,6 +1,7 @@
 local QuestDefinitions = require(script.Parent.Parent.Content.QuestDefinitions)
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local QuestLifecycle = require(ReplicatedStorage.Shared.Logic.QuestLifecycle)
+local QuestAccessRules = require(ReplicatedStorage.Shared.Logic.QuestAccessRules)
 local RewardService = require(script.Parent.RewardService)
 
 local QuestService = {}
@@ -20,13 +21,9 @@ function QuestService.Start(profile, questId)
     if profile.Quests.Active[questId] then
         return false, "already_active"
     end
-    if profile.Level < (definition.MinimumLevel or 1) then
-        return false, "level_too_low"
-    end
-    for _, prerequisiteId in definition.PrerequisiteQuests or {} do
-        if profile.Quests.Completed[prerequisiteId] ~= true then
-            return false, "prerequisite_incomplete"
-        end
+    local accessible, accessReason = QuestAccessRules.CanStart(profile, definition)
+    if not accessible then
+        return false, accessReason
     end
     profile.Quests.Active[questId] = makeState(definition)
     return true

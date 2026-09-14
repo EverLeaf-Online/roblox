@@ -86,13 +86,13 @@ return table.freeze({
             table.freeze({ Type = "Collect", Target = "mosswarden_core", Required = 1 }),
         }),
         Reward = table.freeze({
-            Exp = 400,
+            Exp = 525,
             Currencies = table.freeze({ Shards = 30, Marks = 1 }),
         }),
     }),
     first_advancement_trial = table.freeze({
         DisplayName = "The Five Paths",
-        MinimumLevel = 8,
+        MinimumLevel = 7,
         StartNpcId = "path_mentor",
         PrerequisiteQuests = table.freeze({ "old_grove_stirs" }),
         Objectives = table.freeze({
@@ -104,11 +104,40 @@ return table.freeze({
             Currencies = table.freeze({ Shards = 20, Marks = 1 }),
         }),
     }),
+    quiet_hunts = table.freeze({
+        DisplayName = "The Quiet Hunts",
+        MinimumLevel = 8,
+        StartNpcId = "moss_scout",
+        PrerequisiteQuests = table.freeze({ "first_advancement_trial" }),
+        Objectives = table.freeze({
+            table.freeze({ Type = "Defeat", Target = "royal_glowcap", Required = 1 }),
+            table.freeze({ Type = "Defeat", Target = "lumen_wisp", Required = 3 }),
+        }),
+        Reward = table.freeze({
+            Exp = 600,
+            Currencies = table.freeze({ Shards = 18 }),
+        }),
+    }),
+    lumen_attunement = table.freeze({
+        DisplayName = "Attunement of the Five",
+        MinimumLevel = 8,
+        StartNpcId = "archive_keeper",
+        PrerequisiteQuests = table.freeze({ "first_advancement_trial" }),
+        Objectives = table.freeze({
+            table.freeze({ Type = "Collect", Target = "wisp_essence", Required = 4 }),
+            table.freeze({ Type = "Collect", Target = "glowcap_gel", Required = 4 }),
+        }),
+        Reward = table.freeze({
+            Exp = 650,
+            Currencies = table.freeze({ Shards = 18 }),
+        }),
+    }),
     brasshaven_passage = table.freeze({
         DisplayName = "The Road Beyond Lumenreach",
-        MinimumLevel = 20,
+        MinimumLevel = 10,
+        MinimumAdvancementTier = 1,
         StartNpcId = "lumen_guide",
-        PrerequisiteQuests = table.freeze({ "old_grove_stirs" }),
+        PrerequisiteQuests = table.freeze({ "first_advancement_trial" }),
         Objectives = table.freeze({
             table.freeze({ Type = "Explore", Target = "shattered_lumen_arch", Required = 1 }),
         }),

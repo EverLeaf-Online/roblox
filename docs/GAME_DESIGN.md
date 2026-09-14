@@ -13,7 +13,7 @@ This repository is a clean, original Roblox RPG built from scratch.
 ## Progression baseline
 
 - Level cap: 200.
-- First playable vertical slice: levels 1–30.
+- First playable vertical slice: levels 1–30, with Lumenreach closing the starter/first-advancement chapter and Brasshaven carrying the rest of the slice.
 - Core stats: Might, Finesse, Insight, Fortune.
 - AP: +5 per level.
 - SP: +3 per level after first advancement.
@@ -30,7 +30,7 @@ This repository is a clean, original Roblox RPG built from scratch.
 
 ## World/content baseline
 
-- Early world progression includes Lumenreach and Brasshaven.
+- Early world progression is structured as Lumenreach roughly levels 1–10, then Brasshaven roughly levels 10–30.
 - Belforge Colossus is a planned boss encounter.
 - Core non-Robux currencies include Shards and Marks.
 

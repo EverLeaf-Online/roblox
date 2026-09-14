@@ -1,7 +1,7 @@
 # EverLeaf Roblox — Master Checklist
 
 **Canonical status:** 2026-09-14
-**Latest gameplay checkpoint:** first-advancement implementation — five families, Pathkeeper trial, proving circle, starter skills
+**Latest gameplay checkpoint:** Lumenreach 1–10 progression pacing — advancement route, post-trial bridges, Brasshaven Level-10 gate
 **Purpose:** detailed implementation/status tracker for the entire project.
 **Roadmap:** [`ROADMAP.md`](ROADMAP.md)
 
@@ -231,7 +231,7 @@
 - [x] Advancement tier field.
 - [x] Advancement gates for first tier at 8/10 and later tiers 30/70/120.
 - [x] Headless progression-math tests.
-- [ ] Tune/finalize EXP curve for levels 1–30.
+- [ ] Tune/finalize EXP curve for levels 1–30. Lumenreach 1–10 route now has a regression-tested no-grind baseline; Brasshaven 10–30 remains.
 - [ ] Define death EXP behavior, if any.
 - [x] Level-up toast presentation/feedback foundation.
 - [x] First-advancement presentation/quest flow implemented; Studio end-to-end QA remains.
@@ -599,7 +599,7 @@
 - [x] First movement/jump Studio test.
 - [x] Left-click basic attack verified end-to-end in Studio with server damage and visible swing.
 - [x] Added pure regression coverage for quest lifecycle, rewards, inventory/equipment rules, skills, payload bounds, profile migration, and movement sanity.
-- [ ] Add regression tests for progression curves.
+- [x] Added progression regression coverage for Lumenreach story → Level 8 advancement and post-trial bridge → Level 10.
 - [ ] Add DataStore/session-lock test scenarios.
 - [ ] Add 2+ client Studio test scenarios.
 - [ ] Controller-only test pass.
@@ -648,7 +648,7 @@
 5. [ ] Multiplayer smoke test: target selection, damage ownership, loot ownership, simultaneous trigger activation, and party/network behavior.
 6. [x] Dedicated shop UX, item detail cards, reward/quest/level-up notifications, and field-boss HUD implemented; complete Studio UX QA remains.
 7. [x] Five first families, Seren the Pathkeeper, Wayfarer Proving Circle, The Five Paths trial, permanent family selection, and starter-skill grants implemented; Studio UX/progression QA remains.
-8. [ ] Tune level 1–30 EXP, monster stats, spawn density, drop rates, Shard/Mark sinks, and boss rewards.
+8. [ ] Lumenreach 1–10 EXP pacing now regression-tested; continue Brasshaven 10–30 EXP, monster stats, spawn density, drop rates, Shard/Mark sinks, and boss rewards.
 9. [ ] Performance profile the dense Lumenreach build for frame time, memory, streaming, and listener leaks.
 10. [ ] Complete keyboard/mouse + controller blocking-flow QA and the full no-red-Output Phase 1 run.
 
