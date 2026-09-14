@@ -1,0 +1,9 @@
+{
+  "name": "EverLeaf PBR Installer",
+  "tree": {
+    "$className": "Model",
+    "EverLeafPBRInstaller": {
+      "$path": "tools/studio/EverLeafPBRInstaller.server.luau"
+    }
+  }
+}

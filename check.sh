@@ -29,5 +29,6 @@ done
 echo "[6/6] Rojo build"
 mkdir -p build
 rojo build default.project.json -o build/game.rbxlx
+rojo build studio-pbr-plugin.project.json -o build/EverLeafPBRInstaller.rbxm
 
 echo "All checks passed."
