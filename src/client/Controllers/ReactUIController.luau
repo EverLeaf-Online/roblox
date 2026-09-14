@@ -888,12 +888,7 @@ local function App()
         end
     end, { interaction, menuOpen, dead })
 
-    return React.createElement("ScreenGui", {
-        ResetOnSpawn = false,
-        IgnoreGuiInset = false,
-        DisplayOrder = 10,
-        ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
-    }, {
+    return React.createElement(React.Fragment, nil, {
         HUD = React.createElement(HUD, {
             Profile = profile,
             Health = health,
@@ -924,8 +919,12 @@ function ReactUIController.Start()
         existing:Destroy()
     end
 
-    local mount = Instance.new("Folder")
+    local mount = Instance.new("ScreenGui")
     mount.Name = "EverLeafReactMount"
+    mount.ResetOnSpawn = false
+    mount.IgnoreGuiInset = false
+    mount.DisplayOrder = 10
+    mount.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     mount.Parent = playerGui
 
     reactRoot = ReactRoblox.createRoot(mount)
