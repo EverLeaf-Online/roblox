@@ -5,6 +5,24 @@
     "ReplicatedStorage": {
       "Shared": {
         "$path": "src/shared"
+      },
+      "EverLeafRemotes": {
+        "$className": "Folder",
+        "ProfileReady": {
+          "$className": "RemoteEvent"
+        },
+        "ProfileChanged": {
+          "$className": "RemoteEvent"
+        },
+        "AllocateStat": {
+          "$className": "RemoteFunction"
+        },
+        "RequestProfile": {
+          "$className": "RemoteFunction"
+        },
+        "BasicAttack": {
+          "$className": "RemoteFunction"
+        }
       }
     },
     "ServerScriptService": {

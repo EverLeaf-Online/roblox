@@ -167,16 +167,39 @@ local function createAttackButton()
 end
 
 function CombatController.Start()
-    local remotes = ReplicatedStorage:WaitForChild(Net.RemoteFolderName)
-    attackRemote = remotes:WaitForChild(Net.Functions.BasicAttack)
-
     createAttackButton()
+    if attackButton then
+        attackButton.Text = "CONNECTING..."
+    end
 
     UserInputService.InputBegan:Connect(function(input)
         if input.KeyCode == Enum.KeyCode.Z or input.KeyCode == Enum.KeyCode.ButtonR2 then
             performAttack()
         end
     end)
+
+    local remotes = ReplicatedStorage:WaitForChild(Net.RemoteFolderName, 5)
+    if not remotes then
+        if attackButton then
+            attackButton.Text = "COMBAT OFFLINE"
+        end
+        warn("[CombatController] EverLeafRemotes folder was not found")
+        return
+    end
+
+    local remote = remotes:WaitForChild(Net.Functions.BasicAttack, 5)
+    if not remote or not remote:IsA("RemoteFunction") then
+        if attackButton then
+            attackButton.Text = "COMBAT OFFLINE"
+        end
+        warn("[CombatController] BasicAttack RemoteFunction was not found")
+        return
+    end
+
+    attackRemote = remote
+    if attackButton then
+        attackButton.Text = "ATTACK  [Z]"
+    end
 end
 
 return CombatController
