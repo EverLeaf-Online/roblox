@@ -59,6 +59,7 @@
 - [x] Lumenreach 3D benchmark graybox generated from canonical source.
 - [ ] **PARTIAL:** Asset import/optimization pipeline now includes Studio-only sanitized Creator Store prefab intake; source-controlled production asset ingestion still pending.
 - [x] Poly Haven/approved Sketchfab material/model source policy documented.
+- [x] Poly Haven 1K PBR source set downloaded, hash-manifested, and wired to a Roblox MaterialVariant registry; Roblox texture asset uploads remain pending.
 - [x] Source-controlled wind/ambient-motion foundation integrated; production foliage assets and performance tuning remain.
 - [ ] Streaming/performance budgets measured in Studio.
 - [ ] First production-quality environment benchmark scene.

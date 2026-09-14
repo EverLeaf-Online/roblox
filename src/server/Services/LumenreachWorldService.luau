@@ -4,6 +4,7 @@ local Workspace = game:GetService("Workspace")
 local EnemySpawnerService = require(script.Parent.EnemySpawnerService)
 local EnvironmentPrefabService = require(script.Parent.EnvironmentPrefabService)
 local InteractionService = require(script.Parent.InteractionService)
+local PBRMaterialService = require(script.Parent.PBRMaterialService)
 local WorldObjectService = require(script.Parent.WorldObjectService)
 
 local LumenreachWorldService = {}
@@ -1169,6 +1170,7 @@ function LumenreachWorldService.Init()
 
     prepareGround(world)
     decorate(world)
+    PBRMaterialService.ApplyGeneratedWorld(world)
     makeSpawn(world)
     makeGuide(world, Vector3.new(-48, 2, 35))
 

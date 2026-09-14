@@ -1,0 +1,123 @@
+{
+  "source": "Poly Haven",
+  "license": "CC0",
+  "resolution": "1k",
+  "format": "jpg",
+  "materials": {
+    "forest_ground": {
+      "polyhaven_id": "forrest_ground_01",
+      "name": "Forest Ground 01",
+      "source_url": "https://polyhaven.com/a/forrest_ground_01",
+      "license": "CC0",
+      "maps": {
+        "color": {
+          "file": "assets/polyhaven/forest_ground/forest_ground_color_1k.jpg",
+          "md5": "236e7d928f5e357a194fd92de189cbe4",
+          "bytes": 833711
+        },
+        "normal": {
+          "file": "assets/polyhaven/forest_ground/forest_ground_normal_1k.jpg",
+          "md5": "ba4265df25aea293913d004b69ef9ab0",
+          "bytes": 1428763
+        },
+        "roughness": {
+          "file": "assets/polyhaven/forest_ground/forest_ground_roughness_1k.jpg",
+          "md5": "72dacf5b829cafc025f08ca64e92e5eb",
+          "bytes": 257165
+        }
+      }
+    },
+    "mossy_rock": {
+      "polyhaven_id": "mossy_rock",
+      "name": "Mossy Rock",
+      "source_url": "https://polyhaven.com/a/mossy_rock",
+      "license": "CC0",
+      "maps": {
+        "color": {
+          "file": "assets/polyhaven/mossy_rock/mossy_rock_color_1k.jpg",
+          "md5": "a57fbbf55269eb64f8d40708fe3af26c",
+          "bytes": 1124438
+        },
+        "normal": {
+          "file": "assets/polyhaven/mossy_rock/mossy_rock_normal_1k.jpg",
+          "md5": "59370f9b3d068271c2bccfb414dc325b",
+          "bytes": 995727
+        },
+        "roughness": {
+          "file": "assets/polyhaven/mossy_rock/mossy_rock_roughness_1k.jpg",
+          "md5": "7eadb38815ad2569104d827ad8ac1572",
+          "bytes": 780918
+        }
+      }
+    },
+    "moss_wood": {
+      "polyhaven_id": "moss_wood",
+      "name": "Moss Wood",
+      "source_url": "https://polyhaven.com/a/moss_wood",
+      "license": "CC0",
+      "maps": {
+        "color": {
+          "file": "assets/polyhaven/moss_wood/moss_wood_color_1k.jpg",
+          "md5": "3de94c0b72a86b272335c3726dfc705b",
+          "bytes": 915794
+        },
+        "normal": {
+          "file": "assets/polyhaven/moss_wood/moss_wood_normal_1k.jpg",
+          "md5": "194a920f2dacf9d2a09342a32bd0dd0b",
+          "bytes": 1098945
+        },
+        "roughness": {
+          "file": "assets/polyhaven/moss_wood/moss_wood_roughness_1k.jpg",
+          "md5": "7cfc20627bce9b5b88bfe9d9aaba058e",
+          "bytes": 315356
+        }
+      }
+    },
+    "wood_chip_path": {
+      "polyhaven_id": "wood_chip_path",
+      "name": "Wood Chip Path",
+      "source_url": "https://polyhaven.com/a/wood_chip_path",
+      "license": "CC0",
+      "maps": {
+        "color": {
+          "file": "assets/polyhaven/wood_chip_path/wood_chip_path_color_1k.jpg",
+          "md5": "8b5da33ea5d2352a55a46ac4e80c3bb5",
+          "bytes": 1000152
+        },
+        "normal": {
+          "file": "assets/polyhaven/wood_chip_path/wood_chip_path_normal_1k.jpg",
+          "md5": "50527cd1e763242101d392391b1547c2",
+          "bytes": 1332341
+        },
+        "roughness": {
+          "file": "assets/polyhaven/wood_chip_path/wood_chip_path_roughness_1k.jpg",
+          "md5": "68514508893e5be152c7bcaea9e90068",
+          "bytes": 413024
+        }
+      }
+    },
+    "wood_stone_pathway": {
+      "polyhaven_id": "wood_stone_pathway",
+      "name": "Wood Stone Pathway",
+      "source_url": "https://polyhaven.com/a/wood_stone_pathway",
+      "license": "CC0",
+      "maps": {
+        "color": {
+          "file": "assets/polyhaven/wood_stone_pathway/wood_stone_pathway_color_1k.jpg",
+          "md5": "87be796fadb1f46f1a09226a6f36cbf0",
+          "bytes": 799878
+        },
+        "normal": {
+          "file": "assets/polyhaven/wood_stone_pathway/wood_stone_pathway_normal_1k.jpg",
+          "md5": "99d64d7443171b79e88ccba968236f58",
+          "bytes": 1122763
+        },
+        "roughness": {
+          "file": "assets/polyhaven/wood_stone_pathway/wood_stone_pathway_roughness_1k.jpg",
+          "md5": "faafc82bbbdc2212083765a6f9266610",
+          "bytes": 602415
+        }
+      }
+    }
+  }
+}
