@@ -1,7 +1,7 @@
 # EverLeaf Roblox — Master Checklist
 
 **Canonical status:** 2026-09-14
-**Latest gameplay checkpoint:** Belforge entry shell — sealed eastworks gate, foreman NPC, Phase-1 onward destination
+**Latest gameplay checkpoint:** first-family starter gear — five path weapons, family restrictions, advancement grants, equipment stat scaling
 **Purpose:** detailed implementation/status tracker for the entire project.
 **Roadmap:** [`ROADMAP.md`](ROADMAP.md)
 
@@ -132,6 +132,7 @@
 - [x] Client action/catalog/profile/UI-state layers.
 - [x] Reward pipeline can grant EXP, currencies, and items.
 - [x] Equipment stat bonuses feed combat damage.
+- [x] Equipment core-stat bonuses now feed the corresponding primary-stat damage roll.
 - [x] Physical world-object registry + proximity validation for NPCs/portals.
 - [x] Enemy AI state-machine + enemy-to-player damage architecture.
 - [x] Generic skill targeting/effect execution architecture.
@@ -263,9 +264,10 @@
 - [x] First families finalized: Ironbloom, Thornrunner, Lumenweaver, Veilstrider, Brasshand.
 - [x] Level gates locked: Ironbloom/Thornrunner/Veilstrider at 8; Lumenweaver/Brasshand at 10.
 - [x] Primary stat/role identities defined for all five first families; deeper secondary-stat scaling remains for later tuning.
-- [ ] Define starting weapons/equipment identities.
+- [x] First-family starter weapons defined and granted: Rootsteel Bastion Blade, Briarstring Fieldbow, Prismatic Lumen Focus, Veilglass Twin Knives, and Rivethead Forge Maul.
 - [x] First advancement requires The Five Paths trial: Wayfarer Proving Circle + Gravebone Captain, after Mosswarden progression.
-- [x] First advancement implemented with server validation, permanent family binding, +3 starting SP, starter skill grant/hotbar assignment, and family-aware basic attacks.
+- [x] First advancement implemented with server validation, permanent family binding, +3 starting SP, starter skill grant/hotbar assignment, family-aware basic attacks, and starter-weapon delivery.
+- [x] Equipment family/tier/level restrictions are validated server-side.
 - [ ] Implement level-30 advancements.
 - [ ] Implement level-70 advancements.
 - [ ] Implement level-120 advancements.

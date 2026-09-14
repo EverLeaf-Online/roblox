@@ -23,6 +23,12 @@ This repository is a clean, original Roblox RPG built from scratch.
   - Lumenweaver — Level 10, Insight, Lumen caster.
   - Veilstrider — Level 8, Fortune, agile skirmisher.
   - Brasshand — Level 10, Might, close-range bruiser/battlecraft path.
+- First-family starter weapons are identity-locked equipment rather than cosmetic labels:
+  - Ironbloom — Rootsteel Bastion Blade.
+  - Thornrunner — Briarstring Fieldbow.
+  - Lumenweaver — Prismatic Lumen Focus.
+  - Veilstrider — Veilglass Twin Knives.
+  - Brasshand — Rivethead Forge Maul.
 - Later advancements: levels 30, 70, and 120.
 - Damage uses mastery-based variance rather than a single deterministic roll.
 - HP/MP growth, attack cadence, knockback, and aggro are first-class combat systems.

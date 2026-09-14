@@ -1,5 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local InventoryRules = require(ReplicatedStorage.Shared.Logic.InventoryRules)
+local EquipmentEligibilityRules = require(ReplicatedStorage.Shared.Logic.EquipmentEligibilityRules)
 local InventoryService = require(script.Parent.InventoryService)
 
 local EquipmentService = {}
@@ -16,6 +17,10 @@ function EquipmentService.Equip(profile, inventoryIndex)
     local equipmentSlot = definition.EquipmentSlot
     if not InventoryRules.IsValidEquipmentSlot(equipmentSlot) then
         return false, "invalid_equipment_slot"
+    end
+    local eligible, eligibilityReason = EquipmentEligibilityRules.CanEquip(profile, definition)
+    if not eligible then
+        return false, eligibilityReason
     end
 
     local newItemId = slot.ItemId

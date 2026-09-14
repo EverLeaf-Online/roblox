@@ -2,6 +2,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
 local AdvancementRules = require(ReplicatedStorage.Shared.Logic.AdvancementRules)
 local ClassFamilyDefinitions = require(script.Parent.Parent.Content.ClassFamilyDefinitions)
+local InventoryService = require(script.Parent.InventoryService)
 
 local AdvancementService = {}
 local FIRST_TRIAL_QUEST_ID = "first_advancement_trial"
@@ -47,6 +48,33 @@ local function assignStarterSkill(profile, starterSkillId)
     return nil
 end
 
+local function canGrantStarterItem(profile, starterItemId)
+    if type(starterItemId) ~= "string" or starterItemId == "" then
+        return true
+    end
+    local weapon = profile.Equipment and profile.Equipment.Weapon or ""
+    if weapon == nil or weapon == "" then
+        return true
+    end
+    return InventoryService.CanAdd(profile, starterItemId, 1)
+end
+
+local function grantStarterItem(profile, starterItemId)
+    if type(starterItemId) ~= "string" or starterItemId == "" then
+        return nil, false
+    end
+    profile.Equipment = profile.Equipment or {}
+    if profile.Equipment.Weapon == nil or profile.Equipment.Weapon == "" then
+        profile.Equipment.Weapon = starterItemId
+        return starterItemId, true
+    end
+    local added = InventoryService.Add(profile, starterItemId, 1)
+    if added then
+        return starterItemId, false
+    end
+    return nil, false
+end
+
 function AdvancementService.FirstAdvance(profile, familyId)
     local ok, reason = AdvancementService.CanFirstAdvance(profile, familyId)
     if not ok then
@@ -54,10 +82,15 @@ function AdvancementService.FirstAdvance(profile, familyId)
     end
 
     local family = ClassFamilyDefinitions[familyId]
+    if not canGrantStarterItem(profile, family.StarterItemId) then
+        return false, "inventory_full"
+    end
+
     profile.FamilyId = familyId
     profile.AdvancementTier = 1
     profile.SP += STARTING_SP
     local hotbarSlot = assignStarterSkill(profile, family.StarterSkillId)
+    local starterItemId, starterItemEquipped = grantStarterItem(profile, family.StarterItemId)
 
     return true,
         {
@@ -66,6 +99,8 @@ function AdvancementService.FirstAdvance(profile, familyId)
             FamilyDisplayName = family.DisplayName,
             StarterSkillId = family.StarterSkillId,
             StarterSkillHotbarSlot = hotbarSlot,
+            StarterItemId = starterItemId,
+            StarterItemEquipped = starterItemEquipped,
             GrantedSP = STARTING_SP,
         }
 end

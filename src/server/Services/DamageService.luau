@@ -33,7 +33,8 @@ function DamageService.RollBasicDamage(profile, definition)
 
     mastery =
         math.clamp(mastery, GameConfig.Combat.MinimumMastery, GameConfig.Combat.MaximumMastery)
-    local primaryValue = profile.Stats[primaryStat] or 0
+    local primaryValue = (profile.Stats[primaryStat] or 0)
+        + EquipmentService.GetStatBonus(profile, primaryStat)
     local minimum, maximum =
         DamageMath.CalculateRange(primaryValue, attackPower, statScale, mastery)
     local damage = DamageMath.RollFromUnit(minimum, maximum, random:NextNumber())

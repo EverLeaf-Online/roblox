@@ -78,6 +78,7 @@ function AdvancementOverlay.Component(props)
         and level >= requiredLevel
     local starterSkill = selected and catalog.Skills and catalog.Skills[selected.StarterSkillId]
         or nil
+    local starterItem = selected and catalog.Items and catalog.Items[selected.StarterItemId] or nil
 
     local familyRows = {}
     for index, familyId in FAMILY_ORDER do
@@ -306,7 +307,7 @@ function AdvancementOverlay.Component(props)
                 }),
                 SkillBody = label({
                     Position = UDim2.fromOffset(24, 241),
-                    Size = UDim2.new(1, -48, 0, 54),
+                    Size = UDim2.new(1, -48, 0, 42),
                     Text = starterSkill and starterSkill.Description or "",
                     TextSize = 10,
                     Wrapped = true,
@@ -314,8 +315,26 @@ function AdvancementOverlay.Component(props)
                     Color = Color3.fromRGB(148, 176, 162),
                     ZIndex = 63,
                 }),
+                WeaponKicker = label({
+                    Position = UDim2.fromOffset(24, 286),
+                    Size = UDim2.fromOffset(105, 16),
+                    Text = "PATH WEAPON",
+                    TextSize = 8,
+                    Bold = true,
+                    Color = Color3.fromRGB(121, 244, 183),
+                    ZIndex = 63,
+                }),
+                Weapon = label({
+                    Position = UDim2.fromOffset(135, 284),
+                    Size = UDim2.new(1, -159, 0, 20),
+                    Text = starterItem and starterItem.DisplayName or "—",
+                    TextSize = 10,
+                    Bold = true,
+                    Color = Color3.fromRGB(226, 238, 232),
+                    ZIndex = 63,
+                }),
                 Gate = label({
-                    Position = UDim2.fromOffset(24, 309),
+                    Position = UDim2.fromOffset(24, 315),
                     Size = UDim2.new(1, -48, 0, 24),
                     Text = selected
                             and reasonText(

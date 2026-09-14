@@ -63,6 +63,7 @@ function CatalogService.Build()
             "CombatRole",
             "FirstAdvancementLevel",
             "StarterSkillId",
+            "StarterItemId",
             "Accent",
             "Summary",
         }),
