@@ -140,6 +140,16 @@ local function makeTree(parent, position, scale, variant)
 end
 
 local function makeFallenLog(parent, position, yaw, scale)
+    local prefab = EnvironmentPrefabService.Place(
+        "FallenTreeTrunk",
+        parent,
+        CFrame.new(position) * CFrame.Angles(0, yaw, 0),
+        scale
+    )
+    if prefab then
+        return prefab
+    end
+
     local model = Instance.new("Model")
     model.Name = "FallenLog"
     model.Parent = parent
@@ -170,6 +180,16 @@ local function makeFallenLog(parent, position, yaw, scale)
 end
 
 local function makeStump(parent, position, scale)
+    local prefab = EnvironmentPrefabService.Place(
+        "TreeStump",
+        parent,
+        CFrame.new(position) * CFrame.Angles(0, math.rad(17), 0),
+        scale
+    )
+    if prefab then
+        return prefab
+    end
+
     local model = Instance.new("Model")
     model.Name = "TreeStump"
     model.Parent = parent
@@ -192,6 +212,19 @@ local function makeStump(parent, position, scale)
     ).CanCollide =
         false
     return model
+end
+
+local function makePineRoots(parent, position, yaw, scale)
+    local prefab = EnvironmentPrefabService.Place(
+        "PineRoots",
+        parent,
+        CFrame.new(position) * CFrame.Angles(0, yaw, 0),
+        scale
+    )
+    if prefab then
+        return prefab
+    end
+    return nil
 end
 
 local function makeFern(parent, position, scale)
@@ -1123,6 +1156,9 @@ local function decorate(world)
     makeStump(world, Vector3.new(-62, 0, 67), 0.9)
     makeStump(world, Vector3.new(83, 0, 17), 0.72)
     makeStump(world, Vector3.new(12, 0, -66), 0.8)
+    makePineRoots(world, Vector3.new(-84, 0, -18), math.rad(24), 0.78)
+    makePineRoots(world, Vector3.new(76, 0, 57), math.rad(-38), 0.72)
+    makePineRoots(world, Vector3.new(31, 0, -63), math.rad(71), 0.66)
 
     makeCampfire(world, Vector3.new(-59, 0, 31))
     makeTent(world, Vector3.new(-72, 0.2, 28), math.rad(18))

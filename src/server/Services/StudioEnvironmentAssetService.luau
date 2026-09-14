@@ -76,12 +76,13 @@ local function importAsset(entry)
 end
 
 function StudioEnvironmentAssetService.Init()
-    if not RunService:IsStudio() then
-        return
-    end
+    local inStudio = RunService:IsStudio()
 
     for _, entry in EnvironmentAssetRegistry do
-        if entry.Status == "approved_for_studio_sanitized_import" and entry.PrefabName then
+        local approved = entry.Status == "approved_for_sanitized_import"
+            or entry.Status == "approved_for_studio_sanitized_import"
+        local allowedHere = inStudio or entry.AllowRuntimeLoad == true
+        if approved and allowedHere and entry.PrefabName then
             importAsset(entry)
         end
     end

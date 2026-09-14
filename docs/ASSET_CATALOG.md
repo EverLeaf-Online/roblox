@@ -1,6 +1,6 @@
 # EverLeaf Environment Asset Catalog
 
-This catalog tracks third-party environment assets before they are allowed into production. Marketplace assets are never loaded dynamically at runtime. Every model is imported into Studio, inspected, stripped of scripts/unneeded instances, optimized, and then source-controlled or otherwise recorded as an approved production dependency.
+This catalog tracks third-party environment assets before they are allowed into production. Untrusted marketplace assets are never loaded dynamically during live gameplay. EverLeaf-owned assets produced from reviewed CC0 source files may be runtime-loaded from Roblox by asset ID after sanitization. Every production dependency must have source/license provenance and a bounded import path.
 
 ## Current candidates
 
@@ -19,10 +19,15 @@ This catalog tracks third-party environment assets before they are allowed into 
 5. Record attribution/license requirements before shipping.
 6. Never call `InsertService:LoadAsset()` for marketplace environment content during live gameplay.
 
-## Tree — 580221169
+## Phase 1 Pine Forest kit — active
 
-- Creator Store asset: `580221169`
-- Status: approved for Studio-only sanitized auto-import.
-- Runtime policy: never dynamically loaded outside Studio.
-- Sanitization: scripts, remotes, bindables, prompts, click detectors, and sounds are stripped before registration.
-- Lumenreach uses `TreePrimary` when available and falls back to the procedural tree only when the prefab cannot be loaded.
+Source collection: Poly Haven **Pine Forest** (CC0). The downloaded high/working source files are not committed; `assets/polyhaven/forest_model_manifest.json` records reproducible source URLs and Roblox asset IDs.
+
+| EverLeaf role | Poly Haven source | Roblox asset ID | Status |
+|---|---|---:|---|
+| `TreePrimary` | `pine_sapling_small` | `106862145251341` | Approved |
+| `TreeStump` | `tree_stump_01` | `108442673083674` | Approved |
+| `FallenTreeTrunk` | `dead_tree_trunk` | `119607451904702` | Approved |
+| `PineRoots` | `pine_roots` | `103715602023577` | Approved |
+
+All four models are EverLeaf-owned Roblox uploads sourced from CC0 files. The loader sanitizes them before prefab registration. `TreePrimary` replaces the broken Creator Store tree `580221169`; that old asset is no longer an active Lumenreach dependency. Procedural geometry remains only as a fail-safe when a trusted prefab cannot be loaded.

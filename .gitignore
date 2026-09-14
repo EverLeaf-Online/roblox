@@ -7,3 +7,6 @@ Packages/
 .DS_Store
 Thumbs.db
 *.bak.*
+
+# Large local Poly Haven model source working set; reproducible from manifest.
+assets/polyhaven/models/

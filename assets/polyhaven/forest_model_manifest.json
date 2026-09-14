@@ -1,0 +1,30 @@
+{
+  "license": "CC0-1.0",
+  "source": "https://polyhaven.com/collections/pine_forest",
+  "assets": {
+    "pine_sapling_small": {
+      "role": "TreePrimary",
+      "roblox_model_asset_id": 106862145251341,
+      "source_fbx": "https://dl.polyhaven.org/file/ph-assets/Models/fbx/1k/pine_sapling_small/pine_sapling_small_1k.fbx",
+      "status": "Approved"
+    },
+    "tree_stump_01": {
+      "role": "TreeStump",
+      "roblox_model_asset_id": 108442673083674,
+      "source_fbx": "https://dl.polyhaven.org/file/ph-assets/Models/fbx/1k/tree_stump_01/tree_stump_01_1k.fbx",
+      "status": "Approved"
+    },
+    "dead_tree_trunk": {
+      "role": "FallenTreeTrunk",
+      "roblox_model_asset_id": 119607451904702,
+      "source_fbx": "https://dl.polyhaven.org/file/ph-assets/Models/fbx/1k/dead_tree_trunk/dead_tree_trunk_1k.fbx",
+      "status": "Approved"
+    },
+    "pine_roots": {
+      "role": "PineRoots",
+      "roblox_model_asset_id": 103715602023577,
+      "source_fbx": "https://dl.polyhaven.org/file/ph-assets/Models/fbx/1k/pine_roots/pine_roots_1k.fbx",
+      "status": "Approved"
+    }
+  }
+}

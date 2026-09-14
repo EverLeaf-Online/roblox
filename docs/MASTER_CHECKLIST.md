@@ -148,7 +148,7 @@
 - [x] Poly Haven 1K PBR source set downloaded, hash-manifested, uploaded to Roblox (15/15 approved), wired to generated asset IDs, and Studio MaterialVariants verified.
 - [x] Source-controlled wind/ambient-motion foundation integrated; production foliage assets and performance tuning remain.
 - [ ] Streaming/performance budgets measured in Studio.
-- [ ] First production-quality environment benchmark scene.
+- [ ] **PARTIAL:** First production-quality environment benchmark scene is in active replacement pass: Poly Haven PBR materials are live and the Pine Forest prefab kit is wired; foliage density, rock/ruin/camp prop replacement and performance verification remain.
 
 ## 1. Repository / development environment
 
