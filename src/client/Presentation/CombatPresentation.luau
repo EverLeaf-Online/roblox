@@ -1,5 +1,6 @@
 local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local CombatPresentation = {}
@@ -13,6 +14,10 @@ local FAMILY_COLORS = table.freeze({
     brasshand = Color3.fromRGB(241, 187, 82),
 })
 
+local attackGeneration = 0
+
+local IDENTITY = CFrame.new()
+
 local function findMotor(character, names)
     for _, name in names do
         local joint = character:FindFirstChild(name, true)
@@ -23,24 +28,7 @@ local function findMotor(character, names)
     return nil
 end
 
-local function tweenJoint(joint, c0, duration, style, direction)
-    if not joint or not joint.Parent then
-        return nil
-    end
-    local tween = TweenService:Create(
-        joint,
-        TweenInfo.new(
-            duration,
-            style or Enum.EasingStyle.Quad,
-            direction or Enum.EasingDirection.Out
-        ),
-        { C0 = c0 }
-    )
-    tween:Play()
-    return tween
-end
-
-local function joints(character)
+local function rigJoints(character)
     local right = findMotor(character, { "RightShoulder", "Right Shoulder" })
     if not right then
         return nil
@@ -48,218 +36,234 @@ local function joints(character)
     return {
         Right = right,
         Left = findMotor(character, { "LeftShoulder", "Left Shoulder" }),
+        RightElbow = findMotor(character, { "RightElbow" }),
+        LeftElbow = findMotor(character, { "LeftElbow" }),
         Torso = findMotor(character, { "Waist", "RootJoint", "Root Joint" }),
-        RightBase = right.C0,
-        LeftBase = findMotor(character, { "LeftShoulder", "Left Shoulder" })
-                and findMotor(character, { "LeftShoulder", "Left Shoulder" }).C0
-            or nil,
-        TorsoBase = findMotor(character, { "Waist", "RootJoint", "Root Joint" })
-                and findMotor(character, { "Waist", "RootJoint", "Root Joint" }).C0
-            or nil,
     }
 end
 
-local function restore(state, duration)
-    tweenJoint(
-        state.Right,
-        state.RightBase,
-        duration,
-        Enum.EasingStyle.Quad,
-        Enum.EasingDirection.InOut
-    )
-    if state.Left and state.LeftBase then
-        tweenJoint(
-            state.Left,
-            state.LeftBase,
-            duration,
-            Enum.EasingStyle.Quad,
-            Enum.EasingDirection.InOut
-        )
-    end
-    if state.Torso and state.TorsoBase then
-        tweenJoint(
-            state.Torso,
-            state.TorsoBase,
-            duration,
-            Enum.EasingStyle.Quad,
-            Enum.EasingDirection.InOut
-        )
-    end
+local function angles(x, y, z)
+    return CFrame.Angles(math.rad(x or 0), math.rad(y or 0), math.rad(z or 0))
 end
 
-local function meleeSwing(state, heavy)
-    local windupDuration = heavy and 0.1 or 0.065
-    local strikeDuration = heavy and 0.13 or 0.085
-    local windup = tweenJoint(
-        state.Right,
-        state.RightBase
-            * CFrame.Angles(
-                math.rad(heavy and 50 or 28),
-                math.rad(-12),
-                math.rad(heavy and 52 or 36)
-            ),
-        windupDuration
-    )
-    if state.Left and state.LeftBase then
-        tweenJoint(
-            state.Left,
-            state.LeftBase * CFrame.Angles(math.rad(-8), 0, math.rad(-12)),
-            windupDuration
-        )
-    end
-    if state.Torso and state.TorsoBase then
-        tweenJoint(
-            state.Torso,
-            state.TorsoBase * CFrame.Angles(0, math.rad(heavy and -24 or -16), 0),
-            windupDuration
-        )
-    end
-    if windup then
-        windup.Completed:Wait()
-    end
-    local strike = tweenJoint(
-        state.Right,
-        state.RightBase
-            * CFrame.Angles(math.rad(heavy and -112 or -92), math.rad(10), math.rad(-14)),
-        strikeDuration,
-        Enum.EasingStyle.Quart
-    )
-    if state.Torso and state.TorsoBase then
-        tweenJoint(
-            state.Torso,
-            state.TorsoBase * CFrame.Angles(0, math.rad(heavy and 30 or 24), 0),
-            strikeDuration,
-            Enum.EasingStyle.Quart
-        )
-    end
-    if strike then
-        strike.Completed:Wait()
-    end
-    restore(state, heavy and 0.2 or 0.15)
+local function frame(time, pose)
+    pose.Time = time
+    return pose
 end
 
-local function bowShot(state)
-    local left = state.Left
-    if not left or not state.LeftBase then
-        meleeSwing(state, false)
+local ATTACK_SEQUENCES = table.freeze({
+    default = table.freeze({
+        Duration = 0.34,
+        Frames = table.freeze({
+            frame(0, {}),
+            frame(0.18, {
+                Right = angles(40, -12, 58),
+                Left = angles(-8, 0, -10),
+                Torso = angles(0, -18, 0),
+                RightElbow = angles(-24, 0, 0),
+            }),
+            frame(0.52, {
+                Right = angles(-112, 12, -24),
+                Left = angles(10, 0, 8),
+                Torso = angles(0, 30, 0),
+                RightElbow = angles(18, 0, 0),
+            }),
+            frame(1, {}),
+        }),
+    }),
+    ironbloom = table.freeze({
+        Duration = 0.43,
+        Frames = table.freeze({
+            frame(0, {}),
+            frame(0.22, {
+                Right = angles(62, -15, 66),
+                Left = angles(14, 8, -24),
+                Torso = angles(-5, -30, 0),
+                RightElbow = angles(-38, 0, 0),
+            }),
+            frame(0.56, {
+                Right = angles(-132, 15, -30),
+                Left = angles(-18, -5, 16),
+                Torso = angles(6, 38, 0),
+                RightElbow = angles(12, 0, 0),
+            }),
+            frame(0.72, {
+                Right = angles(-88, 6, -15),
+                Torso = angles(3, 20, 0),
+            }),
+            frame(1, {}),
+        }),
+    }),
+    thornrunner = table.freeze({
+        Duration = 0.4,
+        Frames = table.freeze({
+            frame(0, {}),
+            frame(0.22, {
+                Left = angles(-82, -8, -18),
+                Right = angles(-74, 34, 82),
+                LeftElbow = angles(-22, 0, 0),
+                RightElbow = angles(-90, 0, 0),
+                Torso = angles(0, -24, 0),
+            }),
+            frame(0.5, {
+                Left = angles(-88, -4, -12),
+                Right = angles(-86, 3, 8),
+                LeftElbow = angles(-14, 0, 0),
+                RightElbow = angles(-18, 0, 0),
+                Torso = angles(0, -18, 0),
+            }),
+            frame(0.66, {
+                Left = angles(-75, 0, -8),
+                Right = angles(-55, 0, 0),
+                Torso = angles(0, -10, 0),
+            }),
+            frame(1, {}),
+        }),
+    }),
+    lumenweaver = table.freeze({
+        Duration = 0.42,
+        Frames = table.freeze({
+            frame(0, {}),
+            frame(0.22, {
+                Right = angles(-94, -8, 12),
+                Left = angles(-48, 12, -32),
+                RightElbow = angles(-28, 0, 0),
+                LeftElbow = angles(-34, 0, 0),
+                Torso = angles(-8, -12, 0),
+            }),
+            frame(0.55, {
+                Right = angles(-118, 3, -4),
+                Left = angles(-74, -6, 24),
+                RightElbow = angles(4, 0, 0),
+                LeftElbow = angles(-14, 0, 0),
+                Torso = angles(4, 10, 0),
+            }),
+            frame(0.7, {
+                Right = angles(-72, 0, 0),
+                Left = angles(-34, 0, 10),
+            }),
+            frame(1, {}),
+        }),
+    }),
+    veilstrider = table.freeze({
+        Duration = 0.28,
+        Frames = table.freeze({
+            frame(0, {}),
+            frame(0.16, {
+                Right = angles(24, -18, 82),
+                Left = angles(24, 18, -82),
+                RightElbow = angles(-36, 0, 0),
+                LeftElbow = angles(-36, 0, 0),
+                Torso = angles(0, -16, 0),
+            }),
+            frame(0.48, {
+                Right = angles(-106, 18, -38),
+                Left = angles(-106, -18, 38),
+                RightElbow = angles(12, 0, 0),
+                LeftElbow = angles(12, 0, 0),
+                Torso = angles(0, 24, 0),
+            }),
+            frame(0.68, {
+                Right = angles(-70, 6, -18),
+                Left = angles(-70, -6, 18),
+            }),
+            frame(1, {}),
+        }),
+    }),
+    brasshand = table.freeze({
+        Duration = 0.46,
+        Frames = table.freeze({
+            frame(0, {}),
+            frame(0.24, {
+                Right = angles(58, -8, 28),
+                Left = angles(58, 8, -28),
+                RightElbow = angles(-72, 0, 0),
+                LeftElbow = angles(-72, 0, 0),
+                Torso = angles(-12, 0, 0),
+            }),
+            frame(0.58, {
+                Right = angles(-142, 4, 12),
+                Left = angles(-126, -4, -12),
+                RightElbow = angles(-10, 0, 0),
+                LeftElbow = angles(-10, 0, 0),
+                Torso = angles(16, 8, 0),
+            }),
+            frame(0.74, {
+                Right = angles(-95, 0, 5),
+                Left = angles(-88, 0, -5),
+                Torso = angles(8, 4, 0),
+            }),
+            frame(1, {}),
+        }),
+    }),
+})
+
+local POSE_KEYS = table.freeze({ "Right", "Left", "RightElbow", "LeftElbow", "Torso" })
+
+local function frameOffset(value, key)
+    return value[key] or IDENTITY
+end
+
+local function sampleSequence(sequence, alpha)
+    local frames = sequence.Frames
+    if alpha <= 0 then
+        return frames[1]
+    end
+    for index = 1, #frames - 1 do
+        local a = frames[index]
+        local b = frames[index + 1]
+        if alpha <= b.Time then
+            local span = math.max(0.0001, b.Time - a.Time)
+            local t = math.clamp((alpha - a.Time) / span, 0, 1)
+            local result = {}
+            for _, key in POSE_KEYS do
+                result[key] = frameOffset(a, key):Lerp(frameOffset(b, key), t)
+            end
+            return result
+        end
+    end
+    return frames[#frames]
+end
+
+local function playSequence(character, familyId)
+    local resolved = rigJoints(character)
+    if not resolved then
+        warn("[CombatPresentation] Player rig has no usable shoulder Motor6D")
         return
     end
-    local draw = tweenJoint(
-        left,
-        state.LeftBase * CFrame.Angles(math.rad(-76), math.rad(-6), math.rad(-20)),
-        0.09
-    )
-    tweenJoint(
-        state.Right,
-        state.RightBase * CFrame.Angles(math.rad(-50), math.rad(24), math.rad(72)),
-        0.09
-    )
-    if state.Torso and state.TorsoBase then
-        tweenJoint(state.Torso, state.TorsoBase * CFrame.Angles(0, math.rad(-22), 0), 0.09)
-    end
-    if draw then
-        draw.Completed:Wait()
-    end
-    tweenJoint(
-        state.Right,
-        state.RightBase * CFrame.Angles(math.rad(-70), 0, math.rad(10)),
-        0.07,
-        Enum.EasingStyle.Quart
-    )
-    task.wait(0.055)
-    restore(state, 0.15)
-end
 
-local function lumenCast(state)
-    local cast = tweenJoint(
-        state.Right,
-        state.RightBase * CFrame.Angles(math.rad(-82), math.rad(-4), math.rad(4)),
-        0.1
-    )
-    if state.Left and state.LeftBase then
-        tweenJoint(
-            state.Left,
-            state.LeftBase * CFrame.Angles(math.rad(-42), math.rad(8), math.rad(-26)),
-            0.1
-        )
+    local sequence = ATTACK_SEQUENCES[familyId] or ATTACK_SEQUENCES.default
+    attackGeneration += 1
+    local generation = attackGeneration
+    local startedAt = os.clock()
+    local base = {}
+    for _, key in POSE_KEYS do
+        local joint = resolved[key]
+        if joint then
+            base[key] = joint.Transform
+        end
     end
-    if state.Torso and state.TorsoBase then
-        tweenJoint(state.Torso, state.TorsoBase * CFrame.Angles(math.rad(-4), math.rad(-8), 0), 0.1)
-    end
-    if cast then
-        cast.Completed:Wait()
-    end
-    task.wait(0.065)
-    restore(state, 0.18)
-end
 
-local function crosscut(state)
-    local left = state.Left
-    if not left or not state.LeftBase then
-        meleeSwing(state, false)
-        return
-    end
-    local windup = tweenJoint(
-        state.Right,
-        state.RightBase * CFrame.Angles(math.rad(20), math.rad(-15), math.rad(70)),
-        0.05
-    )
-    tweenJoint(
-        left,
-        state.LeftBase * CFrame.Angles(math.rad(20), math.rad(15), math.rad(-70)),
-        0.05
-    )
-    if windup then
-        windup.Completed:Wait()
-    end
-    tweenJoint(
-        state.Right,
-        state.RightBase * CFrame.Angles(math.rad(-82), math.rad(16), math.rad(-30)),
-        0.065,
-        Enum.EasingStyle.Quart
-    )
-    tweenJoint(
-        left,
-        state.LeftBase * CFrame.Angles(math.rad(-82), math.rad(-16), math.rad(30)),
-        0.065,
-        Enum.EasingStyle.Quart
-    )
-    task.wait(0.06)
-    restore(state, 0.12)
-end
+    local connection
+    connection = RunService.PreSimulation:Connect(function()
+        if generation ~= attackGeneration or not character.Parent then
+            connection:Disconnect()
+            return
+        end
 
-local function maulSwing(state)
-    local left = state.Left
-    local windup = tweenJoint(
-        state.Right,
-        state.RightBase * CFrame.Angles(math.rad(42), 0, math.rad(24)),
-        0.12
-    )
-    if left and state.LeftBase then
-        tweenJoint(left, state.LeftBase * CFrame.Angles(math.rad(42), 0, math.rad(-24)), 0.12)
-    end
-    if state.Torso and state.TorsoBase then
-        tweenJoint(state.Torso, state.TorsoBase * CFrame.Angles(math.rad(-7), 0, 0), 0.12)
-    end
-    if windup then
-        windup.Completed:Wait()
-    end
-    tweenJoint(
-        state.Right,
-        state.RightBase * CFrame.Angles(math.rad(-120), 0, math.rad(8)),
-        0.12,
-        Enum.EasingStyle.Quint
-    )
-    if left and state.LeftBase then
-        tweenJoint(
-            left,
-            state.LeftBase * CFrame.Angles(math.rad(-100), 0, math.rad(-8)),
-            0.12,
-            Enum.EasingStyle.Quint
-        )
-    end
-    task.wait(0.1)
-    restore(state, 0.22)
+        local alpha = math.clamp((os.clock() - startedAt) / sequence.Duration, 0, 1)
+        local pose = sampleSequence(sequence, alpha)
+        for _, key in POSE_KEYS do
+            local joint = resolved[key]
+            if joint and joint.Parent then
+                joint.Transform = (base[key] or IDENTITY) * frameOffset(pose, key)
+            end
+        end
+
+        if alpha >= 1 then
+            connection:Disconnect()
+        end
+    end)
 end
 
 local function handPosition(character, familyId)
@@ -381,30 +385,17 @@ local function burstImpact(targetPosition, color, heavy)
     Debris:AddItem(core, 0.22)
 end
 
+function CombatPresentation.GetBasicAttackDuration(familyId)
+    local sequence = ATTACK_SEQUENCES[familyId] or ATTACK_SEQUENCES.default
+    return sequence.Duration
+end
+
 function CombatPresentation.PlayBasicAttack(familyId)
     local character = player.Character
     if not character then
         return
     end
-    local state = joints(character)
-    if not state then
-        return
-    end
-    task.spawn(function()
-        if familyId == "thornrunner" then
-            bowShot(state)
-        elseif familyId == "lumenweaver" then
-            lumenCast(state)
-        elseif familyId == "veilstrider" then
-            crosscut(state)
-        elseif familyId == "brasshand" then
-            maulSwing(state)
-        elseif familyId == "ironbloom" then
-            meleeSwing(state, true)
-        else
-            meleeSwing(state, false)
-        end
-    end)
+    playSequence(character, familyId)
 end
 
 function CombatPresentation.PlayHit(familyId, targetPosition, dodged)

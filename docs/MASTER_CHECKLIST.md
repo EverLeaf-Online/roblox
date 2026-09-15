@@ -314,8 +314,8 @@
 
 ### Player-facing attack loop
 - [x] Left-click / R2 basic attack verified end-to-end in Studio.
-- [x] Basic attack produces a visible procedural swing.
-- [x] Procedural basic-attack animation foundation.
+- [ ] Rig-aware player basic-attack pose layer is source-complete for default, Ironbloom, Thornrunner, Lumenweaver, Veilstrider, and Brasshand; live Studio visual verification is pending after replacing the ineffective old joint tween.
+- [x] Procedural basic-attack animation foundation now drives R6/R15 shoulders, R15 elbows, and torso through a post-animation additive pose layer.
 - [ ] Facing-aware attack direction.
 - [ ] Production hitbox/hurtbox implementation.
 - [ ] Hit-confirm feedback.

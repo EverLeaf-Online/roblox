@@ -136,6 +136,7 @@ local function performAttack()
     attacking = true
     local profile = ProfileStore.Get()
     local familyId = profile and profile.FamilyId or ""
+    local animationEndsAt = os.clock() + CombatPresentation.GetBasicAttackDuration(familyId)
     faceCameraDirection()
     CombatPresentation.PlayBasicAttack(familyId)
 
@@ -165,7 +166,7 @@ local function performAttack()
             end
         end
 
-        task.delay(0.12, function()
+        task.delay(math.max(0, animationEndsAt - os.clock()), function()
             attacking = false
         end)
     end)
