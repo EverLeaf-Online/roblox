@@ -24,8 +24,6 @@ local dodgeDirection = Vector3.zero
 local dodgeStartedAt = -math.huge
 local dodgeAttachment = nil
 local dodgeVelocity = nil
-local rollMotor = nil
-local rollMotorBaseTransform = nil
 local rollPoseMotors = {}
 local rollPoseConnection = nil
 local rollAnimateScript = nil
@@ -36,12 +34,6 @@ local function restoreRollPose()
         rollPoseConnection:Disconnect()
         rollPoseConnection = nil
     end
-
-    if rollMotor and rollMotor.Parent and rollMotorBaseTransform then
-        rollMotor.Transform = rollMotorBaseTransform
-    end
-    rollMotor = nil
-    rollMotorBaseTransform = nil
 
     for motor, baseTransform in rollPoseMotors do
         if motor and motor.Parent then
@@ -195,11 +187,6 @@ local function beginRollPose()
 
     stopLocomotionAnimations(character)
 
-    rollMotor = findCharacterMotor({ "Root", "RootJoint", "Root Joint" })
-    if rollMotor then
-        rollMotorBaseTransform = rollMotor.Transform
-    end
-
     rememberPoseMotor(findCharacterMotor({ "Waist" }))
     rememberPoseMotor(findCharacterMotor({ "Neck" }))
     rememberPoseMotor(findCharacterMotor({ "LeftHip", "Left Hip" }))
@@ -211,19 +198,13 @@ local function beginRollPose()
     -- Apply the roll after that work in PreSimulation so the running animation
     -- cannot visually replace the combat roll while the root is moving.
     rollPoseConnection = RunService.PreSimulation:Connect(function()
-        if dodgeUntil <= 0 or os.clock() >= dodgeUntil or not rollMotor or not rollMotor.Parent then
+        if dodgeUntil <= 0 or os.clock() >= dodgeUntil then
             return
         end
 
         local alpha =
             math.clamp((os.clock() - dodgeStartedAt) / GameConfig.Movement.DodgeDuration, 0, 1)
-        local spin = alpha * math.pi * 2
         local tuck = math.sin(alpha * math.pi)
-        local bob = math.sin(alpha * math.pi) * 0.35
-
-        rollMotor.Transform = rollMotorBaseTransform
-            * CFrame.new(0, -0.55 * tuck + bob, 0)
-            * CFrame.Angles(-spin, 0, 0)
 
         for motor, baseTransform in rollPoseMotors do
             local name = motor.Name
@@ -431,10 +412,15 @@ function ThirdPersonController.Start()
             local now = os.clock()
             if player:GetAttribute("EverLeafStaggered") == true then
                 CombatFacing.Reset()
+                local finishedDirection = dodgeDirection
                 clearDodgeMover()
                 dodgeUntil = 0
                 dodgeStartedAt = -math.huge
                 dodgeDirection = Vector3.zero
+                if root and root.Parent and finishedDirection.Magnitude > 0.01 then
+                    root.CFrame = CFrame.lookAt(root.Position, root.Position + finishedDirection)
+                    root.AssemblyAngularVelocity = Vector3.zero
+                end
                 if crouching then
                     setCrouching(false)
                 end
@@ -449,6 +435,13 @@ function ThirdPersonController.Start()
                     humanoid:Move(Vector3.zero, false)
                     local alpha =
                         math.clamp((now - dodgeStartedAt) / GameConfig.Movement.DodgeDuration, 0, 1)
+                    local spin = alpha * math.pi * 2
+                    local upright = CFrame.lookAt(root.Position, root.Position + dodgeDirection)
+                    -- Rotate the actual character assembly for the visible somersault.
+                    -- Motor-only posing can be overwritten or ignored by some avatar rigs,
+                    -- which looked like a frozen character sliding across the ground.
+                    root.CFrame = upright * CFrame.Angles(-spin, 0, 0)
+                    root.AssemblyAngularVelocity = Vector3.zero
                     if dodgeVelocity and dodgeVelocity.Parent then
                         local speed = rollSpeed(alpha)
                         dodgeVelocity.PlaneVelocity =
@@ -457,10 +450,15 @@ function ThirdPersonController.Start()
                     return
                 end
 
+                local finishedDirection = dodgeDirection
                 clearDodgeMover()
                 dodgeUntil = 0
                 dodgeStartedAt = -math.huge
                 dodgeDirection = Vector3.zero
+                if root and root.Parent and finishedDirection.Magnitude > 0.01 then
+                    root.CFrame = CFrame.lookAt(root.Position, root.Position + finishedDirection)
+                    root.AssemblyAngularVelocity = Vector3.zero
+                end
                 if crouching then
                     setCrouching(false)
                 end

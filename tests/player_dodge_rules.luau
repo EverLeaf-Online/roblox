@@ -10,9 +10,9 @@ local bootstrap = fs.readFile("src/server/bootstrap.server.luau")
 
 assert(string.find(config, "DodgeIFrameDuration = 0.22", 1, true), "dodge iframe config missing")
 assert(string.find(config, "NormalMaxHorizontalSpeed = 32", 1, true), "normal movement cap missing")
-assert(string.find(config, "DodgeRollStartSpeed = 30", 1, true), "roll start speed missing")
-assert(string.find(config, "DodgeRollEndSpeed = 8", 1, true), "roll end speed missing")
-assert(string.find(config, "DodgeDuration = 0.48", 1, true), "roll duration missing")
+assert(string.find(config, "DodgeRollStartSpeed = 24", 1, true), "roll start speed missing")
+assert(string.find(config, "DodgeRollEndSpeed = 5", 1, true), "roll end speed missing")
+assert(string.find(config, "DodgeDuration = 0.52", 1, true), "roll duration missing")
 assert(
     string.find(validator, "payload.Dodge == true", 1, true),
     "dodge movement intent validation missing"
@@ -39,9 +39,13 @@ assert(
     "client dodge should use modern LinearVelocity"
 )
 assert(
-    string.find(controller, "RunService.PreSimulation:Connect", 1, true)
-        and string.find(controller, "local spin = alpha * math.pi * 2", 1, true),
-    "dodge must apply a full body roll after Animator evaluation"
+    string.find(controller, "RunService.PreSimulation:Connect", 1, true),
+    "dodge must keep the tuck pose after Animator evaluation"
+)
+assert(
+    string.find(controller, "local spin = alpha * math.pi * 2", 1, true)
+        and string.find(controller, "root.CFrame = upright * CFrame.Angles(-spin, 0, 0)", 1, true),
+    "dodge must rotate the actual character assembly through a full somersault"
 )
 assert(
     string.find(controller, 'character:FindFirstChild("Animate")', 1, true)
