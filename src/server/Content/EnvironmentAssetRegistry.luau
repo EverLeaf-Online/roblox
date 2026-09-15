@@ -15,9 +15,9 @@ local EnvironmentAssetRegistry = {
                 MaterialVariant = "MossWood",
                 FallbackColor = table.freeze({ 103, 82, 59 }),
                 AuthoredMaps = table.freeze({
-                    ColorMap = 77401003804409,
-                    NormalMap = 79040073771864,
-                    RoughnessMap = 81879177681425,
+                    Color = 77401003804409,
+                    Normal = 79040073771864,
+                    Roughness = 81879177681425,
                 }),
             }),
             Foliage = table.freeze({
@@ -25,9 +25,9 @@ local EnvironmentAssetRegistry = {
                 FallbackColor = table.freeze({ 53, 92, 58 }),
                 DoubleSided = true,
                 AuthoredMaps = table.freeze({
-                    ColorMap = 107051695372257,
-                    NormalMap = 123643527847304,
-                    RoughnessMap = 96029717543713,
+                    Color = 107051695372257,
+                    Normal = 123643527847304,
+                    Roughness = 96029717543713,
                 }),
             }),
         }),
@@ -42,7 +42,20 @@ local EnvironmentAssetRegistry = {
         GroundToPivot = true,
         AllowRuntimeLoad = true,
         PolyHavenId = "tree_stump_01",
-        Notes = "Optimized textured 1K GLB from Poly Haven; decimated for Roblox while preserving embedded material maps.",
+        Appearance = table.freeze({
+            Bark = table.freeze({
+                TemplateName = "TreeStump01",
+                MaterialVariant = "MossWood",
+                FallbackColor = table.freeze({ 105, 82, 58 }),
+                DoubleSided = true,
+                AuthoredMaps = table.freeze({
+                    Color = 75921120872030,
+                    Normal = 139475389710498,
+                    Roughness = 110862539566759,
+                }),
+            }),
+        }),
+        Notes = "Optimized Poly Haven GLB with an EverLeaf-owned pre-authored SurfaceAppearance; runtime never rewrites protected texture properties.",
     },
     FallenTreeTrunk = {
         AssetId = 76250166585487,
@@ -53,7 +66,20 @@ local EnvironmentAssetRegistry = {
         GroundToPivot = true,
         AllowRuntimeLoad = true,
         PolyHavenId = "dead_tree_trunk",
-        Notes = "Optimized textured 1K GLB from Poly Haven; replaces the earlier raw-FBX upload that could render without its intended surface maps.",
+        Appearance = table.freeze({
+            Bark = table.freeze({
+                TemplateName = "DeadTreeTrunk",
+                MaterialVariant = "MossWood",
+                FallbackColor = table.freeze({ 96, 75, 54 }),
+                DoubleSided = true,
+                AuthoredMaps = table.freeze({
+                    Color = 82355078069700,
+                    Normal = 125047021803353,
+                    Roughness = 135501648353594,
+                }),
+            }),
+        }),
+        Notes = "Optimized Poly Haven GLB with an EverLeaf-owned pre-authored SurfaceAppearance; replaces the earlier raw-FBX path.",
     },
     PineRoots = {
         AssetId = 71542327988536,
@@ -64,7 +90,20 @@ local EnvironmentAssetRegistry = {
         GroundToPivot = true,
         AllowRuntimeLoad = true,
         PolyHavenId = "pine_roots",
-        Notes = "Optimized textured 1K GLB from Poly Haven; dual-material roots retained and decimated to the Phase 1 prop budget.",
+        Appearance = table.freeze({
+            Bark = table.freeze({
+                TemplateName = "PineRoots",
+                MaterialVariant = "MossWood",
+                FallbackColor = table.freeze({ 93, 73, 52 }),
+                DoubleSided = true,
+                AuthoredMaps = table.freeze({
+                    Color = 84336745084507,
+                    Normal = 124149621365793,
+                    Roughness = 90536205360576,
+                }),
+            }),
+        }),
+        Notes = "Optimized Poly Haven roots with an EverLeaf-owned pre-authored SurfaceAppearance and Phase 1 geometry budget.",
     },
     FernPrimary = {
         AssetId = 83253621583897,
@@ -75,6 +114,18 @@ local EnvironmentAssetRegistry = {
         GroundToPivot = true,
         AllowRuntimeLoad = true,
         PolyHavenId = "fern_02",
+        Appearance = table.freeze({
+            Bark = table.freeze({
+                TemplateName = "Fern02",
+                FallbackColor = table.freeze({ 54, 105, 61 }),
+                DoubleSided = true,
+                AuthoredMaps = table.freeze({
+                    Color = 87556766012982,
+                    Normal = 116135417084017,
+                    Roughness = 100618651444906,
+                }),
+            }),
+        }),
         Notes = "Low-cost 1K fern GLB with transparent fronds; used as the primary forest understory fern.",
     },
     DryBranches = {
@@ -86,6 +137,19 @@ local EnvironmentAssetRegistry = {
         GroundToPivot = true,
         AllowRuntimeLoad = true,
         PolyHavenId = "dry_branches_medium_01",
+        Appearance = table.freeze({
+            Bark = table.freeze({
+                TemplateName = "DryBranchesMedium01",
+                MaterialVariant = "MossWood",
+                FallbackColor = table.freeze({ 104, 82, 58 }),
+                DoubleSided = true,
+                AuthoredMaps = table.freeze({
+                    Color = 80500740189197,
+                    Normal = 76858150067111,
+                    Roughness = 93285630552595,
+                }),
+            }),
+        }),
         Notes = "Weathered branch cluster for forest-floor deadwood and trail-edge dressing.",
     },
     MossyRockSet = {
@@ -97,6 +161,19 @@ local EnvironmentAssetRegistry = {
         GroundToPivot = true,
         AllowRuntimeLoad = true,
         PolyHavenId = "rock_moss_set_01",
+        Appearance = table.freeze({
+            Bark = table.freeze({
+                TemplateName = "RockMossSet01",
+                MaterialVariant = "MossyRock",
+                FallbackColor = table.freeze({ 92, 97, 73 }),
+                DoubleSided = true,
+                AuthoredMaps = table.freeze({
+                    Color = 88459066484424,
+                    Normal = 78430367855105,
+                    Roughness = 109925093907478,
+                }),
+            }),
+        }),
         Notes = "Six-rock mossy set decimated to the Phase 1 environment budget for natural rock clusters.",
     },
     RockFace = {
@@ -108,6 +185,19 @@ local EnvironmentAssetRegistry = {
         GroundToPivot = true,
         AllowRuntimeLoad = true,
         PolyHavenId = "rock_face_02",
+        Appearance = table.freeze({
+            Bark = table.freeze({
+                TemplateName = "RockFace02",
+                MaterialVariant = "MossyRock",
+                FallbackColor = table.freeze({ 104, 105, 96 }),
+                DoubleSided = true,
+                AuthoredMaps = table.freeze({
+                    Color = 102187131078292,
+                    Normal = 123178744985389,
+                    Roughness = 90661732845165,
+                }),
+            }),
+        }),
         Notes = "Weathered cliff-face mesh used to break up the large perimeter terrain masses.",
     },
     TreeStump2 = {
@@ -119,6 +209,19 @@ local EnvironmentAssetRegistry = {
         GroundToPivot = true,
         AllowRuntimeLoad = true,
         PolyHavenId = "tree_stump_02",
+        Appearance = table.freeze({
+            Bark = table.freeze({
+                TemplateName = "TreeStump02",
+                MaterialVariant = "MossWood",
+                FallbackColor = table.freeze({ 102, 80, 57 }),
+                DoubleSided = true,
+                AuthoredMaps = table.freeze({
+                    Color = 116147903172083,
+                    Normal = 130847612141632,
+                    Roughness = 113970681171636,
+                }),
+            }),
+        }),
         Notes = "Second optimized stump silhouette for forest-floor variation.",
     },
     FallenTreeTrunk2 = {
@@ -130,6 +233,19 @@ local EnvironmentAssetRegistry = {
         GroundToPivot = true,
         AllowRuntimeLoad = true,
         PolyHavenId = "dead_tree_trunk_02",
+        Appearance = table.freeze({
+            Bark = table.freeze({
+                TemplateName = "DeadTreeTrunk02",
+                MaterialVariant = "MossWood",
+                FallbackColor = table.freeze({ 94, 73, 52 }),
+                DoubleSided = true,
+                AuthoredMaps = table.freeze({
+                    Color = 115230663078673,
+                    Normal = 135186803590795,
+                    Roughness = 103393422304285,
+                }),
+            }),
+        }),
         Notes = "Second optimized fallen-trunk silhouette for large deadwood variation.",
     },
     ForestTreesPack = {

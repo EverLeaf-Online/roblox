@@ -10,6 +10,12 @@ for _, propertyName in { "ColorMap", "NormalMap", "RoughnessMap", "MetalnessMap"
     )
 end
 assert(
+    string.find(source, "%.TextureID%s*=", 1) == nil
+        and string.find(source, "%.TextureId%s*=", 1) == nil,
+    "runtime prefab service must not rewrite MeshPart texture identifiers"
+)
+
+assert(
     string.find(source, "template:Clone()", 1, true) ~= nil,
     "runtime appearance path clones a pre-authored template"
 )
@@ -23,6 +29,17 @@ for _, required in
         "rbxassetid://77401003804409",
         "rbxassetid://107051695372257",
         '"AlphaMode": "Transparency"',
+        '"TreeStump01"',
+        '"DeadTreeTrunk"',
+        '"PineRoots"',
+        '"Fern02"',
+        '"DryBranchesMedium01"',
+        '"RockMossSet01"',
+        '"RockFace02"',
+        '"TreeStump02"',
+        '"DeadTreeTrunk02"',
+        "rbxassetid://75921120872030",
+        "rbxassetid://87556766012982",
     }
 do
     assert(

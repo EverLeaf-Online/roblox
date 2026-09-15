@@ -130,10 +130,6 @@ local function applyAppearance(instance, appearance)
                     child:Destroy()
                 end
             end
-            pcall(function()
-                part.TextureID = ""
-            end)
-
             local template = appearanceTemplate(config.TemplateName)
             if template then
                 local surface = template:Clone()

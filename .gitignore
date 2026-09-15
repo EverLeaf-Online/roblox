@@ -14,3 +14,6 @@ assets/polyhaven/models/
 # Python tooling cache
 __pycache__/
 *.pyc
+
+# Generated from production GLBs by extract_environment_surface_maps.py.
+assets/polyhaven/surface_maps/

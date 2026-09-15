@@ -60,6 +60,96 @@
             "MetalnessMap": "",
             "AlphaMode": "Transparency"
           }
+        },
+        "DeadTreeTrunk": {
+          "$className": "SurfaceAppearance",
+          "$properties": {
+            "ColorMap": "rbxassetid://82355078069700",
+            "NormalMap": "rbxassetid://125047021803353",
+            "RoughnessMap": "rbxassetid://135501648353594",
+            "MetalnessMap": "",
+            "AlphaMode": "Overlay"
+          }
+        },
+        "DeadTreeTrunk02": {
+          "$className": "SurfaceAppearance",
+          "$properties": {
+            "ColorMap": "rbxassetid://115230663078673",
+            "NormalMap": "rbxassetid://135186803590795",
+            "RoughnessMap": "rbxassetid://103393422304285",
+            "MetalnessMap": "",
+            "AlphaMode": "Overlay"
+          }
+        },
+        "DryBranchesMedium01": {
+          "$className": "SurfaceAppearance",
+          "$properties": {
+            "ColorMap": "rbxassetid://80500740189197",
+            "NormalMap": "rbxassetid://76858150067111",
+            "RoughnessMap": "rbxassetid://93285630552595",
+            "MetalnessMap": "",
+            "AlphaMode": "Overlay"
+          }
+        },
+        "Fern02": {
+          "$className": "SurfaceAppearance",
+          "$properties": {
+            "ColorMap": "rbxassetid://87556766012982",
+            "NormalMap": "rbxassetid://116135417084017",
+            "RoughnessMap": "rbxassetid://100618651444906",
+            "MetalnessMap": "",
+            "AlphaMode": "Transparency"
+          }
+        },
+        "PineRoots": {
+          "$className": "SurfaceAppearance",
+          "$properties": {
+            "ColorMap": "rbxassetid://84336745084507",
+            "NormalMap": "rbxassetid://124149621365793",
+            "RoughnessMap": "rbxassetid://90536205360576",
+            "MetalnessMap": "",
+            "AlphaMode": "Overlay"
+          }
+        },
+        "RockFace02": {
+          "$className": "SurfaceAppearance",
+          "$properties": {
+            "ColorMap": "rbxassetid://102187131078292",
+            "NormalMap": "rbxassetid://123178744985389",
+            "RoughnessMap": "rbxassetid://90661732845165",
+            "MetalnessMap": "",
+            "AlphaMode": "Overlay"
+          }
+        },
+        "RockMossSet01": {
+          "$className": "SurfaceAppearance",
+          "$properties": {
+            "ColorMap": "rbxassetid://88459066484424",
+            "NormalMap": "rbxassetid://78430367855105",
+            "RoughnessMap": "rbxassetid://109925093907478",
+            "MetalnessMap": "",
+            "AlphaMode": "Overlay"
+          }
+        },
+        "TreeStump01": {
+          "$className": "SurfaceAppearance",
+          "$properties": {
+            "ColorMap": "rbxassetid://75921120872030",
+            "NormalMap": "rbxassetid://139475389710498",
+            "RoughnessMap": "rbxassetid://110862539566759",
+            "MetalnessMap": "",
+            "AlphaMode": "Overlay"
+          }
+        },
+        "TreeStump02": {
+          "$className": "SurfaceAppearance",
+          "$properties": {
+            "ColorMap": "rbxassetid://116147903172083",
+            "NormalMap": "rbxassetid://130847612141632",
+            "RoughnessMap": "rbxassetid://113970681171636",
+            "MetalnessMap": "",
+            "AlphaMode": "Overlay"
+          }
         }
       }
     },
