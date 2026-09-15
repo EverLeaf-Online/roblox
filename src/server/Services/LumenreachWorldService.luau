@@ -2865,25 +2865,134 @@ end
 
 local function makeWhisperrootHollow(parent)
     local origin = WORLD_ZONES.Waterfall + Vector3.new(-69, 0, -44)
+    local ground = terrainSurfacePosition(origin, 0)
     local model = Instance.new("Model")
     model.Name = "WhisperrootHollow"
     model.Parent = parent
-    makeRockCluster(model, origin + Vector3.new(-8, 0, 0), 1.7, 31)
-    makeRockCluster(model, origin + Vector3.new(8, 0, 0), 1.7, 32)
-    makeRockCluster(model, origin + Vector3.new(0, 5.8, 2), 1.45, 33)
-    makeDryBranches(model, origin + Vector3.new(-5, 0.2, 7), math.rad(24), 0.75)
-    makeCrystal(model, origin + Vector3.new(0, 2.4, 9))
-    makeCrystal(model, origin + Vector3.new(5, 1.9, 6))
+
+    -- Ground dressing frames the entrance, while the elevated crown is placed
+    -- directly instead of going through the terrain-grounded rock helper. This
+    -- preserves the intended hollow/arch silhouette after terrain resolution.
+    makeRockCluster(model, ground + Vector3.new(-8.5, 0, 0.5), 1.45, 31)
+    makeRockCluster(model, ground + Vector3.new(8.2, 0, 0.8), 1.4, 32)
+    makeMossyRockSet(model, ground + Vector3.new(-10.5, 0, 5.5), math.rad(31), 0.72)
+    makeMossyRockSet(model, ground + Vector3.new(10.2, 0, 5.8), math.rad(-34), 0.68)
+
+    local crownSpecs = {
+        {
+            Name = "WhisperrootCrownLeft",
+            Offset = Vector3.new(-6.0, 6.2, 1.2),
+            Rotation = CFrame.Angles(math.rad(4), math.rad(28), math.rad(-23)),
+            Longest = 14.5,
+            Scale = 0.76,
+        },
+        {
+            Name = "WhisperrootCrownRight",
+            Offset = Vector3.new(6.0, 6.0, 1.4),
+            Rotation = CFrame.Angles(math.rad(-3), math.rad(-31), math.rad(24)),
+            Longest = 14.0,
+            Scale = 0.74,
+        },
+        {
+            Name = "WhisperrootCrownTop",
+            Offset = Vector3.new(0.2, 9.5, 2.0),
+            Rotation = CFrame.Angles(math.rad(8), math.rad(83), math.rad(6)),
+            Longest = 12.0,
+            Scale = 0.62,
+        },
+    }
+    for _, spec in crownSpecs do
+        local placed = EnvironmentPrefabService.Place(
+            "RockFace",
+            model,
+            CFrame.new(ground + spec.Offset) * spec.Rotation,
+            prefabScaleForLongest("RockFace", spec.Longest, spec.Scale)
+        )
+        if placed then
+            placed.Name = spec.Name
+            setRenderOnly(placed)
+        end
+    end
+
+    -- Smooth side blockers define the hollow without letting imported rock hulls
+    -- snag the player. The center remains a wide, obvious walk-in opening.
+    makeCollisionProxy(
+        model,
+        "WhisperrootLeftCollision",
+        Vector3.new(6.5, 8.2, 8.0),
+        CFrame.new(ground + Vector3.new(-8.0, 4.1, 1.8)) * CFrame.Angles(0, math.rad(10), 0)
+    )
+    makeCollisionProxy(
+        model,
+        "WhisperrootRightCollision",
+        Vector3.new(6.5, 8.0, 8.0),
+        CFrame.new(ground + Vector3.new(8.0, 4.0, 2.0)) * CFrame.Angles(0, math.rad(-12), 0)
+    )
+
+    makeDryBranches(model, ground + Vector3.new(-5, 0, 7), math.rad(24), 0.75)
+    makePineRoots(model, ground + Vector3.new(7.2, 0, 6.8), math.rad(-28), 0.62)
+    makeFern(model, ground + Vector3.new(-7.0, 0, 8.2), 0.72, math.rad(17))
+    makeFern(model, ground + Vector3.new(7.5, 0, 8.0), 0.68, math.rad(-23))
+    makeCrystal(model, ground + Vector3.new(0, 0, 9))
+    makeCrystal(model, ground + Vector3.new(5, 0, 6))
+
     local cacheGround = terrainSurfacePosition(origin + Vector3.new(-2, 0, 11), 0)
+    local cacheBase = CFrame.new(cacheGround) * CFrame.Angles(0, math.rad(-18), 0)
     local cache = makePart(
         model,
         "OldWayfarerCache",
-        Vector3.new(4.4, 1.3, 2.8),
-        CFrame.new(cacheGround + Vector3.new(0, 0.65, 0)) * CFrame.Angles(0, math.rad(-18), 0),
+        Vector3.new(4.6, 1.45, 3.0),
+        cacheBase * CFrame.new(0, 0.72, 0),
         Enum.Material.Wood,
         Color3.fromRGB(89, 63, 42)
     )
-    cache.CanCollide = true
+    cache.CanCollide = false
+    cache.CanTouch = false
+    cache.CanQuery = false
+
+    local lid = makePart(
+        model,
+        "CacheLid",
+        Vector3.new(4.8, 0.48, 3.15),
+        cacheBase * CFrame.new(0, 1.62, -0.08) * CFrame.Angles(math.rad(-3), 0, 0),
+        Enum.Material.Wood,
+        Color3.fromRGB(104, 74, 45)
+    )
+    lid.CanCollide = false
+    lid.CanTouch = false
+    lid.CanQuery = false
+
+    for _, x in { -1.55, 1.55 } do
+        local band = makePart(
+            model,
+            "CacheBand",
+            Vector3.new(0.28, 1.75, 3.22),
+            cacheBase * CFrame.new(x, 0.9, 0),
+            Enum.Material.Metal,
+            Color3.fromRGB(73, 79, 73)
+        )
+        band.CanCollide = false
+        band.CanTouch = false
+        band.CanQuery = false
+    end
+
+    local cacheRune = makePart(
+        model,
+        "CacheRune",
+        Vector3.new(1.15, 0.72, 0.08),
+        cacheBase * CFrame.new(0, 1.0, -1.54),
+        Enum.Material.Neon,
+        Color3.fromRGB(99, 220, 184)
+    )
+    cacheRune.CanCollide = false
+    cacheRune.CanTouch = false
+    cacheRune.CanQuery = false
+    makeCollisionProxy(
+        model,
+        "WayfarerCacheCollision",
+        Vector3.new(4.8, 1.9, 3.2),
+        cacheBase * CFrame.new(0, 0.95, 0)
+    )
 
     local cachePrompt = Instance.new("ProximityPrompt")
     cachePrompt.Name = "WayfarerCachePrompt"
