@@ -21,8 +21,22 @@ local movementIntentRemote = nil
 local lastDodgeAt = -math.huge
 local dodgeUntil = 0
 local dodgeDirection = Vector3.zero
+local dodgeAttachment = nil
+local dodgeVelocity = nil
+
+local function clearDodgeMover()
+    if dodgeVelocity then
+        dodgeVelocity:Destroy()
+        dodgeVelocity = nil
+    end
+    if dodgeAttachment then
+        dodgeAttachment:Destroy()
+        dodgeAttachment = nil
+    end
+end
 
 local function attachCharacter(character)
+    clearDodgeMover()
     humanoid = character:WaitForChild("Humanoid")
     root = character:WaitForChild("HumanoidRootPart")
     CombatFacing.Reset()
@@ -178,6 +192,35 @@ local function tryDodge()
     humanoid:Move(Vector3.zero, false)
     root.CFrame = CFrame.lookAt(root.Position, root.Position + dodgeDirection)
 
+    if movementIntentRemote then
+        movementIntentRemote:FireServer({
+            Dodge = true,
+            DirectionX = dodgeDirection.X,
+            DirectionZ = dodgeDirection.Z,
+        })
+    end
+
+    clearDodgeMover()
+    dodgeAttachment = Instance.new("Attachment")
+    dodgeAttachment.Name = "EverLeafDodgeAttachment"
+    dodgeAttachment.Parent = root
+
+    dodgeVelocity = Instance.new("LinearVelocity")
+    dodgeVelocity.Name = "EverLeafDodgeVelocity"
+    dodgeVelocity.Attachment0 = dodgeAttachment
+    dodgeVelocity.RelativeTo = Enum.ActuatorRelativeTo.World
+    dodgeVelocity.VelocityConstraintMode = Enum.VelocityConstraintMode.Plane
+    dodgeVelocity.PrimaryTangentAxis = Vector3.xAxis
+    dodgeVelocity.SecondaryTangentAxis = Vector3.zAxis
+    dodgeVelocity.PlaneVelocity = Vector2.new(
+        dodgeDirection.X * GameConfig.Movement.DodgeSpeed,
+        dodgeDirection.Z * GameConfig.Movement.DodgeSpeed
+    )
+    dodgeVelocity.ForceLimitsEnabled = true
+    dodgeVelocity.ForceLimitMode = Enum.ForceLimitMode.PerAxis
+    dodgeVelocity.MaxPlanarAxesForce = Vector2.new(90000, 90000)
+    dodgeVelocity.Parent = root
+
     local velocity = root.AssemblyLinearVelocity
     root.AssemblyLinearVelocity = Vector3.new(
         dodgeDirection.X * GameConfig.Movement.DodgeSpeed,
@@ -244,6 +287,7 @@ function ThirdPersonController.Start()
             local now = os.clock()
             if player:GetAttribute("EverLeafStaggered") == true then
                 CombatFacing.Reset()
+                clearDodgeMover()
                 dodgeUntil = 0
                 dodgeDirection = Vector3.zero
                 if crouching then
@@ -258,15 +302,10 @@ function ThirdPersonController.Start()
                 if now < dodgeUntil and root and root.Parent then
                     humanoid.WalkSpeed = 0
                     humanoid:Move(Vector3.zero, false)
-                    local velocity = root.AssemblyLinearVelocity
-                    root.AssemblyLinearVelocity = Vector3.new(
-                        dodgeDirection.X * GameConfig.Movement.DodgeSpeed,
-                        velocity.Y,
-                        dodgeDirection.Z * GameConfig.Movement.DodgeSpeed
-                    )
                     return
                 end
 
+                clearDodgeMover()
                 dodgeUntil = 0
                 dodgeDirection = Vector3.zero
                 if crouching then

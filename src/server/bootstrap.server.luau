@@ -27,6 +27,7 @@ local PBRMaterialService = require(script.Parent.Services.PBRMaterialService)
 local Net = require(ReplicatedStorage.Shared.Net)
 local PlayerDataService = require(script.Parent.Services.PlayerDataService)
 local PlayerDamageService = require(script.Parent.Services.PlayerDamageService)
+local PlayerDodgeService = require(script.Parent.Services.PlayerDodgeService)
 local PlayerPresentationService = require(script.Parent.Services.PlayerPresentationService)
 local RateLimiterService = require(script.Parent.Services.RateLimiterService)
 local ResourceService = require(script.Parent.Services.ResourceService)
@@ -71,6 +72,7 @@ PlayerDataService.Init()
 MonetizationService.Init()
 PlayerPresentationService.Init()
 MovementSanityService.Init()
+PlayerDodgeService.Init()
 ResourceService.Init()
 EnemySpawnerService.Init()
 PBRMaterialService.Init()
@@ -147,6 +149,7 @@ end)
 
 local function onPlayerAdded(player)
     player:SetAttribute("EverLeafCrouching", false)
+    player:SetAttribute("EverLeafDodging", false)
     local ok, profileOrReason = PlayerDataService.Load(player)
     if not ok then
         warn(
@@ -171,6 +174,7 @@ local function onPlayerAdded(player)
 
     player.CharacterAdded:Connect(function()
         player:SetAttribute("EverLeafCrouching", false)
+        player:SetAttribute("EverLeafDodging", false)
         StatusEffectService.Clear(player)
         task.defer(function()
             local profile = PlayerDataService.Get(player)
@@ -248,9 +252,16 @@ movementIntent.OnServerEvent:Connect(function(player, payload)
         player:SetAttribute("EverLeafCrouching", false)
         return
     end
+
+    if payload.Dodge == true then
+        PlayerDodgeService.TryStart(player, payload.DirectionX, payload.DirectionZ)
+        return
+    end
+
     if payload.Crouching then
         if
             player:GetAttribute("EverLeafStaggered") == true
+            or player:GetAttribute("EverLeafDodging") == true
             or humanoid.FloorMaterial == Enum.Material.Air
         then
             return

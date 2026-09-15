@@ -62,8 +62,11 @@ local function correctPlayer(player)
 
     local velocity = root.AssemblyLinearVelocity
     local horizontal = Vector3.new(velocity.X, 0, velocity.Z)
-    if horizontal.Magnitude > GameConfig.Movement.MaxHorizontalSpeed then
-        horizontal = horizontal.Unit * GameConfig.Movement.MaxHorizontalSpeed
+    local maxHorizontalSpeed = if player:GetAttribute("EverLeafDodging") == true
+        then GameConfig.Movement.MaxHorizontalSpeed
+        else GameConfig.Movement.NormalMaxHorizontalSpeed
+    if horizontal.Magnitude > maxHorizontalSpeed then
+        horizontal = horizontal.Unit * maxHorizontalSpeed
         root.AssemblyLinearVelocity = Vector3.new(horizontal.X, velocity.Y, horizontal.Z)
     end
 
@@ -87,7 +90,7 @@ local function correctPlayer(player)
         delta.Y,
         delta.Z,
         elapsed,
-        GameConfig.Movement.MaxHorizontalSpeed,
+        maxHorizontalSpeed,
         GameConfig.Movement.DisplacementSlack,
         GameConfig.Movement.MaxVerticalSpeed
     )

@@ -191,12 +191,35 @@ function ActionPayloadRules.ValidateMovementIntent(payload)
     if type(payload) ~= "table" then
         return false
     end
-    for key in payload do
-        if key ~= "Crouching" then
+
+    if payload.Crouching ~= nil then
+        for key in payload do
+            if key ~= "Crouching" then
+                return false
+            end
+        end
+        return type(payload.Crouching) == "boolean"
+    end
+
+    if payload.Dodge == true then
+        for key in payload do
+            if key ~= "Dodge" and key ~= "DirectionX" and key ~= "DirectionZ" then
+                return false
+            end
+        end
+        local x = payload.DirectionX
+        local z = payload.DirectionZ
+        if type(x) ~= "number" or type(z) ~= "number" then
             return false
         end
+        if x ~= x or z ~= z or math.abs(x) == math.huge or math.abs(z) == math.huge then
+            return false
+        end
+        local magnitude = math.sqrt(x * x + z * z)
+        return magnitude >= 0.5 and magnitude <= 1.1
     end
-    return type(payload.Crouching) == "boolean"
+
+    return false
 end
 
 function ActionPayloadRules.MutatesProfile(actionName)

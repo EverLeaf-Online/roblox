@@ -6,6 +6,7 @@ local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
 local PlayerDamageFeedbackRules = require(ReplicatedStorage.Shared.Logic.PlayerDamageFeedbackRules)
 local DerivedStatsService = require(script.Parent.DerivedStatsService)
 local MovementSanityService = require(script.Parent.MovementSanityService)
+local PlayerDodgeService = require(script.Parent.PlayerDodgeService)
 local PlayerDataService = require(script.Parent.PlayerDataService)
 local StatusEffectService = require(script.Parent.StatusEffectService)
 
@@ -70,6 +71,9 @@ function PlayerDamageService.Apply(player, amount, sourceId, options)
         return false, "character_unavailable"
     end
     local now = os.clock()
+    if PlayerDodgeService.IsInvulnerable(player) then
+        return false, "dodged"
+    end
     if now - (lastDamageAt[player] or 0) < GameConfig.Combat.PlayerDamageIFrames then
         return false, "invulnerable"
     end
