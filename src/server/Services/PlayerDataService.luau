@@ -7,6 +7,7 @@ local RunService = game:GetService("RunService")
 local ProfileSchema = require(script.Parent.Parent.Data.ProfileSchema)
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
 local ProfileSaveRules = require(ReplicatedStorage.Shared.Logic.ProfileSaveRules)
+local RetryExecutor = require(ReplicatedStorage.Shared.Logic.RetryExecutor)
 
 local PlayerDataService = {}
 local store = DataStoreService:GetDataStore(GameConfig.DataStore.Name)
@@ -22,18 +23,12 @@ local function keyFor(player)
 end
 
 local function retry(operation)
-    local lastError = nil
-    for attempt = 1, GameConfig.DataStore.MaxAttempts do
-        local ok, result = pcall(operation)
-        if ok then
-            return true, result
-        end
-        lastError = result
-        if attempt < GameConfig.DataStore.MaxAttempts then
-            task.wait(GameConfig.DataStore.RetryBaseSeconds * (2 ^ (attempt - 1)))
-        end
-    end
-    return false, lastError
+    return RetryExecutor.Run(
+        operation,
+        GameConfig.DataStore.MaxAttempts,
+        GameConfig.DataStore.RetryBaseSeconds,
+        task.wait
+    )
 end
 
 local function persistenceEnabled()

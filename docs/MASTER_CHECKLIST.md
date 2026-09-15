@@ -635,7 +635,9 @@
 - [x] Left-click basic attack/server damage path is Studio-verified; the replacement rig-aware visible player attack animation is source-complete and still needs fresh Studio visual verification.
 - [x] Added pure regression coverage for quest lifecycle, rewards, inventory/equipment rules, skills, payload bounds, profile migration, movement sanity, Defense mitigation, Critical math/caps, combat-stat UI labels, atomic profile transactions, interaction-session validation, and cross-content reference integrity.
 - [x] Added progression regression coverage for Lumenreach story → Level 8 advancement and post-trial bridge → Level 10.
-- [x] Added pure session-claim/save-ownership/revision regressions; live DataStore fault-injection/session-lock stress remains open.
+- [x] Production retry/backoff policy is shared and deterministically fault-injected in tests: transient throttles recover, exhaustion returns the terminal error, exponential delays are verified, and no terminal sleep occurs.
+- [x] Pure two-server session-lock handoff simulation covers fresh-lock blocking, stale takeover, old-owner save rejection, and post-takeover anti-steal behavior; live multi-server stress remains open.
+- [x] Save revision simulation verifies mutations arriving during an in-flight snapshot remain dirty until a later successful save.
 - [ ] Add 2+ client Studio test scenarios.
 - [ ] Controller-only test pass.
 - [ ] Network-latency test pass.
