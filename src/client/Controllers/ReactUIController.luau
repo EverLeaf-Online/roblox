@@ -20,6 +20,7 @@ local PartyHud = require(script.Parent.Parent.UI.Components.PartyHud)
 local PartyOverlay = require(script.Parent.Parent.UI.Components.PartyOverlay)
 local PlayerDamageFeedback = require(script.Parent.Parent.UI.Components.PlayerDamageFeedback)
 local AdvancementOverlay = require(script.Parent.Parent.UI.Components.AdvancementOverlay)
+local CosmeticsPanel = require(script.Parent.Parent.UI.Components.CosmeticsPanel)
 local ShopOverlay = require(script.Parent.Parent.UI.Components.ShopOverlay)
 local PremiumShopPanel = require(script.Parent.Parent.UI.Components.PremiumShopPanel)
 local ToastStack = require(script.Parent.Parent.UI.Components.ToastStack)
@@ -71,6 +72,7 @@ local HOTKEYS = table.freeze({
     INVENTORY = "I",
     SKILLS = "K",
     QUESTS = "J",
+    COSMETICS = "V",
     STORE = "O",
     SETTINGS = "M",
 })
@@ -105,6 +107,7 @@ local NAV_ICONS = table.freeze({
     INVENTORY = EverLeafIcons.Inventory,
     SKILLS = EverLeafIcons.Skills,
     QUESTS = EverLeafIcons.Quests,
+    COSMETICS = EverLeafIcons.Mark,
     STORE = EverLeafIcons.Shard,
     SETTINGS = EverLeafIcons.Settings,
 })
@@ -2948,8 +2951,18 @@ local function MainMenu(props)
     local selectedHotbarSlot, setSelectedHotbarSlot = React.useState(1)
     local questFilter, setQuestFilter = React.useState("ACTIVE")
     local catalog = CatalogClient.Get() or {}
-    local tabs = { "CHARACTER", "INVENTORY", "SKILLS", "QUESTS", "STORE", "SETTINGS" }
-    local navHeight = #tabs * 54 - 8
+    local tabs = {
+        "CHARACTER",
+        "INVENTORY",
+        "SKILLS",
+        "QUESTS",
+        "COSMETICS",
+        "STORE",
+        "SETTINGS",
+    }
+    local navStep = 46
+    local navRowHeight = 38
+    local navHeight = #tabs * navStep - (navStep - navRowHeight)
     local navFooterY = 82 + navHeight + 12
 
     local function invoke(action, payload, successText)
@@ -2985,6 +2998,12 @@ local function MainMenu(props)
         )
     elseif activeTab == "QUESTS" then
         content = QuestsPanel(profile, catalog, questFilter, setQuestFilter)
+    elseif activeTab == "COSMETICS" then
+        content = React.createElement(CosmeticsPanel, {
+            Profile = profile,
+            Catalog = catalog,
+            OnInvoke = invoke,
+        })
     elseif activeTab == "STORE" then
         content = React.createElement(PremiumShopPanel)
     else
@@ -2997,8 +3016,8 @@ local function MainMenu(props)
         navChildren["MenuNav_" .. tabName] = React.createElement(
             "TextButton",
             {
-                Position = UDim2.fromOffset(0, (index - 1) * 54),
-                Size = UDim2.new(1, 0, 0, 46),
+                Position = UDim2.fromOffset(0, (index - 1) * navStep),
+                Size = UDim2.new(1, 0, 0, navRowHeight),
                 BackgroundColor3 = selected and COLORS.AccentDark or COLORS.PanelRaised,
                 BackgroundTransparency = selected and 0 or 0.22,
                 BorderSizePixel = 0,
@@ -3014,8 +3033,8 @@ local function MainMenu(props)
             },
             withChrome({
                 Icon = React.createElement(Icon, {
-                    Position = UDim2.fromOffset(8, 7),
-                    Size = UDim2.fromOffset(32, 32),
+                    Position = UDim2.fromOffset(9, 6),
+                    Size = UDim2.fromOffset(26, 26),
                     Image = NAV_ICONS[tabName],
                     ImageTransparency = selected and 0 or 0.25,
                     ZIndex = 35,
@@ -3719,7 +3738,15 @@ local function App()
             if
                 menuOpen and (keyCode == Enum.KeyCode.ButtonL1 or keyCode == Enum.KeyCode.ButtonR1)
             then
-                local tabs = { "CHARACTER", "INVENTORY", "SKILLS", "QUESTS", "STORE", "SETTINGS" }
+                local tabs = {
+                    "CHARACTER",
+                    "INVENTORY",
+                    "SKILLS",
+                    "QUESTS",
+                    "COSMETICS",
+                    "STORE",
+                    "SETTINGS",
+                }
                 local currentIndex = table.find(tabs, menuTab) or 1
                 local direction = keyCode == Enum.KeyCode.ButtonR1 and 1 or -1
                 local nextIndex = ((currentIndex - 1 + direction) % #tabs) + 1
@@ -3748,6 +3775,7 @@ local function App()
                     [Enum.KeyCode.I] = "INVENTORY",
                     [Enum.KeyCode.K] = "SKILLS",
                     [Enum.KeyCode.J] = "QUESTS",
+                    [Enum.KeyCode.V] = "COSMETICS",
                     [Enum.KeyCode.O] = "STORE",
                     [Enum.KeyCode.M] = "SETTINGS",
                 }

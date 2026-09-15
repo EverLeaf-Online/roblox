@@ -5,6 +5,7 @@ return table.freeze({
     Equipment = "Equipment",
     Skills = "Skills",
     Quests = "Quests",
+    Cosmetics = "Cosmetics",
     Dialogue = "Dialogue",
     Shop = "Shop",
     Store = "Store",

@@ -605,7 +605,8 @@
 - [x] Cosmetic catalog design foundation is data-driven, replicated through the public catalog, slot-validated, and entitlement-aware.
 - [x] Cosmetic ownership/equip persistence is schema-backed and included in full save→rejoin regression coverage.
 - [x] Founder recognition presentation implemented through custom player nameplates, party recognition, and Character-panel title/aura toggles.
-- [ ] General cosmetic collection/preview UX beyond the current Founder controls.
+- [x] General cosmetic collection/equip UX implemented with an owned-cosmetics browser, slot/source metadata, equipped state, and equip/unequip actions.
+- [ ] Dedicated live avatar preview/try-on UX beyond equipping the cosmetic on the player character.
 - [ ] Emotes if desired.
 - [x] Initial cosmetic effects implemented: Founder's Lumen aura and Founding Month member Lumen Trail.
 - [x] Roblox purchase receipt validation/idempotency implemented for the live developer product.
