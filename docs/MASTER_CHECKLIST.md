@@ -1,7 +1,7 @@
 # EverLeaf Roblox — Master Checklist
 
-**Canonical status:** 2026-09-14
-**Latest gameplay checkpoint:** source-complete Level 1–30 route + Level-30 second advancement — Belforge antechamber, Mara the Forge Oathkeeper, five deterministic Tier-2 family promotions, skills, and secure advancement flow
+**Canonical status:** 2026-09-15
+**Latest gameplay checkpoint:** source-complete Level 1–30 vertical-slice systems through Belforge — Tier-2 advancement, Colossus boss lifecycle, party ready-check/group entry, Defense/Critical combat stats, full 8-slot hotbar UX/cooldowns, incoming-hit feedback, region-aware HUD, and requirement/comparison-aware equipment UI
 **Purpose:** detailed implementation/status tracker for the entire project.
 **Roadmap:** [`ROADMAP.md`](ROADMAP.md)
 
@@ -75,7 +75,7 @@
 - [x] Quest menu shell exists.
 - [x] Settings mutations are wired.
 - [ ] Responsive layout pass for common desktop resolutions.
-- [ ] Controller navigation/focus pass.
+- [x] Controller/gamepad navigation/focus source pass: Start/B/L1/R1 menu flow, device-aware hotbar labels, initial actionable focus, and gameplay/UI input capture are implemented; live controller-only Studio QA remains in Phase 1 exit validation.
 - [x] Dedicated buy/sell shop screen implemented with item selection, quantity controls, pricing, balance display, and server-authoritative transactions.
 - [x] Reusable item detail card implemented for shop/inventory-facing item inspection; hover/pointer refinement remains part of final UI QA.
 - [x] Notification/toast system implemented for level-up, currency/item rewards, quest acceptance/readiness/completion, shop success, and shop errors.
@@ -417,7 +417,7 @@
 - [x] Inventory capacity rules are server-enforced through stack/capacity validation and regression-tested.
 - [x] Item detail cards/tooltips show item type, stats/effects, sell value, and equipment requirements.
 - [x] React inventory UI supports browsing, consumable use, requirement-aware equipment actions, and selected-item details; Studio polish/QA remains.
-- [x] React equipment UI shows equipped slots, supports unequip, and exposes requirement-aware equip flow; Studio polish/QA remains.
+- [x] React equipment UI shows equipped slots, supports unequip, exposes requirement-aware equip flow, and compares candidate stats against the currently equipped item; Studio polish/QA remains.
 - [ ] Safe deletion/drop behavior.
 
 ## 14. NPC / interaction / quests
@@ -532,15 +532,15 @@
 - [x] React EXP bar verified in Studio; polish/scalability remains.
 - [x] React level display verified in Studio; polish/scalability remains.
 - [x] React currency display verified in Studio; polish/scalability remains.
-- [x] Persistent 8-slot skill hotbar data/service foundation; React hotbar shell implemented.
+- [x] Persistent 8-slot skill hotbar data/service foundation with full React slot-select/assign/move/clear editor, MP-cost/low-MP state, and live cooldown countdown feedback.
 - [ ] Buff/debuff display.
 - [x] React character/stat menu supports server-authoritative AP allocation and now surfaces Max HP/MP, Defense, Crit Chance, and Crit Damage; polish remains.
-- [x] React inventory/equipment menu exposes use/equip/unequip actions and the menu action shell is Studio-verified; dedicated UX polish remains.
+- [x] React inventory/equipment menu exposes use/equip/unequip actions, level/tier/family lock states, and candidate-vs-equipped stat deltas; Studio polish/QA remains.
 - [ ] **PARTIAL:** React quest menu shell is source-complete; further filtering/polish pending.
 - [x] React NPC dialogue with clickable quest/shop actions verified in Studio; visual polish remains.
-- [ ] **PARTIAL:** Shop action is exposed through the React dialogue shell; dedicated shop screen pending.
+- [x] Dedicated React buy/sell shop screen is implemented beyond dialogue preview actions, with item selection, quantity controls, prices, balances, and server-authoritative transactions; Studio interaction/balance QA remains.
 - [x] Field-boss HUD implemented for nearby catalogued bosses with name, recommended level, HP, and percentage.
-- [ ] **PARTIAL:** Toast framework is live for world denials, party events, rewards/quests, and skill-use failures; broader notification coverage/polish remains.
+- [x] Toast/notification framework is live for world denials, party events, level-up/rewards/quests, shop outcomes, and skill-use failures; final visual/timing polish remains.
 - [x] React settings controls mutate music/SFX/damage-number preferences server-side; menu action shell is Studio-verified, visual polish remains.
 - [ ] Responsive layout testing.
 
