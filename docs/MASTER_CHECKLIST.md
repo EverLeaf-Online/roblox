@@ -508,6 +508,7 @@
 - [x] Travel-lane cleanup now uses actual model/part horizontal bounds—not just pivots—and scrubs intruding signs, lanterns, waystones, benches, supplies, foliage, rocks, roots, and deadfall while keeping authored corridor dressing outside the safe lane.
 - [x] Wayfarer Proving Circle visual rebuild replaces the giant visible cylinder platform with an invisible flat combat floor, broken moss-stone ring, family spokes/runes, grounded accents, and a smaller Lumen heart/beacon while preserving a predictable trial surface.
 - [x] Protected-gameplay-footprint cleanup now scrubs generated trees, deadfall, roots, large direct RockFace decorations, rocks, and other route décor out of the arrival spawn, Training Dummy practice area, Proving Circle/entrance, all current Lumenreach encounter pockets, elite pockets, and the Mosswarden arena while preserving surrounding forest framing.
+- [x] Required Lumen Gorge bridge collision now uses smooth hidden continuous side barriers while visible rail/posts are render-only, eliminating repeated post snag points without removing fall protection.
 - [x] Ilyra, Orin, Tovin, Maela, and Seren use distinct grounded R15 NPC presentations with interaction prompts; final Studio visual QA remains.
 - [x] Training dummy and full first-region monster/wave placement.
 - [x] Hidden Whisperroot Hollow added with persistent one-time cache reward.

@@ -1705,7 +1705,7 @@ local function makeBridge(parent, position, yaw, length, width)
     end
 
     for _, side in { -1, 1 } do
-        makePart(
+        local rail = makePart(
             model,
             "Rail",
             Vector3.new(0.24, 0.24, length + 0.5),
@@ -1713,10 +1713,14 @@ local function makeBridge(parent, position, yaw, length, width)
             Enum.Material.Wood,
             darkWood
         )
+        rail.CanCollide = false
+        rail.CanTouch = false
+        rail.CanQuery = false
+
         local postCount = math.max(4, math.floor(length / 4))
         for index = 0, postCount do
             local z = -length * 0.5 + (length / postCount) * index
-            makePart(
+            local post = makePart(
                 model,
                 "RailPost",
                 Vector3.new(0.28, 2.7, 0.28),
@@ -1724,7 +1728,20 @@ local function makeBridge(parent, position, yaw, length, width)
                 Enum.Material.Wood,
                 darkWood
             )
+            post.CanCollide = false
+            post.CanTouch = false
+            post.CanQuery = false
         end
+
+        -- One smooth hidden wall per side replaces dozens of tiny physical
+        -- rail/post colliders. Players can brush the bridge edge without
+        -- snagging while still being prevented from walking off the span.
+        makeCollisionProxy(
+            model,
+            "BridgeRailCollision",
+            Vector3.new(0.62, 3.25, length + 0.65),
+            base * CFrame.new(side * (width * 0.5 - 0.02), 1.72, 0)
+        )
     end
 
     return model
