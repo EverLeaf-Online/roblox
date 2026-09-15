@@ -18,6 +18,30 @@ local FAMILY_COLORS = table.freeze({
     brasshand = Color3.fromRGB(241, 187, 82),
 })
 
+local SKILL_SOUND_CUES = table.freeze({
+    slash = table.freeze({
+        Id = "rbxasset://sounds/electronicpingshort.wav",
+        Volume = 0.18,
+        Speed = 1.28,
+    }),
+    heavy = table.freeze({
+        Id = "rbxasset://sounds/electronicpingshort.wav",
+        Volume = 0.28,
+        Speed = 0.72,
+    }),
+    shot = table.freeze({
+        Id = "rbxasset://sounds/electronicpingshort.wav",
+        Volume = 0.18,
+        Speed = 1.55,
+    }),
+    magic = table.freeze({ Id = "rbxasset://sounds/impact_water.mp3", Volume = 0.20, Speed = 1.35 }),
+    impact = table.freeze({
+        Id = "rbxasset://sounds/electronicpingshort.wav",
+        Volume = 0.16,
+        Speed = 0.92,
+    }),
+})
+
 local attackGeneration = 0
 
 local IDENTITY = CFrame.new()
@@ -397,23 +421,26 @@ local function projectile(startPosition, targetPosition, color, kind, speed)
     if kind == "orb" then
         shot.Shape = Enum.PartType.Ball
         shot.Size = Vector3.new(0.65, 0.65, 0.65)
+    elseif kind == "lance" then
+        shot.Size = Vector3.new(0.22, 0.22, 2.8)
     else
         shot.Size = Vector3.new(0.12, 0.12, 1.65)
     end
     shot.CFrame = CFrame.lookAt(startPosition, targetPosition)
     shot.Parent = workspace
 
-    if kind == "orb" then
+    if kind == "orb" or kind == "lance" then
         local light = Instance.new("PointLight")
         light.Color = color
         light.Brightness = 1.2
         light.Range = 7
         light.Parent = shot
+        local trailHalf = kind == "lance" and 0.9 or 0.2
         local a0 = Instance.new("Attachment")
-        a0.Position = Vector3.new(0, 0, -0.2)
+        a0.Position = Vector3.new(0, 0, -trailHalf)
         a0.Parent = shot
         local a1 = Instance.new("Attachment")
-        a1.Position = Vector3.new(0, 0, 0.2)
+        a1.Position = Vector3.new(0, 0, trailHalf)
         a1.Parent = shot
         local trail = Instance.new("Trail")
         trail.Attachment0 = a0
@@ -493,6 +520,123 @@ local function burstImpact(targetPosition, color, heavy)
     Debris:AddItem(core, 0.22)
 end
 
+local function skillPresentation(definition)
+    return type(definition) == "table"
+            and type(definition.Presentation) == "table"
+            and definition.Presentation
+        or {}
+end
+
+local function skillSequenceKey(familyId, presentation)
+    local style = presentation.AnimationStyle or "family"
+    if style == "heavy" then
+        return familyId == "brasshand" and "brasshand" or "ironbloom"
+    end
+    if style == "fast" then
+        return "veilstrider"
+    end
+    if style == "shot" then
+        return "thornrunner"
+    end
+    if style == "cast" then
+        return "lumenweaver"
+    end
+    return familyId
+end
+
+local function playSkillCue(parent, cueName)
+    local cue = SKILL_SOUND_CUES[cueName]
+    if not cue or not parent then
+        return
+    end
+    local sound = Instance.new("Sound")
+    sound.Name = "EverLeafSkillCue"
+    sound.SoundId = cue.Id
+    sound.Volume = cue.Volume
+    sound.PlaybackSpeed = cue.Speed
+    sound.RollOffMode = Enum.RollOffMode.Inverse
+    sound.RollOffMinDistance = 5
+    sound.RollOffMaxDistance = 55
+    sound.Parent = parent
+    sound:Play()
+    Debris:AddItem(sound, 2)
+end
+
+local function playSkillCueAt(position, cueName)
+    if typeof(position) ~= "Vector3" or not SKILL_SOUND_CUES[cueName] then
+        return
+    end
+    local anchorPart = Instance.new("Part")
+    anchorPart.Name = "EverLeafSkillSoundAnchor"
+    anchorPart.Anchored = true
+    anchorPart.CanCollide = false
+    anchorPart.CanTouch = false
+    anchorPart.CanQuery = false
+    anchorPart.Transparency = 1
+    anchorPart.Size = Vector3.new(0.1, 0.1, 0.1)
+    anchorPart.Position = position
+    anchorPart.Parent = workspace
+    playSkillCue(anchorPart, cueName)
+    Debris:AddItem(anchorPart, 2)
+end
+
+local function groundPulse(position, color, radius)
+    if typeof(position) ~= "Vector3" then
+        return
+    end
+    radius = math.max(2, tonumber(radius) or 5)
+    local ring = Instance.new("Part")
+    ring.Name = "EverLeafSkillPulse"
+    ring.Anchored = true
+    ring.CanCollide = false
+    ring.CanTouch = false
+    ring.CanQuery = false
+    ring.CastShadow = false
+    ring.Material = Enum.Material.Neon
+    ring.Color = color
+    ring.Shape = Enum.PartType.Cylinder
+    ring.Size = Vector3.new(0.12, 1.2, 1.2)
+    ring.CFrame = CFrame.new(position + Vector3.new(0, 0.12, 0)) * CFrame.Angles(0, 0, math.rad(90))
+    ring.Transparency = 0.25
+    ring.Parent = workspace
+    TweenService:Create(ring, TweenInfo.new(0.22, Enum.EasingStyle.Quad), {
+        Size = Vector3.new(0.08, radius * 2, radius * 2),
+        Transparency = 1,
+    }):Play()
+    Debris:AddItem(ring, 0.28)
+end
+
+local function playSkillImpactVisual(familyId, presentation, hit, withCamera)
+    if type(hit) ~= "table" or hit.Dodged == true or typeof(hit.TargetPosition) ~= "Vector3" then
+        return
+    end
+    local color = FAMILY_COLORS[familyId] or Color3.fromRGB(188, 216, 201)
+    if withCamera then
+        local impactWeight = math.max(0, tonumber(presentation.ImpactWeight) or 0.6)
+        if hit.Critical == true then
+            impactWeight *= 1.2
+        end
+        CameraImpulse.Punch(impactWeight)
+    end
+    local style = presentation.ImpactStyle or "burst"
+    if style == "slash" then
+        slashImpact(hit.TargetPosition, color, false)
+    elseif style == "cross" then
+        slashImpact(hit.TargetPosition, color, true)
+    elseif style == "heavy_burst" then
+        burstImpact(hit.TargetPosition, color, true)
+    elseif style == "pulse" then
+        burstImpact(hit.TargetPosition, color, true)
+        groundPulse(hit.TargetPosition, color, 3.5)
+    elseif style == "pierce" then
+        burstImpact(hit.TargetPosition, color, false)
+        slashImpact(hit.TargetPosition, color, false)
+    else
+        burstImpact(hit.TargetPosition, color, false)
+    end
+    playSkillCueAt(hit.TargetPosition, presentation.ImpactSound or "none")
+end
+
 local function launchRangedBasic(character, familyId, weaponType)
     local root = character:FindFirstChild("HumanoidRootPart")
     if not root then
@@ -540,9 +684,11 @@ function CombatPresentation.PlayBasicAttack(familyId, weaponType)
     launchRangedBasic(character, familyId, weaponType)
 end
 
-function CombatPresentation.GetSkillCastDuration(familyId, _definition)
-    local sequence = ATTACK_SEQUENCES[familyId] or ATTACK_SEQUENCES.default
-    return sequence.Duration
+function CombatPresentation.GetSkillCastDuration(familyId, definition)
+    local presentation = skillPresentation(definition)
+    local sequenceKey = skillSequenceKey(familyId, presentation)
+    local sequence = ATTACK_SEQUENCES[sequenceKey] or ATTACK_SEQUENCES.default
+    return sequence.Duration * math.max(0.5, tonumber(presentation.CastDurationMultiplier) or 1)
 end
 
 function CombatPresentation.PlaySkillCast(familyId, definition)
@@ -550,69 +696,56 @@ function CombatPresentation.PlaySkillCast(familyId, definition)
     if not character then
         return
     end
-    playSequence(character, familyId)
+    local presentation = skillPresentation(definition)
+    local sequenceKey = skillSequenceKey(familyId, presentation)
+    local durationMultiplier = math.max(0.5, tonumber(presentation.CastDurationMultiplier) or 1)
+    playSequence(character, sequenceKey, durationMultiplier)
+
+    local root = character:FindFirstChild("HumanoidRootPart")
+    if not root or not root:IsA("BasePart") then
+        return
+    end
+    local color = FAMILY_COLORS[familyId] or Color3.fromRGB(188, 216, 201)
+    playSkillCue(root, presentation.CastSound or "none")
+    if presentation.CastVFX == "pulse" then
+        local effect = definition and definition.Effect or {}
+        groundPulse(root.Position, color, effect.TargetRadius or 4.5)
+    end
 
     local effect = definition and definition.Effect
     if type(effect) ~= "table" or effect.Mode ~= "Projectile" then
         return
     end
-    local root = character:FindFirstChild("HumanoidRootPart")
-    if not root or not root:IsA("BasePart") then
-        return
-    end
     local startPosition = handPosition(character, familyId, nil)
     local range = math.max(1, tonumber(effect.Range) or 20)
     local speed = math.max(1, tonumber(effect.ProjectileSpeed) or 80)
-    projectile(
-        startPosition,
-        startPosition + root.CFrame.LookVector * range,
-        FAMILY_COLORS[familyId] or Color3.fromRGB(188, 216, 201),
-        familyId == "lumenweaver" and "orb" or "arrow",
-        speed
-    )
+    local kind = presentation.ProjectileKind or (familyId == "lumenweaver" and "orb" or "arrow")
+    projectile(startPosition, startPosition + root.CFrame.LookVector * range, color, kind, speed)
 end
 
-function CombatPresentation.PlaySkillResult(familyId, result)
+function CombatPresentation.PlaySkillResult(familyId, definition, result)
     if type(result) ~= "table" then
         return
     end
+    local presentation = skillPresentation(definition)
     if result.Kind == "Damage" then
         local hits = type(result.Hits) == "table" and result.Hits or nil
         if hits and #hits > 0 then
             for index, hit in hits do
-                if index == 1 then
-                    CombatPresentation.PlayHit(
-                        familyId,
-                        hit.TargetPosition,
-                        hit.Dodged == true,
-                        hit.Critical == true
-                    )
-                elseif typeof(hit.TargetPosition) == "Vector3" and hit.Dodged ~= true then
-                    local color = FAMILY_COLORS[familyId] or Color3.fromRGB(188, 216, 201)
-                    if familyId == "veilstrider" then
-                        slashImpact(hit.TargetPosition, color, true)
-                    elseif familyId == "ironbloom" then
-                        slashImpact(hit.TargetPosition, color, false)
-                    else
-                        burstImpact(hit.TargetPosition, color, familyId == "brasshand")
-                    end
-                end
+                playSkillImpactVisual(familyId, presentation, hit, index == 1)
             end
         else
-            CombatPresentation.PlayHit(
-                familyId,
-                result.TargetPosition,
-                result.Dodged == true,
-                result.Critical == true
-            )
+            playSkillImpactVisual(familyId, presentation, {
+                TargetPosition = result.TargetPosition,
+                Dodged = result.Dodged,
+                Critical = result.Critical,
+            }, true)
         end
     elseif result.Kind == "Miss" and typeof(result.TargetPosition) == "Vector3" then
         if result.Reason == "projectile_blocked" then
-            burstImpact(
-                result.TargetPosition,
-                FAMILY_COLORS[familyId] or Color3.fromRGB(188, 216, 201),
-                false
-            )
+            local color = FAMILY_COLORS[familyId] or Color3.fromRGB(188, 216, 201)
+            burstImpact(result.TargetPosition, color, false)
+            playSkillCueAt(result.TargetPosition, presentation.ImpactSound or "impact")
         end
     end
 end

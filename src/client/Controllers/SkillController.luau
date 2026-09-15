@@ -105,7 +105,7 @@ local function useSlot(slotIndex)
                 skillId,
                 tonumber(result.CooldownRemaining) or tonumber(result.Cooldown) or 0
             )
-            CombatPresentation.PlaySkillResult(profile.FamilyId, result)
+            CombatPresentation.PlaySkillResult(profile.FamilyId, definition, result)
             if result.Kind == "Miss" then
                 showFailure(result.Reason)
             end

@@ -15,6 +15,7 @@ local WeaponCombatProfiles = require("../src/shared/WeaponCombatProfiles")
 local StatusEffectDefinitions = require("../src/shared/StatusEffectDefinitions")
 local StatusEffectRules = require("../src/shared/Logic/StatusEffectRules")
 local SkillTargetingRules = require("../src/shared/Logic/SkillTargetingRules")
+local SkillPresentationRules = require("../src/shared/Logic/SkillPresentationRules")
 local currencies = { Shards = true, Marks = true }
 
 for effectId, definition in StatusEffectDefinitions do
@@ -291,6 +292,12 @@ for skillId, skill in Skills do
         )
     end
     if skill.Effect and skill.Effect.Type == "DamageAttack" then
+        local presentationOk, presentationReason =
+            SkillPresentationRules.Validate(skill.Presentation, skill.Effect)
+        assert(
+            presentationOk,
+            string.format("skill %s presentation valid: %s", skillId, tostring(presentationReason))
+        )
         local targetingOk, targetingReason = SkillTargetingRules.Validate(skill.Effect)
         assert(
             targetingOk,

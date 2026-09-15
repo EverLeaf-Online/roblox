@@ -358,7 +358,7 @@
 - [x] Skill MP/resource-cost validation foundation.
 - [x] Server skill cooldown foundation.
 - [x] Active-skill targeting shapes/ranges are server-owned and explicit: projectile single-target, forward cone/box, and radial AoE with validated target caps/LOS; current melee roster uses multi-target shapes while projectile skills remain physically simulated single-target shots; Studio tuning remains.
-- [ ] Skill animation/VFX/SFX hooks.
+- [x] Skill animation/VFX/SFX hooks are data-driven per active skill: animation style/speed, cast pulse, projectile kind, impact style/weight, and cast/impact sound cues feed client-only presentation while server hit authority stays unchanged; final original production VFX/SFX library remains open.
 - [x] Persistent 8-slot skill hotbar data/service foundation with React hotbar shell, full slot-select/assign/move/clear UX, MP-cost display, low-MP state, and cooldown countdown feedback.
 - [x] Keyboard and controller hotbar 1–8 skill-use bindings are source-complete; slot 1 Beginner Strike remains Studio-verified.
 - [x] Skill tree UI is source-complete with Wayfarer/Foundation + family lanes, real prerequisite connectors, learned/learnable/locked node states, SP/MP/cooldown metadata, and exact unlock requirements; Studio visual QA remains.

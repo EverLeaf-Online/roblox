@@ -58,6 +58,7 @@ function CatalogService.Build()
             "Kind",
             "Prerequisites",
             "PassiveBonuses",
+            "Presentation",
             "Effect",
         }),
         Quests = copySelected(
