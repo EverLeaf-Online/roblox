@@ -24,6 +24,15 @@ local function findPlayer(userId)
     return Players:GetPlayerByUserId(userId)
 end
 
+local function recognitionFor(player)
+    if player:GetAttribute("EverLeafFounder") == true then
+        return "FOUNDER"
+    elseif player:GetAttribute("EverLeafMember") == true then
+        return "MEMBER"
+    end
+    return nil
+end
+
 local function snapshotParty(party)
     if not party or not party.Leader then
         return nil
@@ -31,7 +40,12 @@ local function snapshotParty(party)
     local members = {}
     for _, member in party.Members do
         if member.Parent == Players then
-            table.insert(members, { UserId = member.UserId, Name = member.Name })
+            table.insert(members, {
+                UserId = member.UserId,
+                Name = member.Name,
+                DisplayName = member.DisplayName,
+                Recognition = recognitionFor(member),
+            })
         end
     end
     return {
@@ -49,6 +63,8 @@ local function readySnapshot(party, check)
             table.insert(members, {
                 UserId = member.UserId,
                 Name = member.Name,
+                DisplayName = member.DisplayName,
+                Recognition = recognitionFor(member),
                 Ready = check.Responses[member.UserId] == true,
             })
         end
@@ -317,6 +333,19 @@ end
 
 function PartyService.GetSnapshot(player)
     return snapshotParty(partyByPlayer[player])
+end
+
+function PartyService.RefreshPresentation(player)
+    local party = partyByPlayer[player]
+    if not party then
+        return false
+    end
+    fireChanged(party)
+    local check = readyChecks[party]
+    if check then
+        fireReadyCheck(party, check)
+    end
+    return true
 end
 
 function PartyService.Init()

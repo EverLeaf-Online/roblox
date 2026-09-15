@@ -27,6 +27,7 @@ local PBRMaterialService = require(script.Parent.Services.PBRMaterialService)
 local Net = require(ReplicatedStorage.Shared.Net)
 local PlayerDataService = require(script.Parent.Services.PlayerDataService)
 local PlayerDamageService = require(script.Parent.Services.PlayerDamageService)
+local PlayerPresentationService = require(script.Parent.Services.PlayerPresentationService)
 local RateLimiterService = require(script.Parent.Services.RateLimiterService)
 local ResourceService = require(script.Parent.Services.ResourceService)
 local SnapshotService = require(script.Parent.Services.SnapshotService)
@@ -67,6 +68,7 @@ local requestCatalog = ensureRemote("RemoteFunction", Net.Functions.RequestCatal
 
 PlayerDataService.Init()
 MonetizationService.Init()
+PlayerPresentationService.Init()
 MovementSanityService.Init()
 ResourceService.Init()
 EnemySpawnerService.Init()
@@ -119,6 +121,10 @@ local function replicateProfile(player)
 end
 
 PlayerDataService.Changed:Connect(replicateProfile)
+MonetizationService.Changed:Connect(function(player)
+    replicateSnapshot(player)
+    PartyService.RefreshPresentation(player)
+end)
 StatusEffectService.Changed:Connect(replicateSnapshot)
 PartyService.Event:Connect(function(player, eventData)
     if player.Parent == Players then

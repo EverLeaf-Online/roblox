@@ -588,7 +588,7 @@
 - [ ] Trading design decision.
 - [ ] Secure trading if approved.
 - [ ] Social/profile inspection.
-- [x] Achievement persistence/service foundation; titles/presentation pending.
+- [x] Achievement persistence/service foundation, Roblox badge awarding, join-time repair, Level 10/First Victory hooks, and entitlement-aware player title/nameplate presentation implemented.
 - [x] Multiplayer boss source rules implemented: six-player cap, pull lockout, participant elimination, wipe reset, contributor thresholds, individual boss rewards, and no death-rush re-entry; live multi-client QA remains.
 - [x] Belforge party ready-check implemented: leader-initiated at the physical seal, all members assembled/eligible, per-member confirmation, roster lock, expiry/cancel handling, and all-ready group teleport.
 
@@ -596,13 +596,21 @@
 
 - [x] Cosmetic-only monetization rule documented.
 - [x] No Robux power purchases rule documented.
-- [ ] Cosmetic catalog design.
+- [x] Live Creator Hub IDs centralized for the Founder pass, support developer product, membership subscription, and five launch badges.
+- [x] Founder pass ownership is checked server-side; ownership grants the EverLeaf Founder badge plus permanent Founder title and Founder's Lumen aura cosmetics.
+- [x] Repeatable Support EverLeaf developer product uses server-owned `ProcessReceipt` handling with durable purchase-ID idempotency and audit logging.
+- [x] Subscription entitlement/status hooks are server-owned; membership sales remain intentionally disabled in-game until recurring benefits are fully verified and Creator Hub activation is deliberate.
+- [x] September 2026 membership cosmetic reward path is implemented as a permanent, non-power Lumen Trail collectible and is only granted to an active subscriber.
+- [x] Cosmetic catalog design foundation is data-driven, replicated through the public catalog, slot-validated, and entitlement-aware.
 - [x] Cosmetic ownership/equip persistence is schema-backed and included in full save→rejoin regression coverage.
-- [ ] Cosmetic preview UX.
+- [x] Founder recognition presentation implemented through custom player nameplates, party recognition, and Character-panel title/aura toggles.
+- [ ] General cosmetic collection/preview UX beyond the current Founder controls.
 - [ ] Emotes if desired.
-- [ ] Cosmetic effects if desired.
-- [ ] Roblox purchase receipt validation when monetization is implemented.
-- [ ] Ensure no purchasable item changes combat/progression power.
+- [x] Initial cosmetic effects implemented: Founder's Lumen aura and Founding Month member Lumen Trail.
+- [x] Roblox purchase receipt validation/idempotency implemented for the live developer product.
+- [x] Current paid offerings do not grant combat stats, progression, currencies, drop-rate advantages, advancement, or stronger equipment.
+- [x] In-game EverLeaf Store uses Roblox product/subscription metadata for displayed prices rather than hard-coded regional prices.
+- [x] Paid-item gifting/trading remain disabled; regional Price Level validation groundwork exists before either feature can ever be enabled.
 
 ## 23. Security / anti-exploit
 

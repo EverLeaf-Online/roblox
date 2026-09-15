@@ -1,4 +1,5 @@
 local DerivedStatsService = require(script.Parent.DerivedStatsService)
+local MonetizationService = require(script.Parent.MonetizationService)
 local PartyService = require(script.Parent.PartyService)
 local PlayerDataService = require(script.Parent.PlayerDataService)
 local ResourceService = require(script.Parent.ResourceService)
@@ -14,6 +15,7 @@ function SnapshotService.Build(player)
     end
 
     snapshot.Derived = DerivedStatsService.Compute(profile)
+    snapshot.Entitlements = MonetizationService.GetSnapshot(player)
     snapshot.Resources = ResourceService.GetSnapshot(player, profile)
     snapshot.StatusEffects = StatusEffectService.GetSnapshot(player)
     snapshot.Party = PartyService.GetSnapshot(player)

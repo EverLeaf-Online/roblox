@@ -25,10 +25,14 @@ local MonetizationConfig = {
         Level10 = 3949793123694068,
     },
 
+    MonthlyMemberCosmetics = table.freeze({
+        ["2026-09"] = "member_2026_09_lumen_trail",
+    }),
+
     Benefits = {
         Founder = table.freeze({
             "founder_title",
-            "founder_cosmetics",
+            "founder_lumen_aura",
             "founder_recognition",
         }),
         Membership = table.freeze({

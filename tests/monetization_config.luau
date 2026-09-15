@@ -17,7 +17,18 @@ assert(MonetizationConfig.SupportSalesEnabled == true, "support sales enabled")
 assert(MonetizationConfig.MembershipSalesEnabled == false, "membership stays gated until activated")
 assert(MonetizationConfig.GiftingEnabled == false, "gifting remains disabled")
 assert(MonetizationConfig.PaidItemTradingEnabled == false, "paid item trading remains disabled")
-assert(table.find(MonetizationConfig.Benefits.Founder, "founder_title"), "founder benefit hook")
+assert(
+    MonetizationConfig.MonthlyMemberCosmetics["2026-09"] == "member_2026_09_lumen_trail",
+    "September member cosmetic"
+)
+assert(
+    table.find(MonetizationConfig.Benefits.Founder, "founder_title"),
+    "founder title benefit hook"
+)
+assert(
+    table.find(MonetizationConfig.Benefits.Founder, "founder_lumen_aura"),
+    "founder aura benefit hook"
+)
 assert(table.find(MonetizationConfig.Benefits.Membership, "member_qol"), "membership benefit hook")
 
 print("monetization config tests passed")

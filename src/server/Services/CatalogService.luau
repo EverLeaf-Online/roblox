@@ -1,5 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local BuildInfo = require(ReplicatedStorage.Shared.BuildInfo)
+local CosmeticDefinitions = require(ReplicatedStorage.Shared.CosmeticDefinitions)
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
 local BossDefinitions = require(script.Parent.Parent.Content.BossDefinitions)
 local ClassFamilyDefinitions = require(script.Parent.Parent.Content.ClassFamilyDefinitions)
@@ -85,6 +86,13 @@ function CatalogService.Build()
             "SecondAdvancement",
             "Accent",
             "Summary",
+        }),
+        Cosmetics = copySelected(CosmeticDefinitions, {
+            "DisplayName",
+            "Slot",
+            "Entitlement",
+            "Label",
+            "Description",
         }),
     }
 end

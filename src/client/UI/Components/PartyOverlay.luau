@@ -111,7 +111,7 @@ local function PartyOverlay(props)
                 Position = UDim2.fromOffset(13, 4),
                 Size = UDim2.new(1, -116, 0, 19),
                 BackgroundTransparency = 1,
-                Text = member.Name,
+                Text = member.DisplayName or member.Name,
                 TextColor3 = Color3.fromRGB(235, 244, 239),
                 TextSize = 11,
                 Font = Enum.Font.GothamBold,
@@ -122,8 +122,11 @@ local function PartyOverlay(props)
                 Position = UDim2.fromOffset(13, 23),
                 Size = UDim2.new(1, -116, 0, 14),
                 BackgroundTransparency = 1,
-                Text = memberIsLeader and "PARTY LEADER"
-                    or (member.UserId == localPlayer.UserId and "YOU" or "MEMBER"),
+                Text = (
+                    memberIsLeader and "PARTY LEADER"
+                    or (member.UserId == localPlayer.UserId and "YOU" or "MEMBER")
+                )
+                    .. (member.Recognition and (" · " .. member.Recognition) or ""),
                 TextColor3 = memberIsLeader and Color3.fromRGB(232, 193, 105)
                     or Color3.fromRGB(139, 169, 154),
                 TextSize = 8,

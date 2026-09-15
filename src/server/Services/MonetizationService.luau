@@ -5,13 +5,17 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local MonetizationConfig = require(ReplicatedStorage.Shared.MonetizationConfig)
+local CosmeticDefinitions = require(ReplicatedStorage.Shared.CosmeticDefinitions)
 local Net = require(ReplicatedStorage.Shared.Net)
 local AchievementService = require(script.Parent.AchievementService)
 local AuditLogService = require(script.Parent.AuditLogService)
+local CosmeticService = require(script.Parent.CosmeticService)
 local PlayerDataService = require(script.Parent.PlayerDataService)
 
 local MonetizationService = {}
 local initialized = false
+local changedEvent = Instance.new("BindableEvent")
+MonetizationService.Changed = changedEvent.Event
 local receiptStoreName = if RunService:IsStudio()
     then "EverLeafPurchaseReceipts_Studio_v1"
     else "EverLeafPurchaseReceipts_v1"
@@ -34,12 +38,44 @@ local function worldNotice(player, kind, title, body, duration)
 end
 
 local function setFounder(player, value)
-    player:SetAttribute("EverLeafFounder", value == true)
+    local nextValue = value == true
+    if player:GetAttribute("EverLeafFounder") == nextValue then
+        return false
+    end
+    player:SetAttribute("EverLeafFounder", nextValue)
+    changedEvent:Fire(player)
+    return true
 end
 
 local function setMembership(player, isSubscribed, isRenewing)
-    player:SetAttribute("EverLeafMember", isSubscribed == true)
-    player:SetAttribute("EverLeafMembershipRenewing", isRenewing == true)
+    local nextSubscribed = isSubscribed == true
+    local nextRenewing = isRenewing == true
+    local changed = player:GetAttribute("EverLeafMember") ~= nextSubscribed
+        or player:GetAttribute("EverLeafMembershipRenewing") ~= nextRenewing
+    player:SetAttribute("EverLeafMember", nextSubscribed)
+    player:SetAttribute("EverLeafMembershipRenewing", nextRenewing)
+    if changed then
+        changedEvent:Fire(player)
+    end
+    return changed
+end
+
+local function grantFounderCosmetics(profile)
+    local changed = false
+    for _, cosmeticId in { "founder_title", "founder_lumen_aura" } do
+        local granted = CosmeticService.Grant(profile, cosmeticId)
+        changed = granted or changed
+    end
+
+    if not profile.Cosmetics.Equipped.Title or profile.Cosmetics.Equipped.Title == "" then
+        local equipped = CosmeticService.Equip(profile, "Title", "founder_title")
+        changed = equipped or changed
+    end
+    if not profile.Cosmetics.Equipped.Aura or profile.Cosmetics.Equipped.Aura == "" then
+        local equipped = CosmeticService.Equip(profile, "Aura", "founder_lumen_aura")
+        changed = equipped or changed
+    end
+    return changed
 end
 
 local function refreshFounder(player)
@@ -67,13 +103,47 @@ local function refreshFounder(player)
     if ownsPass == true then
         local profile = PlayerDataService.Get(player)
         if profile then
-            local changed = AchievementService.UnlockAndAward(player, profile, "everleaf_founder")
-            if changed then
+            local badgeChanged =
+                AchievementService.UnlockAndAward(player, profile, "everleaf_founder")
+            local cosmeticChanged = grantFounderCosmetics(profile)
+            if badgeChanged or cosmeticChanged then
                 PlayerDataService.NotifyChanged(player)
             end
         end
     end
     return true, ownsPass == true
+end
+
+local function grantMonthlyMemberCosmetic(player, profile)
+    local period = os.date("!%Y-%m")
+    local cosmeticId = MonetizationConfig.MonthlyMemberCosmetics[period]
+    if not cosmeticId then
+        return false
+    end
+    local granted = CosmeticService.Grant(profile, cosmeticId)
+    if not granted then
+        return false
+    end
+    local definition = CosmeticDefinitions[cosmeticId]
+    local slotName = definition and definition.Slot
+    if
+        slotName
+        and (not profile.Cosmetics.Equipped[slotName] or profile.Cosmetics.Equipped[slotName] == "")
+    then
+        CosmeticService.Equip(profile, slotName, cosmeticId)
+    end
+    PlayerDataService.NotifyChanged(player)
+    worldNotice(
+        player,
+        "reward",
+        "Monthly Member Cosmetic",
+        string.format(
+            "%s has been added to your permanent cosmetic collection.",
+            definition and definition.DisplayName or cosmeticId
+        ),
+        6
+    )
+    return true
 end
 
 local function refreshMembership(player)
@@ -100,6 +170,12 @@ local function refreshMembership(player)
     local subscribed = type(status) == "table" and status.IsSubscribed == true
     local renewing = type(status) == "table" and status.IsRenewing == true
     setMembership(player, subscribed, renewing)
+    if subscribed then
+        local profile = PlayerDataService.Get(player)
+        if profile then
+            grantMonthlyMemberCosmetic(player, profile)
+        end
+    end
     return true, subscribed
 end
 
@@ -199,6 +275,14 @@ end
 
 function MonetizationService.IsMember(player)
     return player:GetAttribute("EverLeafMember") == true
+end
+
+function MonetizationService.GetSnapshot(player)
+    return {
+        Founder = MonetizationService.IsFounder(player),
+        Member = MonetizationService.IsMember(player),
+        MembershipRenewing = player:GetAttribute("EverLeafMembershipRenewing") == true,
+    }
 end
 
 function MonetizationService.GetPriceLevels(userIds)

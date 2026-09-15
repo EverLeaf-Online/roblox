@@ -174,3 +174,5 @@ Fill the shell with original EverLeaf content:
 ## Non-negotiable monetization rule
 
 Robux remains cosmetic-only. Do not sell progression power, combat stats, currencies, drop-rate advantages, advancement, stronger equipment, or other pay-to-win advantages.
+
+Current implementation follows that rule: the Founder pass grants recognition/cosmetics, the repeatable support product grants no gameplay power, and Membership is kept inactive until its recurring non-power benefits are complete and verified.

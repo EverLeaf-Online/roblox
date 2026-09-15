@@ -1426,6 +1426,88 @@ local function CharacterPanel(profile, invoke)
             },
         })
     end
+
+    local founderActive = player:GetAttribute("EverLeafFounder") == true
+    local memberActive = player:GetAttribute("EverLeafMember") == true
+    local equippedCosmetics = profile.Cosmetics and profile.Cosmetics.Equipped or {}
+    local founderTitleEquipped = equippedCosmetics.Title == "founder_title"
+    local founderAuraEquipped = equippedCosmetics.Aura == "founder_lumen_aura"
+    local recognition = "WAYFARER"
+    local recognitionColor = COLORS.Muted
+    if founderActive then
+        recognition = "EVERLEAF FOUNDER · BADGE + PERMANENT COSMETICS"
+        recognitionColor = COLORS.Gold
+    elseif memberActive then
+        recognition = "EVERLEAF MEMBER · ACTIVE MEMBERSHIP"
+        recognitionColor = COLORS.Accent
+    end
+    children.Recognition = React.createElement(Panel, {
+        Position = UDim2.fromOffset(0, 356),
+        Size = UDim2.new(1, 0, 0, 46),
+        BackgroundColor3 = COLORS.PanelRaised,
+        StrokeTransparency = 0.62,
+        Children = {
+            Label = React.createElement(Label, {
+                Position = UDim2.fromOffset(14, 5),
+                Size = UDim2.new(1, -28, 0, 14),
+                Text = "RECOGNITION",
+                TextSize = 8,
+                Bold = true,
+                Color = COLORS.Faint,
+                ZIndex = 5,
+            }),
+            Value = React.createElement(Label, {
+                Position = UDim2.fromOffset(14, 19),
+                Size = UDim2.new(1, founderActive and -220 or -28, 0, 20),
+                Text = recognition,
+                TextSize = 9,
+                Bold = true,
+                Color = recognitionColor,
+                ZIndex = 5,
+            }),
+            TitleToggle = founderActive and React.createElement(Button, {
+                AnchorPoint = Vector2.new(1, 0.5),
+                Position = UDim2.new(1, -106, 0.5, 0),
+                Size = UDim2.fromOffset(92, 30),
+                Text = founderTitleEquipped and "TITLE ON" or "TITLE OFF",
+                Tone = founderTitleEquipped and "accent" or nil,
+                OnActivated = function()
+                    invoke(
+                        "cosmetic.equip",
+                        {
+                            Slot = "Title",
+                            CosmeticId = founderTitleEquipped and "" or "founder_title",
+                        },
+                        founderTitleEquipped and "Founder title hidden."
+                            or "Founder title equipped."
+                    )
+                end,
+                ZIndex = 6,
+            }) or nil,
+            AuraToggle = founderActive
+                    and React.createElement(Button, {
+                        AnchorPoint = Vector2.new(1, 0.5),
+                        Position = UDim2.new(1, -8, 0.5, 0),
+                        Size = UDim2.fromOffset(92, 30),
+                        Text = founderAuraEquipped and "AURA ON" or "AURA OFF",
+                        Tone = founderAuraEquipped and "accent" or nil,
+                        OnActivated = function()
+                            invoke(
+                                "cosmetic.equip",
+                                {
+                                    Slot = "Aura",
+                                    CosmeticId = founderAuraEquipped and "" or "founder_lumen_aura",
+                                },
+                                founderAuraEquipped and "Founder aura hidden."
+                                    or "Founder aura equipped."
+                            )
+                        end,
+                        ZIndex = 6,
+                    })
+                or nil,
+        },
+    })
+
     return React.createElement("Frame", {
         Size = UDim2.fromScale(1, 1),
         BackgroundTransparency = 1,

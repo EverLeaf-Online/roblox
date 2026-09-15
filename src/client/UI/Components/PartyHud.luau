@@ -65,7 +65,8 @@ local function PartyHud(props)
                 Size = UDim2.new(1, -70, 0, 15),
                 BackgroundTransparency = 1,
                 Text = (isLeader and "LEADER · " or "")
-                    .. member.Name
+                    .. (member.DisplayName or member.Name)
+                    .. (member.Recognition and (" · " .. member.Recognition) or "")
                     .. (isSelf and " · YOU" or ""),
                 TextColor3 = status.Online and Color3.fromRGB(230, 241, 235)
                     or Color3.fromRGB(115, 127, 121),
