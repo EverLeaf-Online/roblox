@@ -4125,7 +4125,23 @@ local function makeWoodlandCluster(parent, center, seed, scale, protectOpeningRo
     end
     local groundDetailPosition = center + Vector3.new(-4.7, 0, -3.8) * scale
     if not protectOpeningRoute or isOpeningRouteClear(groundDetailPosition, 8.5) then
-        if seed % 2 == 0 then
+        if protectOpeningRoute then
+            -- The opening route uses only production imported ground dressing.
+            -- Keep the small procedural flowers/mushrooms deeper in Lumenreach
+            -- where they read as whimsical accents instead of first-impression
+            -- placeholder geometry.
+            makeFern(
+                parent,
+                groundDetailPosition + Vector3.new(1.1, 0, 0.8) * scale,
+                0.56 * scale,
+                rotation + 0.28
+            )
+            if seed % 2 == 0 then
+                makeDryBranches(parent, groundDetailPosition, rotation - 0.32, 0.4 * scale)
+            else
+                makeMossyRockSet(parent, groundDetailPosition, rotation + 0.18, 0.33 * scale)
+            end
+        elseif seed % 2 == 0 then
             makeFlowerPatch(parent, groundDetailPosition, 0.68 * scale, seed % 4 == 0)
         else
             makeMushroomCluster(parent, groundDetailPosition, 0.7 * scale, seed)
