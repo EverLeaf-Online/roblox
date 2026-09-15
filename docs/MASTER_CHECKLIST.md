@@ -134,8 +134,8 @@
 - [x] Achievement/cosmetic/settings persistence boundaries.
 - [x] Client action/catalog/profile/UI-state layers.
 - [x] Reward pipeline can grant EXP, currencies, and items.
-- [x] Equipment stat bonuses feed combat damage.
-- [x] Equipment core-stat bonuses now feed the corresponding primary-stat damage roll.
+- [x] Equipment stat bonuses feed combat damage, Defense mitigation, and Critical Chance/Power.
+- [x] Equipment core-stat bonuses now feed all matching derived effects as well as damage (for example Might → Max HP/Defense and Insight → Max MP).
 - [x] Physical world-object registry + proximity validation for NPCs/portals.
 - [x] Enemy AI state-machine + enemy-to-player damage architecture.
 - [x] Generic skill targeting/effect execution architecture.
@@ -256,8 +256,8 @@
 - [x] Runtime MP/resource state foundation.
 - [x] Character stat reconciliation on profile changes/spawn.
 - [x] Derived-stat headless tests.
-- [ ] Finalize all stat effects and scaling curves.
-- [ ] Define defense/accuracy/evasion/crit or consciously reject them.
+- [ ] **PARTIAL:** Core HP/MP, Defense, and Critical scaling are source-complete and tested; broader 1–30 balance tuning still remains.
+- [x] Defense and Critical rules implemented; hidden accuracy/miss RNG and passive evasion were consciously rejected in favor of active dodge, positioning, telegraphs, and monster dodge.
 - [x] Out-of-combat HP/MP regeneration rules implemented with tested shared recovery math and combat-delay gating.
 - [x] HP/MP resources are represented in the canonical React HUD and replicated snapshots.
 
@@ -373,7 +373,7 @@
 
 ## 11. Player damage / death
 
-- [ ] Defense/damage-taken calculation.
+- [x] Deterministic Defense/damage-taken calculation with diminishing returns and minimum positive-hit floor.
 - [x] Enemy-to-player validated damage path.
 - [x] Prototype 0.15s player damage i-frame exists; tuning remains.
 - [ ] Knockback on player.
@@ -409,7 +409,7 @@
 - [ ] Unique item IDs where needed.
 - [x] Equipment slot architecture.
 - [x] Server equip/unequip validation foundation.
-- [x] Equipment stat aggregation foundation; AttackPower feeds basic damage.
+- [x] Equipment stat aggregation feeds AttackPower, core stats, Defense, Crit Chance, and Crit Power.
 - [ ] Level/class requirements.
 - [ ] Weapon types.
 - [ ] Armor/accessory types.
@@ -534,7 +534,7 @@
 - [x] React currency display verified in Studio; polish/scalability remains.
 - [x] Persistent 8-slot skill hotbar data/service foundation; React hotbar shell implemented.
 - [ ] Buff/debuff display.
-- [x] React character/stat menu supports server-authoritative AP allocation and menu actions are Studio-verified; polish remains.
+- [x] React character/stat menu supports server-authoritative AP allocation and now surfaces Max HP/MP, Defense, Crit Chance, and Crit Damage; polish remains.
 - [x] React inventory/equipment menu exposes use/equip/unequip actions and the menu action shell is Studio-verified; dedicated UX polish remains.
 - [ ] **PARTIAL:** React quest menu shell is source-complete; further filtering/polish pending.
 - [x] React NPC dialogue with clickable quest/shop actions verified in Studio; visual polish remains.
@@ -609,7 +609,7 @@
 - [x] First Studio Rojo sync test.
 - [x] First movement/jump Studio test.
 - [x] Left-click basic attack verified end-to-end in Studio with server damage and visible swing.
-- [x] Added pure regression coverage for quest lifecycle, rewards, inventory/equipment rules, skills, payload bounds, profile migration, and movement sanity.
+- [x] Added pure regression coverage for quest lifecycle, rewards, inventory/equipment rules, skills, payload bounds, profile migration, movement sanity, Defense mitigation, Critical math/caps, and combat-stat UI labels.
 - [x] Added progression regression coverage for Lumenreach story → Level 8 advancement and post-trial bridge → Level 10.
 - [ ] Add DataStore/session-lock test scenarios.
 - [ ] Add 2+ client Studio test scenarios.

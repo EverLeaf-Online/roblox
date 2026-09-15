@@ -68,14 +68,14 @@ function CombatService.BasicAttack(player, profile)
 
     lastAttackAt[player] = now
     ResourceService.MarkCombat(player, profile)
-    local damage, reason = DamageService.RollBasicDamage(profile, {
+    local damage, damageMeta = DamageService.RollBasicDamage(profile, {
         PrimaryStat = attack.PrimaryStat,
         AttackPower = attack.AttackPower,
         StatScale = attack.StatScale,
         Mastery = attack.Mastery,
     })
     if not damage then
-        return false, reason
+        return false, damageMeta
     end
 
     local targetHumanoid = EnemyService.GetHumanoid(target)
@@ -87,7 +87,8 @@ function CombatService.BasicAttack(player, profile)
     local hitApplied, hitResult = MonsterCombat.ApplyPlayerHit(
         target,
         targetDefinition.MonsterConfig or targetDefinition,
-        damage
+        damage,
+        { Critical = damageMeta and damageMeta.Critical == true }
     )
     if not hitApplied then
         if hitResult == "dodged" then
@@ -106,6 +107,7 @@ function CombatService.BasicAttack(player, profile)
     return true,
         {
             Damage = hitResult,
+            Critical = damageMeta and damageMeta.Critical == true,
             TargetHealth = math.max(0, targetHumanoid.Health),
             TargetPosition = targetRoot.Position,
         }

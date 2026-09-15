@@ -12,6 +12,7 @@ local PartyStore = require(script.Parent.Parent.State.PartyStore)
 local ProfileStore = require(script.Parent.Parent.State.ProfileStore)
 local EverLeafIcons = require(script.Parent.Parent.UI.EverLeafIcons)
 local NotificationStore = require(script.Parent.Parent.UI.NotificationStore)
+local StatText = require(script.Parent.Parent.UI.StatText)
 local BossHud = require(script.Parent.Parent.UI.Components.BossHud)
 local PartyHud = require(script.Parent.Parent.UI.Components.PartyHud)
 local PartyOverlay = require(script.Parent.Parent.UI.Components.PartyOverlay)
@@ -1045,7 +1046,7 @@ local function itemStatsText(definition)
     table.sort(keys)
     for _, statName in keys do
         local amount = definition.Stats[statName]
-        table.insert(parts, string.format("%s +%s", statName, tostring(amount)))
+        table.insert(parts, StatText.Format(statName, amount))
     end
     return table.concat(parts, "  ·  ")
 end
@@ -1110,15 +1111,29 @@ local function CharacterPanel(profile, invoke)
                     ZIndex = 5,
                 }),
                 Resources = React.createElement(Label, {
-                    Position = UDim2.new(1, -310, 0, 50),
-                    Size = UDim2.fromOffset(290, 22),
+                    Position = UDim2.new(1, -248, 0, 39),
+                    Size = UDim2.fromOffset(228, 18),
                     Text = string.format(
-                        "Max HP %s   ·   Max MP %s",
+                        "HP %s  ·  MP %s",
                         tostring(derived.MaxHP or "—"),
                         tostring(derived.MaxMP or "—")
                     ),
-                    TextSize = 11,
+                    TextSize = 10,
                     Color = COLORS.Muted,
+                    Align = Enum.TextXAlignment.Right,
+                    ZIndex = 5,
+                }),
+                CombatStats = React.createElement(Label, {
+                    Position = UDim2.new(1, -300, 0, 58),
+                    Size = UDim2.fromOffset(280, 18),
+                    Text = string.format(
+                        "DEF %s  ·  CRIT %.1f%%  ·  CRIT DMG %.0f%%",
+                        tostring(derived.Defense or "—"),
+                        (tonumber(derived.CritChance) or 0) * 100,
+                        (tonumber(derived.CritMultiplier) or 1) * 100
+                    ),
+                    TextSize = 9,
+                    Color = COLORS.Faint,
                     Align = Enum.TextXAlignment.Right,
                     ZIndex = 5,
                 }),
@@ -1128,10 +1143,10 @@ local function CharacterPanel(profile, invoke)
 
     local names = { "Might", "Finesse", "Insight", "Fortune" }
     local descriptions = {
-        Might = "Power and physical damage",
-        Finesse = "Precision and agile weapon scaling",
-        Insight = "Technique and magical aptitude",
-        Fortune = "Luck-oriented progression hooks",
+        Might = "Power, Max HP, and Defense",
+        Finesse = "Agile scaling and Crit Damage",
+        Insight = "Technique scaling and Max MP",
+        Fortune = "Crit Chance and opportunistic scaling",
     }
     for index, statName in names do
         local column = (index - 1) % 2

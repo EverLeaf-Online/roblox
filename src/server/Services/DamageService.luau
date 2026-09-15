@@ -1,6 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local DamageMath = require(ReplicatedStorage.Shared.Math.DamageMath)
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
+local DerivedStatsService = require(script.Parent.DerivedStatsService)
 local EquipmentService = require(script.Parent.EquipmentService)
 
 local DamageService = {}
@@ -38,8 +39,15 @@ function DamageService.RollBasicDamage(profile, definition)
     local minimum, maximum =
         DamageMath.CalculateRange(primaryValue, attackPower, statScale, mastery)
     local damage = DamageMath.RollFromUnit(minimum, maximum, random:NextNumber())
+    local derived = DerivedStatsService.Compute(profile)
+    local finalDamage, critical = DamageMath.ApplyCritical(
+        damage,
+        derived.CritChance,
+        derived.CritMultiplier,
+        random:NextNumber()
+    )
 
-    return damage
+    return finalDamage, { Critical = critical, BaseDamage = damage }
 end
 
 return DamageService

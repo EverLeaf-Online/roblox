@@ -297,7 +297,7 @@ function MonsterCombat.Initialize(monster, definition)
     makeHealthBar(monster, definition)
 end
 
-function MonsterCombat.ApplyPlayerHit(monster, definition, damage)
+function MonsterCombat.ApplyPlayerHit(monster, definition, damage, options)
     local humanoid = getHumanoid(monster)
     if not humanoid or humanoid.Health <= 0 then
         return false, "dead"
@@ -317,7 +317,17 @@ function MonsterCombat.ApplyPlayerHit(monster, definition, damage)
         return false, "no_damage"
     end
     humanoid:TakeDamage(applied)
-    showDamage(monster, applied)
+    options = options or {}
+    if options.Critical == true then
+        showDamage(
+            monster,
+            applied,
+            string.format("CRIT  %d", applied),
+            Color3.fromRGB(255, 196, 76)
+        )
+    else
+        showDamage(monster, applied)
+    end
     hitBurst(monster)
     if humanoid.Health > 0 then
         playFlinch(monster, definition.HitStun or 0.22)

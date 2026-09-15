@@ -1,10 +1,11 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local React = require(ReplicatedStorage.Packages.React)
+local StatText = require(script.Parent.Parent.StatText)
 
 local function statText(definition)
     local parts = {}
     for name, value in definition and definition.Stats or {} do
-        table.insert(parts, string.format("%s +%s", tostring(name), tostring(value)))
+        table.insert(parts, StatText.Format(name, value))
     end
     table.sort(parts)
     if definition and definition.Effects then

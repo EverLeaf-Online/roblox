@@ -103,6 +103,17 @@ GameConfig.DerivedStats = {
     BaseMP = 50,
     MPPerLevel = 4,
     MPPerInsight = 6,
+    BaseDefense = 2,
+    DefensePerLevel = 0.4,
+    DefensePerMight = 0.6,
+    BaseCritChance = 0.04,
+    CritChancePerFortune = 0.0035,
+    CritChancePerFinesse = 0.0015,
+    MaximumCritChance = 0.35,
+    BaseCritMultiplier = 1.45,
+    CritMultiplierPerFinesse = 0.0025,
+    CritMultiplierPerFortune = 0.0015,
+    MaximumCritMultiplier = 2.25,
 }
 
 GameConfig.Resources = {
@@ -127,6 +138,7 @@ GameConfig.Combat = {
     BasicAttackArcDegrees = 120,
     RequireLineOfSight = true,
     PlayerDamageIFrames = 0.15,
+    DefenseConstant = 100,
 }
 
 GameConfig.Graphics = {

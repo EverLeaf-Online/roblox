@@ -32,7 +32,7 @@ return table.freeze({
         RequiredAdvancementTier = 1,
         RequiredLevel = 8,
         StackLimit = 1,
-        Stats = table.freeze({ AttackPower = 8, Might = 2 }),
+        Stats = table.freeze({ AttackPower = 8, Might = 2, Defense = 2 }),
         SellPrice = table.freeze({ Currency = "Shards", Amount = 10 }),
     }),
     thornrunner_briarbow = table.freeze({
@@ -44,7 +44,7 @@ return table.freeze({
         RequiredAdvancementTier = 1,
         RequiredLevel = 8,
         StackLimit = 1,
-        Stats = table.freeze({ AttackPower = 7, Finesse = 2 }),
+        Stats = table.freeze({ AttackPower = 7, Finesse = 2, CritChance = 1 }),
         SellPrice = table.freeze({ Currency = "Shards", Amount = 10 }),
     }),
     lumenweaver_focus = table.freeze({
@@ -56,7 +56,7 @@ return table.freeze({
         RequiredAdvancementTier = 1,
         RequiredLevel = 10,
         StackLimit = 1,
-        Stats = table.freeze({ AttackPower = 7, Insight = 2 }),
+        Stats = table.freeze({ AttackPower = 7, Insight = 2, CritChance = 1 }),
         SellPrice = table.freeze({ Currency = "Shards", Amount = 11 }),
     }),
     veilstrider_twinknives = table.freeze({
@@ -68,7 +68,7 @@ return table.freeze({
         RequiredAdvancementTier = 1,
         RequiredLevel = 8,
         StackLimit = 1,
-        Stats = table.freeze({ AttackPower = 7, Fortune = 2 }),
+        Stats = table.freeze({ AttackPower = 7, Fortune = 2, CritChance = 2 }),
         SellPrice = table.freeze({ Currency = "Shards", Amount = 10 }),
     }),
     brasshand_rivet_maul = table.freeze({
@@ -80,7 +80,7 @@ return table.freeze({
         RequiredAdvancementTier = 1,
         RequiredLevel = 10,
         StackLimit = 1,
-        Stats = table.freeze({ AttackPower = 9, Might = 1, Finesse = 1 }),
+        Stats = table.freeze({ AttackPower = 9, Might = 1, Finesse = 1, Defense = 1 }),
         SellPrice = table.freeze({ Currency = "Shards", Amount = 11 }),
     }),
     foundry_guard_vest = table.freeze({
@@ -91,7 +91,7 @@ return table.freeze({
         RequiredAdvancementTier = 1,
         RequiredLevel = 10,
         StackLimit = 1,
-        Stats = table.freeze({ Might = 1, Insight = 1 }),
+        Stats = table.freeze({ Might = 1, Insight = 1, Defense = 6 }),
         SellPrice = table.freeze({ Currency = "Shards", Amount = 14 }),
     }),
     ashrunner_coat = table.freeze({
@@ -102,7 +102,7 @@ return table.freeze({
         RequiredAdvancementTier = 1,
         RequiredLevel = 10,
         StackLimit = 1,
-        Stats = table.freeze({ Finesse = 1, Fortune = 1 }),
+        Stats = table.freeze({ Finesse = 1, Fortune = 1, Defense = 3, CritChance = 1 }),
         SellPrice = table.freeze({ Currency = "Shards", Amount = 14 }),
     }),
     emberloop_charm = table.freeze({
@@ -113,7 +113,7 @@ return table.freeze({
         RequiredAdvancementTier = 1,
         RequiredLevel = 12,
         StackLimit = 1,
-        Stats = table.freeze({ AttackPower = 2, Fortune = 1 }),
+        Stats = table.freeze({ AttackPower = 2, Fortune = 1, CritChance = 2 }),
         SellPrice = table.freeze({ Currency = "Shards", Amount = 18 }),
     }),
     belforge_wayfarer_ring = table.freeze({
@@ -124,7 +124,14 @@ return table.freeze({
         RequiredAdvancementTier = 1,
         RequiredLevel = 12,
         StackLimit = 1,
-        Stats = table.freeze({ Might = 1, Finesse = 1, Insight = 1, Fortune = 1 }),
+        Stats = table.freeze({
+            Might = 1,
+            Finesse = 1,
+            Insight = 1,
+            Fortune = 1,
+            Defense = 2,
+            CritChance = 1,
+        }),
         SellPrice = table.freeze({ Currency = "Shards", Amount = 24 }),
     }),
     tempered_mark_charm = table.freeze({
@@ -135,7 +142,7 @@ return table.freeze({
         RequiredAdvancementTier = 1,
         RequiredLevel = 14,
         StackLimit = 1,
-        Stats = table.freeze({ AttackPower = 4 }),
+        Stats = table.freeze({ AttackPower = 4, CritChance = 3 }),
         SellPrice = table.freeze({ Currency = "Shards", Amount = 28 }),
     }),
     small_tonic = table.freeze({
@@ -313,7 +320,16 @@ return table.freeze({
         RequiredAdvancementTier = 2,
         RequiredLevel = 30,
         StackLimit = 1,
-        Stats = table.freeze({ AttackPower = 4, Might = 1, Finesse = 1, Insight = 1, Fortune = 1 }),
+        Stats = table.freeze({
+            AttackPower = 4,
+            Might = 1,
+            Finesse = 1,
+            Insight = 1,
+            Fortune = 1,
+            Defense = 4,
+            CritChance = 2,
+            CritPower = 10,
+        }),
         SellPrice = table.freeze({ Currency = "Shards", Amount = 50 }),
     }),
     mosswarden_core = table.freeze({

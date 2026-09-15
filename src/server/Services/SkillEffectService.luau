@@ -22,14 +22,14 @@ function SkillEffectService.Execute(player, profile, definition)
         if not target then
             return false, "no_target"
         end
-        local damage, reason = DamageService.RollBasicDamage(profile, {
+        local damage, damageMeta = DamageService.RollBasicDamage(profile, {
             PrimaryStat = effect.PrimaryStat or "Might",
             AttackPower = effect.AttackPower or 1,
             StatScale = effect.StatScale or 1,
             Mastery = effect.Mastery,
         })
         if not damage then
-            return false, reason
+            return false, damageMeta
         end
         local humanoid = EnemyService.GetHumanoid(target)
         local targetDefinition = EnemyService.GetDefinition(target)
@@ -39,7 +39,8 @@ function SkillEffectService.Execute(player, profile, definition)
         local hitApplied, hitResult = MonsterCombat.ApplyPlayerHit(
             target,
             targetDefinition.MonsterConfig or targetDefinition,
-            damage
+            damage,
+            { Critical = damageMeta and damageMeta.Critical == true }
         )
         if not hitApplied then
             if hitResult == "dodged" then
@@ -48,7 +49,12 @@ function SkillEffectService.Execute(player, profile, definition)
             return false, hitResult
         end
         EnemyService.RecordDamage(target, player, hitResult)
-        return true, { Kind = "Damage", Damage = hitResult }
+        return true,
+            {
+                Kind = "Damage",
+                Damage = hitResult,
+                Critical = damageMeta and damageMeta.Critical == true,
+            }
     end
 
     if effect.Type == "SelfStatus" then

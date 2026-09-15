@@ -155,7 +155,11 @@ local function performAttack()
             if result.Dodged == true then
                 showFeedback("Enemy dodged", "warning")
             elseif damage then
-                showFeedback(string.format("Hit · %d damage", damage), "success")
+                if result.Critical == true then
+                    showFeedback(string.format("Critical · %d damage", damage), "success")
+                else
+                    showFeedback(string.format("Hit · %d damage", damage), "success")
+                end
             else
                 showFeedback("Hit", "success")
             end

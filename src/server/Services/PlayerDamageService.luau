@@ -1,8 +1,11 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local DamageMath = require(ReplicatedStorage.Shared.Math.DamageMath)
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
+local DerivedStatsService = require(script.Parent.DerivedStatsService)
 local MovementSanityService = require(script.Parent.MovementSanityService)
+local PlayerDataService = require(script.Parent.PlayerDataService)
 
 local PlayerDamageService = {}
 local lastDamageAt = {}
@@ -67,8 +70,17 @@ function PlayerDamageService.Apply(player, amount, sourceId, options)
     end
 
     lastDamageAt[player] = now
+    local profile = PlayerDataService.Get(player)
+    local derived = profile and DerivedStatsService.Compute(profile) or nil
+    local appliedDamage = DamageMath.MitigateIncoming(
+        amount,
+        derived and derived.Defense or 0,
+        GameConfig.Combat.DefenseConstant
+    )
     humanoid:SetAttribute("LastDamageSource", tostring(sourceId or "unknown"))
-    humanoid:TakeDamage(math.floor(amount))
+    humanoid:SetAttribute("LastDamageRaw", math.floor(amount))
+    humanoid:SetAttribute("LastDamageApplied", appliedDamage)
+    humanoid:TakeDamage(appliedDamage)
     if humanoid.Health > 0 then
         options = options or {}
         applyImpulse(player, character, options)
