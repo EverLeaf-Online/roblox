@@ -4710,11 +4710,14 @@ local function makeWayfarerArrivalMarker(world, groundPosition, yaw)
     model.Parent = world
     local base = CFrame.new(groundPosition) * CFrame.Angles(0, yaw, 0)
 
+    -- The arrival mark is a ground sigil, not a platform. Keep the slate nearly
+    -- flush with Terrain and break the perimeter with imported moss stones so a
+    -- fresh spawn reads as an old Wayfarer site rather than a Roblox spawn pad.
     local disc = makePart(
         model,
         "ArrivalRuneBase",
-        Vector3.new(0.16, 5.6, 5.6),
-        base * CFrame.new(0, 0.08, 0) * CFrame.Angles(0, 0, math.rad(90)),
+        Vector3.new(0.1, 4.8, 4.8),
+        base * CFrame.new(0, 0.05, 0) * CFrame.Angles(0, 0, math.rad(90)),
         Enum.Material.Slate,
         Color3.fromRGB(61, 77, 69)
     )
@@ -4722,44 +4725,60 @@ local function makeWayfarerArrivalMarker(world, groundPosition, yaw)
     disc.CanCollide = false
     disc.CanTouch = false
     disc.CanQuery = false
+    disc.Transparency = 0.28
 
-    local rune = makePart(
-        model,
-        "ArrivalLumenRune",
-        Vector3.new(0.08, 3.25, 0.42),
-        base * CFrame.new(0, 0.18, 0) * CFrame.Angles(0, 0, math.rad(90)),
-        Enum.Material.Neon,
-        Color3.fromRGB(104, 221, 181)
-    )
-    rune.CanCollide = false
-    rune.CanTouch = false
-    rune.CanQuery = false
-    rune.Transparency = 0.16
-
-    for index = 1, 8 do
-        local angle = (index - 1) * math.pi * 0.25
-        local localOffset = Vector3.new(math.cos(angle) * 3.5, 0, math.sin(angle) * 3.5)
-        local stone = makePart(
+    local runeColor = Color3.fromRGB(104, 221, 181)
+    local runeSegments = {
+        { Size = Vector3.new(0.06, 2.9, 0.32), Offset = Vector3.new(0, 0.13, 0), Yaw = 0 },
+        { Size = Vector3.new(0.06, 2.15, 0.28), Offset = Vector3.new(-0.72, 0.14, 0.18), Yaw = 58 },
+        { Size = Vector3.new(0.06, 2.15, 0.28), Offset = Vector3.new(0.72, 0.14, 0.18), Yaw = -58 },
+        { Size = Vector3.new(0.06, 1.55, 0.24), Offset = Vector3.new(0, 0.15, 0.95), Yaw = 90 },
+    }
+    local glowParent = nil
+    for index, spec in runeSegments do
+        local rune = makePart(
             model,
-            "ArrivalStone" .. index,
-            Vector3.new(1.2, 0.34, 0.78),
-            base
-                * CFrame.new(localOffset + Vector3.new(0, 0.14, 0))
-                * CFrame.Angles(0, -angle + math.rad(90), math.rad((index % 3 - 1) * 3)),
-            Enum.Material.Slate,
-            if index % 2 == 0 then Color3.fromRGB(82, 94, 86) else Color3.fromRGB(70, 84, 77)
+            "ArrivalLumenRune" .. index,
+            spec.Size,
+            base * CFrame.new(spec.Offset) * CFrame.Angles(0, math.rad(spec.Yaw), math.rad(90)),
+            Enum.Material.Neon,
+            runeColor
         )
-        stone.CanCollide = false
-        stone.CanTouch = false
-        stone.CanQuery = false
+        rune.CanCollide = false
+        rune.CanTouch = false
+        rune.CanQuery = false
+        rune.Transparency = 0.12 + index * 0.02
+        glowParent = glowParent or rune
     end
 
-    local glow = Instance.new("PointLight")
-    glow.Color = Color3.fromRGB(104, 221, 181)
-    glow.Brightness = 0.32
-    glow.Range = 8
-    glow.Shadows = false
-    glow.Parent = rune
+    for index, localOffset in
+        {
+            Vector3.new(-3.4, 0, -1.4),
+            Vector3.new(3.2, 0, -1.7),
+            Vector3.new(-2.8, 0, 2.4),
+            Vector3.new(3.0, 0, 2.2),
+        }
+    do
+        local worldPosition = (base * CFrame.new(localOffset)).Position
+        makeMossyRockSet(
+            model,
+            worldPosition,
+            yaw + math.rad(index * 37),
+            0.2 + (index % 2) * 0.035
+        )
+    end
+
+    makeFern(model, (base * CFrame.new(-3.7, 0, 2.8)).Position, 0.42, yaw + math.rad(16))
+    makeFern(model, (base * CFrame.new(3.8, 0, -2.4)).Position, 0.38, yaw + math.rad(-31))
+
+    if glowParent then
+        local glow = Instance.new("PointLight")
+        glow.Color = runeColor
+        glow.Brightness = 0.3
+        glow.Range = 7
+        glow.Shadows = false
+        glow.Parent = glowParent
+    end
     return model
 end
 
