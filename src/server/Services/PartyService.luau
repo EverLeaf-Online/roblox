@@ -1,11 +1,13 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local PartyReadyRules = require(ReplicatedStorage.Shared.Logic.PartyReadyRules)
 local PartyRules = require(ReplicatedStorage.Shared.Logic.PartyRules)
 
 local PartyService = {}
 local partyByPlayer = {}
 local invitations = {}
+local readyChecks = {}
 local nextId = 0
 local event = Instance.new("BindableEvent")
 PartyService.Event = event.Event
@@ -38,6 +40,53 @@ local function snapshotParty(party)
         Members = members,
         MaxMembers = party.MaxMembers,
     }
+end
+
+local function readySnapshot(party, check)
+    local members = {}
+    for _, member in party.Members do
+        if member.Parent == Players then
+            table.insert(members, {
+                UserId = member.UserId,
+                Name = member.Name,
+                Ready = check.Responses[member.UserId] == true,
+            })
+        end
+    end
+    return {
+        Purpose = check.Purpose,
+        LeaderUserId = party.Leader.UserId,
+        LeaderName = party.Leader.Name,
+        Members = members,
+        Duration = math.max(0, check.ExpiresAt - os.clock()),
+    }
+end
+
+local function fireReadyCheck(party, check)
+    local snapshot = readySnapshot(party, check)
+    for _, member in party.Members do
+        if member.Parent == Players then
+            event:Fire(member, { Type = "ReadyCheck", ReadyCheck = snapshot })
+        end
+    end
+end
+
+local function notifyReadyOutcome(party, eventType, reason)
+    for _, member in party.Members do
+        if member.Parent == Players then
+            event:Fire(member, { Type = eventType, Reason = reason })
+        end
+    end
+end
+
+local function clearReadyCheck(party, reason)
+    local check = readyChecks[party]
+    if not check then
+        return false
+    end
+    readyChecks[party] = nil
+    notifyReadyOutcome(party, "ReadyCheckCleared", reason)
+    return true
 end
 
 local function fireChanged(party)
@@ -120,6 +169,7 @@ function PartyService.Accept(player)
     end
 
     invitations[player] = nil
+    clearReadyCheck(party, "party_changed")
     table.insert(party.Members, player)
     partyByPlayer[player] = party
     fireChanged(party)
@@ -141,6 +191,7 @@ function PartyService.Kick(leader, targetUserId)
     if not target or target == leader or partyByPlayer[target] ~= party then
         return false, "invalid_target"
     end
+    clearReadyCheck(party, "party_changed")
     for index = #party.Members, 1, -1 do
         if party.Members[index] == target then
             table.remove(party.Members, index)
@@ -159,6 +210,7 @@ function PartyService.Leave(player)
         return false, "not_in_party"
     end
     local wasLeader = party.Leader == player
+    clearReadyCheck(party, "party_changed")
     for index = #party.Members, 1, -1 do
         if party.Members[index] == player then
             table.remove(party.Members, index)
@@ -178,6 +230,89 @@ function PartyService.Leave(player)
         fireChanged(party)
     end
     return true
+end
+
+function PartyService.StartReadyCheck(leader, purpose, duration)
+    local party = partyByPlayer[leader]
+    local allowed, reason = PartyReadyRules.CanStart(
+        party ~= nil and party.Leader == leader,
+        party and #party.Members or 0,
+        party and party.MaxMembers or 6,
+        party ~= nil and readyChecks[party] ~= nil
+    )
+    if not allowed then
+        return false, reason
+    end
+
+    duration = math.clamp(tonumber(duration) or 20, 5, 60)
+    local check = {
+        Purpose = tostring(purpose or "party"),
+        ExpiresAt = os.clock() + duration,
+        Responses = { [leader.UserId] = true },
+    }
+    readyChecks[party] = check
+    fireReadyCheck(party, check)
+
+    task.delay(duration, function()
+        if readyChecks[party] == check then
+            readyChecks[party] = nil
+            notifyReadyOutcome(party, "ReadyCheckCleared", "expired")
+        end
+    end)
+    return true, readySnapshot(party, check)
+end
+
+function PartyService.RespondReadyCheck(player, accepted)
+    local party = partyByPlayer[player]
+    local check = party and readyChecks[party] or nil
+    local allowed, reason = PartyReadyRules.CanRespond(
+        party ~= nil,
+        check ~= nil,
+        check ~= nil and check.ExpiresAt <= os.clock()
+    )
+    if not allowed then
+        if party and check and check.ExpiresAt <= os.clock() then
+            readyChecks[party] = nil
+            notifyReadyOutcome(party, "ReadyCheckCleared", "expired")
+        end
+        return false, reason
+    end
+    if type(accepted) ~= "boolean" then
+        return false, "invalid_response"
+    end
+    if not accepted then
+        readyChecks[party] = nil
+        notifyReadyOutcome(party, "ReadyCheckCleared", "declined")
+        return true, { Complete = false, Declined = true, Purpose = check.Purpose }
+    end
+
+    check.Responses[player.UserId] = true
+    local memberIds = {}
+    for _, member in party.Members do
+        table.insert(memberIds, member.UserId)
+    end
+    if PartyReadyRules.AllReady(memberIds, check.Responses) then
+        readyChecks[party] = nil
+        local members = table.clone(party.Members)
+        return true, { Complete = true, Purpose = check.Purpose, Party = party, Members = members }
+    end
+
+    fireReadyCheck(party, check)
+    return true, { Complete = false, Purpose = check.Purpose }
+end
+
+function PartyService.NotifyReadyCheckOutcome(party, completed, reason)
+    if not party then
+        return false
+    end
+    notifyReadyOutcome(party, completed and "ReadyCheckComplete" or "ReadyCheckCleared", reason)
+    return true
+end
+
+function PartyService.GetReadyCheck(player)
+    local party = partyByPlayer[player]
+    local check = party and readyChecks[party] or nil
+    return check and readySnapshot(party, check) or nil
 end
 
 function PartyService.GetSnapshot(player)

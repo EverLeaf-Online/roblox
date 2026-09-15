@@ -936,7 +936,7 @@ local function makeBelforgeAntechamber(parent)
             WorldNoticeService.SendReason(player, "profile_not_loaded")
             return
         end
-        local entered, reason = BelforgeColossusService.EnterArena(player, profile)
+        local entered, reason = BelforgeColossusService.RequestEntry(player, profile)
         if not entered then
             WorldNoticeService.SendReason(player, reason)
         end

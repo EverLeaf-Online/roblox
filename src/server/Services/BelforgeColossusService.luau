@@ -11,7 +11,9 @@ local BelforgeAccessRules = require(ReplicatedStorage.Shared.Logic.BelforgeAcces
 local BelforgeColossusRules = require(ReplicatedStorage.Shared.Logic.BelforgeColossusRules)
 local BelforgeEncounterRules = require(ReplicatedStorage.Shared.Logic.BelforgeEncounterRules)
 local MonsterSpawnService = require(script.Parent.MonsterSpawnService)
+local PartyService = require(script.Parent.PartyService)
 local PlayerDamageService = require(script.Parent.PlayerDamageService)
+local PlayerDataService = require(script.Parent.PlayerDataService)
 local WorldTravelService = require(script.Parent.WorldTravelService)
 
 local BelforgeColossusService = {}
@@ -21,6 +23,8 @@ local accumulator = 0
 local ENCOUNTER_TRIGGER = "BelforgeColossusEncounter"
 local MAX_PLAYERS = BossDefinitions.belforge_colossus.MaxPlayers
 local WIPE_RESET_SECONDS = 8
+local READY_CHECK_SECONDS = 20
+local ASSEMBLY_RADIUS = 72
 local encounter = {
     State = "Open",
     Participants = {},
@@ -272,6 +276,118 @@ local function wipeIfNeeded()
         boss:Destroy()
     end
     MonsterSpawnService.ForceCooldownByName(ENCOUNTER_TRIGGER, WIPE_RESET_SECONDS)
+end
+
+local function validatePartyAssembly(party)
+    if not party or not party.Leader or #party.Members < 2 then
+        return false, "party_too_small"
+    end
+    if #party.Members + participantCount() > MAX_PLAYERS then
+        return false, "encounter_full"
+    end
+
+    local antechamber = WorldTravelService.GetSpawn("belforge_antechamber")
+    if not antechamber then
+        return false, "spawn_unavailable"
+    end
+
+    for _, member in party.Members do
+        if member.Parent ~= Players then
+            return false, "party_member_unavailable"
+        end
+        local profile = PlayerDataService.Get(member)
+        local allowed = BelforgeAccessRules.CanEnterColossus(profile)
+        if not allowed then
+            return false, "party_member_ineligible"
+        end
+        local character = member.Character
+        local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+        local root = character and character:FindFirstChild("HumanoidRootPart")
+        if not humanoid or humanoid.Health <= 0 or not root then
+            return false, "party_member_unavailable"
+        end
+        if (root.Position - antechamber.Position).Magnitude > ASSEMBLY_RADIUS then
+            return false, "party_not_assembled"
+        end
+    end
+    return true
+end
+
+function BelforgeColossusService.StartPartyReadyCheck(player, profile)
+    refreshCooldownState()
+    local accessOk, accessReason = BelforgeAccessRules.CanEnterColossus(profile)
+    if not accessOk then
+        return false, accessReason
+    end
+    local party = PartyService.Get(player)
+    if not party or #party.Members <= 1 then
+        return false, "party_too_small"
+    end
+    if party.Leader ~= player then
+        return false, "not_party_leader"
+    end
+    local canEnter, encounterReason =
+        BelforgeEncounterRules.CanEnter(encounter.State, false, participantCount(), MAX_PLAYERS)
+    if not canEnter then
+        return false, encounterReason
+    end
+    local assembled, assemblyReason = validatePartyAssembly(party)
+    if not assembled then
+        return false, assemblyReason
+    end
+    return PartyService.StartReadyCheck(player, BOSS_ID, READY_CHECK_SECONDS)
+end
+
+function BelforgeColossusService.RequestEntry(player, profile)
+    local party = PartyService.Get(player)
+    if party and #party.Members > 1 then
+        return BelforgeColossusService.StartPartyReadyCheck(player, profile)
+    end
+    return BelforgeColossusService.EnterArena(player, profile)
+end
+
+function BelforgeColossusService.RespondPartyReadyCheck(player, accepted)
+    local ok, result = PartyService.RespondReadyCheck(player, accepted)
+    if not ok then
+        return false, result
+    end
+    if not result.Complete then
+        return true, result
+    end
+    if result.Purpose ~= BOSS_ID then
+        PartyService.NotifyReadyCheckOutcome(result.Party, false, "invalid_ready_check")
+        return false, "invalid_ready_check"
+    end
+
+    refreshCooldownState()
+    local canEnter, encounterReason =
+        BelforgeEncounterRules.CanEnter(encounter.State, false, participantCount(), MAX_PLAYERS)
+    if not canEnter then
+        PartyService.NotifyReadyCheckOutcome(result.Party, false, encounterReason)
+        return false, encounterReason
+    end
+    local assembled, assemblyReason = validatePartyAssembly(result.Party)
+    if not assembled then
+        PartyService.NotifyReadyCheckOutcome(result.Party, false, assemblyReason)
+        return false, assemblyReason
+    end
+
+    local entered = {}
+    for _, member in result.Members do
+        local profile = PlayerDataService.Get(member)
+        local moved, moveReason = BelforgeColossusService.EnterArena(member, profile)
+        if not moved then
+            for _, enteredMember in entered do
+                BelforgeColossusService.LeaveArena(enteredMember)
+            end
+            PartyService.NotifyReadyCheckOutcome(result.Party, false, moveReason)
+            return false, moveReason
+        end
+        table.insert(entered, member)
+    end
+
+    PartyService.NotifyReadyCheckOutcome(result.Party, true, "belforge_entry")
+    return true, { Complete = true, Entered = true }
 end
 
 function BelforgeColossusService.EnterArena(player, profile)

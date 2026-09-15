@@ -46,6 +46,41 @@ local MESSAGES = table.freeze({
         "Arena Full",
         "The Belforge encounter already has the maximum number of entrants.",
     }),
+    not_party_leader = table.freeze({
+        "warning",
+        "Leader Required",
+        "Your party leader must start the Belforge ready check at the arena seal.",
+    }),
+    party_too_small = table.freeze({
+        "info",
+        "Solo Entry",
+        "A one-player party does not need a ready check.",
+    }),
+    party_not_assembled = table.freeze({
+        "warning",
+        "Party Not Assembled",
+        "Every party member must be alive and present in the Belforge antechamber before the ready check begins.",
+    }),
+    party_member_ineligible = table.freeze({
+        "warning",
+        "Party Member Not Ready",
+        "Every party member must be Level 30, Tier 2, and cleared for the Colossus arena.",
+    }),
+    party_member_unavailable = table.freeze({
+        "warning",
+        "Party Member Unavailable",
+        "Every party member must be online, alive, and ready in the antechamber.",
+    }),
+    ready_check_active = table.freeze({
+        "info",
+        "Ready Check Active",
+        "Your party already has an active ready check.",
+    }),
+    no_ready_check = table.freeze({
+        "warning",
+        "Ready Check Ended",
+        "That party ready check is no longer active.",
+    }),
     boss_recovering = table.freeze({
         "info",
         "Colossus Dormant",

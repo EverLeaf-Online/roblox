@@ -1,4 +1,5 @@
 local AdvancementService = require(script.Parent.AdvancementService)
+local BelforgeColossusService = require(script.Parent.BelforgeColossusService)
 local ConsumableService = require(script.Parent.ConsumableService)
 local CosmeticService = require(script.Parent.CosmeticService)
 local EquipmentService = require(script.Parent.EquipmentService)
@@ -99,6 +100,12 @@ handlers["party.kick"] = function(player, _, payload)
 end
 handlers["party.leave"] = function(player)
     return PartyService.Leave(player)
+end
+handlers["party.ready.respond"] = function(player, _, payload)
+    if type(payload.Accepted) ~= "boolean" then
+        return false, "invalid_response"
+    end
+    return BelforgeColossusService.RespondPartyReadyCheck(player, payload.Accepted)
 end
 handlers["cosmetic.equip"] = function(_, profile, payload)
     return CosmeticService.Equip(profile, payload.Slot, payload.CosmeticId)

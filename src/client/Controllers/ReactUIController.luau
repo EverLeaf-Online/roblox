@@ -2479,8 +2479,11 @@ local function App()
 
     React.useEffect(function()
         local previousInviteUserId = nil
+        local previousReadyPurpose = nil
+        local previousReadyResultGeneration = nil
         local connection = PartyStore.Changed:Connect(function(snapshot)
             setPartyState(snapshot)
+
             local invite = snapshot and snapshot.Invite
             if invite and invite.FromUserId ~= previousInviteUserId then
                 previousInviteUserId = invite.FromUserId
@@ -2495,6 +2498,60 @@ local function App()
                 )
             elseif not invite then
                 previousInviteUserId = nil
+            end
+
+            local readyCheck = snapshot and snapshot.ReadyCheck
+            if readyCheck and readyCheck.Purpose ~= previousReadyPurpose then
+                previousReadyPurpose = readyCheck.Purpose
+                NotificationStore.Push(
+                    "party",
+                    "Belforge Ready Check",
+                    string.format(
+                        "%s is assembling the party. Press P or Select to respond.",
+                        readyCheck.LeaderName or "Your party leader"
+                    ),
+                    6
+                )
+            elseif not readyCheck then
+                previousReadyPurpose = nil
+            end
+
+            local readyResult = snapshot and snapshot.ReadyResult
+            if readyResult and readyResult.Generation ~= previousReadyResultGeneration then
+                previousReadyResultGeneration = readyResult.Generation
+                if readyResult.Type == "Complete" then
+                    setPartyOpen(false)
+                    NotificationStore.Push(
+                        "success",
+                        "Party Ready",
+                        "Belforge group entry confirmed.",
+                        3.5
+                    )
+                elseif readyResult.Type == "Cleared" then
+                    local reason = readyResult.Reason
+                    if reason == "expired" then
+                        NotificationStore.Push(
+                            "info",
+                            "Ready Check Expired",
+                            "The Belforge ready check timed out.",
+                            3.5
+                        )
+                    elseif reason == "declined" then
+                        NotificationStore.Push(
+                            "info",
+                            "Ready Check Cancelled",
+                            "A party member declined the Belforge pull.",
+                            3.5
+                        )
+                    elseif reason == "party_changed" then
+                        NotificationStore.Push(
+                            "info",
+                            "Ready Check Cancelled",
+                            "The party roster changed.",
+                            3.5
+                        )
+                    end
+                end
             end
         end)
         return function()
@@ -2623,7 +2680,21 @@ local function App()
         elseif interaction then
             targetName = "DialogueClose"
         elseif partyOpen then
-            targetName = if partyState and partyState.Invite then "PartyAccept" else "PartyPrimary"
+            local readyCheck = partyState and partyState.ReadyCheck
+            if readyCheck then
+                local selfReady = false
+                for _, member in readyCheck.Members or {} do
+                    if member.UserId == player.UserId then
+                        selfReady = member.Ready == true
+                        break
+                    end
+                end
+                targetName = if selfReady then "PartyReadyDecline" else "PartyReady"
+            else
+                targetName = if partyState and partyState.Invite
+                    then "PartyAccept"
+                    else "PartyPrimary"
+            end
         elseif menuOpen then
             targetName = "MenuNav_" .. menuTab
         end

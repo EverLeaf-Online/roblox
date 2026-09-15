@@ -115,7 +115,7 @@
 - [ ] Rejoin preserves expected profile/inventory/equipment/quest state.
 - [ ] Keyboard/mouse full pass.
 - [ ] Gamepad/controller blocking-flow live Studio pass; source support is now implemented for movement, camera, attack, jump, sprint, dodge, all 8 skill slots, menu open/back/tab cycling, device-aware hotbar labels, and initial UI focus.
-- [ ] Multi-client basic party/network smoke test; boss contributor rewards are source-complete but still need live multi-client verification.
+- [ ] Multi-client basic party/network smoke test; party UI, ready checks, group boss entry, and contributor rewards are source-complete but still need live multi-client verification.
 - [ ] Full `./check.sh` gate passes at final Phase 1 checkpoint.
 - [ ] Studio Output contains no red errors during the canonical Phase 1 run.
 
@@ -563,12 +563,13 @@
 - [x] Runtime party-state foundation (create/add/leave/leader handoff).
 - [x] Production party UI implemented: incoming invites, create/accept/decline/invite/kick/leave controls, live member roster, leader state, and compact live-HP party HUD.
 - [ ] Shared/individual reward rules.
-- [ ] Instance/party teleport flow.
+- [ ] Generic instance/party teleport flow; Belforge now has a source-complete party ready-check and synchronized group-entry path.
 - [ ] Trading design decision.
 - [ ] Secure trading if approved.
 - [ ] Social/profile inspection.
 - [x] Achievement persistence/service foundation; titles/presentation pending.
 - [x] Multiplayer boss source rules implemented: six-player cap, pull lockout, participant elimination, wipe reset, contributor thresholds, individual boss rewards, and no death-rush re-entry; live multi-client QA remains.
+- [x] Belforge party ready-check implemented: leader-initiated at the physical seal, all members assembled/eligible, per-member confirmation, roster lock, expiry/cancel handling, and all-ready group teleport.
 
 ## 22. Monetization
 
