@@ -1,4 +1,5 @@
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
 local StylizedNpcFactory = {}
@@ -97,6 +98,14 @@ local function configureRig(model)
         end
     end
 
+    return root, head
+end
+
+local function startIdleAnimation(model)
+    local humanoid = model:FindFirstChildOfClass("Humanoid")
+    if not humanoid then
+        return
+    end
     local animator = humanoid:FindFirstChildOfClass("Animator")
     if not animator then
         animator = Instance.new("Animator")
@@ -114,8 +123,6 @@ local function configureRig(model)
         track.Looped = true
         track:Play(0.2, 1, 0.82)
     end
-
-    return root, head
 end
 
 local function makeDescription(spec, palette)
@@ -564,7 +571,7 @@ local function addClothingLayers(model, spec, palette)
     end
 end
 
-local function partBottomRelativeToRoot(root, part)
+local function partBottomWorldY(part)
     local half = part.Size * 0.5
     local lowest = math.huge
     for _, x in { -1, 1 } do
@@ -572,20 +579,19 @@ local function partBottomRelativeToRoot(root, part)
             for _, z in { -1, 1 } do
                 local worldCorner =
                     part.CFrame:PointToWorldSpace(Vector3.new(half.X * x, half.Y * y, half.Z * z))
-                local rootLocal = root.CFrame:PointToObjectSpace(worldCorner)
-                lowest = math.min(lowest, rootLocal.Y)
+                lowest = math.min(lowest, worldCorner.Y)
             end
         end
     end
     return lowest
 end
 
-local function measuredFootBottomLocalY(model, root)
+local function measuredFootBottomWorldY(model)
     local lowest = math.huge
     for _, name in { "LeftFoot", "RightFoot" } do
         local foot = bodyPart(model, name)
         if foot then
-            lowest = math.min(lowest, partBottomRelativeToRoot(root, foot))
+            lowest = math.min(lowest, partBottomWorldY(foot))
         end
     end
     if lowest == math.huge then
@@ -601,12 +607,18 @@ local function groundModel(model, requestedPosition, yaw)
         return false
     end
 
-    -- Measure the assembled R15 rig before moving it. This stays correct across
-    -- avatar scale changes and does not depend on Humanoid.HipHeight semantics.
-    local footBottomLocalY = measuredFootBottomLocalY(model, root)
-    if not footBottomLocalY then
-        footBottomLocalY = -(humanoid.HipHeight + root.Size.Y * 0.5)
-    end
+    -- Put the assembled rig above the target first, then let Roblox resolve
+    -- the generated R15 Motor6D chain before reading foot positions. Measuring
+    -- immediately after CreateHumanoidModelFromDescriptionAsync can see stale
+    -- limb CFrames and was the cause of NPCs being buried to the waist.
+    local stagingRoot = CFrame.new(
+        requestedPosition.X,
+        requestedPosition.Y + 12,
+        requestedPosition.Z
+    ) * CFrame.Angles(0, yaw or 0, 0)
+    local stagingTransform = stagingRoot * root.CFrame:Inverse()
+    model:PivotTo(stagingTransform * model:GetPivot())
+    RunService.Heartbeat:Wait()
 
     local rayParams = RaycastParams.new()
     local terrain = Workspace:FindFirstChildOfClass("Terrain")
@@ -624,18 +636,26 @@ local function groundModel(model, requestedPosition, yaw)
     local result = Workspace:Raycast(rayOrigin, Vector3.new(0, -220, 0), rayParams)
     local groundY = if result then result.Position.Y else requestedPosition.Y
     local clearance = 0.12
-    local rootY = NpcGroundingRules.ComputeRootY(groundY, footBottomLocalY, clearance)
-    local desiredRoot = CFrame.new(requestedPosition.X, rootY, requestedPosition.Z)
-        * CFrame.Angles(0, yaw or 0, 0)
 
-    local transform = desiredRoot * root.CFrame:Inverse()
-    model:PivotTo(transform * model:GetPivot())
+    local footBottomWorldY = measuredFootBottomWorldY(model)
+    if not footBottomWorldY then
+        footBottomWorldY = root.Position.Y - humanoid.HipHeight - root.Size.Y * 0.5
+    end
 
+    local shiftY = NpcGroundingRules.ComputeVerticalShift(groundY, footBottomWorldY, clearance)
+    model:PivotTo(CFrame.new(0, shiftY, 0) * model:GetPivot())
+    RunService.Heartbeat:Wait()
+
+    local verifiedFootBottom = measuredFootBottomWorldY(model)
     model:SetAttribute("EverLeafGroundY", groundY)
-    model:SetAttribute("EverLeafRootY", rootY)
-    model:SetAttribute("EverLeafFootBottomLocalY", footBottomLocalY)
+    model:SetAttribute("EverLeafFootBottomWorldY", verifiedFootBottom or footBottomWorldY + shiftY)
+    model:SetAttribute("EverLeafGroundShiftY", shiftY)
     model:SetAttribute("EverLeafHipHeight", humanoid.HipHeight)
     model:SetAttribute("EverLeafGroundClearance", clearance)
+    model:SetAttribute(
+        "EverLeafGroundError",
+        (verifiedFootBottom or footBottomWorldY + shiftY) - (groundY + clearance)
+    )
     return true
 end
 
@@ -685,6 +705,7 @@ function StylizedNpcFactory.Create(parent, spec)
     makeHair(model, head, palette, spec.HairStyle or "short")
     addClothingLayers(model, spec, palette)
     groundModel(model, spec.Position, spec.Yaw or 0)
+    startIdleAnimation(model)
     model.PrimaryPart = root
     return model, root, head
 end
