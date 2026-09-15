@@ -195,6 +195,52 @@ for skillId, skill in Skills do
             string.format("skill %s family exists: %s", skillId, skill.FamilyId)
         )
     end
+    for _, requirement in skill.Prerequisites or {} do
+        local requiredSkill = Skills[requirement.SkillId]
+        assert(
+            requiredSkill,
+            string.format(
+                "skill %s prerequisite exists: %s",
+                skillId,
+                tostring(requirement.SkillId)
+            )
+        )
+        assert(
+            type(requirement.Rank) == "number"
+                and requirement.Rank >= 1
+                and requirement.Rank <= (requiredSkill.MaxRank or 1),
+            "skill prerequisite rank valid: " .. skillId
+        )
+        assert(requirement.SkillId ~= skillId, "skill cannot require itself: " .. skillId)
+    end
+    if skill.PassiveBonuses then
+        assert(skill.Kind == "Passive", "only passive skills define PassiveBonuses: " .. skillId)
+        for statName, amount in skill.PassiveBonuses do
+            assert(
+                type(statName) == "string" and type(amount) == "number" and amount > 0,
+                "valid passive bonus: " .. skillId
+            )
+        end
+    end
+end
+
+local visiting = {}
+local visited = {}
+local function visitSkill(skillId)
+    if visited[skillId] then
+        return
+    end
+    assert(not visiting[skillId], "skill prerequisite cycle detected at: " .. skillId)
+    visiting[skillId] = true
+    local skill = Skills[skillId]
+    for _, requirement in skill and skill.Prerequisites or {} do
+        visitSkill(requirement.SkillId)
+    end
+    visiting[skillId] = nil
+    visited[skillId] = true
+end
+for skillId in Skills do
+    visitSkill(skillId)
 end
 
 print("content integrity tests passed")

@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SkillDefinitions = require(script.Parent.Parent.Content.SkillDefinitions)
 local ResourceService = require(script.Parent.ResourceService)
 local SkillUseRules = require(ReplicatedStorage.Shared.Logic.SkillUseRules)
+local SkillProgressionRules = require(ReplicatedStorage.Shared.Logic.SkillProgressionRules)
 local HotbarRules = require(ReplicatedStorage.Shared.Logic.HotbarRules)
 local AdvancementRules = require(ReplicatedStorage.Shared.Logic.AdvancementRules)
 local SkillEffectService = require(script.Parent.SkillEffectService)
@@ -15,24 +16,15 @@ function SkillService.Learn(profile, skillId)
     if not definition then
         return false, "unknown_skill"
     end
-    local familyAllowed, familyReason = AdvancementRules.CanUseFamilySkill(profile, definition)
-    if not familyAllowed then
-        return false, familyReason
-    end
-    if profile.Level < (definition.RequiredLevel or 1) then
-        return false, "level_too_low"
-    end
-    if profile.AdvancementTier < (definition.RequiredTier or 0) then
-        return false, "tier_too_low"
-    end
     local currentRank = profile.Skills.Learned[skillId] or 0
-    if currentRank >= definition.MaxRank then
-        return false, "max_rank"
+    local ruleDefinition = table.clone(definition)
+    ruleDefinition.Id = skillId
+    ruleDefinition.CurrentRank = currentRank
+    local allowed, reason = SkillProgressionRules.CanLearn(profile, ruleDefinition)
+    if not allowed then
+        return false, reason
     end
     local cost = definition.SPCostPerRank or 1
-    if profile.SP < cost then
-        return false, "insufficient_sp"
-    end
     profile.SP -= cost
     profile.Skills.Learned[skillId] = currentRank + 1
     return true, currentRank + 1

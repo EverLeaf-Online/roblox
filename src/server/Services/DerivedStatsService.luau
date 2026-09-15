@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local DerivedStatsMath = require(ReplicatedStorage.Shared.Math.DerivedStatsMath)
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
 local EquipmentService = require(script.Parent.EquipmentService)
+local SkillBonusService = require(script.Parent.SkillBonusService)
 
 local DerivedStatsService = {}
 
@@ -20,9 +21,14 @@ function DerivedStatsService.Compute(profile)
         totalCoreStat(profile, "Fortune"),
         GameConfig.DerivedStats,
         {
-            Defense = EquipmentService.GetStatBonus(profile, "Defense"),
-            CritChance = EquipmentService.GetStatBonus(profile, "CritChance"),
-            CritPower = EquipmentService.GetStatBonus(profile, "CritPower"),
+            MaxHP = SkillBonusService.GetStatBonus(profile, "MaxHP"),
+            MaxMP = SkillBonusService.GetStatBonus(profile, "MaxMP"),
+            Defense = EquipmentService.GetStatBonus(profile, "Defense")
+                + SkillBonusService.GetStatBonus(profile, "Defense"),
+            CritChance = EquipmentService.GetStatBonus(profile, "CritChance")
+                + SkillBonusService.GetStatBonus(profile, "CritChance"),
+            CritPower = EquipmentService.GetStatBonus(profile, "CritPower")
+                + SkillBonusService.GetStatBonus(profile, "CritPower"),
         }
     )
 end

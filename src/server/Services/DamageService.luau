@@ -3,6 +3,7 @@ local DamageMath = require(ReplicatedStorage.Shared.Math.DamageMath)
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
 local DerivedStatsService = require(script.Parent.DerivedStatsService)
 local EquipmentService = require(script.Parent.EquipmentService)
+local SkillBonusService = require(script.Parent.SkillBonusService)
 
 local DamageService = {}
 local random = Random.new()
@@ -25,6 +26,7 @@ function DamageService.RollBasicDamage(profile, definition)
     local attackPower = tonumber(definition.AttackPower)
     if attackPower then
         attackPower += EquipmentService.GetStatBonus(profile, "AttackPower")
+        attackPower += SkillBonusService.GetStatBonus(profile, "AttackPower")
     end
     local statScale = tonumber(definition.StatScale) or 1
     local mastery = tonumber(definition.Mastery) or GameConfig.Combat.DefaultMastery

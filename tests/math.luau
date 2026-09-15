@@ -66,6 +66,19 @@ expectEqual(equippedDerived.Defense, 11, "equipment defense is included")
 expect(math.abs(equippedDerived.CritChance - 0.0935) < 0.000001, "equipment crit chance")
 expect(math.abs(equippedDerived.CritMultiplier - 1.5675) < 0.000001, "equipment crit power")
 
+local passiveDerived = DerivedStatsMath.Compute(1, 4, 4, 4, 4, tuning, {
+    MaxHP = 16,
+    MaxMP = 20,
+    Defense = 3,
+    CritChance = 2,
+    CritPower = 5,
+})
+expectEqual(passiveDerived.MaxHP, 136, "flat passive max HP bonus")
+expectEqual(passiveDerived.MaxMP, 94, "flat passive max MP bonus")
+expectEqual(passiveDerived.Defense, 7.4, "passive defense bonus")
+expect(math.abs(passiveDerived.CritChance - 0.08) < 0.000001, "passive crit chance")
+expect(math.abs(passiveDerived.CritMultiplier - 1.516) < 0.000001, "passive crit power")
+
 local critDamage, critical = DamageMath.ApplyCritical(100, 0.2, 1.5, 0.1)
 expectEqual(critDamage, 150, "critical damage multiplier")
 expect(critical == true, "critical roll succeeds below chance")

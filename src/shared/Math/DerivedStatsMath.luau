@@ -8,8 +8,14 @@ function DerivedStatsMath.Compute(level, might, finesse, insight, fortune, tunin
     fortune = math.max(0, tonumber(fortune) or 0)
     bonuses = bonuses or {}
 
-    local maxHP = tuning.BaseHP + (level - 1) * tuning.HPPerLevel + might * tuning.HPPerMight
-    local maxMP = tuning.BaseMP + (level - 1) * tuning.MPPerLevel + insight * tuning.MPPerInsight
+    local maxHP = tuning.BaseHP
+        + (level - 1) * tuning.HPPerLevel
+        + might * tuning.HPPerMight
+        + math.max(0, tonumber(bonuses.MaxHP) or 0)
+    local maxMP = tuning.BaseMP
+        + (level - 1) * tuning.MPPerLevel
+        + insight * tuning.MPPerInsight
+        + math.max(0, tonumber(bonuses.MaxMP) or 0)
     local defense = tuning.BaseDefense
         + (level - 1) * tuning.DefensePerLevel
         + might * tuning.DefensePerMight

@@ -5,6 +5,8 @@ local LABELS = table.freeze({
     Defense = "Defense",
     CritChance = "Crit Chance",
     CritPower = "Crit Power",
+    MaxHP = "Max HP",
+    MaxMP = "Max MP",
 })
 
 function StatText.Label(name)

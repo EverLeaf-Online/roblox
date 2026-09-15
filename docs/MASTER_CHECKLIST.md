@@ -347,9 +347,9 @@
 - [x] Skill learning/cooldown/MP foundation plus generic targeting/effect execution; player-facing skill flow still pending.
 - [x] SP spending/validation foundation.
 - [x] Skill rank/max-rank architecture.
-- [ ] Skill prerequisites.
-- [ ] Active skills.
-- [ ] Passive skills.
+- [x] Skill prerequisites are server-enforced through shared progression rules; prerequisite targets/ranks and cycles are regression-validated.
+- [x] Active-skill framework and current family/Tier-2 active roster are implemented with SP ranks, MP costs, cooldowns, server effects, and hotbar use; broader roster expansion remains content work.
+- [x] Passive-skill framework is implemented with Steady Footing plus five Tier-1 family passives feeding real HP/MP/Defense/Crit/Attack derived stats.
 - [x] Runtime status-effect framework foundation.
 - [x] Skill MP/resource-cost validation foundation.
 - [x] Server skill cooldown foundation.
@@ -357,7 +357,7 @@
 - [ ] Skill animation/VFX/SFX hooks.
 - [x] Persistent 8-slot skill hotbar data/service foundation with React hotbar shell, full slot-select/assign/move/clear UX, MP-cost display, low-MP state, and cooldown countdown feedback.
 - [x] Keyboard and controller hotbar 1–8 skill-use bindings are source-complete; slot 1 Beginner Strike remains Studio-verified.
-- [ ] Skill tree UI.
+- [x] Skill tree UI is source-complete with Wayfarer/Foundation + family lanes, real prerequisite connectors, learned/learnable/locked node states, SP/MP/cooldown metadata, and exact unlock requirements; Studio visual QA remains.
 
 ## 10. Enemies
 

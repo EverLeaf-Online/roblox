@@ -24,6 +24,7 @@ local ShopOverlay = require(script.Parent.Parent.UI.Components.ShopOverlay)
 local ToastStack = require(script.Parent.Parent.UI.Components.ToastStack)
 local EquipmentEligibilityRules = require(ReplicatedStorage.Shared.Logic.EquipmentEligibilityRules)
 local EquipmentComparisonRules = require(ReplicatedStorage.Shared.Logic.EquipmentComparisonRules)
+local SkillProgressionRules = require(ReplicatedStorage.Shared.Logic.SkillProgressionRules)
 local Net = require(ReplicatedStorage.Shared.Net)
 local ProgressionMath = require(ReplicatedStorage.Shared.Math.ProgressionMath)
 
@@ -1815,77 +1816,282 @@ local function SkillsPanel(
         end
     end
     table.sort(skillRows, function(a, b)
+        local aTier = tonumber(a.Definition.RequiredTier) or 0
+        local bTier = tonumber(b.Definition.RequiredTier) or 0
+        if aTier ~= bTier then
+            return aTier < bTier
+        end
+        local aKind = a.Definition.Kind == "Passive" and 1 or 0
+        local bKind = b.Definition.Kind == "Passive" and 1 or 0
+        if aKind ~= bKind then
+            return aKind < bKind
+        end
         return (a.Definition.DisplayName or a.Id) < (b.Definition.DisplayName or b.Id)
     end)
 
+    local rowById = {}
     local selected = nil
     for _, row in skillRows do
+        rowById[row.Id] = row
         if row.Id == selectedSkillId then
             selected = row
-            break
         end
     end
     selected = selected or skillRows[1]
 
-    local listChildren = {}
-    for index, row in skillRows do
+    local function ruleDefinition(row)
+        if not row then
+            return nil
+        end
+        local definition = table.clone(row.Definition)
+        definition.Id = row.Id
+        definition.CurrentRank = row.Rank
+        return definition
+    end
+
+    local function missingPrerequisiteText(definition)
+        if not definition then
+            return ""
+        end
+        for _, requirement in definition.Prerequisites or {} do
+            local have = tonumber(learned[requirement.SkillId]) or 0
+            local needed = math.max(1, tonumber(requirement.Rank) or 1)
+            if have < needed then
+                local requiredDefinition = catalog.Skills and catalog.Skills[requirement.SkillId]
+                local requiredName = requiredDefinition and requiredDefinition.DisplayName
+                    or prettyId(requirement.SkillId)
+                return string.format("Requires %s Rank %d", requiredName, needed)
+            end
+        end
+        return ""
+    end
+
+    local function learnReasonText(row, reason)
+        if not row then
+            return "Select a skill"
+        end
+        local definition = row.Definition
+        if reason == "wrong_family" then
+            return "Not available to your family"
+        elseif reason == "level_too_low" then
+            return "Requires Level " .. tostring(definition.RequiredLevel or 1)
+        elseif reason == "tier_too_low" then
+            return "Requires Advancement Tier " .. tostring(definition.RequiredTier or 0)
+        elseif reason == "prerequisite_unmet" then
+            return missingPrerequisiteText(definition)
+        elseif reason == "insufficient_sp" then
+            return string.format("Requires %d SP", tonumber(definition.SPCostPerRank) or 1)
+        elseif reason == "max_rank" then
+            return "Maximum rank reached"
+        end
+        return "Ready to learn"
+    end
+
+    local function passiveBonusText(definition)
+        local entries = {}
+        for statName, amount in definition and definition.PassiveBonuses or {} do
+            table.insert(entries, StatText.Format(statName, amount) .. " / rank")
+        end
+        table.sort(entries)
+        return table.concat(entries, " · ")
+    end
+
+    local treeChildren = {
+        FoundationTitle = React.createElement(Label, {
+            Position = UDim2.fromOffset(12, 7),
+            Size = UDim2.fromOffset(118, 18),
+            Text = "WAYFARER FOUNDATION",
+            TextSize = 7,
+            Bold = true,
+            Align = Enum.TextXAlignment.Center,
+            Color = COLORS.Muted,
+            ZIndex = 6,
+        }),
+        FamilyTitle = React.createElement(Label, {
+            Position = UDim2.fromOffset(148, 7),
+            Size = UDim2.fromOffset(118, 18),
+            Text = profile.FamilyId ~= "" and string.upper(prettyId(profile.FamilyId))
+                or "FAMILY PATH",
+            TextSize = 7,
+            Bold = true,
+            Align = Enum.TextXAlignment.Center,
+            Color = profile.FamilyId ~= "" and COLORS.Accent or COLORS.Faint,
+            ZIndex = 6,
+        }),
+    }
+
+    local nodePositions = {}
+    local function addTreeNode(row, x, y, laneLabel)
+        if not row then
+            return
+        end
+        nodePositions[row.Id] = { X = x, Y = y }
+        local definition = row.Definition
+        local rule = ruleDefinition(row)
+        local learnable = SkillProgressionRules.CanLearn(profile, rule)
+        local learnedSkill = row.Rank > 0
         local selectedRow = selected and selected.Id == row.Id
-        listChildren[row.Id] = React.createElement(
+        local nodeColor = if selectedRow
+            then COLORS.AccentDark
+            else if learnedSkill
+                then Color3.fromRGB(36, 69, 52)
+                else if learnable then Color3.fromRGB(75, 65, 40) else COLORS.PanelRaised
+        local strokeColor = if learnedSkill
+            then COLORS.Accent
+            else if learnable then COLORS.Gold else COLORS.Border
+        treeChildren["SkillTreeNode_" .. row.Id] = React.createElement(
             "TextButton",
             {
-                Position = UDim2.fromOffset(0, (index - 1) * 64),
-                Size = UDim2.new(1, -8, 0, 56),
-                BackgroundColor3 = selectedRow and COLORS.AccentDark or COLORS.PanelRaised,
+                Position = UDim2.fromOffset(x, y),
+                Size = UDim2.fromOffset(122, 64),
+                BackgroundColor3 = nodeColor,
+                BackgroundTransparency = selectedRow and 0 or 0.04,
                 BorderSizePixel = 0,
                 Text = "",
                 Selectable = true,
-                ZIndex = 5,
+                ZIndex = 8,
                 [React.Event.Activated] = function()
                     setSelectedSkillId(row.Id)
                 end,
             },
-            withChrome(
-                {
-                    Icon = React.createElement(Icon, {
-                        Position = UDim2.fromOffset(10, 10),
-                        Size = UDim2.fromOffset(36, 36),
-                        Image = SKILL_ICONS[row.Id] or EverLeafIcons.Skills,
-                        ImageTransparency = selectedRow and 0 or 0.14,
-                        ZIndex = 6,
-                    }),
-                    Name = React.createElement(Label, {
-                        Position = UDim2.fromOffset(54, 8),
-                        Size = UDim2.new(1, -66, 0, 20),
-                        Text = row.Definition.DisplayName or row.Id,
-                        TextSize = 12,
-                        Bold = true,
-                        Color = selectedRow and COLORS.Accent or COLORS.Text,
-                        ZIndex = 6,
-                    }),
-                    Meta = React.createElement(Label, {
-                        Position = UDim2.fromOffset(54, 31),
-                        Size = UDim2.new(1, -66, 0, 17),
-                        Text = string.format(
-                            "%s  ·  Rank %d/%d",
-                            row.Definition.Kind or "Skill",
-                            row.Rank,
-                            row.Definition.MaxRank or 1
-                        ),
-                        TextSize = 9,
-                        Color = selectedRow and COLORS.Text or COLORS.Faint,
-                        ZIndex = 6,
-                    }),
-                },
-                9,
-                selectedRow and COLORS.BorderStrong or COLORS.Border,
-                selectedRow and 0.28 or 0.65,
-                1
-            )
+            withChrome({
+                Kind = React.createElement(Label, {
+                    Position = UDim2.fromOffset(7, 5),
+                    Size = UDim2.new(1, -14, 0, 12),
+                    Text = string.format(
+                        "%s · %s",
+                        laneLabel,
+                        string.upper(definition.Kind or "SKILL")
+                    ),
+                    TextSize = 6,
+                    Bold = true,
+                    Align = Enum.TextXAlignment.Center,
+                    Color = learnedSkill and COLORS.Accent
+                        or if learnable then COLORS.Gold else COLORS.Faint,
+                    ZIndex = 9,
+                }),
+                Name = React.createElement(Label, {
+                    Position = UDim2.fromOffset(7, 18),
+                    Size = UDim2.new(1, -14, 0, 28),
+                    Text = definition.DisplayName or row.Id,
+                    TextSize = 8,
+                    Bold = true,
+                    Align = Enum.TextXAlignment.Center,
+                    Wrapped = true,
+                    Color = selectedRow and COLORS.LumenPale or COLORS.Text,
+                    ZIndex = 9,
+                }),
+                Rank = React.createElement(Label, {
+                    Position = UDim2.fromOffset(7, 47),
+                    Size = UDim2.new(1, -14, 0, 12),
+                    Text = string.format("RANK %d/%d", row.Rank, definition.MaxRank or 1),
+                    TextSize = 6,
+                    Bold = true,
+                    Align = Enum.TextXAlignment.Center,
+                    Color = learnedSkill and COLORS.Accent
+                        or if learnable then COLORS.Gold else COLORS.Faint,
+                    ZIndex = 9,
+                }),
+            }, 8, strokeColor, (learnedSkill or learnable) and 0.28 or 0.72, 1)
         )
+        if not learnedSkill and not learnable then
+            treeChildren["SkillTreeLock_" .. row.Id] = React.createElement(Label, {
+                Position = UDim2.fromOffset(x + 101, y + 4),
+                Size = UDim2.fromOffset(16, 16),
+                Text = "×",
+                TextSize = 10,
+                Bold = true,
+                Align = Enum.TextXAlignment.Center,
+                Color = COLORS.Danger,
+                ZIndex = 10,
+            })
+        end
+    end
+
+    local beginnerRow = rowById.beginner_strike
+    local steadyRow = rowById.steady_footing
+    addTreeNode(beginnerRow, 8, 34, "COMMON")
+    addTreeNode(steadyRow, 8, 132, "COMMON")
+
+    local tierOneActive = nil
+    local tierOnePassive = nil
+    local tierTwoActive = nil
+    for _, row in skillRows do
+        if row.Definition.FamilyId == profile.FamilyId and profile.FamilyId ~= "" then
+            local tier = tonumber(row.Definition.RequiredTier) or 0
+            if tier == 1 and row.Definition.Kind == "Active" then
+                tierOneActive = tierOneActive or row
+            elseif tier == 1 and row.Definition.Kind == "Passive" then
+                tierOnePassive = tierOnePassive or row
+            elseif tier >= 2 and row.Definition.Kind == "Active" then
+                tierTwoActive = tierTwoActive or row
+            end
+        end
+    end
+    addTreeNode(tierOneActive, 144, 34, "TIER 1")
+    addTreeNode(tierOnePassive, 144, 132, "TIER 1")
+    addTreeNode(tierTwoActive, 144, 252, "TIER 2")
+
+    local function addConnector(fromId, toId, key)
+        local from = nodePositions[fromId]
+        local to = nodePositions[toId]
+        if not from or not to then
+            return
+        end
+        local x = from.X + 61
+        local top = from.Y + 64
+        local bottom = to.Y
+        treeChildren[key] = React.createElement("Frame", {
+            Position = UDim2.fromOffset(x - 1, top),
+            Size = UDim2.fromOffset(2, math.max(0, bottom - top)),
+            BackgroundColor3 = COLORS.BorderStrong,
+            BackgroundTransparency = 0.25,
+            BorderSizePixel = 0,
+            ZIndex = 5,
+        })
+    end
+    if beginnerRow and steadyRow then
+        addConnector(beginnerRow.Id, steadyRow.Id, "FoundationConnector")
+    end
+    if tierOneActive and tierOnePassive then
+        addConnector(tierOneActive.Id, tierOnePassive.Id, "FamilyConnector")
+    end
+    if profile.FamilyId == "" then
+        treeChildren.NoFamily = React.createElement(Label, {
+            Position = UDim2.fromOffset(148, 54),
+            Size = UDim2.fromOffset(118, 90),
+            Text = "Complete your first advancement to reveal a family path.",
+            TextSize = 8,
+            Wrapped = true,
+            Align = Enum.TextXAlignment.Center,
+            Color = COLORS.Faint,
+            ZIndex = 6,
+        })
+    elseif tierTwoActive then
+        treeChildren.TierTwoDivider = React.createElement(Label, {
+            Position = UDim2.fromOffset(148, 217),
+            Size = UDim2.fromOffset(118, 24),
+            Text = "TIER 2 ADVANCEMENT",
+            TextSize = 6,
+            Bold = true,
+            Align = Enum.TextXAlignment.Center,
+            Color = COLORS.Gold,
+            ZIndex = 6,
+        })
     end
 
     local selectedDefinition = selected and selected.Definition or nil
     local selectedRank = selected and selected.Rank or 0
+    local selectedRuleDefinition = ruleDefinition(selected)
+    local selectedCanLearn, selectedLearnReason =
+        if selectedRuleDefinition
+            then SkillProgressionRules.CanLearn(profile, selectedRuleDefinition)
+            else false,
+        "invalid_skill"
+    local selectedRequirementText = selected
+            and learnReasonText(selected, selectedCanLearn and nil or selectedLearnReason)
+        or "Select a skill"
+    local selectedPassiveBonuses = passiveBonusText(selectedDefinition)
     local boundSlot = nil
     if selected then
         for index = 1, 8 do
@@ -1908,7 +2114,9 @@ local function SkillsPanel(
 
     local bindingText = "Select an active learned skill, then choose a hotbar slot below."
     if selectedDefinition and selectedDefinition.Kind ~= "Active" then
-        bindingText = "Passive skills are always active and do not occupy a hotbar slot."
+        bindingText = if selectedPassiveBonuses ~= ""
+            then "Passive · " .. selectedPassiveBonuses
+            else "Passive skills are always active and do not occupy a hotbar slot."
     elseif selected and selectedRank <= 0 then
         bindingText = "Learn at least one rank before assigning this skill."
     elseif boundSlot then
@@ -2006,26 +2214,24 @@ local function SkillsPanel(
         BackgroundTransparency = 1,
         ZIndex = 4,
     }, {
-        ListTitle = React.createElement(Label, {
+        TreeTitle = React.createElement(Label, {
             Position = UDim2.fromOffset(0, 0),
             Size = UDim2.fromOffset(275, 24),
-            Text = string.format("SKILLS  ·  SP %d", tonumber(profile.SP) or 0),
+            Text = string.format("SKILL TREE  ·  SP %d", tonumber(profile.SP) or 0),
             TextSize = 12,
             Bold = true,
             Color = COLORS.Muted,
             ZIndex = 5,
         }),
-        List = React.createElement("ScrollingFrame", {
+        Tree = React.createElement("Frame", {
             Position = UDim2.fromOffset(0, 32),
             Size = UDim2.fromOffset(282, 354),
-            CanvasSize = UDim2.fromOffset(0, math.max(354, #skillRows * 64)),
             BackgroundColor3 = COLORS.PanelDeep,
             BackgroundTransparency = 0.18,
             BorderSizePixel = 0,
-            ScrollBarThickness = 4,
-            ScrollBarImageColor3 = COLORS.BorderStrong,
+            ClipsDescendants = true,
             ZIndex = 4,
-        }, withChrome(listChildren, 10, COLORS.Border, 0.55, 1)),
+        }, withChrome(treeChildren, 10, COLORS.Border, 0.55, 1)),
         Detail = React.createElement(Panel, {
             Position = UDim2.fromOffset(302, 0),
             Size = UDim2.fromOffset(296, 210),
@@ -2063,35 +2269,60 @@ local function SkillsPanel(
                     Size = UDim2.new(1, -32, 0, 20),
                     Text = selectedDefinition
                             and string.format(
-                                "Rank %d/%d  ·  Level %d  ·  Tier %d",
+                                "Rank %d/%d · Lv %d · Tier %d · %d SP%s",
                                 selectedRank,
                                 selectedDefinition.MaxRank or 1,
                                 selectedDefinition.RequiredLevel or 1,
-                                selectedDefinition.RequiredTier or 0
+                                selectedDefinition.RequiredTier or 0,
+                                selectedDefinition.SPCostPerRank or 1,
+                                selectedDefinition.Kind == "Active"
+                                        and string.format(
+                                            " · %d MP / %.1fs",
+                                            tonumber(selectedDefinition.MPCost) or 0,
+                                            tonumber(selectedDefinition.Cooldown) or 0
+                                        )
+                                    or ""
                             )
                         or "",
                     TextSize = 10,
                     Color = COLORS.Gold,
                     ZIndex = 6,
                 }),
-                Binding = React.createElement(Label, {
+                Description = React.createElement(Label, {
                     Position = UDim2.fromOffset(16, 96),
-                    Size = UDim2.new(1, -32, 0, 48),
-                    Text = bindingText,
-                    TextSize = 9,
+                    Size = UDim2.new(1, -32, 0, 35),
+                    Text = selectedDefinition and selectedDefinition.Description or "",
+                    TextSize = 8,
                     Color = COLORS.Muted,
                     Wrapped = true,
                     VerticalAlign = Enum.TextYAlignment.Top,
+                    ZIndex = 6,
+                }),
+                Requirement = React.createElement(Label, {
+                    Position = UDim2.fromOffset(16, 133),
+                    Size = UDim2.new(1, -32, 0, 20),
+                    Text = if selectedDefinition and selectedDefinition.Kind == "Passive"
+                        then bindingText
+                        else selectedRequirementText,
+                    TextSize = 8,
+                    Bold = true,
+                    Color = if selectedCanLearn or selectedRank > 0
+                        then COLORS.Accent
+                        else COLORS.Warning,
+                    Wrapped = true,
                     ZIndex = 6,
                 }),
                 RankUp = selected
                         and React.createElement(Button, {
                             Position = UDim2.fromOffset(16, 158),
                             Size = UDim2.fromOffset(126, 38),
-                            Text = "RANK UP",
-                            Tone = "accent",
-                            Active = (tonumber(profile.SP) or 0) > 0
-                                and selectedRank < (selectedDefinition.MaxRank or 1),
+                            Text = if selectedCanLearn
+                                then "RANK UP"
+                                else if selectedLearnReason == "max_rank"
+                                    then "MAX RANK"
+                                    else "LOCKED",
+                            Tone = selectedCanLearn and "accent" or nil,
+                            Active = selectedCanLearn,
                             OnActivated = function()
                                 invoke(
                                     "skill.learn",
