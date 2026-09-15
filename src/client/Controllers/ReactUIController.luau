@@ -785,6 +785,7 @@ local function HUD(props)
             Radius = 7,
             StrokeColor = COLORS.BorderStrong,
             StrokeTransparency = 0.42,
+            Visible = compactVisible,
             Children = {
                 TopAccent = React.createElement("Frame", {
                     Position = UDim2.fromOffset(14, 8),
@@ -2945,7 +2946,7 @@ end
 local function MainMenu(props)
     local profile = props.Profile or {}
     local activeTab = props.ActiveTab or "CHARACTER"
-    local status, setStatus = React.useState("Ready")
+    local status, setStatus = React.useState(nil)
     local selectedInventoryIndex, setSelectedInventoryIndex = React.useState(1)
     local selectedSkillId, setSelectedSkillId = React.useState("beginner_strike")
     local selectedHotbarSlot, setSelectedHotbarSlot = React.useState(1)
@@ -3028,7 +3029,6 @@ local function MainMenu(props)
                     if props.OnTabChanged then
                         props.OnTabChanged(tabName)
                     end
-                    setStatus(tabName .. " opened")
                 end,
             },
             withChrome({
@@ -3096,21 +3096,6 @@ local function MainMenu(props)
                             Size = UDim2.fromOffset(5, 64),
                             BackgroundColor3 = COLORS.Accent,
                             BorderSizePixel = 0,
-                            ZIndex = 33,
-                        }),
-                        ActiveIcon = React.createElement(Icon, {
-                            Position = UDim2.fromOffset(16, 16),
-                            Size = UDim2.fromOffset(30, 30),
-                            Image = NAV_ICONS[activeTab] or EverLeafIcons.Objective,
-                            ZIndex = 34,
-                        }),
-                        ActiveName = React.createElement(Label, {
-                            Position = UDim2.fromOffset(52, 0),
-                            Size = UDim2.fromOffset(150, 64),
-                            Text = string.upper(activeTab),
-                            TextSize = 10,
-                            Bold = true,
-                            Color = COLORS.Muted,
                             ZIndex = 33,
                         }),
                         Brand = React.createElement(Label, {
@@ -3193,38 +3178,33 @@ local function MainMenu(props)
                 }),
                 Content = React.createElement("Frame", {
                     Position = UDim2.fromOffset(188, 82),
-                    Size = UDim2.fromOffset(614, 404),
+                    Size = UDim2.fromOffset(614, 442),
                     BackgroundTransparency = 1,
                     ZIndex = 33,
                 }, { Content = content }),
-                Status = React.createElement(
-                    "Frame",
-                    {
-                        Position = UDim2.fromOffset(188, 496),
-                        Size = UDim2.fromOffset(614, 28),
-                        BackgroundColor3 = COLORS.Panel,
-                        BackgroundTransparency = 0.12,
-                        BorderSizePixel = 0,
-                        ZIndex = 33,
-                    },
-                    withChrome({
-                        Dot = React.createElement("Frame", {
-                            Position = UDim2.fromOffset(10, 10),
-                            Size = UDim2.fromOffset(8, 8),
-                            BackgroundColor3 = COLORS.Accent,
-                            BorderSizePixel = 0,
-                            ZIndex = 34,
-                        }, withChrome(nil, 999)),
-                        Text = React.createElement(Label, {
-                            Position = UDim2.fromOffset(26, 0),
-                            Size = UDim2.new(1, -36, 1, 0),
-                            Text = status,
-                            TextSize = 9,
-                            Color = COLORS.Muted,
-                            ZIndex = 34,
-                        }),
-                    }, 7)
-                ),
+                Status = status
+                        and React.createElement(
+                            "Frame",
+                            {
+                                Position = UDim2.fromOffset(188, 496),
+                                Size = UDim2.fromOffset(614, 28),
+                                BackgroundColor3 = COLORS.Panel,
+                                BackgroundTransparency = 0.08,
+                                BorderSizePixel = 0,
+                                ZIndex = 36,
+                            },
+                            withChrome({
+                                Text = React.createElement(Label, {
+                                    Position = UDim2.fromOffset(12, 0),
+                                    Size = UDim2.new(1, -24, 1, 0),
+                                    Text = status,
+                                    TextSize = 9,
+                                    Color = COLORS.Muted,
+                                    ZIndex = 37,
+                                }),
+                            }, 7)
+                        )
+                    or nil,
             },
         }),
     })

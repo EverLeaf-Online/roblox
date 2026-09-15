@@ -40,7 +40,7 @@ local function ProductCard(props)
 
     return React.createElement("Frame", {
         Position = props.Position,
-        Size = UDim2.new(1, -8, 0, 106),
+        Size = UDim2.new(1, -8, 0, 112),
         BackgroundColor3 = owned and COLORS.CardOwned or COLORS.Card,
         BackgroundTransparency = 0.02,
         BorderSizePixel = 0,
@@ -53,7 +53,7 @@ local function ProductCard(props)
         }),
         Title = React.createElement("TextLabel", {
             Position = UDim2.fromOffset(14, 10),
-            Size = UDim2.new(1, -166, 0, 22),
+            Size = UDim2.new(1, -190, 0, 22),
             BackgroundTransparency = 1,
             Text = props.Title,
             TextColor3 = owned and COLORS.Accent or COLORS.Text,
@@ -64,7 +64,7 @@ local function ProductCard(props)
         }),
         Price = React.createElement("TextLabel", {
             Position = UDim2.fromOffset(14, 32),
-            Size = UDim2.new(1, -166, 0, 18),
+            Size = UDim2.new(1, -190, 0, 18),
             BackgroundTransparency = 1,
             Text = props.Price,
             TextColor3 = COLORS.Gold,
@@ -75,7 +75,7 @@ local function ProductCard(props)
         }),
         Description = React.createElement("TextLabel", {
             Position = UDim2.fromOffset(14, 54),
-            Size = UDim2.new(1, -166, 0, 42),
+            Size = UDim2.new(1, -190, 0, 48),
             BackgroundTransparency = 1,
             Text = props.Description,
             TextColor3 = COLORS.Muted,
@@ -212,7 +212,7 @@ local function PremiumShopPanel()
             ZIndex = 5,
         }),
         Founder = React.createElement(ProductCard, {
-            Position = UDim2.fromOffset(4, 66),
+            Position = UDim2.fromOffset(4, 62),
             Title = "EverLeaf Founder",
             Price = priceText(founderEntry),
             Description = "Permanent Founder badge, gold Founder title, and the Founder's Lumen cosmetic aura. No combat power.",
@@ -225,7 +225,7 @@ local function PremiumShopPanel()
             end,
         }),
         Support = React.createElement(ProductCard, {
-            Position = UDim2.fromOffset(4, 180),
+            Position = UDim2.fromOffset(4, 182),
             Title = "Support EverLeaf",
             Price = priceText(supportEntry),
             Description = "Optional repeatable support purchase. Thank you for helping Lumenreach grow.",
@@ -236,7 +236,7 @@ local function PremiumShopPanel()
             end,
         }),
         Membership = React.createElement(ProductCard, {
-            Position = UDim2.fromOffset(4, 294),
+            Position = UDim2.fromOffset(4, 302),
             Title = "EverLeaf Membership",
             Price = priceText(membershipEntry) .. " / MONTH",
             Description = if member
