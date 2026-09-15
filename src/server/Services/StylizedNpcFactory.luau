@@ -1,541 +1,650 @@
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+
 local StylizedNpcFactory = {}
 
-local function makePart(parent, name, size, cframe, material, color)
-    local part = Instance.new("Part")
-    part.Name = name
-    part.Anchored = true
+local R15_IDLE_ANIMATION = "rbxassetid://507766666"
+
+local function bodyPart(model, name)
+    local part = model:FindFirstChild(name)
+    if part and part:IsA("BasePart") then
+        return part
+    end
+    return nil
+end
+
+local function weldPart(model, anchor, part)
+    part.Anchored = false
     part.CanCollide = false
     part.CanTouch = false
-    part.CanQuery = true
+    part.CanQuery = false
+    part.Massless = true
+    part.Parent = model
+    local weld = Instance.new("WeldConstraint")
+    weld.Name = "EverLeafNpcWeld"
+    weld.Part0 = anchor
+    weld.Part1 = part
+    weld.Parent = part
+    return part
+end
+
+local function attachPart(model, anchor, name, size, localCFrame, material, color, shape)
+    if not anchor then
+        return nil
+    end
+    local part
+    if shape == "Wedge" then
+        part = Instance.new("WedgePart")
+    else
+        part = Instance.new("Part")
+        if shape == "Ball" then
+            part.Shape = Enum.PartType.Ball
+        elseif shape == "Cylinder" then
+            part.Shape = Enum.PartType.Cylinder
+        end
+    end
+    part.Name = name
     part.Size = size
-    part.CFrame = cframe
+    part.CFrame = anchor.CFrame * localCFrame
     part.Material = material or Enum.Material.SmoothPlastic
     part.Color = color
     part.TopSurface = Enum.SurfaceType.Smooth
     part.BottomSurface = Enum.SurfaceType.Smooth
-    part.Parent = parent
-    return part
+    return weldPart(model, anchor, part)
 end
 
-local function makeBall(parent, name, size, cframe, material, color)
-    local part = makePart(parent, name, size, cframe, material, color)
-    part.Shape = Enum.PartType.Ball
-    return part
-end
-
-local function makeWedge(parent, name, size, cframe, material, color)
-    local part = Instance.new("WedgePart")
-    part.Name = name
-    part.Anchored = true
-    part.CanCollide = false
-    part.CanTouch = false
-    part.CanQuery = true
-    part.Size = size
-    part.CFrame = cframe
-    part.Material = material or Enum.Material.SmoothPlastic
-    part.Color = color
-    part.Parent = parent
-    return part
-end
-
-local function makeCylinderBetween(parent, name, a, b, radius, material, color)
-    local delta = b - a
-    local length = delta.Magnitude
-    if length <= 0.01 then
-        return nil
-    end
-    local part = makePart(
-        parent,
-        name,
-        Vector3.new(length, radius * 2, radius * 2),
-        CFrame.lookAt((a + b) * 0.5, b) * CFrame.Angles(0, math.pi * 0.5, 0),
-        material,
-        color
-    )
-    part.Shape = Enum.PartType.Cylinder
-    return part
-end
-
-local function worldPoint(base, point, scale)
-    return (base * CFrame.new(point * scale)).Position
-end
-
-local function makeFace(model, base, scale, skin, eyeColor)
-    local eyeY = 6.23 * scale
-    local eyeZ = -0.88 * scale
-    for _, side in { -1, 1 } do
-        makeBall(
-            model,
-            if side < 0 then "LeftEye" else "RightEye",
-            Vector3.new(0.17, 0.2, 0.1) * scale,
-            base * CFrame.new(side * 0.34 * scale, eyeY, eyeZ),
-            Enum.Material.SmoothPlastic,
-            eyeColor
-        )
-        makePart(
-            model,
-            if side < 0 then "LeftBrow" else "RightBrow",
-            Vector3.new(0.32, 0.07, 0.07) * scale,
-            base
-                * CFrame.new(side * 0.34 * scale, 6.48 * scale, -0.9 * scale)
-                * CFrame.Angles(0, 0, math.rad(side * -5)),
-            Enum.Material.SmoothPlastic,
-            Color3.fromRGB(63, 49, 41)
-        )
-    end
-    makeBall(
-        model,
-        "Nose",
-        Vector3.new(0.16, 0.2, 0.16) * scale,
-        base * CFrame.new(0, 6.03 * scale, -0.92 * scale),
-        Enum.Material.SmoothPlastic,
-        skin
-    )
-    makePart(
-        model,
-        "Mouth",
-        Vector3.new(0.42, 0.06, 0.06) * scale,
-        base * CFrame.new(0, 5.77 * scale, -0.9 * scale),
-        Enum.Material.SmoothPlastic,
-        Color3.fromRGB(127, 75, 68)
-    )
-end
-
-local function makeHair(model, base, scale, hairColor, style)
-    style = style or "short"
-    local crown = makeBall(
-        model,
-        "HairCrown",
-        Vector3.new(1.92, 1.15, 1.86) * scale,
-        base * CFrame.new(0, 6.72 * scale, 0.05 * scale),
-        Enum.Material.SmoothPlastic,
-        hairColor
-    )
-    crown.CanQuery = false
-
-    for _, side in { -1, 1 } do
-        makeWedge(
-            model,
-            if side < 0 then "HairBangLeft" else "HairBangRight",
-            Vector3.new(0.55, 0.9, 0.22) * scale,
-            base
-                * CFrame.new(side * 0.37 * scale, 6.47 * scale, -0.86 * scale)
-                * CFrame.Angles(math.rad(-9), math.rad(side * 6), math.rad(side * 9)),
-            Enum.Material.SmoothPlastic,
-            hairColor
-        )
+local function configureRig(model)
+    local humanoid = model:FindFirstChildOfClass("Humanoid")
+    local root = bodyPart(model, "HumanoidRootPart")
+    if not humanoid or not root then
+        return nil, nil
     end
 
-    if style == "long" then
-        for _, side in { -1, 1 } do
-            makeWedge(
-                model,
-                if side < 0 then "LongHairLeft" else "LongHairRight",
-                Vector3.new(0.72, 2.7, 0.5) * scale,
-                base
-                    * CFrame.new(side * 0.58 * scale, 5.55 * scale, 0.72 * scale)
-                    * CFrame.Angles(math.rad(-5), 0, math.rad(side * 5)),
-                Enum.Material.SmoothPlastic,
-                hairColor
-            )
+    for _, descendant in model:GetDescendants() do
+        if
+            descendant:IsA("Script")
+            or descendant:IsA("LocalScript")
+            or descendant:IsA("ModuleScript")
+        then
+            descendant:Destroy()
+        elseif descendant:IsA("BasePart") then
+            descendant.CanCollide = false
+            descendant.CanTouch = false
+            descendant.CanQuery = descendant.Name == "HumanoidRootPart"
+            descendant.Massless = descendant.Name ~= "HumanoidRootPart"
         end
-    elseif style == "bun" then
-        makeBall(
-            model,
-            "HairBun",
-            Vector3.new(0.95, 0.95, 0.95) * scale,
-            base * CFrame.new(0, 7.08 * scale, 0.68 * scale),
-            Enum.Material.SmoothPlastic,
-            hairColor
-        )
-    elseif style == "ponytail" then
-        makeBall(
-            model,
-            "PonytailTie",
-            Vector3.new(0.42, 0.42, 0.42) * scale,
-            base * CFrame.new(0, 6.66 * scale, 0.95 * scale),
-            Enum.Material.SmoothPlastic,
-            Color3.fromRGB(58, 77, 67)
-        )
-        makeWedge(
-            model,
-            "Ponytail",
-            Vector3.new(0.95, 3.1, 0.7) * scale,
-            base
-                * CFrame.new(0, 5.55 * scale, 1.25 * scale)
-                * CFrame.Angles(math.rad(-8), 0, math.rad(4)),
-            Enum.Material.SmoothPlastic,
-            hairColor
-        )
     end
-end
 
-local function makeBody(model, base, scale, palette, build)
-    local cloth = palette.Cloth
-    local darkCloth = palette.DarkCloth or cloth:Lerp(Color3.new(0, 0, 0), 0.24)
-    local skin = palette.Skin or Color3.fromRGB(214, 181, 146)
-    local leather = palette.Leather or Color3.fromRGB(84, 58, 39)
-    build = build or 1
-
-    local root = makePart(
-        model,
-        "HumanoidRootPart",
-        Vector3.new(2.2, 7.6, 2.0) * scale,
-        base * CFrame.new(0, 3.8 * scale, 0),
-        Enum.Material.SmoothPlastic,
-        Color3.new(0, 0, 0)
-    )
+    root.Anchored = true
     root.Transparency = 1
-    root.CanQuery = false
+    humanoid.WalkSpeed = 0
+    humanoid.JumpPower = 0
+    humanoid.AutoRotate = false
+    humanoid.BreakJointsOnDeath = false
+    humanoid.NameDisplayDistance = 0
+    humanoid.HealthDisplayDistance = 0
+    pcall(function()
+        humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+    end)
 
-    local hipWidth = 0.5 * build
-    local shoulderWidth = 1.27 * build
-    for _, side in { -1, 1 } do
-        local hip = worldPoint(base, Vector3.new(side * hipWidth, 2.75, 0), scale)
-        local knee =
-            worldPoint(base, Vector3.new(side * (hipWidth + 0.03), 1.55, side * -0.04), scale)
-        local ankle = worldPoint(base, Vector3.new(side * (hipWidth + 0.05), 0.58, -0.03), scale)
-        makeCylinderBetween(
-            model,
-            side < 0 and "LeftUpperLeg" or "RightUpperLeg",
-            hip,
-            knee,
-            0.34 * scale,
-            Enum.Material.Fabric,
-            darkCloth
-        )
-        makeCylinderBetween(
-            model,
-            side < 0 and "LeftLowerLeg" or "RightLowerLeg",
-            knee,
-            ankle,
-            0.3 * scale,
-            Enum.Material.Fabric,
-            darkCloth
-        )
-        makeBall(
-            model,
-            side < 0 and "LeftKnee" or "RightKnee",
-            Vector3.new(0.68, 0.62, 0.68) * scale,
-            CFrame.new(knee),
-            Enum.Material.Fabric,
-            darkCloth
-        )
-        makePart(
-            model,
-            side < 0 and "LeftBoot" or "RightBoot",
-            Vector3.new(0.78, 0.62, 1.14) * scale,
-            base * CFrame.new(side * (hipWidth + 0.05) * scale, 0.31 * scale, -0.18 * scale),
-            Enum.Material.SmoothPlastic,
-            palette.Boots or Color3.fromRGB(54, 42, 34)
-        )
-
-        local shoulder = worldPoint(base, Vector3.new(side * shoulderWidth, 4.72, 0), scale)
-        local elbow =
-            worldPoint(base, Vector3.new(side * (shoulderWidth + 0.16), 3.68, -0.05), scale)
-        local hand =
-            worldPoint(base, Vector3.new(side * (shoulderWidth + 0.08), 2.72, -0.08), scale)
-        makeCylinderBetween(
-            model,
-            side < 0 and "LeftUpperArm" or "RightUpperArm",
-            shoulder,
-            elbow,
-            0.3 * scale,
-            Enum.Material.Fabric,
-            cloth
-        )
-        makeCylinderBetween(
-            model,
-            side < 0 and "LeftForearm" or "RightForearm",
-            elbow,
-            hand,
-            0.27 * scale,
-            Enum.Material.Fabric,
-            cloth
-        )
-        makeBall(
-            model,
-            side < 0 and "LeftShoulder" or "RightShoulder",
-            Vector3.new(0.8, 0.72, 0.82) * scale,
-            CFrame.new(shoulder),
-            Enum.Material.Fabric,
-            darkCloth
-        )
-        makeBall(
-            model,
-            side < 0 and "LeftHand" or "RightHand",
-            Vector3.new(0.58, 0.58, 0.58) * scale,
-            CFrame.new(hand),
-            Enum.Material.SmoothPlastic,
-            skin
-        )
+    local head = bodyPart(model, "Head")
+    if head then
+        for _, child in head:GetChildren() do
+            if child:IsA("Decal") or child:IsA("SurfaceGui") then
+                child:Destroy()
+            end
+        end
     end
 
-    makePart(
-        model,
-        "Torso",
-        Vector3.new(2.25 * build, 2.05, 1.32) * scale,
-        base * CFrame.new(0, 4.0 * scale, 0),
-        Enum.Material.Fabric,
-        cloth
-    )
-    makeWedge(
-        model,
-        "CoatFront",
-        Vector3.new(2.42 * build, 1.85, 1.38) * scale,
-        base * CFrame.new(0, 2.85 * scale, -0.02 * scale),
-        Enum.Material.Fabric,
-        darkCloth
-    )
-    makePart(
-        model,
-        "Belt",
-        Vector3.new(2.48 * build, 0.28, 1.45) * scale,
-        base * CFrame.new(0, 3.15 * scale, 0),
-        Enum.Material.Fabric,
-        leather
-    )
-    makePart(
-        model,
-        "Buckle",
-        Vector3.new(0.4, 0.38, 0.1) * scale,
-        base * CFrame.new(0, 3.14 * scale, -0.77 * scale),
-        Enum.Material.Metal,
-        palette.Metal or Color3.fromRGB(169, 132, 67)
-    )
+    local animator = humanoid:FindFirstChildOfClass("Animator")
+    if not animator then
+        animator = Instance.new("Animator")
+        animator.Parent = humanoid
+    end
+    local animation = Instance.new("Animation")
+    animation.Name = "EverLeafNpcIdle"
+    animation.AnimationId = R15_IDLE_ANIMATION
+    local ok, track = pcall(function()
+        return animator:LoadAnimation(animation)
+    end)
+    animation:Destroy()
+    if ok and track then
+        track.Priority = Enum.AnimationPriority.Idle
+        track.Looped = true
+        track:Play(0.2, 1, 0.82)
+    end
 
-    local neck = makeBall(
-        model,
-        "Neck",
-        Vector3.new(0.65, 0.55, 0.65) * scale,
-        base * CFrame.new(0, 5.16 * scale, 0),
-        Enum.Material.SmoothPlastic,
-        skin
-    )
-    neck.CanQuery = false
-    local head = makeBall(
-        model,
-        "Head",
-        Vector3.new(1.75, 1.9, 1.7) * scale,
-        base * CFrame.new(0, 6.05 * scale, 0),
-        Enum.Material.SmoothPlastic,
-        skin
-    )
     return root, head
 end
 
-local function makeStaff(model, base, scale, color, lumenColor, side)
-    side = side or 1
-    local bottom = worldPoint(base, Vector3.new(side * 1.72, 0.35, 0.2), scale)
-    local top = worldPoint(base, Vector3.new(side * 1.72, 6.75, 0.2), scale)
-    makeCylinderBetween(model, "Staff", bottom, top, 0.11 * scale, Enum.Material.Wood, color)
-    local crystal = makeBall(
-        model,
-        "StaffLumen",
-        Vector3.new(0.78, 0.94, 0.78) * scale,
-        CFrame.new(top + Vector3.new(0, 0.3 * scale, 0)),
-        Enum.Material.Neon,
-        lumenColor
-    )
-    local light = Instance.new("PointLight")
-    light.Color = lumenColor
-    light.Brightness = 0.75
-    light.Range = 9
-    light.Parent = crystal
+local function makeDescription(spec, palette)
+    local description = Instance.new("HumanoidDescription")
+    local skin = palette.Skin or Color3.fromRGB(214, 181, 146)
+    local cloth = palette.Cloth or Color3.fromRGB(63, 91, 77)
+    local dark = palette.DarkCloth or cloth:Lerp(Color3.new(0, 0, 0), 0.28)
+
+    description.HeadColor = skin
+    description.LeftArmColor = skin
+    description.RightArmColor = skin
+    description.TorsoColor = cloth
+    description.LeftLegColor = dark
+    description.RightLegColor = dark
+
+    description.HeightScale = tonumber(spec.HeightScale) or 0.98
+    description.WidthScale = tonumber(spec.WidthScale) or (tonumber(spec.Build) or 1)
+    description.DepthScale = tonumber(spec.DepthScale)
+        or math.clamp((tonumber(spec.Build) or 1) * 0.96, 0.82, 1.15)
+    description.HeadScale = tonumber(spec.HeadScale) or 0.96
+    description.BodyTypeScale = tonumber(spec.BodyTypeScale) or 0.18
+    description.ProportionScale = tonumber(spec.ProportionScale) or 0.22
+
+    return description
 end
 
-local function addRoleDetails(model, base, scale, spec, palette)
-    local role = spec.Role or "Villager"
-    local accent = palette.Accent or Color3.fromRGB(101, 155, 119)
-    local leather = palette.Leather or Color3.fromRGB(84, 58, 39)
-    local dark = palette.DarkCloth or palette.Cloth:Lerp(Color3.new(0, 0, 0), 0.24)
-    local lumen = palette.Lumen or Color3.fromRGB(113, 238, 170)
+local function makeFace(head, palette, role)
+    if not head then
+        return
+    end
+    local gui = Instance.new("SurfaceGui")
+    gui.Name = "EverLeafNpcFace"
+    gui.Face = Enum.NormalId.Front
+    gui.AlwaysOnTop = false
+    gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+    gui.PixelsPerStud = 72
+    gui.LightInfluence = 0
+    gui.Parent = head
 
-    if role == "Guide" then
-        makeWedge(
+    local canvas = Instance.new("Frame")
+    canvas.Size = UDim2.fromScale(1, 1)
+    canvas.BackgroundTransparency = 1
+    canvas.Parent = gui
+
+    local eyeColor = palette.EyeColor or Color3.fromRGB(43, 61, 52)
+    local browColor = palette.Hair or Color3.fromRGB(67, 50, 42)
+    for index, x in { 0.31, 0.69 } do
+        local eye = Instance.new("Frame")
+        eye.Name = if index == 1 then "LeftEye" else "RightEye"
+        eye.AnchorPoint = Vector2.new(0.5, 0.5)
+        eye.Position = UDim2.fromScale(x, 0.43)
+        eye.Size = UDim2.fromScale(0.09, if role == "Archivist" then 0.07 else 0.085)
+        eye.BackgroundColor3 = eyeColor
+        eye.BorderSizePixel = 0
+        eye.Parent = canvas
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(1, 0)
+        corner.Parent = eye
+
+        local brow = Instance.new("Frame")
+        brow.AnchorPoint = Vector2.new(0.5, 0.5)
+        brow.Position = UDim2.fromScale(x, 0.31)
+        brow.Size = UDim2.fromScale(0.18, 0.035)
+        brow.Rotation = if index == 1 then -4 else 4
+        brow.BackgroundColor3 = browColor
+        brow.BorderSizePixel = 0
+        brow.Parent = canvas
+    end
+
+    local mouth = Instance.new("Frame")
+    mouth.AnchorPoint = Vector2.new(0.5, 0.5)
+    mouth.Position = UDim2.fromScale(0.5, 0.69)
+    mouth.Size = UDim2.fromScale(0.19, 0.028)
+    mouth.BackgroundColor3 = Color3.fromRGB(124, 75, 67)
+    mouth.BorderSizePixel = 0
+    mouth.Parent = canvas
+    local mouthCorner = Instance.new("UICorner")
+    mouthCorner.CornerRadius = UDim.new(1, 0)
+    mouthCorner.Parent = mouth
+end
+
+local function makeHair(model, head, palette, style)
+    if not head then
+        return
+    end
+    local hair = palette.Hair or Color3.fromRGB(71, 52, 43)
+    attachPart(
+        model,
+        head,
+        "HairCrown",
+        Vector3.new(1.72, 0.7, 1.65),
+        CFrame.new(0, 0.55, 0.02),
+        Enum.Material.SmoothPlastic,
+        hair,
+        "Ball"
+    )
+    for _, side in { -1, 1 } do
+        attachPart(
             model,
-            "GuideCape",
-            Vector3.new(2.45, 3.25, 0.35) * scale,
-            base * CFrame.new(0, 3.75 * scale, 0.86 * scale) * CFrame.Angles(math.rad(-7), 0, 0),
-            Enum.Material.Fabric,
-            dark
+            head,
+            if side < 0 then "HairLockLeft" else "HairLockRight",
+            Vector3.new(0.42, 0.9, 0.22),
+            CFrame.new(side * 0.38, 0.18, -0.78)
+                * CFrame.Angles(math.rad(-8), 0, math.rad(side * 9)),
+            Enum.Material.SmoothPlastic,
+            hair,
+            "Wedge"
         )
-        makePart(
+    end
+    if style == "ponytail" then
+        attachPart(
             model,
-            "Satchel",
-            Vector3.new(1.15, 1.45, 0.55) * scale,
-            base * CFrame.new(-1.18 * scale, 3.1 * scale, 0.72 * scale),
-            Enum.Material.Fabric,
-            leather
+            head,
+            "Ponytail",
+            Vector3.new(0.66, 2.25, 0.55),
+            CFrame.new(0, -0.18, 0.92) * CFrame.Angles(math.rad(-12), 0, math.rad(4)),
+            Enum.Material.SmoothPlastic,
+            hair,
+            "Wedge"
         )
-        makeStaff(model, base, scale, Color3.fromRGB(74, 52, 34), lumen, 1)
+    elseif style == "bun" then
+        attachPart(
+            model,
+            head,
+            "HairBun",
+            Vector3.new(0.86, 0.86, 0.86),
+            CFrame.new(0, 0.68, 0.72),
+            Enum.Material.SmoothPlastic,
+            hair,
+            "Ball"
+        )
+    elseif style == "long" then
         for _, side in { -1, 1 } do
-            makeWedge(
+            attachPart(
                 model,
-                side < 0 and "HoodLeft" or "HoodRight",
-                Vector3.new(0.45, 1.35, 0.55) * scale,
-                base * CFrame.new(side * 0.73 * scale, 6.15 * scale, 0.38 * scale),
-                Enum.Material.Fabric,
-                dark
+                head,
+                if side < 0 then "LongHairLeft" else "LongHairRight",
+                Vector3.new(0.58, 1.95, 0.36),
+                CFrame.new(side * 0.52, -0.42, 0.72)
+                    * CFrame.Angles(math.rad(-7), 0, math.rad(side * 5)),
+                Enum.Material.SmoothPlastic,
+                hair,
+                "Wedge"
             )
-        end
-    elseif role == "Quartermaster" then
-        makePart(
-            model,
-            "Apron",
-            Vector3.new(1.85, 2.65, 0.16) * scale,
-            base * CFrame.new(0, 3.55 * scale, -0.75 * scale),
-            Enum.Material.Fabric,
-            accent
-        )
-        for _, side in { -1, 1 } do
-            makePart(
-                model,
-                side < 0 and "BeltPouchLeft" or "BeltPouchRight",
-                Vector3.new(0.62, 0.72, 0.42) * scale,
-                base * CFrame.new(side * 0.88 * scale, 2.95 * scale, -0.62 * scale),
-                Enum.Material.Fabric,
-                leather
-            )
-        end
-        makePart(
-            model,
-            "Ledger",
-            Vector3.new(1.15, 0.18, 1.5) * scale,
-            base
-                * CFrame.new(-1.28 * scale, 2.95 * scale, -0.68 * scale)
-                * CFrame.Angles(math.rad(14), math.rad(18), math.rad(-9)),
-            Enum.Material.Wood,
-            Color3.fromRGB(104, 75, 48)
-        )
-    elseif role == "Scout" then
-        makeWedge(
-            model,
-            "ScoutCloak",
-            Vector3.new(2.35, 3.05, 0.34) * scale,
-            base * CFrame.new(0, 3.7 * scale, 0.82 * scale) * CFrame.Angles(math.rad(-6), 0, 0),
-            Enum.Material.Fabric,
-            accent
-        )
-        makePart(
-            model,
-            "FieldPack",
-            Vector3.new(1.6, 1.8, 0.7) * scale,
-            base * CFrame.new(0, 3.55 * scale, 1.02 * scale),
-            Enum.Material.Fabric,
-            leather
-        )
-        local spearBottom = worldPoint(base, Vector3.new(1.72, 0.5, 0.4), scale)
-        local spearTop = worldPoint(base, Vector3.new(1.72, 6.5, 0.4), scale)
-        makeCylinderBetween(
-            model,
-            "ScoutSpear",
-            spearBottom,
-            spearTop,
-            0.08 * scale,
-            Enum.Material.Wood,
-            Color3.fromRGB(77, 54, 35)
-        )
-        makeWedge(
-            model,
-            "SpearHead",
-            Vector3.new(0.42, 0.9, 0.22) * scale,
-            CFrame.new(spearTop + Vector3.new(0, 0.38 * scale, 0)),
-            Enum.Material.Metal,
-            Color3.fromRGB(144, 157, 150)
-        )
-    elseif role == "Archivist" then
-        makeWedge(
-            model,
-            "ArchiveRobe",
-            Vector3.new(2.5, 2.9, 1.25) * scale,
-            base * CFrame.new(0, 2.7 * scale, 0.05 * scale),
-            Enum.Material.Fabric,
-            dark
-        )
-        makePart(
-            model,
-            "Book",
-            Vector3.new(1.2, 0.32, 1.5) * scale,
-            base
-                * CFrame.new(1.2 * scale, 2.95 * scale, -0.58 * scale)
-                * CFrame.Angles(math.rad(18), math.rad(-12), math.rad(8)),
-            Enum.Material.Fabric,
-            accent
-        )
-        for _, side in { -1, 1 } do
-            makePart(
-                model,
-                side < 0 and "GlassesLeft" or "GlassesRight",
-                Vector3.new(0.48, 0.32, 0.06) * scale,
-                base * CFrame.new(side * 0.34 * scale, 6.23 * scale, -0.94 * scale),
-                Enum.Material.Metal,
-                Color3.fromRGB(88, 78, 65)
-            )
-        end
-    elseif role == "Mentor" then
-        makeWedge(
-            model,
-            "PathkeeperMantle",
-            Vector3.new(2.85, 1.0, 1.7) * scale,
-            base * CFrame.new(0, 4.72 * scale, 0.05 * scale),
-            Enum.Material.Fabric,
-            accent
-        )
-        makeWedge(
-            model,
-            "PathkeeperCoatTail",
-            Vector3.new(2.35, 3.0, 0.44) * scale,
-            base * CFrame.new(0, 2.95 * scale, 0.82 * scale) * CFrame.Angles(math.rad(-5), 0, 0),
-            Enum.Material.Fabric,
-            dark
-        )
-        makeStaff(model, base, scale, Color3.fromRGB(82, 58, 38), lumen, 1)
-        for index = 1, 3 do
-            local angle = index * math.pi * 2 / 3
-            local rune = makeBall(
-                model,
-                "PathRune" .. index,
-                Vector3.new(0.25, 0.25, 0.25) * scale,
-                base
-                    * CFrame.new(
-                        math.cos(angle) * 0.78 * scale,
-                        4.85 * scale,
-                        -0.88 * scale + math.sin(angle) * 0.18 * scale
-                    ),
-                Enum.Material.Neon,
-                lumen
-            )
-            rune.CanQuery = false
         end
     end
 end
 
-function StylizedNpcFactory.Create(parent, spec)
-    local model = Instance.new("Model")
-    model.Name = spec.Name or spec.NpcId or "EverLeafNpc"
-    model.Parent = parent
+local function addClothingLayers(model, spec, palette)
+    local upper = bodyPart(model, "UpperTorso")
+    local lower = bodyPart(model, "LowerTorso")
+    local head = bodyPart(model, "Head")
+    local rightHand = bodyPart(model, "RightHand")
+    local leftHand = bodyPart(model, "LeftHand")
+    local accent = palette.Accent or Color3.fromRGB(103, 152, 119)
+    local cloth = palette.Cloth or Color3.fromRGB(63, 91, 77)
+    local dark = palette.DarkCloth or cloth:Lerp(Color3.new(0, 0, 0), 0.28)
+    local leather = palette.Leather or Color3.fromRGB(84, 58, 39)
+    local metal = palette.Metal or Color3.fromRGB(162, 132, 72)
+    local lumen = palette.Lumen or Color3.fromRGB(113, 238, 170)
+    local role = spec.Role or "Villager"
 
-    local scale = tonumber(spec.Scale) or 1
-    local base = CFrame.new(spec.Position) * CFrame.Angles(0, spec.Yaw or 0, 0)
+    attachPart(
+        model,
+        upper,
+        "Collar",
+        Vector3.new(2.0, 0.36, 1.15),
+        CFrame.new(0, 0.72, 0),
+        Enum.Material.Fabric,
+        accent
+    )
+    attachPart(
+        model,
+        lower,
+        "Belt",
+        Vector3.new(1.95, 0.26, 1.05),
+        CFrame.new(0, 0.35, 0),
+        Enum.Material.Fabric,
+        leather
+    )
+    attachPart(
+        model,
+        lower,
+        "Buckle",
+        Vector3.new(0.34, 0.32, 0.1),
+        CFrame.new(0, 0.35, -0.56),
+        Enum.Material.Metal,
+        metal
+    )
+
+    if role == "Guide" then
+        attachPart(
+            model,
+            upper,
+            "GuideCape",
+            Vector3.new(2.15, 2.75, 0.28),
+            CFrame.new(0, -0.35, 0.68) * CFrame.Angles(math.rad(-7), 0, 0),
+            Enum.Material.Fabric,
+            dark,
+            "Wedge"
+        )
+        attachPart(
+            model,
+            lower,
+            "Satchel",
+            Vector3.new(0.95, 1.15, 0.48),
+            CFrame.new(-1.0, -0.1, 0.55),
+            Enum.Material.Fabric,
+            leather
+        )
+        attachPart(
+            model,
+            head,
+            "GuideHood",
+            Vector3.new(2.0, 1.75, 1.95),
+            CFrame.new(0, 0.02, 0.14),
+            Enum.Material.Fabric,
+            dark,
+            "Ball"
+        )
+        attachPart(
+            model,
+            head,
+            "GuideHoodOpening",
+            Vector3.new(1.55, 1.3, 0.38),
+            CFrame.new(0, -0.03, -0.82),
+            Enum.Material.Fabric,
+            cloth,
+            "Ball"
+        )
+        if rightHand then
+            attachPart(
+                model,
+                rightHand,
+                "WayfinderStaff",
+                Vector3.new(6.0, 0.18, 0.18),
+                CFrame.new(0, -2.0, 0.18) * CFrame.Angles(0, 0, math.rad(90)),
+                Enum.Material.Wood,
+                Color3.fromRGB(75, 52, 34),
+                "Cylinder"
+            )
+            local crystal = attachPart(
+                model,
+                rightHand,
+                "StaffLumen",
+                Vector3.new(0.68, 0.68, 0.68),
+                CFrame.new(0, 1.1, 0.18),
+                Enum.Material.Neon,
+                lumen,
+                "Ball"
+            )
+            if crystal then
+                local light = Instance.new("PointLight")
+                light.Color = lumen
+                light.Brightness = 0.8
+                light.Range = 8
+                light.Parent = crystal
+            end
+        end
+    elseif role == "Quartermaster" then
+        attachPart(
+            model,
+            upper,
+            "QuartermasterVest",
+            Vector3.new(2.05, 2.05, 0.22),
+            CFrame.new(0, -0.05, -0.58),
+            Enum.Material.Fabric,
+            accent
+        )
+        attachPart(
+            model,
+            lower,
+            "Apron",
+            Vector3.new(1.65, 1.9, 0.18),
+            CFrame.new(0, -0.7, -0.55),
+            Enum.Material.Fabric,
+            accent
+        )
+        attachPart(
+            model,
+            lower,
+            "PouchLeft",
+            Vector3.new(0.55, 0.65, 0.38),
+            CFrame.new(-0.82, 0.0, -0.5),
+            Enum.Material.Fabric,
+            leather
+        )
+        attachPart(
+            model,
+            lower,
+            "PouchRight",
+            Vector3.new(0.55, 0.65, 0.38),
+            CFrame.new(0.82, 0.0, -0.5),
+            Enum.Material.Fabric,
+            leather
+        )
+        if leftHand then
+            attachPart(
+                model,
+                leftHand,
+                "Ledger",
+                Vector3.new(1.05, 0.18, 1.35),
+                CFrame.new(0, -0.25, -0.35) * CFrame.Angles(math.rad(18), math.rad(15), 0),
+                Enum.Material.Wood,
+                Color3.fromRGB(104, 75, 48)
+            )
+        end
+    elseif role == "Scout" then
+        attachPart(
+            model,
+            upper,
+            "ScoutCloak",
+            Vector3.new(2.1, 2.55, 0.28),
+            CFrame.new(0, -0.3, 0.66) * CFrame.Angles(math.rad(-6), 0, 0),
+            Enum.Material.Fabric,
+            accent,
+            "Wedge"
+        )
+        attachPart(
+            model,
+            upper,
+            "FieldPack",
+            Vector3.new(1.45, 1.6, 0.62),
+            CFrame.new(0, -0.2, 0.88),
+            Enum.Material.Fabric,
+            leather
+        )
+        if rightHand then
+            attachPart(
+                model,
+                rightHand,
+                "ScoutSpear",
+                Vector3.new(5.8, 0.16, 0.16),
+                CFrame.new(0, -1.8, 0.12) * CFrame.Angles(0, 0, math.rad(90)),
+                Enum.Material.Wood,
+                Color3.fromRGB(77, 54, 35),
+                "Cylinder"
+            )
+            attachPart(
+                model,
+                rightHand,
+                "SpearHead",
+                Vector3.new(0.4, 0.82, 0.18),
+                CFrame.new(0, 1.18, 0.12),
+                Enum.Material.Metal,
+                Color3.fromRGB(151, 162, 156),
+                "Wedge"
+            )
+        end
+    elseif role == "Archivist" then
+        attachPart(
+            model,
+            upper,
+            "ArchivistMantle",
+            Vector3.new(2.25, 0.72, 1.35),
+            CFrame.new(0, 0.57, 0),
+            Enum.Material.Fabric,
+            accent,
+            "Wedge"
+        )
+        attachPart(
+            model,
+            lower,
+            "ArchiveRobe",
+            Vector3.new(2.05, 2.25, 1.05),
+            CFrame.new(0, -0.75, 0.02),
+            Enum.Material.Fabric,
+            dark,
+            "Wedge"
+        )
+        if rightHand then
+            attachPart(
+                model,
+                rightHand,
+                "ArchiveBook",
+                Vector3.new(1.15, 0.3, 1.45),
+                CFrame.new(0, -0.15, -0.42)
+                    * CFrame.Angles(math.rad(18), math.rad(-10), math.rad(6)),
+                Enum.Material.Fabric,
+                accent
+            )
+        end
+        if head then
+            for _, side in { -1, 1 } do
+                attachPart(
+                    model,
+                    head,
+                    if side < 0 then "GlassesLeft" else "GlassesRight",
+                    Vector3.new(0.46, 0.3, 0.05),
+                    CFrame.new(side * 0.31, 0.08, -0.83),
+                    Enum.Material.Metal,
+                    Color3.fromRGB(89, 79, 67)
+                )
+            end
+        end
+    elseif role == "Mentor" then
+        attachPart(
+            model,
+            upper,
+            "PathkeeperMantle",
+            Vector3.new(2.35, 0.82, 1.45),
+            CFrame.new(0, 0.56, 0),
+            Enum.Material.Fabric,
+            accent,
+            "Wedge"
+        )
+        attachPart(
+            model,
+            upper,
+            "PathkeeperCoat",
+            Vector3.new(2.15, 2.75, 0.3),
+            CFrame.new(0, -0.35, 0.68) * CFrame.Angles(math.rad(-5), 0, 0),
+            Enum.Material.Fabric,
+            dark,
+            "Wedge"
+        )
+        if rightHand then
+            attachPart(
+                model,
+                rightHand,
+                "PathkeeperStaff",
+                Vector3.new(6.1, 0.18, 0.18),
+                CFrame.new(0, -2.0, 0.2) * CFrame.Angles(0, 0, math.rad(90)),
+                Enum.Material.Wood,
+                Color3.fromRGB(82, 58, 38),
+                "Cylinder"
+            )
+            local crystal = attachPart(
+                model,
+                rightHand,
+                "PathkeeperLumen",
+                Vector3.new(0.7, 0.7, 0.7),
+                CFrame.new(0, 1.15, 0.2),
+                Enum.Material.Neon,
+                lumen,
+                "Ball"
+            )
+            if crystal then
+                local light = Instance.new("PointLight")
+                light.Color = lumen
+                light.Brightness = 0.8
+                light.Range = 8
+                light.Parent = crystal
+            end
+        end
+    end
+end
+
+local function groundModel(model, requestedPosition, yaw)
+    local pivot = CFrame.new(requestedPosition + Vector3.new(0, 8, 0))
+        * CFrame.Angles(0, yaw or 0, 0)
+    model:PivotTo(pivot)
+
+    local rayParams = RaycastParams.new()
+    local terrain = Workspace:FindFirstChildOfClass("Terrain")
+    if terrain then
+        rayParams.FilterType = Enum.RaycastFilterType.Include
+        rayParams.FilterDescendantsInstances = { terrain }
+    else
+        rayParams.FilterType = Enum.RaycastFilterType.Exclude
+        rayParams.FilterDescendantsInstances = { model }
+    end
+    rayParams.IgnoreWater = false
+    local origin = Vector3.new(requestedPosition.X, requestedPosition.Y + 80, requestedPosition.Z)
+    local result = Workspace:Raycast(origin, Vector3.new(0, -180, 0), rayParams)
+    local targetY = if result then result.Position.Y else requestedPosition.Y
+
+    local leftFoot = bodyPart(model, "LeftFoot")
+    local rightFoot = bodyPart(model, "RightFoot")
+    local footBottom = math.huge
+    for _, foot in { leftFoot, rightFoot } do
+        if foot then
+            footBottom = math.min(footBottom, foot.Position.Y - foot.Size.Y * 0.5)
+        end
+    end
+    if footBottom == math.huge then
+        local boundsCFrame, boundsSize = model:GetBoundingBox()
+        footBottom = boundsCFrame.Position.Y - boundsSize.Y * 0.5
+    end
+
+    local deltaY = targetY + 0.045 - footBottom
+    model:PivotTo(CFrame.new(0, deltaY, 0) * model:GetPivot())
+end
+
+function StylizedNpcFactory.Create(parent, spec)
     local palette = spec.Palette or {}
     palette.Cloth = palette.Cloth or Color3.fromRGB(63, 91, 77)
     palette.Accent = palette.Accent or Color3.fromRGB(103, 152, 119)
     palette.Skin = palette.Skin or Color3.fromRGB(214, 181, 146)
     palette.Leather = palette.Leather or Color3.fromRGB(84, 58, 39)
-    palette.DarkCloth = palette.DarkCloth or palette.Cloth:Lerp(Color3.new(0, 0, 0), 0.24)
+    palette.DarkCloth = palette.DarkCloth or palette.Cloth:Lerp(Color3.new(0, 0, 0), 0.28)
 
-    local root, head = makeBody(model, base, scale, palette, tonumber(spec.Build) or 1)
-    makeFace(model, base, scale, palette.Skin, palette.EyeColor or Color3.fromRGB(35, 45, 40))
-    makeHair(
-        model,
-        base,
-        scale,
-        palette.Hair or Color3.fromRGB(69, 52, 43),
-        spec.HairStyle or "short"
-    )
-    addRoleDetails(model, base, scale, spec, palette)
+    local description = makeDescription(spec, palette)
+    local ok, modelOrError = pcall(function()
+        return Players:CreateHumanoidModelFromDescriptionAsync(
+            description,
+            Enum.HumanoidRigType.R15
+        )
+    end)
+    description:Destroy()
+    if not ok or not modelOrError then
+        warn(
+            string.format(
+                "[StylizedNpcFactory] Could not build R15 NPC %s: %s",
+                tostring(spec.NpcId or spec.Name),
+                tostring(modelOrError)
+            )
+        )
+        return nil, nil, nil
+    end
 
+    local model = modelOrError
+    model.Name = spec.Name or spec.NpcId or "EverLeafNpc"
+    model.Parent = parent
+    local root, head = configureRig(model)
+    if not root or not head then
+        model:Destroy()
+        warn(
+            string.format(
+                "[StylizedNpcFactory] R15 NPC %s missing required body parts",
+                tostring(spec.NpcId or spec.Name)
+            )
+        )
+        return nil, nil, nil
+    end
+
+    makeFace(head, palette, spec.Role)
+    makeHair(model, head, palette, spec.HairStyle or "short")
+    addClothingLayers(model, spec, palette)
+    groundModel(model, spec.Position, spec.Yaw or 0)
     model.PrimaryPart = root
     return model, root, head
 end

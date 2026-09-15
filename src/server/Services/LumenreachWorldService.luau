@@ -1830,9 +1830,16 @@ local function makeGuide(parent, position, yaw)
         Yaw = yaw,
         Role = "Guide",
         HairStyle = "long",
-        Build = 0.98,
+        Build = 0.92,
+        HeightScale = 1.03,
+        HeadScale = 0.94,
+        BodyTypeScale = 0.24,
+        ProportionScale = 0.3,
         Palette = palette,
     })
+    if not model or not root or not head then
+        return nil
+    end
     attachNpcPresentation(
         model,
         root,
@@ -1850,27 +1857,43 @@ local function makeCampNpc(parent, npcId, displayName, position, yaw, palette, r
         Quartermaster = {
             HairStyle = "short",
             Build = 1.08,
+            HeightScale = 0.95,
+            HeadScale = 1.02,
+            BodyTypeScale = 0.34,
+            ProportionScale = 0.12,
             Hair = Color3.fromRGB(78, 53, 37),
             Skin = Color3.fromRGB(198, 158, 123),
             Eye = Color3.fromRGB(72, 63, 48),
         },
         Scout = {
             HairStyle = "ponytail",
-            Build = 0.94,
+            Build = 0.9,
+            HeightScale = 1.04,
+            HeadScale = 0.92,
+            BodyTypeScale = 0.42,
+            ProportionScale = 0.5,
             Hair = Color3.fromRGB(92, 57, 39),
             Skin = Color3.fromRGB(221, 185, 145),
             Eye = Color3.fromRGB(49, 83, 61),
         },
         Archivist = {
             HairStyle = "bun",
-            Build = 0.95,
+            Build = 0.9,
+            HeightScale = 0.94,
+            HeadScale = 1.02,
+            BodyTypeScale = 0.28,
+            ProportionScale = 0.22,
             Hair = Color3.fromRGB(60, 47, 71),
             Skin = Color3.fromRGB(202, 165, 138),
             Eye = Color3.fromRGB(79, 64, 105),
         },
         Mentor = {
             HairStyle = "long",
-            Build = 1.02,
+            Build = 0.96,
+            HeightScale = 1.07,
+            HeadScale = 0.93,
+            BodyTypeScale = 0.5,
+            ProportionScale = 0.56,
             Hair = Color3.fromRGB(151, 157, 145),
             Skin = Color3.fromRGB(211, 178, 145),
             Eye = Color3.fromRGB(61, 105, 78),
@@ -1896,8 +1919,15 @@ local function makeCampNpc(parent, npcId, displayName, position, yaw, palette, r
         Role = role,
         HairStyle = style.HairStyle,
         Build = style.Build,
+        HeightScale = style.HeightScale,
+        HeadScale = style.HeadScale,
+        BodyTypeScale = style.BodyTypeScale,
+        ProportionScale = style.ProportionScale,
         Palette = visualPalette,
     })
+    if not model or not root or not head then
+        return nil
+    end
     attachNpcPresentation(model, root, head, npcId, displayName, visualPalette.Accent, displayName)
     return model
 end

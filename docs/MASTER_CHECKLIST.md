@@ -57,6 +57,7 @@
 - [x] Production-oriented trees, ferns, deadwood, rock faces, mossy rock sets, stumps, roots, logs, mushrooms, cattails, and waystones integrated.
 - [x] Oversized/unintegrated cliff meshes and black stacked-rock formations corrected and blended into terrain.
 - [x] Starter camp rebuilt with larger tents, proper supplies, map table, benches, lanterns, signpost, and custom guide/NPC composition.
+- [x] Lumenreach camp NPCs now use grounded R15 humanoid rigs with distinct role silhouettes, clothing layers, face/hair treatment, props, idle animation support, and terrain-only foot grounding; Studio visual QA remains.
 - [x] Lumenreach NPC visual overhaul is source-complete: Ilyra, Orin, Tovin, Maela, and Seren now use a reusable stylized-character factory with rounded segmented limbs, unique hair/build silhouettes, layered clothing, and role-specific props; Studio visual QA remains.
 - [x] World density pass added continuous forest bands, roadside clusters, undergrowth, deadwood, rocks, and landmark dressing.
 - [x] Lumenreach macro-layout replacement is source-complete: all major zones were repositioned, Crossroads moved onto a raised west-side saddle, Veilfall moved into a lowered ravine, Sunmoss moved onto an elevated ridge, a carved Lumen Gorge now divides west/east Lumenreach, and a required bridge crossing connects the two halves; fresh Studio visual QA remains.
@@ -483,7 +484,7 @@
 - [x] Approved imported environment assets integrated with runtime sanitization; free script-free Forest Trees `13913287259` can populate sanitized tree variants, while the old visible primitive fallbacks are disabled for production placement.
 - [x] Bad oversized cliff/rock placements corrected and terrain-supported.
 - [x] Camera obstruction issue from foliage/decor corrected.
-- [x] Custom Ilyra guide model and three additional camp NPCs placed with interaction prompts.
+- [x] Ilyra, Orin, Tovin, Maela, and Seren use distinct grounded R15 NPC presentations with interaction prompts; final Studio visual QA remains.
 - [x] Training dummy and full first-region monster/wave placement.
 - [x] Hidden Whisperroot Hollow added with persistent one-time cache reward.
 - [x] Wayfarer environmental-story remnants added around the region.
