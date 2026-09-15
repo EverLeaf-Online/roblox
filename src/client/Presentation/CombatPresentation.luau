@@ -1,8 +1,10 @@
 local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
+local WeaponCombatProfiles = require(ReplicatedStorage.Shared.WeaponCombatProfiles)
 local CameraImpulse = require(script.Parent.CameraImpulse)
 
 local CombatPresentation = {}
@@ -324,11 +326,12 @@ local function playAnimatorFallback(character, familyId, duration)
     return true
 end
 
-local function playSequence(character, familyId)
+local function playSequence(character, familyId, durationMultiplier)
     local sequence = ATTACK_SEQUENCES[familyId] or ATTACK_SEQUENCES.default
+    local duration = sequence.Duration * math.max(0.1, tonumber(durationMultiplier) or 1)
     local resolved = rigJoints(character)
     if not resolved then
-        if not playAnimatorFallback(character, familyId, sequence.Duration) then
+        if not playAnimatorFallback(character, familyId, duration) then
             warn("[CombatPresentation] Player rig has no usable attack animation path")
         end
         return
@@ -352,7 +355,7 @@ local function playSequence(character, familyId)
             return
         end
 
-        local alpha = math.clamp((os.clock() - startedAt) / sequence.Duration, 0, 1)
+        local alpha = math.clamp((os.clock() - startedAt) / duration, 0, 1)
         local pose = sampleSequence(sequence, alpha)
         for _, key in POSE_KEYS do
             local joint = resolved[key]
@@ -367,10 +370,11 @@ local function playSequence(character, familyId)
     end)
 end
 
-local function handPosition(character, familyId)
-    local preferred = if familyId == "thornrunner" then "LeftHand" else "RightHand"
+local function handPosition(character, familyId, weaponType)
+    local leftHanded = weaponType == "Bow" or weaponType == nil and familyId == "thornrunner"
+    local preferred = if leftHanded then "LeftHand" else "RightHand"
     local hand = character:FindFirstChild(preferred)
-        or character:FindFirstChild(if familyId == "thornrunner" then "Left Arm" else "Right Arm")
+        or character:FindFirstChild(if leftHanded then "Left Arm" else "Right Arm")
         or character:FindFirstChild("HumanoidRootPart")
     return hand and hand.Position or character:GetPivot().Position
 end
@@ -489,38 +493,51 @@ local function burstImpact(targetPosition, color, heavy)
     Debris:AddItem(core, 0.22)
 end
 
-local function launchRangedBasic(character, familyId)
-    local color = FAMILY_COLORS[familyId] or Color3.fromRGB(188, 216, 201)
+local function launchRangedBasic(character, familyId, weaponType)
     local root = character:FindFirstChild("HumanoidRootPart")
     if not root then
         return
     end
-    local startPosition = handPosition(character, familyId)
-    local distance = if familyId == "thornrunner" then 23 else 21
-    local targetPosition = startPosition + root.CFrame.LookVector * distance
+
+    local profile = type(weaponType) == "string" and WeaponCombatProfiles[weaponType] or nil
+    local isLegacyFamilyProjectile = profile == nil
+        and (familyId == "thornrunner" or familyId == "lumenweaver")
+    if
+        profile and profile.AttackMode ~= "Projectile"
+        or not profile and not isLegacyFamilyProjectile
+    then
+        return
+    end
+
+    local range = profile and profile.Range or if familyId == "thornrunner" then 23 else 21
+    local speed = profile and profile.ProjectileSpeed
+        or if familyId == "lumenweaver" then 68 else 88
+    local kind = profile and profile.ProjectileKind
+        or if familyId == "lumenweaver" then "orb" else "arrow"
+    local startPosition = handPosition(character, familyId, weaponType)
     projectile(
         startPosition,
-        targetPosition,
-        color,
-        if familyId == "lumenweaver" then "orb" else "arrow",
-        if familyId == "lumenweaver" then 68 else 88
+        startPosition + root.CFrame.LookVector * range,
+        FAMILY_COLORS[familyId] or Color3.fromRGB(188, 216, 201),
+        kind,
+        speed
     )
 end
 
-function CombatPresentation.GetBasicAttackDuration(familyId)
+function CombatPresentation.GetBasicAttackDuration(familyId, weaponType)
     local sequence = ATTACK_SEQUENCES[familyId] or ATTACK_SEQUENCES.default
-    return sequence.Duration
+    local profile = type(weaponType) == "string" and WeaponCombatProfiles[weaponType] or nil
+    return sequence.Duration * math.max(0.1, profile and profile.AnimationDurationMultiplier or 1)
 end
 
-function CombatPresentation.PlayBasicAttack(familyId)
+function CombatPresentation.PlayBasicAttack(familyId, weaponType)
     local character = player.Character
     if not character then
         return
     end
-    playSequence(character, familyId)
-    if familyId == "thornrunner" or familyId == "lumenweaver" then
-        launchRangedBasic(character, familyId)
-    end
+    local profile = type(weaponType) == "string" and WeaponCombatProfiles[weaponType] or nil
+    playSequence(character, familyId, profile and profile.AnimationDurationMultiplier or 1)
+    launchRangedBasic(character, familyId, weaponType)
 end
 
 function CombatPresentation.GetSkillCastDuration(familyId, _definition)
@@ -543,7 +560,7 @@ function CombatPresentation.PlaySkillCast(familyId, definition)
     if not root or not root:IsA("BasePart") then
         return
     end
-    local startPosition = handPosition(character, familyId)
+    local startPosition = handPosition(character, familyId, nil)
     local range = math.max(1, tonumber(effect.Range) or 20)
     local speed = math.max(1, tonumber(effect.ProjectileSpeed) or 80)
     projectile(

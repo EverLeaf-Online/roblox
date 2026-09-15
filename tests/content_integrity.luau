@@ -10,6 +10,7 @@ local Bosses = require("../src/server/Content/BossDefinitions")
 local Skills = require("../src/server/Content/SkillDefinitions")
 local Families = require("../src/server/Content/ClassFamilyDefinitions")
 local MonsterConfig = require("../src/server/Content/MonsterConfig")
+local WeaponCombatProfiles = require("../src/shared/WeaponCombatProfiles")
 local currencies = { Shards = true, Marks = true }
 
 for itemId, definition in Items do
@@ -17,6 +18,14 @@ for itemId, definition in Items do
         type(definition.DisplayName) == "string" and definition.DisplayName ~= "",
         "item display name: " .. itemId
     )
+    if definition.EquipmentSlot == "Weapon" then
+        assert(
+            type(definition.WeaponType) == "string" and WeaponCombatProfiles[definition.WeaponType],
+            "weapon type valid: " .. itemId
+        )
+    else
+        assert(definition.WeaponType == nil, "non-weapon cannot declare WeaponType: " .. itemId)
+    end
     local attackSpeed = definition.Stats and definition.Stats.AttackSpeed
     assert(
         attackSpeed == nil
@@ -219,7 +228,12 @@ for bossId, boss in Bosses do
 end
 
 for familyId, family in Families do
-    assert(Items[family.StarterItemId], string.format("family %s starter item exists", familyId))
+    local starterItem = Items[family.StarterItemId]
+    assert(starterItem, string.format("family %s starter item exists", familyId))
+    assert(
+        starterItem.WeaponType == family.PreferredWeaponType,
+        string.format("family %s starter weapon type matches preference", familyId)
+    )
     assert(Skills[family.StarterSkillId], string.format("family %s starter skill exists", familyId))
     if family.SecondAdvancement then
         assert(

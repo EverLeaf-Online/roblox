@@ -2,6 +2,7 @@ return table.freeze({
     ironbloom = table.freeze({
         DisplayName = "Ironbloom",
         PrimaryStat = "Might",
+        PreferredWeaponType = "Blade",
         CombatRole = "Frontline",
         FirstAdvancementLevel = 8,
         StarterSkillId = "ironbloom_sunder",
@@ -31,6 +32,7 @@ return table.freeze({
     thornrunner = table.freeze({
         DisplayName = "Thornrunner",
         PrimaryStat = "Finesse",
+        PreferredWeaponType = "Bow",
         CombatRole = "Ranged Skirmisher",
         FirstAdvancementLevel = 8,
         StarterSkillId = "thornrunner_piercing_shot",
@@ -61,6 +63,7 @@ return table.freeze({
     lumenweaver = table.freeze({
         DisplayName = "Lumenweaver",
         PrimaryStat = "Insight",
+        PreferredWeaponType = "Focus",
         CombatRole = "Lumen Caster",
         FirstAdvancementLevel = 10,
         StarterSkillId = "lumenweaver_lumen_bolt",
@@ -91,6 +94,7 @@ return table.freeze({
     veilstrider = table.freeze({
         DisplayName = "Veilstrider",
         PrimaryStat = "Fortune",
+        PreferredWeaponType = "TwinBlades",
         CombatRole = "Agile Skirmisher",
         FirstAdvancementLevel = 8,
         StarterSkillId = "veilstrider_crosscut",
@@ -120,6 +124,7 @@ return table.freeze({
     brasshand = table.freeze({
         DisplayName = "Brasshand",
         PrimaryStat = "Might",
+        PreferredWeaponType = "Maul",
         CombatRole = "Close-range Bruiser",
         FirstAdvancementLevel = 10,
         StarterSkillId = "brasshand_kinetic_burst",

@@ -1563,7 +1563,9 @@ local function InventoryPanel(
     end
 
     local selectedName = selectedDefinition and selectedDefinition.DisplayName or "Select an item"
-    local selectedType = selectedDefinition and selectedDefinition.Type or "Inventory"
+    local selectedType = if selectedDefinition and selectedDefinition.WeaponType
+        then string.format("Weapon · %s", prettyId(selectedDefinition.WeaponType))
+        else selectedDefinition and selectedDefinition.Type or "Inventory"
     local equipEligible = true
     local equipReason = nil
     if selectedDefinition and selectedDefinition.Type == "Equipment" then

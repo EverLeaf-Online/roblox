@@ -5,6 +5,7 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
 local Net = require(ReplicatedStorage.Shared.Net)
+local CatalogClient = require(script.Parent.Parent.Services.CatalogClient)
 local CombatFacing = require(script.Parent.Parent.Presentation.CombatFacing)
 local CombatPresentation = require(script.Parent.Parent.Presentation.CombatPresentation)
 local ProfileStore = require(script.Parent.Parent.State.ProfileStore)
@@ -113,6 +114,16 @@ local function showFeedback(text, tone)
     end)
 end
 
+local function equippedWeaponType(profile)
+    local itemId = profile and profile.Equipment and profile.Equipment.Weapon
+    local catalog = CatalogClient.Get()
+    local definition = catalog
+        and catalog.Items
+        and type(itemId) == "string"
+        and catalog.Items[itemId]
+    return definition and definition.WeaponType or nil
+end
+
 local function performAttack()
     if attacking or not attackRemote then
         return
@@ -128,10 +139,11 @@ local function performAttack()
     attacking = true
     local profile = ProfileStore.Get()
     local familyId = profile and profile.FamilyId or ""
-    local attackDuration = CombatPresentation.GetBasicAttackDuration(familyId)
+    local weaponType = equippedWeaponType(profile)
+    local attackDuration = CombatPresentation.GetBasicAttackDuration(familyId, weaponType)
     local animationEndsAt = os.clock() + attackDuration
     CombatFacing.LockToCamera(attackDuration)
-    CombatPresentation.PlayBasicAttack(familyId)
+    CombatPresentation.PlayBasicAttack(familyId, weaponType)
 
     task.spawn(function()
         local invokeOk, attackOk, resultOrReason = pcall(function()

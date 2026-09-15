@@ -2,7 +2,10 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local ClassFamilyDefinitions = require(script.Parent.Parent.Content.ClassFamilyDefinitions)
+local ItemDefinitions = require(script.Parent.Parent.Content.ItemDefinitions)
 local AttackCadenceMath = require(ReplicatedStorage.Shared.Math.AttackCadenceMath)
+local WeaponCombatProfiles = require(ReplicatedStorage.Shared.WeaponCombatProfiles)
+local WeaponCombatRules = require(ReplicatedStorage.Shared.Logic.WeaponCombatRules)
 local DamageService = require(script.Parent.DamageService)
 local CombatHitboxService = require(script.Parent.CombatHitboxService)
 local EnemyService = require(script.Parent.EnemyService)
@@ -21,36 +24,35 @@ local function getRoot(model)
     return model and model:FindFirstChild("HumanoidRootPart")
 end
 
+local function equippedWeaponType(profile)
+    local itemId = profile.Equipment and profile.Equipment.Weapon
+    local definition = type(itemId) == "string" and ItemDefinitions[itemId] or nil
+    if not definition or definition.EquipmentSlot ~= "Weapon" then
+        return nil
+    end
+    return definition.WeaponType
+end
+
 local function basicAttackDefinition(profile)
     local family = type(profile.FamilyId) == "string" and ClassFamilyDefinitions[profile.FamilyId]
         or nil
-    local attack = family and family.BasicAttack or nil
-    local baseCooldown = attack and attack.Cooldown or GameConfig.Combat.BasicAttackCooldown
+    local baseAttack = family and family.BasicAttack or {}
     local attackSpeedBonus = EquipmentService.GetStatBonus(profile, "AttackSpeed")
         + SkillBonusService.GetStatBonus(profile, "AttackSpeed")
-    local cooldown, appliedAttackSpeed =
-        AttackCadenceMath.ResolveCooldown(baseCooldown, attackSpeedBonus, GameConfig.Combat)
-    return {
-        PrimaryStat = family and family.PrimaryStat or "Might",
-        Range = attack and attack.Range or GameConfig.Combat.BasicAttackRange,
-        VerticalRange = attack and attack.VerticalRange
-            or GameConfig.Combat.BasicAttackVerticalRange,
-        ArcDegrees = attack and attack.ArcDegrees or GameConfig.Combat.BasicAttackArcDegrees,
-        HitboxWidth = attack and attack.HitboxWidth or GameConfig.Combat.BasicAttackHitboxWidth,
-        AttackMode = attack and attack.AttackMode or "Melee",
-        ProjectileSpeed = attack and attack.ProjectileSpeed
-            or GameConfig.Combat.BasicProjectileSpeed,
-        ProjectileRadius = attack and attack.ProjectileRadius
-            or GameConfig.Combat.BasicProjectileRadius,
-        Cooldown = cooldown,
-        AttackSpeed = appliedAttackSpeed,
-        AttackPower = attack and attack.AttackPower or GameConfig.Combat.BeginnerAttackPower,
-        StatScale = attack and attack.StatScale or GameConfig.Combat.BeginnerStatScale,
-        Mastery = attack and attack.Mastery or GameConfig.Combat.DefaultMastery,
-        Knockback = attack and attack.Knockback or GameConfig.Combat.BeginnerKnockback,
-        Knockup = attack and attack.Knockup or GameConfig.Combat.BeginnerKnockup,
-        Stagger = attack and attack.Stagger or GameConfig.Combat.BeginnerStagger,
-    }
+    local weaponType = equippedWeaponType(profile)
+    local resolved = WeaponCombatRules.Resolve(
+        baseAttack,
+        weaponType,
+        weaponType and WeaponCombatProfiles[weaponType] or nil,
+        GameConfig.Combat
+    )
+    resolved.Cooldown, resolved.AttackSpeed = AttackCadenceMath.ResolveCooldown(
+        resolved.BaseCooldown,
+        attackSpeedBonus,
+        GameConfig.Combat
+    )
+    resolved.PrimaryStat = family and family.PrimaryStat or "Might"
+    return resolved
 end
 
 function CombatService.BasicAttack(player, profile)

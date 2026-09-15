@@ -77,7 +77,15 @@ local function ItemInfoCard(props)
             Position = UDim2.fromOffset(12, 8),
             Size = UDim2.new(1, -24, 0, 16),
             BackgroundTransparency = 1,
-            Text = string.upper(definition.Type or "ITEM"),
+            Text = string.upper(
+                if definition.WeaponType
+                    then string.format(
+                        "%s · %s",
+                        definition.Type or "ITEM",
+                        pretty(definition.WeaponType)
+                    )
+                    else definition.Type or "ITEM"
+            ),
             TextColor3 = Color3.fromRGB(112, 228, 169),
             TextSize = 9,
             Font = Enum.Font.GothamBold,

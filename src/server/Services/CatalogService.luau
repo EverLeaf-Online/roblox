@@ -33,6 +33,7 @@ function CatalogService.Build()
             "DisplayName",
             "Type",
             "EquipmentSlot",
+            "WeaponType",
             "FamilyId",
             "RequiredAdvancementTier",
             "RequiredLevel",
@@ -73,6 +74,7 @@ function CatalogService.Build()
         Families = copySelected(ClassFamilyDefinitions, {
             "DisplayName",
             "PrimaryStat",
+            "PreferredWeaponType",
             "CombatRole",
             "FirstAdvancementLevel",
             "StarterSkillId",

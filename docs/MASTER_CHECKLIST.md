@@ -341,7 +341,7 @@
 - [x] Confirmed hits now trigger a short local camera/FOV impact impulse scaled by family/critical weight without freezing authoritative server simulation; Studio intensity tuning remains.
 - [x] Player basic attacks and damaging skills now apply server-owned monster knockback/launch/stagger data with normal/elite/boss resistance tiers and per-monster override support; Studio feel tuning remains.
 - [x] Basic attacks and active skills surface no-target/out-of-range/projectile-blocked/missed/target-lost/timeout/cancelled feedback with local spam suppression.
-- [ ] Weapon-specific basic attacks.
+- [x] Equipped WeaponType now authoritatively controls basic-attack melee/projectile geometry, projectile properties, cadence modifier, and reaction profile while family stats/mastery remain class-specific; client presentation uses the same shared profile.
 - [x] Server-owned basic-attack cadence now scales from capped AttackSpeed equipment/passive bonuses with a hard cooldown floor; effective AttackSpeed is exposed in snapshots/UI and regression-tested.
 
 ## 9. Skills
@@ -428,7 +428,7 @@
 - [x] Server equip/unequip validation foundation.
 - [x] Equipment stat aggregation feeds AttackPower, core stats, Defense, Crit Chance, and Crit Power.
 - [x] Level/family/advancement-tier equipment requirements are server-enforced and surfaced in inventory/item UI.
-- [ ] Weapon types.
+- [x] Weapon types are explicit data (`Blade`, `Bow`, `Focus`, `TwinBlades`, `Maul`) with shared combat profiles, catalog exposure, item-card display, and starter-family consistency validation.
 - [ ] Armor/accessory types.
 - [x] Consumable architecture with HP/MP restoration foundation.
 - [x] Inventory capacity rules are server-enforced through stack/capacity validation and regression-tested.
