@@ -9,7 +9,19 @@ local EnvironmentAssetRegistry = {
         GroundToPivot = true,
         AllowRuntimeLoad = true,
         PolyHavenId = "pine_sapling_small",
-        Notes = "Optimized textured GLB derived from Poly Haven pine_sapling_small; single tree variant, embedded bark/needle materials, Roblox-scale geometry budget.",
+        Appearance = table.freeze({
+            Bark = table.freeze({
+                ColorMap = 77401003804409,
+                NormalMap = 79040073771864,
+                RoughnessMap = 81879177681425,
+            }),
+            Foliage = table.freeze({
+                ColorMap = 107051695372257,
+                NormalMap = 123643527847304,
+                RoughnessMap = 96029717543713,
+            }),
+        }),
+        Notes = "Optimized Poly Haven pine with explicit EverLeaf-owned bark/needle SurfaceAppearance maps; embedded/raw material state is normalized during prefab registration.",
     },
     TreeStump = {
         AssetId = 111453055456477,

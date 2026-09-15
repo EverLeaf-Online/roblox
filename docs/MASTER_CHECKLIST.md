@@ -508,7 +508,8 @@
 - [x] Lumenreach route/protected-area cleanup now runs after all authored world props are placed, so late-added remnants and landmark dressing can no longer bypass final travel-lane/readability clearance.
 - [x] Lumenreach landmark titles now use transparent world-space typography with a restrained Lumen accent instead of floating dark rounded UI boxes; invisible anchors are non-touch/non-query so they do not add unnecessary ray hits.
 - [x] Wayfarer Camp and Lumenwood Crossroads now have a low-rate forest pollen/Lumen-dust atmosphere layer distinct from Glowmere/Veilfall mist and Sunmoss air effects; final Studio art/performance tuning remains open.
-- [x] Approved imported environment assets integrated with runtime sanitization; free script-free Forest Trees `13913287259` can populate sanitized tree variants, while the old visible primitive fallbacks are disabled for production placement.
+- [x] Approved imported environment assets integrated with runtime sanitization; EverLeaf-owned Poly Haven trees are the production default with explicit bark/needle SurfaceAppearance maps, while the free Forest Trees `13913287259` pack remains sanitized/manual fallback-only and old primitive tree fallbacks stay disabled.
+- [x] Imported first-area environment assets strip raw `Texture`/`Decal` layers during sanitization; controlled PBR overrides replace legacy MeshPart texture state instead of stacking on top of it.
 - [x] Bad oversized cliff/rock placements corrected and terrain-supported.
 - [x] Camera obstruction issue from foliage/decor corrected.
 - [x] Lumenreach collision cleanup now gives imported production trees predictable invisible trunk blockers, makes tent side/rear walls physically solid while preserving entrances, removes legacy/default baseplates, and expands the Terrain safety foundation beyond playable bounds.

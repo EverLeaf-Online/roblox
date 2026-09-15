@@ -13,6 +13,8 @@ local BLOCKED_CLASSES = {
     ClickDetector = true,
     ProximityPrompt = true,
     Sound = true,
+    Texture = true,
+    Decal = true,
 }
 
 local function getFolder()
@@ -82,12 +84,29 @@ local function applyAppearance(instance, appearance)
         local foliage = isFoliagePart(part)
         local maps = if foliage then appearance.Foliage else appearance.Bark
         if maps then
+            -- Controlled EverLeaf PBR must replace legacy/raw texture layers,
+            -- never stack on top of whatever the imported GLB happened to keep.
+            for _, child in part:GetChildren() do
+                if child:IsA("Texture") or child:IsA("Decal") then
+                    child:Destroy()
+                end
+            end
+            pcall(function()
+                part.TextureID = ""
+            end)
+
             local surface = part:FindFirstChildOfClass("SurfaceAppearance")
             if not surface then
                 surface = Instance.new("SurfaceAppearance")
                 surface.Name = "EverLeafSurfaceAppearance"
                 surface.Parent = part
             end
+            for _, child in part:GetChildren() do
+                if child:IsA("SurfaceAppearance") and child ~= surface then
+                    child:Destroy()
+                end
+            end
+            surface.Name = "EverLeafSurfaceAppearance"
             surface.ColorMap = contentId(maps.ColorMap)
             surface.NormalMap = contentId(maps.NormalMap)
             surface.RoughnessMap = contentId(maps.RoughnessMap)
@@ -100,6 +119,7 @@ local function applyAppearance(instance, appearance)
             end
             part.Color = Color3.new(1, 1, 1)
             part.Material = Enum.Material.SmoothPlastic
+            part:SetAttribute("EverLeafAppearanceNormalized", true)
         end
     end
 end

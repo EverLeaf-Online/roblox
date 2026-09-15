@@ -363,6 +363,13 @@ end
 local TREE_VARIANT_COUNT = 12
 
 local function chooseTreePrefab(variant)
+    -- Production first: prefer the EverLeaf-owned Poly Haven tree because its
+    -- bark/needle maps are explicitly normalized. Creator Store variants are
+    -- fallback-only until they receive the same controlled appearance pass.
+    if EnvironmentPrefabService.Get("TreePrimary") then
+        return "TreePrimary"
+    end
+
     variant = math.max(1, math.floor(tonumber(variant) or 1))
     local startIndex = ((variant - 1) % TREE_VARIANT_COUNT) + 1
     for offset = 0, TREE_VARIANT_COUNT - 1 do
@@ -371,9 +378,6 @@ local function chooseTreePrefab(variant)
         if EnvironmentPrefabService.Get(name) then
             return name
         end
-    end
-    if EnvironmentPrefabService.Get("TreePrimary") then
-        return "TreePrimary"
     end
     return nil
 end
