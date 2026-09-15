@@ -3356,11 +3356,14 @@ local function makeWayfarerHall(parent, position, yaw)
     end
 
     for _, side in { -1, 1 } do
+        -- Roof panels must rise toward the center ridge. The previous sign on
+        -- the roll angle made both panels rise outward, creating a giant V/X
+        -- silhouette that cut through the hall at player height.
         local roofPanel = makePart(
             model,
             "HallRoof",
             Vector3.new(15.5, 0.75, 20),
-            base * CFrame.new(side * 6.0, 10.2, 0) * CFrame.Angles(0, 0, math.rad(side * 24)),
+            base * CFrame.new(side * 6.0, 11.3, 0) * CFrame.Angles(0, 0, math.rad(-side * 22)),
             Enum.Material.WoodPlanks,
             roof
         )

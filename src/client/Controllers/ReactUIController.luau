@@ -3890,8 +3890,11 @@ function ReactUIController.Start()
 
     local scaledRoot = Instance.new("Frame")
     scaledRoot.Name = "ScaledRoot"
-    scaledRoot.AnchorPoint = Vector2.new(0.5, 0.5)
-    scaledRoot.Position = UDim2.fromScale(0.5, 0.5)
+    -- Keep the reference canvas top-left anchored. Centering a fixed 1280x720
+    -- frame with a UIScale caused its unscaled anchor offset to push HUD panels
+    -- off-screen on smaller/wider Studio play windows.
+    scaledRoot.AnchorPoint = Vector2.new(0, 0)
+    scaledRoot.Position = UDim2.fromOffset(0, 0)
     scaledRoot.Size = UDim2.fromOffset(UI_REFERENCE_SIZE.X, UI_REFERENCE_SIZE.Y)
     scaledRoot.BackgroundTransparency = 1
     scaledRoot.BorderSizePixel = 0
@@ -3907,7 +3910,17 @@ function ReactUIController.Start()
         local camera = Workspace.CurrentCamera
         local viewport = camera and camera.ViewportSize or UI_REFERENCE_SIZE
         local fit = math.min(viewport.X / UI_REFERENCE_SIZE.X, viewport.Y / UI_REFERENCE_SIZE.Y)
-        uiScale.Scale = math.clamp(fit, 0.1, UI_MAX_SCALE)
+        local scale = math.clamp(fit, 0.1, UI_MAX_SCALE)
+        uiScale.Scale = scale
+
+        -- Center the *scaled* reference canvas using explicit pixel margins.
+        -- This keeps every HUD edge inside the viewport while still allowing
+        -- intentional letterbox space on aspect ratios unlike 16:9.
+        local scaledWidth = UI_REFERENCE_SIZE.X * scale
+        local scaledHeight = UI_REFERENCE_SIZE.Y * scale
+        local offsetX = math.max(0, (viewport.X - scaledWidth) * 0.5)
+        local offsetY = math.max(0, (viewport.Y - scaledHeight) * 0.5)
+        scaledRoot.Position = UDim2.fromOffset(math.floor(offsetX + 0.5), math.floor(offsetY + 0.5))
     end
 
     local function bindCamera()

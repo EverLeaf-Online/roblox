@@ -89,6 +89,15 @@ assert(
     ) ~= nil,
     "town arrival must remain isolated from lodging/tent footprints"
 )
+assert(
+    string.find(source, "math.rad(-side * 22)", 1, true) ~= nil
+        and string.find(source, "CFrame.new(side * 6.0, 11.3, 0)", 1, true) ~= nil,
+    "Wayfarer Hall roof panels must rise inward to a proper center ridge"
+)
+assert(
+    string.find(source, "math.rad(side * 24)", 1, true) == nil,
+    "inverted Wayfarer Hall roof geometry must not return"
+)
 
 local quests = fs.readFile("src/server/Content/QuestDefinitions.luau")
 assert(
