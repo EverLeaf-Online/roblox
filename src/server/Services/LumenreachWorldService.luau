@@ -4252,6 +4252,139 @@ local function makeMosslingHollowFrame(parent)
     makeMushroomCluster(parent, farEdge + right * 7.8, 0.7, 613)
 end
 
+local function makeTrainingYardMark(parent)
+    local center = terrainSurfacePosition(WORLD_ZONES.Camp + Vector3.new(31, 0, -5), 0)
+    local model = Instance.new("Model")
+    model.Name = "WayfarerTrainingYardMark"
+    model.Parent = parent
+
+    -- Keep the training space grounded and worn-in rather than adding another
+    -- raised platform. These shallow scuffs are visual-only and intentionally
+    -- irregular so the dummy reads as part of an actively used camp yard.
+    local scuffs = {
+        { Offset = Vector3.new(-1.8, 0.045, -1.0), Size = Vector3.new(4.8, 0.07, 1.45), Yaw = 18 },
+        { Offset = Vector3.new(1.7, 0.05, 1.2), Size = Vector3.new(3.9, 0.065, 1.25), Yaw = -31 },
+        { Offset = Vector3.new(-0.6, 0.055, 2.7), Size = Vector3.new(2.8, 0.06, 0.92), Yaw = 54 },
+        { Offset = Vector3.new(2.8, 0.05, -2.2), Size = Vector3.new(2.35, 0.06, 0.78), Yaw = 9 },
+        { Offset = Vector3.new(-3.1, 0.05, 2.0), Size = Vector3.new(2.1, 0.055, 0.72), Yaw = -52 },
+    }
+    for index, spec in scuffs do
+        local scuff = makeBall(
+            model,
+            "TrainingScuff" .. index,
+            spec.Size,
+            CFrame.new(center + spec.Offset) * CFrame.Angles(0, math.rad(spec.Yaw), 0),
+            Enum.Material.Ground,
+            Color3.fromRGB(79, 67, 48)
+        )
+        scuff.Transparency = 0.18 + index * 0.025
+        scuff.CanCollide = false
+        scuff.CanTouch = false
+        scuff.CanQuery = false
+        scuff.CastShadow = false
+    end
+
+    local impactColor = Color3.fromRGB(94, 73, 47)
+    for index, spec in
+        {
+            { Offset = Vector3.new(-2.4, 0.095, 0.55), Length = 2.2, Yaw = 72 },
+            { Offset = Vector3.new(1.35, 0.095, -1.9), Length = 1.75, Yaw = -36 },
+            { Offset = Vector3.new(3.05, 0.095, 0.4), Length = 1.45, Yaw = 28 },
+        }
+    do
+        local mark = makePart(
+            model,
+            "TrainingImpactMark" .. index,
+            Vector3.new(0.12, 0.035, spec.Length),
+            CFrame.new(center + spec.Offset) * CFrame.Angles(0, math.rad(spec.Yaw), 0),
+            Enum.Material.Wood,
+            impactColor
+        )
+        mark.Transparency = 0.22
+        mark.CanCollide = false
+        mark.CanTouch = false
+        mark.CanQuery = false
+        mark.CastShadow = false
+    end
+    return model
+end
+
+local function makeCrossroadsWayfinderMark(parent)
+    local center = terrainSurfacePosition(WORLD_ZONES.Crossroads, 0)
+    local model = Instance.new("Model")
+    model.Name = "LumenwoodWayfinderSigil"
+    model.Parent = parent
+
+    -- A weathered, almost-flush slate patch carries four Lumen inlays aligned
+    -- to the actual route branches. It acts as navigation language without
+    -- becoming a raised platform or adding collision at the hub center.
+    local base = makePart(
+        model,
+        "WayfinderSlate",
+        Vector3.new(0.08, 6.8, 6.8),
+        CFrame.new(center + Vector3.new(0, 0.035, 0)) * CFrame.Angles(0, 0, math.rad(90)),
+        Enum.Material.Slate,
+        Color3.fromRGB(59, 72, 66)
+    )
+    base.Shape = Enum.PartType.Cylinder
+    base.Transparency = 0.4
+    base.CanCollide = false
+    base.CanTouch = false
+    base.CanQuery = false
+    base.CastShadow = false
+
+    local routeDirections = {
+        OPENING_ROUTE_POINTS[#OPENING_ROUTE_POINTS - 1] - WORLD_ZONES.Crossroads,
+        Vector3.new(-145, 4.0, 70) - WORLD_ZONES.Crossroads,
+        Vector3.new(-157, 3.4, 128) - WORLD_ZONES.Crossroads,
+        Vector3.new(-208, 3.0, 42) - WORLD_ZONES.Crossroads,
+    }
+    local runeColor = Color3.fromRGB(103, 224, 187)
+    for index, rawDirection in routeDirections do
+        local direction = Vector3.new(rawDirection.X, 0, rawDirection.Z)
+        if direction.Magnitude > 0.001 then
+            direction = direction.Unit
+            local length = if index <= 2 then 2.95 else 2.45
+            local midpoint = center + direction * (length * 0.5) + Vector3.new(0, 0.095, 0)
+            local ray = makePart(
+                model,
+                "WayfinderRune" .. index,
+                Vector3.new(0.24, 0.045, length),
+                CFrame.lookAt(midpoint, midpoint + direction),
+                Enum.Material.Neon,
+                runeColor
+            )
+            ray.Transparency = 0.12 + index * 0.025
+            ray.CanCollide = false
+            ray.CanTouch = false
+            ray.CanQuery = false
+            ray.CastShadow = false
+        end
+    end
+
+    local core = makeBall(
+        model,
+        "WayfinderCore",
+        Vector3.new(0.72, 0.12, 0.72),
+        CFrame.new(center + Vector3.new(0, 0.11, 0)),
+        Enum.Material.Neon,
+        Color3.fromRGB(132, 239, 204)
+    )
+    core.Transparency = 0.08
+    core.CanCollide = false
+    core.CanTouch = false
+    core.CanQuery = false
+    core.CastShadow = false
+
+    local glow = Instance.new("PointLight")
+    glow.Color = core.Color
+    glow.Brightness = 0.22
+    glow.Range = 5
+    glow.Shadows = false
+    glow.Parent = core
+    return model
+end
+
 local function makeRouteThresholds(world)
     local thresholds = {
         {
@@ -4421,6 +4554,8 @@ local function decorate(world)
     makeRouteThresholds(world)
     makeCampDepartureFrame(world)
     makeMosslingHollowFrame(world)
+    makeTrainingYardMark(world)
+    makeCrossroadsWayfinderMark(world)
 
     -- Rock shelves and exposed faces make the new interior ridges legible at
     -- player height. These are deliberately inside the region, not on its border.
