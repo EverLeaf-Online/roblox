@@ -6,7 +6,8 @@ for _, required in
     {
         "local WORLD_WIDTH = 2350",
         "local WORLD_DEPTH = 1800",
-        'world:SetAttribute("WorldDesignVersion", 3)',
+        "local WORLD_DESIGN_VERSION = 4",
+        'world:SetAttribute("WorldDesignVersion", WORLD_DESIGN_VERSION)',
         'world:SetAttribute("TerrainFirstMMOLayout", true)',
         "terrain:Clear()",
         "local ROUTES = table.freeze",
@@ -31,6 +32,23 @@ for _, required in
         '"ArchiveLodge"',
         '"WayfarerInn"',
         '"EastbridgeScoutOutpost"',
+        '"WayfarerHearth"',
+        '"WayfarerMarketStall"',
+        '"WayfarerWatchtower"',
+        '"GlowmereBoardwalkA"',
+        '"GlowmereBoardwalkB"',
+        '"WayfarerRuinWall"',
+        '"WayfarerOverlook"',
+        '"LumenPylon"',
+        "makeGreenwaySetpiece(parent)",
+        "makeCrossroadsSetpiece(parent)",
+        "makeGlowmereSetpiece(parent)",
+        "makeEastLandingSetpiece(parent)",
+        "makeGraveboneSetpiece(parent)",
+        "makeMossglenSetpiece(parent)",
+        "makeSunmossSetpiece(parent)",
+        "makeVeilfallSetpiece(parent)",
+        "makeRuinsApproach(parent)",
         '"eastbridge_landing"',
         '"EASTBRIDGE LANDING"',
         "local function clearOfTravelLanes",
@@ -62,7 +80,7 @@ for _, required in
 do
     assert(
         string.find(source, required, 1, true) ~= nil,
-        "missing Lumenreach v3 contract: " .. required
+        "missing Lumenreach v4 contract: " .. required
     )
 end
 

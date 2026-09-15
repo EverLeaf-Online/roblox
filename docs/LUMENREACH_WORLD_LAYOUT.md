@@ -1,8 +1,8 @@
-# Lumenreach MMO World Layout — Terrain-First V3
+# Lumenreach MMO World Layout — Authored MMO V4
 
 **Canonical target:** 2350 × 1800 studs, Level 1–10 starter region.
 
-Lumenreach V3 is a full replacement of the earlier showcase/camp composition. The runtime generator clears the previous generated model and Terrain, rebuilds macro topography from scratch, cuts the road network into the land, and only then places the minimum structures, trees, NPCs, bridges, encounter markers, and portal required by gameplay. New work must extend this terrain-first layout; it must not stack scenery over older geometry.
+Lumenreach V4 is a full replacement of the earlier showcase/camp composition. The runtime generator clears the previous generated model and Terrain, rebuilds macro topography from scratch, cuts the road network into the land, and only then places the authored structures, trees, NPCs, bridges, encounter spaces, landmarks, and portal required by gameplay. New work must extend this terrain-first layout; it must not stack scenery over older geometry.
 
 ## Topology
 
@@ -40,6 +40,23 @@ The starter route is intentionally readable as geography rather than a chain of 
 | Shattered Lumen Arch | 8–10 | Regional capstone, late Skeleton field, Brasshaven gate |
 | Wayfarer Proving Circle | 7–10 | First advancement milestone detached from leveling traffic |
 
+## V4 authored world identity
+
+V4 keeps the terrain-first macro layout but finishes the region as a designed MMORPG space rather than a sparse navigation prototype. Every major subzone now has an authored silhouette, rest/observation point, or ruin language placed around — never through — its combat and traversal center.
+
+- **Wayfarer Camp** is a permanent starter town with a social hearth plaza, four service buildings, quartermaster/archive stalls, benches, training yard, arrival signage, Lumen gate pylons, and a wide party-safe departure gate.
+- **Greenway Fields** reads as the first reclaimed road outside town, with roadside ruins and a safe rest edge framing the starter combat meadow.
+- **Lumenwood Crossroads** is centered on a tall Wayfarer pylon and resting seats, making the first route decision legible without a giant floating sign.
+- **Glowmere Wetland** gains a shoreline boardwalk and observation deck that skirt the combat pool instead of crossing it.
+- **Eastbridge Landing** is a real field outpost with a scout lodge, market stall, hearth, watchtower, and bridge-facing rest space.
+- **Gravebone Watch** uses broken wall lines, grave markers, and a ruined watchtower to create cover and history around the open combat ring.
+- **Mossglen Valley** gains a scout lookout, rest hearth, overlook deck, and boss-arena pylons while preserving its party-scale field.
+- **Sunmoss Ridge** becomes a highland destination with an overlook deck and ascending Lumen pylons visible from lower routes.
+- **Veilfall Ravine** uses a dedicated overlook, ruin fragment, and wayfinding pylons around the cascade and Wisp field.
+- **Shattered Lumen Arch** now has a processional pylon avenue and broken side walls so the Level 8–10 capstone reads as a regional threshold before the portal itself.
+
+All V4 architecture is native Roblox geometry or approved environment prefabs. No RockFace mesh, giant fallback boulders, tent-town regression, or scenery layering is allowed. The generator still clears and rebuilds the complete region on initialization.
+
 ## Hard layout rules
 
 1. **Rebuild, never layer.** `LumenreachWorldService.Init()` must clear the previous generated Lumenreach model and `Terrain` before constructing V3.
@@ -55,7 +72,7 @@ The starter route is intentionally readable as geography rather than a chain of 
 
 ## Source contract
 
-`src/server/Services/LumenreachWorldService.luau` is the canonical V3 generator. It owns:
+`src/server/Services/LumenreachWorldService.luau` is the canonical V4 generator. It owns:
 
 - `WORLD_WIDTH = 2350` and `WORLD_DEPTH = 1800`;
 - zone centers and progression bands;

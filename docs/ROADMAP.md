@@ -5,6 +5,12 @@
 **Detailed tracker:** [`MASTER_CHECKLIST.md`](MASTER_CHECKLIST.md)
 **Architecture:** [`ARCHITECTURE.md`](ARCHITECTURE.md)
 
+## Lumenreach V4 authored world — implemented
+
+- Terrain-first 2350×1800 Level 1–10 topology retained and fully authored as an MMORPG region.
+- Wayfarer Camp completed as a real starter town; each field subzone now has a distinct landmark/setpiece language without blocking action-combat space.
+- Remaining work is live Studio composition/performance QA and iterative art polish, not another layout rewrite.
+
 ## Development strategy
 
 

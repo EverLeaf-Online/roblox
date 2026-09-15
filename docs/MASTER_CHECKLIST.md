@@ -53,7 +53,8 @@
 
 ### C. Lumenreach environment production pass
 
-- [x] Lumenreach V3 fully replaces the prior map as a 2350×1800 terrain-first Level 1–10 region with a permanent starter town, broad action-combat fields, meaningful elevation, two gorge crossings, branching loops, natural terrain boundaries, and a far-edge regional gate.
+- [x] Lumenreach V4 fully replaces the prior map as a 2350×1800 terrain-first Level 1–10 region with a permanent starter town, broad action-combat fields, meaningful elevation, two gorge crossings, branching loops, natural terrain boundaries, and a far-edge regional gate.
+- [x] Lumenreach V4 authored-world pass: Wayfarer social plaza/training/service districts, Greenway roadside ruins, Crossroads wayfinder, Glowmere boardwalk, Eastbridge field outpost, Gravebone watch ruins, Mossglen lookout/rest hub, Sunmoss overlook, Veilfall overlook, and Shattered Arch processional approach.
 - [x] Wayfarer Camp, Greenway Fields, Lumenwood Crossroads, Glowmere Wetland, Eastbridge Landing, Gravebone Watch, Mossglen Valley, Sunmoss Ridge, Veilfall Ravine, Shattered Lumen Arch, and the separate Wayfarer Proving Circle are distinct progression spaces.
 - [x] Poly Haven PBR material pipeline is live for forest ground, mossy rock, moss wood, wood-chip path, and wood/stone pathway.
 - [x] Production foliage now prefers approved imported assets only; the visible procedural sphere-tree/bush/rock fallbacks were removed from Lumenreach production placement so missing assets fail closed instead of degrading visual quality.
