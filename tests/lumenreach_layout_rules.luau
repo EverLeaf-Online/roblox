@@ -6,7 +6,7 @@ for _, required in
     {
         "local WORLD_WIDTH = 2350",
         "local WORLD_DEPTH = 1800",
-        "local WORLD_DESIGN_VERSION = 7",
+        "local WORLD_DESIGN_VERSION = 8",
         'world:SetAttribute("WorldDesignVersion", WORLD_DESIGN_VERSION)',
         'world:SetAttribute("TerrainFirstMMOLayout", true)',
         "terrain:Clear()",
@@ -336,6 +336,28 @@ assert(
 assert(
     string.find(source, "math.floor(length / 40)", 1, true) ~= nil,
     "route-edge dressing must be frequent enough to avoid long barren road stretches"
+)
+
+local ridgeStart = assert(string.find(source, "local function fillMountainRidge", 1, true))
+local ridgeEnd = assert(string.find(source, "local function carveGorge", ridgeStart, true))
+local ridgeSource = string.sub(source, ridgeStart, ridgeEnd - 1)
+assert(
+    string.find(ridgeSource, "terrain:FillBlock", 1, true) == nil
+        and string.find(ridgeSource, "terrain:FillBall", 1, true) ~= nil,
+    "mountain ridges must use overlapping natural terrain masses, not rectangular cliff slabs"
+)
+assert(
+    string.find(
+        source,
+        'registerSpawn(parent, "LumenreachSpawn", "lumenreach_start", ARRIVAL_ORIGIN, math.rad(-90))',
+        1,
+        true
+    ) ~= nil,
+    "starter spawn must face east into Wayfarer Camp instead of west toward the world boundary"
+)
+assert(
+    string.find(source, "local zoneCoreRadius = 135", 1, true) ~= nil,
+    "world filler must reach zone outskirts instead of leaving giant barren rings"
 )
 
 print("Lumenreach terrain-first MMO redesign rules tests passed")

@@ -16,7 +16,7 @@ local LumenreachWorldService = {}
 local GENERATED_NAME = "EverLeafGeneratedWorld"
 local WORLD_WIDTH = 2350
 local WORLD_DEPTH = 1800
-local WORLD_DESIGN_VERSION = 7
+local WORLD_DESIGN_VERSION = 8
 
 -- Lumenreach is authored as a terrain-first MMORPG region. The generator below
 -- replaces the previous showcase composition completely: terrain is cleared,
@@ -387,40 +387,57 @@ end
 
 local function fillMountainRidge(points, width, height, material)
     local terrain = Workspace.Terrain
-    for index = 1, #points - 1 do
-        local a = points[index]
-        local b = points[index + 1]
+    local sampleSpacing = math.max(28, width * 0.34)
+
+    -- Mountains are built from tightly overlapping terrain masses instead of
+    -- rotated rectangular slabs. The old block-based ridge produced sheer
+    -- walls, visible seams, and sky-shaped holes at segment joins in Studio.
+    for segmentIndex = 1, #points - 1 do
+        local a = points[segmentIndex]
+        local b = points[segmentIndex + 1]
         local flatDelta = Vector3.new(b.X - a.X, 0, b.Z - a.Z)
         if flatDelta.Magnitude > 1 then
-            local midpoint = Vector3.new((a.X + b.X) * 0.5, 0, (a.Z + b.Z) * 0.5)
-            local frame = CFrame.lookAt(midpoint, midpoint + flatDelta.Unit)
-            local length = flatDelta.Magnitude + width * 0.7
-            local variation = 0.9 + ((index * 31) % 5) * 0.035
-            local ridgeHeight = height * variation
+            local direction = flatDelta.Unit
+            local right = Vector3.new(-direction.Z, 0, direction.X)
+            local samples = math.max(2, math.ceil(flatDelta.Magnitude / sampleSpacing))
 
-            terrain:FillBlock(
-                frame + Vector3.new(0, ridgeHeight * 0.30, 0),
-                Vector3.new(width, ridgeHeight * 0.60, length),
-                material
-            )
-            terrain:FillBlock(
-                frame + Vector3.new(0, ridgeHeight * 0.59, 0),
-                Vector3.new(width * 0.72, ridgeHeight * 0.38, length * 0.91),
-                if index % 3 == 0 then Enum.Material.Rock else material
-            )
-            terrain:FillBlock(
-                frame + Vector3.new(0, ridgeHeight * 0.82, 0),
-                Vector3.new(width * 0.42, ridgeHeight * 0.25, length * 0.76),
-                Enum.Material.Rock
-            )
+            for sample = 0, samples do
+                local alpha = sample / samples
+                local point = a:Lerp(b, alpha)
+                local noiseSeed = segmentIndex * 37 + sample * 19
+                local lateral = (((noiseSeed * 13) % 17) - 8) * width * 0.012
+                local baseRadius = width * (0.38 + ((noiseSeed * 7) % 7) * 0.012)
+                local shoulderRadius = width * (0.21 + ((noiseSeed * 5) % 5) * 0.009)
+                local summitRadius = math.min(width * 0.29, height * 0.27)
+                local ridgeHeight = height * (0.78 + ((noiseSeed * 11) % 9) * 0.018)
+                local center = point + right * lateral
 
-            -- Small shoulder fills soften the stepped ridge without returning
-            -- to the giant spherical blobs that read as stacked green balls.
-            for shoulder = -1, 1, 2 do
-                local shoulderPosition = midpoint
-                    + frame.RightVector * shoulder * width * 0.27
-                    + Vector3.new(0, ridgeHeight * 0.32, 0)
-                terrain:FillBall(shoulderPosition, width * 0.22, material)
+                terrain:FillBall(
+                    center + Vector3.new(0, baseRadius * 0.18, 0),
+                    baseRadius,
+                    material
+                )
+
+                for _, side in { -1, 1 } do
+                    terrain:FillBall(
+                        center
+                            + right * side * width * 0.22
+                            + Vector3.new(0, shoulderRadius * 0.08, 0),
+                        shoulderRadius,
+                        material
+                    )
+                end
+
+                terrain:FillBall(
+                    center + Vector3.new(0, ridgeHeight * 0.48, 0),
+                    summitRadius,
+                    if (noiseSeed % 4) == 0 then Enum.Material.Rock else material
+                )
+                terrain:FillBall(
+                    center + Vector3.new(0, ridgeHeight * 0.66, 0),
+                    summitRadius * 0.62,
+                    Enum.Material.Rock
+                )
             end
         end
     end
@@ -500,10 +517,10 @@ local function buildTerrain()
     for z = -680, 720, 115 do
         table.insert(east, Vector3.new(1085, 28, z))
     end
-    fillMountainRidge(north, 92, 102, Enum.Material.Grass)
-    fillMountainRidge(south, 96, 106, Enum.Material.Grass)
-    fillMountainRidge(west, 98, 108, Enum.Material.Grass)
-    fillMountainRidge(east, 100, 116, Enum.Material.Rock)
+    fillMountainRidge(north, 88, 78, Enum.Material.Grass)
+    fillMountainRidge(south, 90, 80, Enum.Material.Grass)
+    fillMountainRidge(west, 86, 72, Enum.Material.Grass)
+    fillMountainRidge(east, 94, 92, Enum.Material.Rock)
 
     -- Internal terrain ridges divide rooms without arbitrary invisible walls.
     fillMountainRidge({
@@ -511,14 +528,14 @@ local function buildTerrain()
         Vector3.new(-760, 22, 350),
         Vector3.new(-680, 26, 430),
         Vector3.new(-600, 25, 520),
-    }, 68, 72, Enum.Material.Grass)
+    }, 62, 46, Enum.Material.Grass)
     fillMountainRidge({
         Vector3.new(245, 8, -105),
         Vector3.new(330, 5, -135),
         Vector3.new(430, 8, -135),
         Vector3.new(540, 13, -110),
         Vector3.new(650, 18, -75),
-    }, 62, 68, Enum.Material.Rock)
+    }, 58, 44, Enum.Material.Rock)
 
     for _, route in ROUTES do
         fillTerrainRoute(route.Points, route.Width + 7, Enum.Material.Ground)
@@ -879,7 +896,7 @@ local function scatterWorldFiller(parent)
     local halfWidth = WORLD_WIDTH * 0.5
     local halfDepth = WORLD_DEPTH * 0.5
     local cellSize = 105
-    local zoneCoreRadius = 190
+    local zoneCoreRadius = 135
     local wetlandCenter = ZONES.Glowmere + Vector3.new(20, 0, 18)
     local wetlandRadius = 95
 
@@ -4579,7 +4596,7 @@ local function registerSpawn(parent, name, spawnId, position, yaw)
 end
 
 local function makeSpawns(parent)
-    registerSpawn(parent, "LumenreachSpawn", "lumenreach_start", ARRIVAL_ORIGIN, math.rad(90))
+    registerSpawn(parent, "LumenreachSpawn", "lumenreach_start", ARRIVAL_ORIGIN, math.rad(-90))
     registerSpawn(
         parent,
         "LumenreachEastGateSpawn",
