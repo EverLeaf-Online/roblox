@@ -6,11 +6,13 @@ local RunService = game:GetService("RunService")
 
 local ProfileSchema = require(script.Parent.Parent.Data.ProfileSchema)
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
+local ProfileSaveRules = require(ReplicatedStorage.Shared.Logic.ProfileSaveRules)
 
 local PlayerDataService = {}
 local store = DataStoreService:GetDataStore(GameConfig.DataStore.Name)
 local profiles = {}
 local persistent = {}
+local saveStates = {}
 local closing = false
 local changedEvent = Instance.new("BindableEvent")
 local sessionId = if game.JobId ~= "" then game.JobId else HttpService:GenerateGUID(false)
@@ -42,7 +44,6 @@ local function claimPersistentProfile(player)
     local blocked = false
     local migrationError = nil
     local claimed = nil
-    local now = os.time()
 
     local ok, result = retry(function()
         blocked = false
@@ -54,16 +55,21 @@ local function claimPersistentProfile(player)
                 return nil
             end
             local data = dataOrReason
+            local callbackNow = os.time()
             local lock = data.Meta.ActiveSession
-            if lock and lock.Id ~= sessionId then
-                local touchedAt = tonumber(lock.TouchedAt) or 0
-                if now - touchedAt < GameConfig.DataStore.SessionLockSeconds then
-                    blocked = true
-                    return nil
-                end
+            if
+                not ProfileSaveRules.CanClaim(
+                    lock,
+                    sessionId,
+                    callbackNow,
+                    GameConfig.DataStore.SessionLockSeconds
+                )
+            then
+                blocked = true
+                return nil
             end
-            data.Meta.ActiveSession = { Id = sessionId, TouchedAt = now }
-            data.Meta.LastSeenAt = now
+            data.Meta.ActiveSession = { Id = sessionId, TouchedAt = callbackNow }
+            data.Meta.LastSeenAt = callbackNow
             claimed = ProfileSchema.DeepCopy(data)
             return data
         end)
@@ -99,6 +105,7 @@ function PlayerDataService.Load(player)
         local profile = ProfileSchema.New()
         profiles[player] = profile
         persistent[player] = false
+        saveStates[player] = { Revision = 0, SavedRevision = 0, Saving = false }
         return true, profile
     end
     local ok, profileOrReason = claimPersistentProfile(player)
@@ -107,6 +114,7 @@ function PlayerDataService.Load(player)
     end
     profiles[player] = profileOrReason
     persistent[player] = true
+    saveStates[player] = { Revision = 0, SavedRevision = 0, Saving = false }
     return true, profileOrReason
 end
 
@@ -123,11 +131,22 @@ function PlayerDataService.Mutate(player, mutator)
     if not profile then
         return false, "profile_not_loaded"
     end
-    mutator(profile)
+    if type(mutator) ~= "function" then
+        return false, "invalid_mutator"
+    end
+    local ok, reason = pcall(mutator, profile)
+    if not ok then
+        return false, tostring(reason)
+    end
+    PlayerDataService.NotifyChanged(player)
     return true
 end
 function PlayerDataService.NotifyChanged(player)
     if profiles[player] then
+        local state = saveStates[player]
+        if state then
+            state.Revision += 1
+        end
         changedEvent:Fire(player)
     end
 end
@@ -137,6 +156,27 @@ function PlayerDataService.Save(player, releaseSession)
     if not profile or not persistent[player] then
         return true
     end
+
+    local state = saveStates[player]
+    if not state then
+        return false, "save_state_missing"
+    end
+
+    -- Serialize saves per player. This prevents an older autosave snapshot from
+    -- completing after a newer leave/shutdown save and overwriting it.
+    while state.Saving do
+        task.wait()
+        if profiles[player] ~= profile then
+            return false, "profile_unloaded"
+        end
+        state = saveStates[player]
+        if not state then
+            return false, "save_state_missing"
+        end
+    end
+    state.Saving = true
+
+    local capturedRevision = state.Revision
     local snapshot = ProfileSchema.DeepCopy(profile)
     snapshot.Meta.SchemaVersion = GameConfig.DataStore.SchemaVersion
     snapshot.Meta.LastSeenAt = os.time()
@@ -150,16 +190,18 @@ function PlayerDataService.Save(player, releaseSession)
         return store:UpdateAsync(keyFor(player), function(raw)
             local old = if type(raw) == "table" then raw else nil
             local oldLock = old and old.Meta and old.Meta.ActiveSession
-            if oldLock and oldLock.Id ~= sessionId then
-                local touchedAt = tonumber(oldLock.TouchedAt) or 0
-                if os.time() - touchedAt < GameConfig.DataStore.SessionLockSeconds then
-                    lostLock = true
-                    return nil
-                end
+            -- Saving is stricter than claiming: once another session owns the
+            -- key (or our lock disappeared), this server must never reacquire it
+            -- implicitly during a save.
+            if not ProfileSaveRules.OwnsLock(oldLock, sessionId) then
+                lostLock = true
+                return nil
             end
             return snapshot
         end)
     end)
+
+    state.Saving = false
     if not ok then
         warn(
             string.format(
@@ -173,22 +215,51 @@ function PlayerDataService.Save(player, releaseSession)
     if lostLock then
         warn(
             string.format(
-                "[PlayerDataService] Refused save for %s because session lock moved",
+                "[PlayerDataService] Refused save for %s because session lock was lost",
                 player.Name
             )
         )
         return false, "session_lock_lost"
     end
+
+    local savedRevision = ProfileSaveRules.SavedRevisionAfterSuccess(
+        capturedRevision,
+        state.Revision,
+        state.SavedRevision
+    )
+    state.SavedRevision = savedRevision
     return true
 end
 
 function PlayerDataService.Unload(player)
-    PlayerDataService.Save(player, true)
+    local saved, reason = PlayerDataService.Save(player, true)
+    if not saved then
+        warn(
+            string.format(
+                "[PlayerDataService] Final save failed for %s: %s",
+                player.Name,
+                tostring(reason)
+            )
+        )
+    end
     profiles[player] = nil
     persistent[player] = nil
+    saveStates[player] = nil
 end
 function PlayerDataService.IsPersistent(player)
     return persistent[player] == true
+end
+function PlayerDataService.GetSaveState(player)
+    local state = saveStates[player]
+    if not state then
+        return nil
+    end
+    return {
+        Revision = state.Revision,
+        SavedRevision = state.SavedRevision,
+        Saving = state.Saving,
+        Dirty = state.Revision > state.SavedRevision,
+    }
 end
 
 function PlayerDataService.Init()
@@ -208,8 +279,26 @@ function PlayerDataService.Init()
     end)
     game:BindToClose(function()
         closing = true
+        local remaining = 0
         for player in profiles do
-            PlayerDataService.Save(player, true)
+            remaining += 1
+            task.spawn(function()
+                PlayerDataService.Save(player, true)
+                remaining -= 1
+            end)
+        end
+
+        local deadline = os.clock() + (GameConfig.DataStore.ShutdownSaveSeconds or 24)
+        while remaining > 0 and os.clock() < deadline do
+            task.wait(0.05)
+        end
+        if remaining > 0 then
+            warn(
+                string.format(
+                    "[PlayerDataService] Shutdown save window expired with %d profile(s) still pending",
+                    remaining
+                )
+            )
         end
     end)
 end

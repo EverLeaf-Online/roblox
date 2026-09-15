@@ -40,6 +40,7 @@ GameConfig.DataStore = {
     SessionLockSeconds = 180,
     MaxAttempts = 4,
     RetryBaseSeconds = 1,
+    ShutdownSaveSeconds = 24,
     EnableInStudio = false,
 }
 

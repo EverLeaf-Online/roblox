@@ -223,17 +223,18 @@
 - [x] Schema version field.
 - [x] Schema reconciliation on load.
 - [x] Roblox DataStore persistence foundation.
-- [x] Retry/backoff logic.
-- [x] Cross-server session locking.
+- [x] Retry/backoff logic with exponential delay and bounded attempts.
+- [x] Cross-server session locking with stale-lock claim rules and strict save-time ownership checks.
 - [x] Session-lock timeout/recovery behavior.
-- [x] Autosave loop.
+- [x] 60-second autosave/session-heartbeat loop with per-player save serialization and revision tracking.
+- [x] PlayerRemoving/final saves are serialized against autosaves; shutdown saves run in parallel with a bounded 24-second wait window.
 - [x] Save on player leaving.
 - [x] BindToClose release/save handling.
 - [x] Studio persistence can remain disabled for safe local iteration.
 - [x] Versioned schema migration/reconciliation framework (`ProfileSchema`, schema v2).
 - [ ] Backup/restore/admin recovery workflow.
-- [ ] DataStore failure simulation tests.
-- [ ] Rejoin/session-lock stress tests.
+- [ ] Live DataStore failure/budget/throttle simulation tests; pure save/lock ownership regressions are implemented.
+- [ ] Multi-server/rejoin session-lock stress tests; pure stale/fresh/foreign lock rules are regression-tested.
 
 ## 4. Character progression
 
@@ -629,7 +630,7 @@
 - [x] Left-click basic attack/server damage path is Studio-verified; the replacement rig-aware visible player attack animation is source-complete and still needs fresh Studio visual verification.
 - [x] Added pure regression coverage for quest lifecycle, rewards, inventory/equipment rules, skills, payload bounds, profile migration, movement sanity, Defense mitigation, Critical math/caps, combat-stat UI labels, atomic profile transactions, interaction-session validation, and cross-content reference integrity.
 - [x] Added progression regression coverage for Lumenreach story → Level 8 advancement and post-trial bridge → Level 10.
-- [ ] Add DataStore/session-lock test scenarios.
+- [x] Added pure session-claim/save-ownership/revision regressions; live DataStore fault-injection/session-lock stress remains open.
 - [ ] Add 2+ client Studio test scenarios.
 - [ ] Controller-only test pass.
 - [ ] Network-latency test pass.
