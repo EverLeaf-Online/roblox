@@ -17,6 +17,7 @@ Net.Functions = table.freeze({
     BasicAttack = "BasicAttack",
     GameAction = "GameAction",
     RequestCatalog = "RequestCatalog",
+    RefreshEntitlements = "RefreshEntitlements",
 })
 
 return table.freeze(Net)

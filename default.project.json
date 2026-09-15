@@ -29,6 +29,9 @@
         "RequestCatalog": {
           "$className": "RemoteFunction"
         },
+        "RefreshEntitlements": {
+          "$className": "RemoteFunction"
+        },
         "PartyEvent": {
           "$className": "RemoteEvent"
         },

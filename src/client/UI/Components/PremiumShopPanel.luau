@@ -29,7 +29,7 @@ end
 
 local function ProductCard(props)
     local owned = props.Owned == true
-    local enabled = props.Enabled ~= false and not owned
+    local enabled = if owned then props.OwnedActionEnabled == true else props.Enabled ~= false
     local buttonText = props.ButtonText
     if owned then
         buttonText = props.OwnedText or "OWNED"
@@ -117,6 +117,8 @@ local function PremiumShopPanel()
     local catalog, setCatalog = React.useState(nil)
     local founder, setFounder = React.useState(player:GetAttribute("EverLeafFounder") == true)
     local member, setMember = React.useState(player:GetAttribute("EverLeafMember") == true)
+    local renewing, setRenewing =
+        React.useState(player:GetAttribute("EverLeafMembershipRenewing") == true)
 
     React.useEffect(function()
         local alive = true
@@ -137,10 +139,16 @@ local function PremiumShopPanel()
             :Connect(function()
                 setMember(player:GetAttribute("EverLeafMember") == true)
             end)
+        local renewingConnection = player
+            :GetAttributeChangedSignal("EverLeafMembershipRenewing")
+            :Connect(function()
+                setRenewing(player:GetAttribute("EverLeafMembershipRenewing") == true)
+            end)
         return function()
             alive = false
             founderConnection:Disconnect()
             memberConnection:Disconnect()
+            renewingConnection:Disconnect()
         end
     end, {})
 
@@ -229,13 +237,22 @@ local function PremiumShopPanel()
             Position = UDim2.fromOffset(4, 294),
             Title = "EverLeaf Membership",
             Price = priceText(membershipEntry) .. " / MONTH",
-            Description = "Recurring Member title plus cosmetic and quality-of-life benefits while active. No combat power.",
+            Description = if member
+                then if renewing
+                    then "Membership active · renewal on. Includes Member recognition and monthly non-power cosmetic rewards."
+                    else "Membership active through the current period · renewal off. Earned monthly cosmetics stay yours."
+                else "Recurring Member title plus cosmetic and quality-of-life benefits while active. No combat power.",
             ButtonText = "JOIN MEMBERSHIP",
-            OwnedText = "MEMBERSHIP ACTIVE",
+            OwnedText = renewing and "MANAGE RENEWAL" or "ENDING THIS PERIOD",
             Owned = member,
+            OwnedActionEnabled = member and renewing,
             Enabled = membershipEntry.Enabled,
             OnActivated = function()
-                prompt("Membership", MonetizationClient.PromptMembership)
+                if member then
+                    prompt("Membership", MonetizationClient.PromptCancelMembership)
+                else
+                    prompt("Membership", MonetizationClient.PromptMembership)
+                end
             end,
         }),
     })

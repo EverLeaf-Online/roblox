@@ -3,6 +3,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local MonetizationConfig = require(ReplicatedStorage.Shared.MonetizationConfig)
+local Net = require(ReplicatedStorage.Shared.Net)
 
 local MonetizationClient = {}
 local player = Players.LocalPlayer
@@ -53,7 +54,7 @@ function MonetizationClient.GetCatalog(forceRefresh)
         },
         Support = {
             Id = MonetizationConfig.SupportProductId,
-            Name = (supportInfo and supportInfo.Name) or "Support EverLeaf – 50",
+            Name = (supportInfo and supportInfo.Name) or "Support EverLeaf",
             PriceInRobux = priceFrom(supportInfo),
             Enabled = MonetizationConfig.SupportSalesEnabled,
         },
@@ -68,6 +69,29 @@ function MonetizationClient.GetCatalog(forceRefresh)
     return cachedCatalog
 end
 
+local function runPrompt(callback)
+    local success, err = pcall(callback)
+    if not success then
+        return false, tostring(err)
+    end
+    return true
+end
+
+function MonetizationClient.RefreshEntitlements()
+    local remotes = ReplicatedStorage:FindFirstChild(Net.RemoteFolderName)
+    local remote = remotes and remotes:FindFirstChild(Net.Functions.RefreshEntitlements)
+    if not remote or not remote:IsA("RemoteFunction") then
+        return false, "entitlement_remote_unavailable"
+    end
+    local success, ok, result = pcall(function()
+        return remote:InvokeServer()
+    end)
+    if not success then
+        return false, tostring(ok)
+    end
+    return ok == true, result
+end
+
 function MonetizationClient.PromptFounder()
     if not MonetizationConfig.FounderSalesEnabled then
         return false, "founder_sales_disabled"
@@ -75,16 +99,18 @@ function MonetizationClient.PromptFounder()
     if player:GetAttribute("EverLeafFounder") == true then
         return false, "already_owned"
     end
-    MarketplaceService:PromptGamePassPurchase(player, MonetizationConfig.FounderPassId)
-    return true
+    return runPrompt(function()
+        MarketplaceService:PromptGamePassPurchase(player, MonetizationConfig.FounderPassId)
+    end)
 end
 
 function MonetizationClient.PromptSupport()
     if not MonetizationConfig.SupportSalesEnabled then
         return false, "support_sales_disabled"
     end
-    MarketplaceService:PromptProductPurchase(player, MonetizationConfig.SupportProductId)
-    return true
+    return runPrompt(function()
+        MarketplaceService:PromptProductPurchase(player, MonetizationConfig.SupportProductId)
+    end)
 end
 
 function MonetizationClient.PromptMembership()
@@ -94,10 +120,37 @@ function MonetizationClient.PromptMembership()
     if player:GetAttribute("EverLeafMember") == true then
         return false, "already_subscribed"
     end
-    MarketplaceService:PromptSubscriptionPurchase(
-        player,
-        MonetizationConfig.MembershipSubscriptionId
-    )
+    return runPrompt(function()
+        MarketplaceService:PromptSubscriptionPurchase(
+            player,
+            MonetizationConfig.MembershipSubscriptionId
+        )
+    end)
+end
+
+function MonetizationClient.PromptCancelMembership()
+    if player:GetAttribute("EverLeafMember") ~= true then
+        return false, "no_active_membership"
+    end
+    if player:GetAttribute("EverLeafMembershipRenewing") ~= true then
+        return false, "membership_not_renewing"
+    end
+    local ok, reason = runPrompt(function()
+        MarketplaceService:PromptCancelSubscription(
+            player,
+            MonetizationConfig.MembershipSubscriptionId
+        )
+    end)
+    if not ok then
+        return false, reason
+    end
+
+    task.spawn(function()
+        task.wait(3)
+        MonetizationClient.RefreshEntitlements()
+        task.wait(10)
+        MonetizationClient.RefreshEntitlements()
+    end)
     return true
 end
 

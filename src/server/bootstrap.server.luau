@@ -65,6 +65,7 @@ local requestProfile = ensureRemote("RemoteFunction", Net.Functions.RequestProfi
 local basicAttack = ensureRemote("RemoteFunction", Net.Functions.BasicAttack)
 local gameAction = ensureRemote("RemoteFunction", Net.Functions.GameAction)
 local requestCatalog = ensureRemote("RemoteFunction", Net.Functions.RequestCatalog)
+local refreshEntitlements = ensureRemote("RemoteFunction", Net.Functions.RefreshEntitlements)
 
 PlayerDataService.Init()
 MonetizationService.Init()
@@ -300,6 +301,25 @@ requestCatalog.OnServerInvoke = function(player, ...)
         return nil
     end
     return CatalogService.Build()
+end
+
+refreshEntitlements.OnServerInvoke = function(player, ...)
+    if select("#", ...) > 0 then
+        return false, "invalid_payload"
+    end
+    local limit = GameConfig.Security.EntitlementRefresh
+    if
+        not RateLimiterService.Allow(
+            player,
+            "RefreshEntitlements",
+            limit.Capacity,
+            limit.RefillPerSecond,
+            1
+        )
+    then
+        return false, "rate_limited"
+    end
+    return MonetizationService.RefreshEntitlementsNow(player)
 end
 
 gameAction.OnServerInvoke = function(player, actionName, payload)

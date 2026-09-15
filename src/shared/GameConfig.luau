@@ -70,6 +70,10 @@ GameConfig.Security = {
         Capacity = 2,
         RefillPerSecond = 0.2,
     },
+    EntitlementRefresh = {
+        Capacity = 1,
+        RefillPerSecond = 0.1,
+    },
 }
 
 GameConfig.Movement = {

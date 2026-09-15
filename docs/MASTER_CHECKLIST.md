@@ -600,6 +600,7 @@
 - [x] Founder pass ownership is checked server-side; ownership grants the EverLeaf Founder badge plus permanent Founder title and Founder's Lumen aura cosmetics.
 - [x] Repeatable Support EverLeaf developer product uses server-owned `ProcessReceipt` handling with durable purchase-ID idempotency and audit logging.
 - [x] Subscription entitlement/status hooks are server-owned; membership sales remain intentionally disabled in-game until recurring benefits are fully verified and Creator Hub activation is deliberate.
+- [x] Membership renewal state is replicated to the client, active subscribers can open Roblox's cancellation/renewal-management prompt from the EverLeaf Store, and entitlement refresh requests are server-rate-limited.
 - [x] September 2026 membership cosmetic reward path is implemented as a permanent, non-power Lumen Trail collectible and is only granted to an active subscriber.
 - [x] Cosmetic catalog design foundation is data-driven, replicated through the public catalog, slot-validated, and entitlement-aware.
 - [x] Cosmetic ownership/equip persistence is schema-backed and included in full save→rejoin regression coverage.

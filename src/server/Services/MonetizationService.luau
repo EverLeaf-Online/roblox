@@ -258,9 +258,25 @@ local function processReceipt(receiptInfo)
     return Enum.ProductPurchaseDecision.PurchaseGranted
 end
 
+function MonetizationService.RefreshEntitlementsNow(player)
+    if not player or not player:IsA("Player") or player.Parent ~= Players then
+        return false, "invalid_player"
+    end
+    local founderOk, founderResult = refreshFounder(player)
+    local membershipOk, membershipResult = refreshMembership(player)
+    if not founderOk then
+        return false, founderResult
+    end
+    if not membershipOk then
+        return false, membershipResult
+    end
+    return true, MonetizationService.GetSnapshot(player)
+end
+
 function MonetizationService.RefreshEntitlements(player)
-    task.spawn(refreshFounder, player)
-    task.spawn(refreshMembership, player)
+    task.spawn(function()
+        MonetizationService.RefreshEntitlementsNow(player)
+    end)
 end
 
 function MonetizationService.OnProfileLoaded(player)
