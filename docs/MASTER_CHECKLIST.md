@@ -81,7 +81,7 @@
 - [x] Skill rank/assign/use actions are wired.
 - [x] Quest menu shell exists.
 - [x] Settings mutations are wired.
-- [ ] Responsive layout pass for common desktop resolutions.
+- [x] Responsive UI scaling foundation is source-complete: the React app mounts in a centered 1280×720 reference root with live viewport-driven UIScale. Common-resolution/mobile Studio QA remains open.
 - [x] Controller/gamepad navigation/focus source pass: Start/B/L1/R1 menu flow, device-aware hotbar labels, initial actionable focus, and gameplay/UI input capture are implemented; live controller-only Studio QA remains in Phase 1 exit validation.
 - [x] Dedicated buy/sell shop screen implemented with item selection, quantity controls, pricing, balance display, and server-authoritative transactions.
 - [x] Reusable item detail card implemented for shop/inventory-facing item inspection; hover/pointer refinement remains part of final UI QA.
@@ -429,7 +429,7 @@
 - [x] Consumable architecture with HP/MP restoration foundation.
 - [x] Inventory capacity rules are server-enforced through stack/capacity validation and regression-tested.
 - [x] Item detail cards/tooltips show item type, stats/effects, sell value, and equipment requirements.
-- [x] React inventory UI supports browsing, consumable use, requirement-aware equipment actions, and selected-item details; Studio polish/QA remains.
+- [x] React inventory UI uses a capacity-aware 6-column grid with occupied/empty cells, quantities, lock states, selection, consumable/equipment actions, and detailed comparison; Studio polish/QA remains.
 - [x] React equipment UI shows equipped slots, supports unequip, exposes requirement-aware equip flow, and compares candidate stats against the currently equipped item; Studio polish/QA remains.
 - [ ] Safe deletion/drop behavior.
 
@@ -455,7 +455,7 @@
 - [x] Mosswarden field-boss quest.
 - [x] Brasshaven passage/unlock quest.
 - [ ] Talk-objective type if future quest design needs it.
-- [ ] Quest journal filtering/sorting/presentation polish.
+- [x] Quest journal filtering/sorting/presentation is source-complete with Active / Ready / Completed filters, counts, ready-first sorting, level metadata, and full-width objective cards; Studio polish/QA remains.
 - [x] Active NPC/shop sessions revalidate the registered world object and live player distance on every quest/shop/advancement mutation; future interaction types must use the same validation path.
 
 ## 15. Shops / services
@@ -551,14 +551,14 @@
 - [x] Persistent 8-slot skill hotbar data/service foundation with full React slot-select/assign/move/clear editor, MP-cost/low-MP state, and live cooldown countdown feedback.
 - [ ] Buff/debuff display.
 - [x] React character/stat menu supports server-authoritative AP allocation and now surfaces Max HP/MP, Defense, Crit Chance, and Crit Damage; polish remains.
-- [x] React inventory/equipment menu exposes use/equip/unequip actions, level/tier/family lock states, and candidate-vs-equipped stat deltas; Studio polish/QA remains.
+- [x] React inventory/equipment menu exposes a 48-capacity visual grid, use/equip/unequip actions, level/tier/family lock states, and candidate-vs-equipped stat deltas; Studio polish/QA remains.
 - [ ] **PARTIAL:** React quest menu shell is source-complete; further filtering/polish pending.
 - [x] React NPC dialogue with clickable quest/shop actions verified in Studio; visual polish remains.
 - [x] Dedicated React buy/sell shop screen is implemented beyond dialogue preview actions, with item selection, quantity controls, prices, balances, and server-authoritative transactions; Studio interaction/balance QA remains.
 - [x] Field-boss HUD implemented for nearby catalogued bosses with name, recommended level, HP, and percentage.
 - [x] Toast/notification framework is live for world denials, party events, level-up/rewards/quests, shop outcomes, and skill-use failures; final visual/timing polish remains.
 - [x] React settings controls mutate music/SFX/damage-number preferences server-side; menu action shell is Studio-verified, visual polish remains.
-- [ ] Responsive layout testing.
+- [ ] Responsive layout live testing remains: source-level UIScale support is implemented, but desktop/landscape-mobile viewport QA is still required.
 
 ## 20. Art / animation / audio
 
@@ -638,7 +638,7 @@
 - [ ] Long-session soak.
 - [ ] Performance profiling.
 - [ ] Memory/listener leak checks.
-- [ ] 1280×720 / common desktop viewport UX checks.
+- [ ] 1280×720 / common desktop / landscape-mobile viewport UX checks; responsive UIScale source support is implemented but not yet live-verified across target sizes.
 
 ## 25. Roblox experience / deployment
 

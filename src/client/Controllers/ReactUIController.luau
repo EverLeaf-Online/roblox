@@ -2,6 +2,7 @@ local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
 
 local React = require(ReplicatedStorage.Packages.React)
 local ReactRoblox = require(ReplicatedStorage.Packages.ReactRoblox)
@@ -29,6 +30,9 @@ local ProgressionMath = require(ReplicatedStorage.Shared.Math.ProgressionMath)
 local ReactUIController = {}
 local player = Players.LocalPlayer
 local reactRoot = nil
+
+local UI_REFERENCE_SIZE = Vector2.new(1280, 720)
+local UI_MAX_SCALE = 1.6
 
 local COLORS = table.freeze({
     Backdrop = Color3.fromRGB(5, 10, 9),
@@ -140,6 +144,7 @@ local function Label(props)
         TextXAlignment = props.Align or Enum.TextXAlignment.Left,
         TextYAlignment = props.VerticalAlign or Enum.TextYAlignment.Center,
         TextWrapped = props.Wrapped or false,
+        TextTruncate = props.TextTruncate or Enum.TextTruncate.None,
         TextTransparency = props.TextTransparency or 0,
         Visible = props.Visible ~= false,
         ZIndex = props.ZIndex or 2,
@@ -1349,68 +1354,156 @@ local function InventoryPanel(
     local selectedDefinition = selectedSlot and catalog.Items and catalog.Items[selectedSlot.ItemId]
         or nil
 
-    local listChildren = {}
-    for visualIndex, row in rows do
-        local slot = row.Slot
-        local definition = catalog.Items and catalog.Items[slot.ItemId]
-        local selected = selectedRow and selectedRow.Index == row.Index
-        local itemEligible = true
-        if definition and definition.Type == "Equipment" then
-            itemEligible = EquipmentEligibilityRules.CanEquip(profile, definition)
+    local capacity = math.max(#rows, tonumber(inventory.Capacity) or 48)
+    local gridColumns = 6
+    local gridCell = 50
+    local gridGap = 4
+    local gridChildren = {
+        Layout = React.createElement("UIGridLayout", {
+            CellSize = UDim2.fromOffset(gridCell, gridCell),
+            CellPadding = UDim2.fromOffset(gridGap, gridGap),
+            FillDirection = Enum.FillDirection.Horizontal,
+            FillDirectionMaxCells = gridColumns,
+            SortOrder = Enum.SortOrder.LayoutOrder,
+            HorizontalAlignment = Enum.HorizontalAlignment.Left,
+            VerticalAlignment = Enum.VerticalAlignment.Top,
+        }),
+        Padding = React.createElement("UIPadding", {
+            PaddingTop = UDim.new(0, 6),
+            PaddingLeft = UDim.new(0, 6),
+            PaddingRight = UDim.new(0, 6),
+            PaddingBottom = UDim.new(0, 6),
+        }),
+    }
+
+    for visualIndex = 1, capacity do
+        local row = rows[visualIndex]
+        if row then
+            local slot = row.Slot
+            local definition = catalog.Items and catalog.Items[slot.ItemId]
+            local selected = selectedRow and selectedRow.Index == row.Index
+            local itemEligible = true
+            if definition and definition.Type == "Equipment" then
+                itemEligible = EquipmentEligibilityRules.CanEquip(profile, definition)
+            end
+            local displayName = definition and definition.DisplayName or tostring(slot.ItemId)
+            local typeText = definition and definition.Type or "Item"
+            local shortType = string.upper(string.sub(typeText, 1, 3))
+            gridChildren["InventorySlot_" .. tostring(visualIndex)] = React.createElement(
+                "TextButton",
+                {
+                    LayoutOrder = visualIndex,
+                    BackgroundColor3 = selected and COLORS.AccentDark or COLORS.PanelRaised,
+                    BackgroundTransparency = selected and 0 or 0.05,
+                    BorderSizePixel = 0,
+                    Text = "",
+                    AutoButtonColor = true,
+                    Selectable = true,
+                    ZIndex = 5,
+                    [React.Event.Activated] = function()
+                        setSelectedInventoryIndex(row.Index)
+                    end,
+                },
+                withChrome(
+                    {
+                        SlotIndex = React.createElement(Label, {
+                            Position = UDim2.fromOffset(5, 3),
+                            Size = UDim2.fromOffset(18, 12),
+                            Text = tostring(visualIndex),
+                            TextSize = 7,
+                            Bold = true,
+                            Color = COLORS.Faint,
+                            ZIndex = 6,
+                        }),
+                        Lock = not itemEligible
+                                and React.createElement(Label, {
+                                    AnchorPoint = Vector2.new(1, 0),
+                                    Position = UDim2.new(1, -5, 0, 3),
+                                    Size = UDim2.fromOffset(12, 12),
+                                    Text = "!",
+                                    TextSize = 9,
+                                    Bold = true,
+                                    Align = Enum.TextXAlignment.Center,
+                                    Color = COLORS.Danger,
+                                    ZIndex = 7,
+                                })
+                            or nil,
+                        Name = React.createElement(Label, {
+                            Position = UDim2.fromOffset(5, 15),
+                            Size = UDim2.new(1, -10, 0, 22),
+                            Text = displayName,
+                            TextSize = 7,
+                            Bold = true,
+                            Align = Enum.TextXAlignment.Center,
+                            Wrapped = true,
+                            Color = selected and COLORS.LumenPale or COLORS.Text,
+                            ZIndex = 6,
+                        }),
+                        Type = React.createElement(Label, {
+                            Position = UDim2.fromOffset(5, 37),
+                            Size = UDim2.fromOffset(24, 10),
+                            Text = shortType,
+                            TextSize = 6,
+                            Bold = true,
+                            Color = itemEligible and COLORS.Faint or COLORS.Danger,
+                            ZIndex = 6,
+                        }),
+                        Quantity = React.createElement(Label, {
+                            AnchorPoint = Vector2.new(1, 1),
+                            Position = UDim2.new(1, -4, 1, -3),
+                            Size = UDim2.fromOffset(25, 11),
+                            Text = (tonumber(slot.Quantity) or 0) > 1
+                                    and string.format("×%d", tonumber(slot.Quantity) or 0)
+                                or "",
+                            TextSize = 7,
+                            Bold = true,
+                            Align = Enum.TextXAlignment.Right,
+                            Color = selected and COLORS.Accent or COLORS.Muted,
+                            ZIndex = 6,
+                        }),
+                    },
+                    7,
+                    selected and COLORS.BorderStrong or COLORS.Border,
+                    selected and 0.18 or 0.68,
+                    1
+                )
+            )
+        else
+            gridChildren["InventoryEmpty_" .. tostring(visualIndex)] = React.createElement(
+                "Frame",
+                {
+                    LayoutOrder = visualIndex,
+                    BackgroundColor3 = COLORS.PanelDeep,
+                    BackgroundTransparency = 0.35,
+                    BorderSizePixel = 0,
+                    ZIndex = 4,
+                },
+                withChrome({
+                    SlotIndex = React.createElement(Label, {
+                        Position = UDim2.fromOffset(5, 3),
+                        Size = UDim2.fromOffset(18, 12),
+                        Text = tostring(visualIndex),
+                        TextSize = 7,
+                        Color = COLORS.Faint,
+                        ZIndex = 5,
+                    }),
+                    Empty = React.createElement(Label, {
+                        Position = UDim2.fromOffset(4, 17),
+                        Size = UDim2.new(1, -8, 0, 18),
+                        Text = "EMPTY",
+                        TextSize = 6,
+                        Bold = true,
+                        Align = Enum.TextXAlignment.Center,
+                        Color = COLORS.Faint,
+                        TextTransparency = 0.3,
+                        ZIndex = 5,
+                    }),
+                }, 7, COLORS.Border, 0.82, 1)
+            )
         end
-        local typeText = definition and definition.Type or "Item"
-        if definition and definition.Type == "Equipment" and not itemEligible then
-            typeText ..= " · LOCKED"
-        end
-        listChildren["Item" .. tostring(row.Index)] = React.createElement(
-            "TextButton",
-            {
-                Position = UDim2.fromOffset(0, (visualIndex - 1) * 48),
-                Size = UDim2.new(1, -8, 0, 42),
-                BackgroundColor3 = selected and COLORS.AccentDark or COLORS.PanelRaised,
-                BackgroundTransparency = selected and 0 or 0.06,
-                BorderSizePixel = 0,
-                Text = "",
-                AutoButtonColor = true,
-                ZIndex = 5,
-                [React.Event.Activated] = function()
-                    setSelectedInventoryIndex(row.Index)
-                end,
-            },
-            withChrome({
-                Name = React.createElement(Label, {
-                    Position = UDim2.fromOffset(12, 4),
-                    Size = UDim2.new(1, -74, 0, 20),
-                    Text = definition and definition.DisplayName or tostring(slot.ItemId),
-                    TextSize = 11,
-                    Bold = true,
-                    Color = selected and COLORS.Accent or COLORS.Text,
-                    ZIndex = 6,
-                }),
-                Type = React.createElement(Label, {
-                    Position = UDim2.fromOffset(12, 23),
-                    Size = UDim2.new(1, -90, 0, 14),
-                    Text = typeText,
-                    TextSize = 9,
-                    Color = if not itemEligible
-                        then COLORS.Danger
-                        else if selected then Color3.fromRGB(181, 224, 202) else COLORS.Faint,
-                    ZIndex = 6,
-                }),
-                Quantity = React.createElement(Label, {
-                    AnchorPoint = Vector2.new(1, 0.5),
-                    Position = UDim2.new(1, -12, 0.5, 0),
-                    Size = UDim2.fromOffset(54, 20),
-                    Text = string.format("×%d", tonumber(slot.Quantity) or 0),
-                    TextSize = 11,
-                    Bold = true,
-                    Align = Enum.TextXAlignment.Right,
-                    Color = selected and COLORS.Accent or COLORS.Muted,
-                    ZIndex = 6,
-                }),
-            }, 8, selected and COLORS.BorderStrong or COLORS.Border, selected and 0.2 or 0.6, 1)
-        )
     end
+    local gridRows = math.ceil(capacity / gridColumns)
+    local gridCanvasHeight = 12 + gridRows * gridCell + math.max(0, gridRows - 1) * gridGap
 
     local equipment = profile.Equipment or {}
     local equipmentChildren = {}
@@ -1591,14 +1684,14 @@ local function InventoryPanel(
         InventoryList = React.createElement("ScrollingFrame", {
             Position = UDim2.fromOffset(0, 32),
             Size = UDim2.fromOffset(330, 330),
-            CanvasSize = UDim2.fromOffset(0, math.max(330, #rows * 48)),
+            CanvasSize = UDim2.fromOffset(0, math.max(330, gridCanvasHeight)),
             BackgroundColor3 = COLORS.PanelDeep,
             BackgroundTransparency = 0.18,
             BorderSizePixel = 0,
             ScrollBarThickness = 4,
             ScrollBarImageColor3 = COLORS.BorderStrong,
             ZIndex = 4,
-        }, withChrome(listChildren, 10, COLORS.Border, 0.55, 1)),
+        }, withChrome(gridChildren, 10, COLORS.Border, 0.55, 1)),
         Details = React.createElement(Panel, {
             Position = UDim2.fromOffset(348, 0),
             Size = UDim2.fromOffset(250, 214),
@@ -2059,137 +2152,207 @@ local function SkillsPanel(
     })
 end
 
-local function QuestsPanel(profile, catalog)
+local function QuestsPanel(profile, catalog, filter, setFilter)
+    filter = filter or "ACTIVE"
     local active = profile.Quests and profile.Quests.Active or {}
     local completed = profile.Quests and profile.Quests.Completed or {}
     local activeRows = {}
+    local readyCount = 0
     for questId, state in active do
+        if state.ReadyToTurnIn == true then
+            readyCount += 1
+        end
         table.insert(activeRows, { Id = questId, State = state })
     end
     table.sort(activeRows, function(a, b)
-        local aName = catalog.Quests and catalog.Quests[a.Id] and catalog.Quests[a.Id].DisplayName
-            or a.Id
-        local bName = catalog.Quests and catalog.Quests[b.Id] and catalog.Quests[b.Id].DisplayName
-            or b.Id
+        if a.State.ReadyToTurnIn ~= b.State.ReadyToTurnIn then
+            return a.State.ReadyToTurnIn == true
+        end
+        local aDefinition = catalog.Quests and catalog.Quests[a.Id]
+        local bDefinition = catalog.Quests and catalog.Quests[b.Id]
+        local aLevel = tonumber(aDefinition and aDefinition.MinimumLevel) or 0
+        local bLevel = tonumber(bDefinition and bDefinition.MinimumLevel) or 0
+        if aLevel ~= bLevel then
+            return aLevel < bLevel
+        end
+        local aName = aDefinition and aDefinition.DisplayName or a.Id
+        local bName = bDefinition and bDefinition.DisplayName or b.Id
         return aName < bName
     end)
 
-    local activeChildren = {}
-    if #activeRows == 0 then
-        activeChildren.Empty = React.createElement(Label, {
-            Position = UDim2.fromOffset(12, 12),
-            Size = UDim2.new(1, -24, 0, 40),
-            Text = "No active quests. Talk to the Wayfarers around camp.",
+    local completedRows = {}
+    for questId, done in completed do
+        if done then
+            local definition = catalog.Quests and catalog.Quests[questId]
+            table.insert(completedRows, {
+                Id = questId,
+                Name = definition and definition.DisplayName or questId,
+                Definition = definition,
+            })
+        end
+    end
+    table.sort(completedRows, function(a, b)
+        return a.Name < b.Name
+    end)
+
+    local filterButtons = {}
+    local filters = {
+        { Id = "ACTIVE", Count = #activeRows },
+        { Id = "READY", Count = readyCount },
+        { Id = "COMPLETED", Count = #completedRows },
+    }
+    for index, entry in filters do
+        local selected = filter == entry.Id
+        filterButtons["QuestFilter_" .. entry.Id] = React.createElement(Button, {
+            Position = UDim2.fromOffset((index - 1) * 196, 0),
+            Size = UDim2.fromOffset(186, 30),
+            Text = string.format("%s · %d", entry.Id, entry.Count),
+            TextSize = 9,
+            Tone = selected and "accent" or nil,
+            OnActivated = function()
+                setFilter(entry.Id)
+            end,
+            ZIndex = 6,
+        })
+    end
+
+    local listChildren = {}
+    local y = 0
+    if filter == "COMPLETED" then
+        for _, row in completedRows do
+            listChildren["Completed_" .. row.Id] = React.createElement(Panel, {
+                Position = UDim2.fromOffset(0, y),
+                Size = UDim2.new(1, -8, 0, 56),
+                BackgroundColor3 = COLORS.PanelRaised,
+                StrokeTransparency = 0.68,
+                Children = {
+                    Check = React.createElement(Label, {
+                        Position = UDim2.fromOffset(12, 0),
+                        Size = UDim2.fromOffset(28, 56),
+                        Text = "✓",
+                        TextSize = 15,
+                        Bold = true,
+                        Color = COLORS.Accent,
+                        Align = Enum.TextXAlignment.Center,
+                        ZIndex = 6,
+                    }),
+                    Name = React.createElement(Label, {
+                        Position = UDim2.fromOffset(50, 8),
+                        Size = UDim2.new(1, -62, 0, 22),
+                        Text = row.Name,
+                        TextSize = 12,
+                        Bold = true,
+                        Color = COLORS.Muted,
+                        ZIndex = 6,
+                    }),
+                    Meta = React.createElement(Label, {
+                        Position = UDim2.fromOffset(50, 31),
+                        Size = UDim2.new(1, -62, 0, 16),
+                        Text = string.format(
+                            "Completed%s",
+                            row.Definition
+                                    and row.Definition.MinimumLevel
+                                    and (" · Level " .. tostring(row.Definition.MinimumLevel))
+                                or ""
+                        ),
+                        TextSize = 8,
+                        Color = COLORS.Faint,
+                        ZIndex = 6,
+                    }),
+                },
+            })
+            y += 64
+        end
+    else
+        for _, row in activeRows do
+            local ready = row.State.ReadyToTurnIn == true
+            if filter == "ACTIVE" or ready then
+                local definition = catalog.Quests and catalog.Quests[row.Id]
+                local name = definition and definition.DisplayName or row.Id
+                local objectives = definition and definition.Objectives or {}
+                local progressLines = {}
+                for index, objective in objectives do
+                    table.insert(
+                        progressLines,
+                        objectiveText(
+                            objective,
+                            row.State.Progress and row.State.Progress[index] or 0
+                        )
+                    )
+                end
+                local height = 78 + math.max(0, #progressLines - 1) * 18
+                listChildren[row.Id] = React.createElement(Panel, {
+                    Position = UDim2.fromOffset(0, y),
+                    Size = UDim2.new(1, -8, 0, height),
+                    BackgroundColor3 = COLORS.PanelRaised,
+                    StrokeColor = ready and COLORS.Gold or COLORS.Border,
+                    StrokeTransparency = ready and 0.25 or 0.6,
+                    Children = {
+                        Status = React.createElement(Pill, {
+                            Position = UDim2.fromOffset(12, 10),
+                            Size = UDim2.fromOffset(ready and 96 or 64, 21),
+                            Text = ready and "TURN IN" or "ACTIVE",
+                            TextSize = 9,
+                            Color = ready and Color3.fromRGB(94, 74, 42) or COLORS.AccentDark,
+                            TextColor = ready and COLORS.Gold or COLORS.Accent,
+                            ZIndex = 6,
+                        }),
+                        Level = React.createElement(Label, {
+                            AnchorPoint = Vector2.new(1, 0),
+                            Position = UDim2.new(1, -14, 0, 11),
+                            Size = UDim2.fromOffset(90, 18),
+                            Text = definition
+                                    and definition.MinimumLevel
+                                    and ("LEVEL " .. tostring(definition.MinimumLevel))
+                                or "",
+                            TextSize = 8,
+                            Bold = true,
+                            Align = Enum.TextXAlignment.Right,
+                            Color = COLORS.Faint,
+                            ZIndex = 6,
+                        }),
+                        Name = React.createElement(Label, {
+                            Position = UDim2.fromOffset(12, 35),
+                            Size = UDim2.new(1, -24, 0, 22),
+                            Text = name,
+                            TextSize = 13,
+                            Bold = true,
+                            ZIndex = 6,
+                        }),
+                        Progress = React.createElement(Label, {
+                            Position = UDim2.fromOffset(12, 58),
+                            Size = UDim2.new(1, -24, 0, math.max(18, #progressLines * 18)),
+                            Text = #progressLines > 0 and table.concat(progressLines, "\n")
+                                or "No objectives",
+                            TextSize = 10,
+                            Wrapped = true,
+                            Color = COLORS.Muted,
+                            VerticalAlign = Enum.TextYAlignment.Top,
+                            ZIndex = 6,
+                        }),
+                    },
+                })
+                y += height + 10
+            end
+        end
+    end
+
+    if next(listChildren) == nil then
+        local emptyText = if filter == "READY"
+            then "No quests are ready to turn in."
+            else if filter == "COMPLETED"
+                then "No completed quests yet."
+                else "No active quests. Talk to a Wayfarer or region contact."
+        listChildren.Empty = React.createElement(Label, {
+            Position = UDim2.fromOffset(16, 16),
+            Size = UDim2.new(1, -32, 0, 48),
+            Text = emptyText,
             TextSize = 11,
             Wrapped = true,
             Color = COLORS.Faint,
             ZIndex = 5,
         })
-    end
-    local y = 0
-    for _, row in activeRows do
-        local definition = catalog.Quests and catalog.Quests[row.Id]
-        local name = definition and definition.DisplayName or row.Id
-        local objectives = definition and definition.Objectives or {}
-        local progressLines = {}
-        for index, objective in objectives do
-            table.insert(
-                progressLines,
-                objectiveText(objective, row.State.Progress and row.State.Progress[index] or 0)
-            )
-        end
-        local height = 78 + math.max(0, #progressLines - 1) * 18
-        activeChildren[row.Id] = React.createElement(Panel, {
-            Position = UDim2.fromOffset(0, y),
-            Size = UDim2.new(1, -8, 0, height),
-            BackgroundColor3 = COLORS.PanelRaised,
-            StrokeColor = row.State.ReadyToTurnIn and COLORS.Gold or COLORS.Border,
-            StrokeTransparency = row.State.ReadyToTurnIn and 0.28 or 0.6,
-            Children = {
-                Status = React.createElement(Pill, {
-                    Position = UDim2.fromOffset(12, 10),
-                    Size = UDim2.fromOffset(row.State.ReadyToTurnIn and 96 or 64, 21),
-                    Text = row.State.ReadyToTurnIn and "TURN IN" or "ACTIVE",
-                    TextSize = 9,
-                    Color = row.State.ReadyToTurnIn and Color3.fromRGB(94, 74, 42)
-                        or COLORS.AccentDark,
-                    TextColor = row.State.ReadyToTurnIn and COLORS.Gold or COLORS.Accent,
-                    ZIndex = 6,
-                }),
-                Name = React.createElement(Label, {
-                    Position = UDim2.fromOffset(12, 35),
-                    Size = UDim2.new(1, -24, 0, 22),
-                    Text = name,
-                    TextSize = 13,
-                    Bold = true,
-                    ZIndex = 6,
-                }),
-                Progress = React.createElement(Label, {
-                    Position = UDim2.fromOffset(12, 58),
-                    Size = UDim2.new(1, -24, 0, math.max(18, #progressLines * 18)),
-                    Text = #progressLines > 0 and table.concat(progressLines, "\n")
-                        or "No objectives",
-                    TextSize = 10,
-                    Wrapped = true,
-                    Color = COLORS.Muted,
-                    VerticalAlign = Enum.TextYAlignment.Top,
-                    ZIndex = 6,
-                }),
-            },
-        })
-        y += height + 10
-    end
-
-    local completedNames = {}
-    for questId, done in completed do
-        if done then
-            local definition = catalog.Quests and catalog.Quests[questId]
-            table.insert(completedNames, definition and definition.DisplayName or questId)
-        end
-    end
-    table.sort(completedNames)
-    local completedChildren = {}
-    for index, name in completedNames do
-        completedChildren["Done" .. index] = React.createElement(
-            "Frame",
-            {
-                Position = UDim2.fromOffset(0, (index - 1) * 38),
-                Size = UDim2.new(1, -8, 0, 32),
-                BackgroundColor3 = COLORS.PanelRaised,
-                BackgroundTransparency = 0.18,
-                BorderSizePixel = 0,
-                ZIndex = 5,
-            },
-            withChrome({
-                Check = React.createElement(Label, {
-                    Position = UDim2.fromOffset(10, 0),
-                    Size = UDim2.fromOffset(22, 32),
-                    Text = "✓",
-                    TextSize = 12,
-                    Bold = true,
-                    Color = COLORS.Accent,
-                    ZIndex = 6,
-                }),
-                Name = React.createElement(Label, {
-                    Position = UDim2.fromOffset(34, 0),
-                    Size = UDim2.new(1, -42, 1, 0),
-                    Text = name,
-                    TextSize = 10,
-                    Color = COLORS.Muted,
-                    ZIndex = 6,
-                }),
-            }, 7, COLORS.Border, 0.7, 1)
-        )
-    end
-    if #completedNames == 0 then
-        completedChildren.Empty = React.createElement(Label, {
-            Position = UDim2.fromOffset(10, 10),
-            Size = UDim2.new(1, -20, 0, 30),
-            Text = "No completed quests yet.",
-            TextSize = 10,
-            Color = COLORS.Faint,
-            ZIndex = 5,
-        })
+        y = 80
     end
 
     return React.createElement("Frame", {
@@ -2197,46 +2360,23 @@ local function QuestsPanel(profile, catalog)
         BackgroundTransparency = 1,
         ZIndex = 4,
     }, {
-        ActiveTitle = React.createElement(Label, {
+        Filters = React.createElement("Frame", {
             Position = UDim2.fromOffset(0, 0),
-            Size = UDim2.fromOffset(370, 24),
-            Text = string.format("ACTIVE QUESTS  ·  %d", #activeRows),
-            TextSize = 12,
-            Bold = true,
-            Color = COLORS.Muted,
+            Size = UDim2.fromOffset(598, 32),
+            BackgroundTransparency = 1,
             ZIndex = 5,
-        }),
-        ActiveList = React.createElement("ScrollingFrame", {
-            Position = UDim2.fromOffset(0, 32),
-            Size = UDim2.fromOffset(374, 354),
-            CanvasSize = UDim2.fromOffset(0, math.max(354, y)),
+        }, filterButtons),
+        QuestList = React.createElement("ScrollingFrame", {
+            Position = UDim2.fromOffset(0, 42),
+            Size = UDim2.fromOffset(598, 344),
+            CanvasSize = UDim2.fromOffset(0, math.max(344, y)),
             BackgroundColor3 = COLORS.PanelDeep,
             BackgroundTransparency = 0.18,
             BorderSizePixel = 0,
             ScrollBarThickness = 4,
             ScrollBarImageColor3 = COLORS.BorderStrong,
             ZIndex = 4,
-        }, withChrome(activeChildren, 10, COLORS.Border, 0.55, 1)),
-        CompletedTitle = React.createElement(Label, {
-            Position = UDim2.fromOffset(394, 0),
-            Size = UDim2.fromOffset(204, 24),
-            Text = string.format("COMPLETED  ·  %d", #completedNames),
-            TextSize = 12,
-            Bold = true,
-            Color = COLORS.Muted,
-            ZIndex = 5,
-        }),
-        CompletedList = React.createElement("ScrollingFrame", {
-            Position = UDim2.fromOffset(394, 32),
-            Size = UDim2.fromOffset(204, 354),
-            CanvasSize = UDim2.fromOffset(0, math.max(354, #completedNames * 38)),
-            BackgroundColor3 = COLORS.PanelDeep,
-            BackgroundTransparency = 0.18,
-            BorderSizePixel = 0,
-            ScrollBarThickness = 4,
-            ScrollBarImageColor3 = COLORS.BorderStrong,
-            ZIndex = 4,
-        }, withChrome(completedChildren, 10, COLORS.Border, 0.55, 1)),
+        }, withChrome(listChildren, 10, COLORS.Border, 0.55, 1)),
     })
 end
 
@@ -2379,6 +2519,7 @@ local function MainMenu(props)
     local selectedInventoryIndex, setSelectedInventoryIndex = React.useState(1)
     local selectedSkillId, setSelectedSkillId = React.useState("beginner_strike")
     local selectedHotbarSlot, setSelectedHotbarSlot = React.useState(1)
+    local questFilter, setQuestFilter = React.useState("ACTIVE")
     local catalog = CatalogClient.Get() or {}
     local tabs = { "CHARACTER", "INVENTORY", "SKILLS", "QUESTS", "SETTINGS" }
 
@@ -2414,7 +2555,7 @@ local function MainMenu(props)
             props.InputMode
         )
     elseif activeTab == "QUESTS" then
-        content = QuestsPanel(profile, catalog)
+        content = QuestsPanel(profile, catalog, questFilter, setQuestFilter)
     else
         content = SettingsPanel(profile, invoke)
     end
@@ -3307,7 +3448,51 @@ function ReactUIController.Start()
     mount.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     mount.Parent = playerGui
 
-    reactRoot = ReactRoblox.createRoot(mount)
+    local scaledRoot = Instance.new("Frame")
+    scaledRoot.Name = "ScaledRoot"
+    scaledRoot.AnchorPoint = Vector2.new(0.5, 0.5)
+    scaledRoot.Position = UDim2.fromScale(0.5, 0.5)
+    scaledRoot.Size = UDim2.fromOffset(UI_REFERENCE_SIZE.X, UI_REFERENCE_SIZE.Y)
+    scaledRoot.BackgroundTransparency = 1
+    scaledRoot.BorderSizePixel = 0
+    scaledRoot.ClipsDescendants = false
+    scaledRoot.Parent = mount
+
+    local uiScale = Instance.new("UIScale")
+    uiScale.Name = "ResponsiveScale"
+    uiScale.Parent = scaledRoot
+
+    local viewportConnection = nil
+    local function updateScale()
+        local camera = Workspace.CurrentCamera
+        local viewport = camera and camera.ViewportSize or UI_REFERENCE_SIZE
+        local fit = math.min(viewport.X / UI_REFERENCE_SIZE.X, viewport.Y / UI_REFERENCE_SIZE.Y)
+        uiScale.Scale = math.clamp(fit, 0.1, UI_MAX_SCALE)
+    end
+
+    local function bindCamera()
+        if viewportConnection then
+            viewportConnection:Disconnect()
+            viewportConnection = nil
+        end
+        local camera = Workspace.CurrentCamera
+        if camera then
+            viewportConnection =
+                camera:GetPropertyChangedSignal("ViewportSize"):Connect(updateScale)
+        end
+        updateScale()
+    end
+
+    local cameraConnection = Workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(bindCamera)
+    bindCamera()
+    mount.Destroying:Once(function()
+        cameraConnection:Disconnect()
+        if viewportConnection then
+            viewportConnection:Disconnect()
+        end
+    end)
+
+    reactRoot = ReactRoblox.createRoot(scaledRoot)
     reactRoot:render(React.createElement(App))
 end
 
