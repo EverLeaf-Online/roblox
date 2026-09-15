@@ -921,22 +921,100 @@ local function makeSignpost(parent, position, yaw, primaryText, secondaryText)
 end
 
 local function makeCrystal(parent, position)
-    local crystal = makePart(
-        parent,
-        "LumenCrystal",
-        Vector3.new(1.6, 4.6, 1.6),
-        CFrame.new(position) * CFrame.Angles(0, 0, math.rad(45)),
-        Enum.Material.Glass,
-        Color3.fromRGB(103, 193, 184)
+    local ground = terrainSurfacePosition(position, 0)
+    local model = Instance.new("Model")
+    model.Name = "LumenCrystalCluster"
+    model.Parent = parent
+
+    local baseStone = makeBall(
+        model,
+        "CrystalMossBase",
+        Vector3.new(3.4, 0.58, 2.8),
+        CFrame.new(ground + Vector3.new(0, 0.18, 0)),
+        Enum.Material.Rock,
+        Color3.fromRGB(73, 91, 82)
     )
-    crystal.CanCollide = false
-    local light = Instance.new("PointLight")
-    light.Color = crystal.Color
-    crystal.Transparency = 0.08
-    light.Brightness = 0.55
-    light.Range = 9
-    light.Parent = crystal
-    return crystal
+    baseStone.CanCollide = false
+    baseStone.CanTouch = false
+    baseStone.CanQuery = false
+    useMaterialVariant(baseStone, "MossyRock")
+
+    local shardSpecs = {
+        {
+            Name = "CoreShard",
+            Size = Vector3.new(1.15, 4.9, 1.05),
+            Offset = Vector3.new(0, 2.45, 0),
+            Rotation = CFrame.Angles(math.rad(-3), math.rad(18), math.rad(7)),
+            Color = Color3.fromRGB(103, 206, 190),
+        },
+        {
+            Name = "LeftShard",
+            Size = Vector3.new(0.82, 3.25, 0.78),
+            Offset = Vector3.new(-1.0, 1.65, 0.2),
+            Rotation = CFrame.Angles(math.rad(8), math.rad(-22), math.rad(-18)),
+            Color = Color3.fromRGB(89, 184, 176),
+        },
+        {
+            Name = "RightShard",
+            Size = Vector3.new(0.72, 2.65, 0.72),
+            Offset = Vector3.new(0.92, 1.35, -0.35),
+            Rotation = CFrame.Angles(math.rad(-6), math.rad(31), math.rad(21)),
+            Color = Color3.fromRGB(126, 221, 197),
+        },
+        {
+            Name = "FrontShard",
+            Size = Vector3.new(0.54, 1.85, 0.58),
+            Offset = Vector3.new(0.15, 0.95, -0.95),
+            Rotation = CFrame.Angles(math.rad(14), math.rad(4), math.rad(-12)),
+            Color = Color3.fromRGB(116, 198, 191),
+        },
+    }
+
+    local core = nil
+    for _, spec in shardSpecs do
+        local shard = makePart(
+            model,
+            spec.Name,
+            spec.Size,
+            CFrame.new(ground + spec.Offset) * spec.Rotation,
+            Enum.Material.Glass,
+            spec.Color
+        )
+        shard.CanCollide = false
+        shard.CanTouch = false
+        shard.CanQuery = false
+        shard.Transparency = spec.Name == "CoreShard" and 0.06 or 0.12
+        if spec.Name == "CoreShard" then
+            core = shard
+        end
+    end
+
+    if core then
+        local light = Instance.new("PointLight")
+        light.Color = Color3.fromRGB(111, 231, 205)
+        light.Brightness = 0.62
+        light.Range = 10
+        light.Shadows = false
+        light.Parent = core
+
+        local motes = Instance.new("ParticleEmitter")
+        motes.Name = "CrystalMotes"
+        motes.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+        motes.Rate = 0.35
+        motes.Lifetime = NumberRange.new(1.8, 3.0)
+        motes.Speed = NumberRange.new(0.15, 0.35)
+        motes.SpreadAngle = Vector2.new(32, 32)
+        motes.Color = ColorSequence.new(Color3.fromRGB(132, 244, 211))
+        motes.Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 0.28),
+            NumberSequenceKeypoint.new(1, 1),
+        })
+        motes.Size = NumberSequence.new(0.07)
+        motes.LightEmission = 0.35
+        motes.Acceleration = Vector3.new(0, 0.18, 0)
+        motes.Parent = core
+    end
+    return model
 end
 
 local function makeGrassTuft(parent, position, scale)
@@ -2331,11 +2409,12 @@ local function makeWhisperrootHollow(parent)
     makeDryBranches(model, origin + Vector3.new(-5, 0.2, 7), math.rad(24), 0.75)
     makeCrystal(model, origin + Vector3.new(0, 2.4, 9))
     makeCrystal(model, origin + Vector3.new(5, 1.9, 6))
+    local cacheGround = terrainSurfacePosition(origin + Vector3.new(-2, 0, 11), 0)
     local cache = makePart(
         model,
         "OldWayfarerCache",
         Vector3.new(4.4, 1.3, 2.8),
-        CFrame.new(origin + Vector3.new(-2, 0.75, 11)) * CFrame.Angles(0, math.rad(-18), 0),
+        CFrame.new(cacheGround + Vector3.new(0, 0.65, 0)) * CFrame.Angles(0, math.rad(-18), 0),
         Enum.Material.Wood,
         Color3.fromRGB(89, 63, 42)
     )
@@ -2374,11 +2453,15 @@ local function makeWhisperrootHollow(parent)
     end)
 
     for index = 1, 3 do
+        local pageGround = terrainSurfacePosition(
+            origin + Vector3.new(-5 + index * 2.1, 0, 9.5 + index * 0.4),
+            0.05
+        )
         local page = makePart(
             model,
             "WeatheredPage" .. index,
             Vector3.new(1.2, 0.05, 1.55),
-            CFrame.new(origin + Vector3.new(-5 + index * 2.1, 1.5, 9.5 + index * 0.4))
+            CFrame.new(pageGround)
                 * CFrame.Angles(math.rad(2), math.rad(index * 23), math.rad(index * 4)),
             Enum.Material.Fabric,
             Color3.fromRGB(201, 189, 151)
