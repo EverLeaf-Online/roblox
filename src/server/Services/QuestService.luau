@@ -2,6 +2,8 @@ local QuestDefinitions = require(script.Parent.Parent.Content.QuestDefinitions)
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local QuestLifecycle = require(ReplicatedStorage.Shared.Logic.QuestLifecycle)
 local QuestAccessRules = require(ReplicatedStorage.Shared.Logic.QuestAccessRules)
+local ProfileTransaction = require(ReplicatedStorage.Shared.Logic.ProfileTransaction)
+local QuestTurnInRules = require(ReplicatedStorage.Shared.Logic.QuestTurnInRules)
 local RewardService = require(script.Parent.RewardService)
 
 local QuestService = {}
@@ -52,30 +54,28 @@ function QuestService.TurnIn(profile, questId)
     if not definition then
         return false, "unknown_quest"
     end
-    if profile.Quests.Completed[questId] then
-        return false, "already_completed"
-    end
 
-    local state = profile.Quests.Active[questId]
-    if not state then
-        return false, "quest_not_active"
-    end
-    if not state.ReadyToTurnIn then
-        return false, "objectives_incomplete"
-    end
-
-    local rewardResult = nil
-    if definition.Reward then
-        local rewarded, resultOrReason = RewardService.Grant(profile, definition.Reward)
-        if not rewarded then
-            return false, resultOrReason
+    return ProfileTransaction.Run(profile, function(workingProfile)
+        local eligible, eligibilityReason = QuestTurnInRules.Validate(workingProfile, questId)
+        if not eligible then
+            return false, eligibilityReason
         end
-        rewardResult = resultOrReason
-    end
 
-    profile.Quests.Active[questId] = nil
-    profile.Quests.Completed[questId] = true
-    return true, { Reward = definition.Reward, RewardResult = rewardResult }
+        local rewardResult = nil
+        if definition.Reward then
+            local rewarded, resultOrReason = RewardService.Apply(workingProfile, definition.Reward)
+            if not rewarded then
+                return false, resultOrReason
+            end
+            rewardResult = resultOrReason
+        end
+
+        local completed, completionReason = QuestTurnInRules.MarkCompleted(workingProfile, questId)
+        if not completed then
+            return false, completionReason
+        end
+        return true, { Reward = definition.Reward, RewardResult = rewardResult }
+    end)
 end
 
 return QuestService

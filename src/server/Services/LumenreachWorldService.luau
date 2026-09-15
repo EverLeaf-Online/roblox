@@ -1,4 +1,5 @@
 local CollectionService = game:GetService("CollectionService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
 local EnemySpawnerService = require(script.Parent.EnemySpawnerService)
@@ -7,6 +8,7 @@ local InteractionService = require(script.Parent.InteractionService)
 local InventoryService = require(script.Parent.InventoryService)
 local PBRMaterialService = require(script.Parent.PBRMaterialService)
 local PlayerDataService = require(script.Parent.PlayerDataService)
+local ProfileTransaction = require(ReplicatedStorage.Shared.Logic.ProfileTransaction)
 local QuestService = require(script.Parent.QuestService)
 local StylizedNpcFactory = require(script.Parent.StylizedNpcFactory)
 local PortalService = require(script.Parent.PortalService)
@@ -2062,17 +2064,22 @@ local function makeWhisperrootHollow(parent)
         if not profile then
             return
         end
-        profile.World.Secrets = profile.World.Secrets or {}
-        if profile.World.Secrets.whisperroot_cache == true then
-            return
+        local claimed = ProfileTransaction.Run(profile, function(workingProfile)
+            workingProfile.World.Secrets = workingProfile.World.Secrets or {}
+            if workingProfile.World.Secrets.whisperroot_cache == true then
+                return false, "already_claimed"
+            end
+            local added, addReason = InventoryService.Add(workingProfile, "old_wayfinder_page", 1)
+            if not added then
+                return false, addReason
+            end
+            workingProfile.World.Secrets.whisperroot_cache = true
+            QuestService.Record(workingProfile, "Collect", "old_wayfinder_page", 1)
+            return true
+        end)
+        if claimed then
+            PlayerDataService.NotifyChanged(player)
         end
-        local added = InventoryService.Add(profile, "old_wayfinder_page", 1)
-        if not added then
-            return
-        end
-        profile.World.Secrets.whisperroot_cache = true
-        QuestService.Record(profile, "Collect", "old_wayfinder_page", 1)
-        PlayerDataService.NotifyChanged(player)
     end)
 
     for index = 1, 3 do

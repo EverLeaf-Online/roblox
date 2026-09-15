@@ -8,50 +8,51 @@ local RegionService = require(script.Parent.RegionService)
 
 local RewardService = {}
 
-function RewardService.Grant(profile, reward)
+function RewardService.Apply(profile, reward)
     local valid, validationReason = RewardRules.Validate(reward)
     if not valid then
         return false, validationReason
     end
 
-    local transactionOk, resultOrReason = ProfileTransaction.Run(profile, function(workingProfile)
-        local result = { LevelsGained = 0, Currencies = {}, Items = {}, UnlockedRegions = {} }
+    local result = { LevelsGained = 0, Currencies = {}, Items = {}, UnlockedRegions = {} }
 
-        if reward.Exp then
-            result.LevelsGained = ProgressionService.GrantExp(workingProfile, reward.Exp)
-        end
-        if reward.Currencies then
-            for currencyName, amount in reward.Currencies do
-                local ok, balanceOrReason =
-                    CurrencyService.Add(workingProfile, currencyName, amount)
-                if not ok then
-                    return false, balanceOrReason
-                end
-                result.Currencies[currencyName] = balanceOrReason
+    if reward.Exp then
+        result.LevelsGained = ProgressionService.GrantExp(profile, reward.Exp)
+    end
+    if reward.Currencies then
+        for currencyName, amount in reward.Currencies do
+            local ok, balanceOrReason = CurrencyService.Add(profile, currencyName, amount)
+            if not ok then
+                return false, balanceOrReason
             end
+            result.Currencies[currencyName] = balanceOrReason
         end
-        if reward.Items then
-            for itemId, quantity in reward.Items do
-                local ok, reason = InventoryService.Add(workingProfile, itemId, quantity)
-                if not ok then
-                    return false, reason
-                end
-                result.Items[itemId] = quantity
+    end
+    if reward.Items then
+        for itemId, quantity in reward.Items do
+            local ok, reason = InventoryService.Add(profile, itemId, quantity)
+            if not ok then
+                return false, reason
             end
+            result.Items[itemId] = quantity
         end
-        if reward.UnlockRegions then
-            for _, regionId in reward.UnlockRegions do
-                local ok, reason = RegionService.Unlock(workingProfile, regionId)
-                if not ok then
-                    return false, reason
-                end
-                result.UnlockedRegions[regionId] = true
+    end
+    if reward.UnlockRegions then
+        for _, regionId in reward.UnlockRegions do
+            local ok, reason = RegionService.Unlock(profile, regionId)
+            if not ok then
+                return false, reason
             end
+            result.UnlockedRegions[regionId] = true
         end
-        return true, result
+    end
+    return true, result
+end
+
+function RewardService.Grant(profile, reward)
+    return ProfileTransaction.Run(profile, function(workingProfile)
+        return RewardService.Apply(workingProfile, reward)
     end)
-
-    return transactionOk, resultOrReason
 end
 
 return RewardService
