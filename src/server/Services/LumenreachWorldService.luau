@@ -2780,6 +2780,23 @@ local function prepareGround(world)
             )
         end
 
+        local function carveTrailPass(a, b, width)
+            local startPoint = Vector3.new(a.X, a.Y + 6, a.Z)
+            local endPoint = Vector3.new(b.X, b.Y + 6, b.Z)
+            local delta = endPoint - startPoint
+            local length = delta.Magnitude
+            if length < 0.1 then
+                return
+            end
+            local midpoint = (startPoint + endPoint) * 0.5
+            terrain:FillBlock(
+                CFrame.lookAt(midpoint, endPoint),
+                Vector3.new(width + 10, 12, length + 7),
+                Enum.Material.Air
+            )
+            fillTrail(a, b, width)
+        end
+
         -- New macro layout: west-basin Camp, raised Crossroads saddle, a
         -- central Lumen Gorge, and the east-side ruins/combat/highland chapter.
         fillClearing(WORLD_ZONES.Camp, Vector3.new(88, 0, 60), Enum.Material.Ground)
@@ -3001,54 +3018,177 @@ local function prepareGround(world)
             terrain:FillBall(intrusion, 5.5 + (index % 3) * 0.9, Enum.Material.Grass)
         end
 
-        local perimeterRidges = {
-            { Vector3.new(-425, -24, -275), 58, Enum.Material.Basalt },
-            { Vector3.new(-430, -24, -125), 54, Enum.Material.Grass },
-            { Vector3.new(-426, -23, 35), 57, Enum.Material.Grass },
-            { Vector3.new(-420, -24, 205), 60, Enum.Material.Basalt },
-            { Vector3.new(-340, -25, 335), 58, Enum.Material.Grass },
-            { Vector3.new(-170, -24, 350), 60, Enum.Material.Grass },
-            { Vector3.new(10, -25, 354), 62, Enum.Material.Basalt },
-            { Vector3.new(195, -24, 348), 60, Enum.Material.Grass },
-            { Vector3.new(355, -25, 320), 57, Enum.Material.Basalt },
-            { Vector3.new(425, -24, 210), 60, Enum.Material.Grass },
-            { Vector3.new(432, -24, 45), 56, Enum.Material.Basalt },
-            { Vector3.new(428, -24, -125), 60, Enum.Material.Basalt },
-            { Vector3.new(415, -24, -285), 58, Enum.Material.Grass },
-            { Vector3.new(295, -25, -350), 62, Enum.Material.Basalt },
-            { Vector3.new(105, -24, -355), 60, Enum.Material.Grass },
-            { Vector3.new(-85, -24, -356), 62, Enum.Material.Basalt },
-            { Vector3.new(-270, -25, -342), 60, Enum.Material.Grass },
-        }
-        for _, ridge in perimeterRidges do
-            terrain:FillBall(ridge[1], ridge[2], ridge[3])
+        -- Interior terrain rooms replace the old ring-of-hills composition.
+        -- Ridges live inside the playable space and create real sightline breaks,
+        -- valleys, bowls, and passes. The outer boundary is intentionally quiet.
+        local function fillRidge(points, radius, peakY, material)
+            material = material or Enum.Material.Grass
+            for index = 1, #points - 1 do
+                local a = points[index]
+                local b = points[index + 1]
+                local distance = (b - a).Magnitude
+                local steps = math.max(1, math.ceil(distance / 16))
+                for step = 0, steps do
+                    local alpha = step / steps
+                    local point = a:Lerp(b, alpha)
+                    local wobble = math.sin((index * 7 + step) * 1.31) * 1.3
+                    terrain:FillBall(
+                        Vector3.new(point.X, peakY - radius + wobble * 0.25, point.Z),
+                        radius + wobble,
+                        material
+                    )
+                end
+            end
         end
 
-        local interiorMasses = {
-            -- West-basin containment and Glowmere ridge.
-            { Vector3.new(-382, -22, 92), 34, Enum.Material.Grass },
-            { Vector3.new(-355, -22, -35), 31, Enum.Material.Basalt },
-            { Vector3.new(-292, -22, 302), 34, Enum.Material.Grass },
-            { Vector3.new(-185, -22, 318), 31, Enum.Material.Grass },
-            { Vector3.new(-72, -22, 328), 30, Enum.Material.Basalt },
+        local function fillLayeredRidge(points, radius, peakY)
+            fillRidge(points, radius, peakY, Enum.Material.Basalt)
+            fillRidge(points, math.max(6, radius - 3.5), peakY + 0.6, Enum.Material.Grass)
+        end
 
-            -- East-side forest masses around Mossglen and the ruins.
-            { Vector3.new(88, -22, 312), 32, Enum.Material.Grass },
-            { Vector3.new(228, -22, 286), 34, Enum.Material.Grass },
-            { Vector3.new(352, -22, 220), 34, Enum.Material.Basalt },
-            { Vector3.new(374, -22, 78), 31, Enum.Material.Basalt },
-            { Vector3.new(355, -21, -72), 34, Enum.Material.Basalt },
+        -- Wayfarer Camp basin: three interior ridge arms form a sheltered bowl
+        -- with deliberate east and south exits.
+        fillLayeredRidge({
+            Vector3.new(-402, 0, 246),
+            Vector3.new(-384, 0, 206),
+            Vector3.new(-378, 0, 160),
+            Vector3.new(-366, 0, 124),
+        }, 19, 7)
+        fillLayeredRidge({
+            Vector3.new(-382, 0, 258),
+            Vector3.new(-338, 0, 266),
+            Vector3.new(-294, 0, 258),
+            Vector3.new(-260, 0, 240),
+        }, 18, 6.5)
+        fillLayeredRidge({
+            Vector3.new(-380, 0, 130),
+            Vector3.new(-346, 0, 108),
+            Vector3.new(-308, 0, 105),
+            Vector3.new(-280, 0, 120),
+        }, 16, 5.5)
 
-            -- Southern highland / Veilfall containment.
-            { Vector3.new(332, -16, -250), 38, Enum.Material.Grass },
-            { Vector3.new(190, -20, -314), 34, Enum.Material.Basalt },
-            { Vector3.new(48, -22, -320), 32, Enum.Material.Grass },
-            { Vector3.new(-112, -22, -305), 32, Enum.Material.Grass },
-            { Vector3.new(-263, -22, -280), 35, Enum.Material.Basalt },
-            { Vector3.new(-365, -22, -228), 34, Enum.Material.Basalt },
+        -- Crossroads saddle: two rock-and-grass spurs pinch the climb and open
+        -- onto the gorge overlook instead of a broad empty plateau.
+        fillLayeredRidge({
+            Vector3.new(-225, 4, 128),
+            Vector3.new(-205, 5, 117),
+            Vector3.new(-192, 5, 105),
+        }, 14, 8)
+        fillLayeredRidge({
+            Vector3.new(-210, 4, 42),
+            Vector3.new(-190, 5, 48),
+            Vector3.new(-169, 5, 51),
+        }, 14, 8)
+
+        -- Glowmere wetland bowl on the north bank.
+        fillLayeredRidge({
+            Vector3.new(-142, 0, 320),
+            Vector3.new(-100, 0, 340),
+            Vector3.new(-48, 0, 346),
+            Vector3.new(10, 0, 326),
+        }, 18, 6)
+        fillLayeredRidge({
+            Vector3.new(-142, 0, 250),
+            Vector3.new(-132, 0, 224),
+            Vector3.new(-118, 0, 202),
+        }, 14, 5)
+
+        -- Veilfall canyon walls. These are inside the map and visually dominate
+        -- the ravine instead of relying on the world perimeter.
+        fillLayeredRidge({
+            Vector3.new(-382, -2, -235),
+            Vector3.new(-360, -2, -190),
+            Vector3.new(-352, -1, -142),
+            Vector3.new(-343, 0, -102),
+        }, 18, 7)
+        fillLayeredRidge({
+            Vector3.new(-252, -2, -242),
+            Vector3.new(-240, -2, -196),
+            Vector3.new(-238, -1, -151),
+            Vector3.new(-230, 0, -112),
+        }, 17, 6.5)
+
+        -- East-side forest spine separates the bridge landing, ruins, and
+        -- Mossglen into distinct rooms while leaving authored passes between.
+        fillLayeredRidge({
+            Vector3.new(72, 0, 190),
+            Vector3.new(105, 0, 204),
+            Vector3.new(145, 1, 205),
+            Vector3.new(178, 1, 190),
+        }, 16, 6)
+        fillLayeredRidge({
+            Vector3.new(210, 0, 32),
+            Vector3.new(233, 1, 0),
+            Vector3.new(248, 2, -37),
+            Vector3.new(250, 3, -76),
+        }, 15, 7)
+
+        -- Shattered Lumen Arch sits on a broken stone shelf.
+        fillLayeredRidge({
+            Vector3.new(72, 2, -126),
+            Vector3.new(116, 3, -142),
+            Vector3.new(160, 3, -135),
+            Vector3.new(190, 3, -113),
+        }, 15, 7)
+
+        -- Mossglen amphitheater: three ridge arcs create a combat bowl with an
+        -- open western entrance and high wooded shoulders.
+        fillLayeredRidge({
+            Vector3.new(238, 0, 214),
+            Vector3.new(286, 0, 226),
+            Vector3.new(330, 0, 207),
+        }, 17, 6.5)
+        fillLayeredRidge({
+            Vector3.new(338, 0, 198),
+            Vector3.new(358, 0, 152),
+            Vector3.new(354, 0, 103),
+            Vector3.new(338, 0, 66),
+        }, 17, 7)
+        fillLayeredRidge({
+            Vector3.new(330, 0, 54),
+            Vector3.new(286, 0, 42),
+            Vector3.new(250, 0, 53),
+        }, 16, 6)
+
+        -- Sunmoss is supported by an interior highland spine, not just isolated
+        -- terrain balls at the far edge.
+        fillLayeredRidge({
+            Vector3.new(185, 4, -188),
+            Vector3.new(224, 7, -220),
+            Vector3.new(268, 10, -245),
+            Vector3.new(315, 11, -258),
+            Vector3.new(352, 9, -238),
+        }, 19, 13)
+
+        -- Only a few low outer anchors remain. They prevent horizon emptiness
+        -- without becoming the main visible topology.
+        local boundaryAnchors = {
+            { Vector3.new(-432, -25, 300), 48, Enum.Material.Grass },
+            { Vector3.new(-438, -25, -270), 46, Enum.Material.Basalt },
+            { Vector3.new(418, -25, 292), 46, Enum.Material.Grass },
+            { Vector3.new(425, -25, -282), 48, Enum.Material.Basalt },
+            { Vector3.new(40, -27, 365), 44, Enum.Material.Grass },
+            { Vector3.new(-30, -27, -365), 44, Enum.Material.Basalt },
         }
-        for _, mound in interiorMasses do
-            terrain:FillBall(mound[1], mound[2], mound[3])
+        for _, anchor in boundaryAnchors do
+            terrain:FillBall(anchor[1], anchor[2], anchor[3])
+        end
+
+        -- Re-cut all authored travel corridors after terrain massing. This
+        -- creates deliberate mountain passes and guarantees ridges never swallow roads.
+        for index = 1, #OPENING_ROUTE_POINTS - 1 do
+            carveTrailPass(
+                OPENING_ROUTE_POINTS[index],
+                OPENING_ROUTE_POINTS[index + 1],
+                openingWidths[index]
+            )
+        end
+        for index = 1, #PROVING_SPUR_POINTS - 1 do
+            carveTrailPass(PROVING_SPUR_POINTS[index], PROVING_SPUR_POINTS[index + 1], 9.0)
+        end
+        carveTrailPass(Vector3.new(-241, 1.4, 118), mosslingHollow, 7.5)
+        for _, trail in trails do
+            carveTrailPass(trail[1], trail[2], trail[3])
         end
 
         -- Glowmere is a real water landmark instead of another grass clearing.
@@ -3328,9 +3468,69 @@ local function makeWoodlandCluster(parent, center, seed, scale, protectOpeningRo
     end
 end
 
+local function makeHabitatPocket(parent, center, seed, scale)
+    scale = scale or 1
+    local rotation = seed * 0.83
+    local forward = Vector3.new(math.sin(rotation), 0, math.cos(rotation))
+    local right = Vector3.new(forward.Z, 0, -forward.X)
+
+    makeCanopyTree(parent, center + right * (7.5 * scale), 0.82 * scale, rotation)
+    makeTree(
+        parent,
+        center - right * (8.5 * scale) + forward * (2.5 * scale),
+        0.88 * scale,
+        (seed % 3) + 1
+    )
+    makeTree(parent, center - forward * (7.0 * scale), 0.74 * scale, ((seed + 1) % 3) + 1)
+    makeMossyRockSet(parent, center + forward * (5.5 * scale), rotation + 0.35, 0.62 * scale)
+
+    if seed % 3 == 0 then
+        makeFallenLog(
+            parent,
+            center - right * (4.5 * scale) - forward * (4.0 * scale),
+            rotation + 0.5,
+            0.58 * scale,
+            2
+        )
+    elseif seed % 3 == 1 then
+        makePineRoots(
+            parent,
+            center - right * (5.2 * scale) - forward * (3.0 * scale),
+            rotation,
+            0.6 * scale
+        )
+    else
+        makeDryBranches(
+            parent,
+            center - right * (5.0 * scale) - forward * (3.5 * scale),
+            rotation,
+            0.56 * scale
+        )
+    end
+
+    makeBush(parent, center + right * (2.4 * scale) - forward * (2.0 * scale), 0.68 * scale)
+    makeFern(
+        parent,
+        center - right * (2.8 * scale) + forward * (1.5 * scale),
+        0.78 * scale,
+        rotation
+    )
+    makeMushroomCluster(parent, center + forward * (1.8 * scale), 0.62 * scale, seed)
+    makeFlowerPatch(
+        parent,
+        center - forward * (3.0 * scale) + right * (1.0 * scale),
+        0.58 * scale,
+        seed % 2 == 0
+    )
+
+    if seed % 4 == 0 then
+        makeCrystal(parent, center + right * (4.0 * scale) + forward * (3.5 * scale))
+    end
+end
+
 local function decorate(world)
     -- A forest belt frames the whole map. Major clearings stay readable instead of being carpeted with props.
-    placeTreeArc(world, Vector3.zero, 365, 305, 44, 0, 360, 2)
+    placeTreeArc(world, Vector3.zero, 365, 305, 20, 12, 336, 2)
     placeTreeArc(world, WORLD_ZONES.Camp, 78, 59, 22, 104, 262, 7)
     placeTreeArc(world, WORLD_ZONES.Crossroads, 57, 44, 16, 18, 320, 9)
     placeTreeArc(world, WORLD_ZONES.Ruins, 78, 65, 12, -45, 285, 11)
@@ -3386,6 +3586,65 @@ local function decorate(world)
     }
     for _, patch in forestPatches do
         scatterForestPatch(world, patch[1], patch[2], patch[3], patch[4], patch[5])
+    end
+
+    -- Mixed habitat pockets fill the playable interior with more than trees.
+    -- These clusters create foreground/midground layers between named locations
+    -- using deadfall, roots, mossy rocks, ferns, mushrooms, flowers, and Lumen crystals.
+    local habitatPockets = {
+        -- West basin and opening chapter.
+        { Vector3.new(-390, 0, 210), 301, 0.92 },
+        { Vector3.new(-372, 0, 150), 303, 0.88 },
+        { Vector3.new(-305, 0, 292), 305, 0.95 },
+        { Vector3.new(-274, 0, 230), 307, 0.86 },
+        { Vector3.new(-252, 0, 38), 309, 0.9 },
+        { Vector3.new(-232, -1, -78), 311, 0.9 },
+
+        -- Glowmere north bank.
+        { Vector3.new(-126, 0, 304), 313, 0.88 },
+        { Vector3.new(6, 0, 286), 315, 0.92 },
+        { Vector3.new(48, 0, 220), 317, 0.9 },
+
+        -- East forest rooms between bridge, ruins, and Mossglen.
+        { Vector3.new(82, 0, 150), 319, 0.9 },
+        { Vector3.new(138, 0, 178), 321, 0.96 },
+        { Vector3.new(205, 0, 228), 323, 0.94 },
+        { Vector3.new(263, 0, 201), 325, 0.9 },
+        { Vector3.new(318, 0, 186), 327, 0.96 },
+        { Vector3.new(328, 0, 92), 329, 0.92 },
+        { Vector3.new(205, 2, 2), 331, 0.88 },
+        { Vector3.new(145, 3, -154), 333, 0.9 },
+
+        -- Veilfall and highland transition.
+        { Vector3.new(-365, -2, -190), 335, 0.92 },
+        { Vector3.new(-250, -2, -190), 337, 0.9 },
+        { Vector3.new(186, 6, -238), 339, 0.9 },
+        { Vector3.new(332, 8, -226), 341, 0.92 },
+    }
+    for _, pocket in habitatPockets do
+        makeHabitatPocket(world, pocket[1], pocket[2], pocket[3])
+    end
+
+    -- Rock shelves and exposed faces make the new interior ridges legible at
+    -- player height. These are deliberately inside the region, not on its border.
+    local interiorRockFaces = {
+        { Vector3.new(-388, 0, 191), math.rad(78), 0.72 },
+        { Vector3.new(-338, 0, 254), math.rad(-8), 0.68 },
+        { Vector3.new(-330, 0, 108), math.rad(176), 0.66 },
+        { Vector3.new(-214, 4, 119), math.rad(62), 0.58 },
+        { Vector3.new(-224, 4, 30), math.rad(-112), 0.58 },
+        { Vector3.new(-103, 0, 329), math.rad(10), 0.7 },
+        { Vector3.new(-350, -2, -175), math.rad(92), 0.82 },
+        { Vector3.new(-242, -2, -180), math.rad(-88), 0.78 },
+        { Vector3.new(117, 0, 199), math.rad(8), 0.66 },
+        { Vector3.new(236, 2, -31), math.rad(82), 0.64 },
+        { Vector3.new(125, 3, -138), math.rad(4), 0.74 },
+        { Vector3.new(338, 0, 147), math.rad(-88), 0.76 },
+        { Vector3.new(287, 0, 220), math.rad(178), 0.72 },
+        { Vector3.new(257, 9, -246), math.rad(14), 0.86 },
+    }
+    for _, face in interiorRockFaces do
+        makeRockFace(world, face[1], face[2], face[3])
     end
 
     -- Dense authored clumps frame the west-basin climb without defining the

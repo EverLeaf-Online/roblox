@@ -59,6 +59,7 @@
 - [x] Starter camp rebuilt with larger tents, proper supplies, map table, benches, lanterns, signpost, and custom guide/NPC composition.
 - [x] World density pass added continuous forest bands, roadside clusters, undergrowth, deadwood, rocks, and landmark dressing.
 - [x] Lumenreach macro-layout replacement is source-complete: all major zones were repositioned, Crossroads moved onto a raised west-side saddle, Veilfall moved into a lowered ravine, Sunmoss moved onto an elevated ridge, a carved Lumen Gorge now divides west/east Lumenreach, and a required bridge crossing connects the two halves; fresh Studio visual QA remains.
+- [x] Interior terrain-room rebuild is source-complete: the visible perimeter hill ring was reduced to minor anchors; Camp basin, Crossroads saddle, Glowmere bowl, Veilfall canyon, east forest spine, Ruins shelf, Mossglen amphitheater, and Sunmoss highland now use interior ridge systems, exposed rock shelves, carved road passes, and mixed habitat pockets; Studio visual QA remains.
 - [x] Camera collision stabilized so non-solid foliage/decor no longer causes view snapping.
 - [x] Environmental storytelling pass adds old wayfarer remnants and hidden Whisperroot Hollow.
 - [ ] Full player-height visual QA for every imported mesh, rock/cliff, root, log, and path obstruction.
@@ -475,6 +476,7 @@
 - [x] Connected trail network and route beacons/waystones.
 - [x] Forest-density and roadside environmental dressing pass.
 - [x] Region topology rebuilt around distinct macro geography: compact west-basin Camp, separate Proving Circle pocket, climbing approach to raised Crossroads, central gorge/river, bridge transition to east-side Ruins/Mossglen, north Glowmere loop, lowered Veilfall route, and ascending Sunmoss highland loop; Studio visual QA remains.
+- [x] Interior terrain massing rebuilt around seven authored rooms with interior ridges/valleys instead of border hills; roads are re-cut as safe passes after terrain generation, and non-tree habitat pockets/rock faces now fill the mid-map spaces; Studio visual QA remains.
 - [x] Opening-route composition pass rebuilt Camp/Crossroads signs, path lantern scale/placement, clearing edges, terrain banks, and authored woodland framing; the obsolete repeated trail-pebble system was removed; Studio player-height review remains open.
 - [x] Approved imported environment assets integrated with runtime sanitization and procedural fallbacks.
 - [x] Bad oversized cliff/rock placements corrected and terrain-supported.
