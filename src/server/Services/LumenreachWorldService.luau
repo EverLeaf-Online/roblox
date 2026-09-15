@@ -1675,55 +1675,101 @@ local function makeWaterfall(parent, position)
     local model = Instance.new("Model")
     model.Name = "LumenFalls"
     model.Parent = parent
+    local ground = terrainSurfacePosition(position, -0.25)
 
-    local cliffColor = Color3.fromRGB(69, 78, 73)
-    makePart(
+    local cliffFaces = {
+        { Offset = Vector3.new(-10.5, 6.0, -1.8), Yaw = math.rad(12), Longest = 22, Scale = 1.0 },
+        { Offset = Vector3.new(10.2, 5.0, -1.0), Yaw = math.rad(-18), Longest = 20, Scale = 0.96 },
+        { Offset = Vector3.new(-4.0, 15.5, -3.0), Yaw = math.rad(48), Longest = 17, Scale = 0.82 },
+        { Offset = Vector3.new(5.4, 14.5, -2.7), Yaw = math.rad(-52), Longest = 16, Scale = 0.78 },
+    }
+    for index, spec in cliffFaces do
+        local placed = EnvironmentPrefabService.Place(
+            "RockFace",
+            model,
+            CFrame.new(ground + spec.Offset) * CFrame.Angles(0, spec.Yaw, 0),
+            prefabScaleForLongest("RockFace", spec.Longest, spec.Scale)
+        )
+        if placed then
+            placed.Name = "VeilfallRockFace" .. index
+            setInstanceCollision(placed, false)
+        end
+    end
+
+    makeMossyRockSet(model, ground + Vector3.new(-13.5, 0, 3.2), math.rad(24), 1.0)
+    makeMossyRockSet(model, ground + Vector3.new(13.2, 0, 3.8), math.rad(-31), 0.94)
+    makeFern(model, ground + Vector3.new(-15.2, 0, 6.2), 0.92, math.rad(17))
+    makeFern(model, ground + Vector3.new(15.0, 0, 5.8), 0.86, math.rad(-26))
+
+    -- Keep traversal collision simple and hidden. The imported rock faces are
+    -- visual-only so camera/player movement never snags on mesh hull details.
+    makeCollisionProxy(
         model,
-        "CliffLeft",
-        Vector3.new(14, 26, 18),
-        CFrame.new(position + Vector3.new(-9, 13, 0)) * CFrame.Angles(0, math.rad(8), math.rad(-3)),
-        Enum.Material.Rock,
-        cliffColor
+        "VeilfallLeftCollision",
+        Vector3.new(12.5, 22, 15),
+        CFrame.new(ground + Vector3.new(-10, 11, -1.5)) * CFrame.Angles(0, math.rad(8), 0)
     )
-    makePart(
+    makeCollisionProxy(
         model,
-        "CliffRight",
-        Vector3.new(14, 22, 18),
-        CFrame.new(position + Vector3.new(9, 11, 0)) * CFrame.Angles(0, math.rad(-10), math.rad(4)),
-        Enum.Material.Rock,
-        cliffColor
-    )
-    makePart(
-        model,
-        "CliffTop",
-        Vector3.new(18, 7, 18),
-        CFrame.new(position + Vector3.new(0, 20, 0)),
-        Enum.Material.Rock,
-        Color3.fromRGB(78, 89, 80)
+        "VeilfallRightCollision",
+        Vector3.new(12.5, 20, 15),
+        CFrame.new(ground + Vector3.new(10, 10, -1.2)) * CFrame.Angles(0, math.rad(-10), 0)
     )
 
-    local water = makePart(
-        model,
-        "Waterfall",
-        Vector3.new(8, 20, 0.7),
-        CFrame.new(position + Vector3.new(0, 10, 7.8)),
-        Enum.Material.Glass,
-        Color3.fromRGB(79, 188, 204)
-    )
-    water.Transparency = 0.28
-    water.CanCollide = false
-    water.Reflectance = 0.08
+    -- Three narrow ribbons break the old flat rectangular waterfall silhouette.
+    local ribbonSpecs = {
+        { X = -2.35, Width = 2.45, Height = 18.4, Z = 7.65, Transparency = 0.34 },
+        { X = 0.15, Width = 3.2, Height = 20.0, Z = 7.8, Transparency = 0.25 },
+        { X = 2.75, Width = 1.85, Height = 17.0, Z = 7.7, Transparency = 0.38 },
+    }
+    for index, spec in ribbonSpecs do
+        local water = makePart(
+            model,
+            "WaterRibbon" .. index,
+            Vector3.new(spec.Width, spec.Height, 0.38),
+            CFrame.new(ground + Vector3.new(spec.X, spec.Height * 0.5 + 0.35, spec.Z))
+                * CFrame.Angles(math.rad(-2 + index), 0, math.rad((index - 2) * 1.2)),
+            Enum.Material.Glass,
+            Color3.fromRGB(79, 188, 204)
+        )
+        water.Transparency = spec.Transparency
+        water.CanCollide = false
+        water.CanTouch = false
+        water.CanQuery = false
+        water.Reflectance = 0.06
+    end
 
     local foam = makePart(
         model,
         "Foam",
-        Vector3.new(11, 0.5, 6),
-        CFrame.new(position + Vector3.new(0, 0.4, 6.8)),
+        Vector3.new(11, 0.32, 6),
+        CFrame.new(ground + Vector3.new(0, 0.28, 6.8)),
         Enum.Material.Neon,
         Color3.fromRGB(198, 244, 236)
     )
-    foam.Transparency = 0.45
+    foam.Transparency = 0.52
     foam.CanCollide = false
+    foam.CanTouch = false
+    foam.CanQuery = false
+
+    local spray = Instance.new("ParticleEmitter")
+    spray.Name = "VeilfallSpray"
+    spray.Texture = "rbxasset://textures/particles/smoke_main.dds"
+    spray.Rate = 2.2
+    spray.Lifetime = NumberRange.new(1.0, 1.8)
+    spray.Speed = NumberRange.new(1.2, 2.6)
+    spray.SpreadAngle = Vector2.new(50, 18)
+    spray.Color = ColorSequence.new(Color3.fromRGB(207, 244, 237))
+    spray.Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 0.55),
+        NumberSequenceKeypoint.new(1, 1),
+    })
+    spray.Size = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 0.8),
+        NumberSequenceKeypoint.new(1, 2.4),
+    })
+    spray.Acceleration = Vector3.new(0.2, 0.7, 0.1)
+    spray.Parent = foam
     return model
 end
 
@@ -2174,45 +2220,108 @@ local function makeCombatGrove(parent, center)
         makeWaystone(model, center + entry[1], entry[2], entry[3])
     end
 
-    local totemBase = CFrame.new(center + Vector3.new(0, 0, 37))
-    makePart(
-        model,
-        "GroveTotem",
-        Vector3.new(2.0, 8.4, 2.0),
-        totemBase * CFrame.new(0, 4.2, 0),
-        Enum.Material.Wood,
-        Color3.fromRGB(65, 50, 35)
-    )
+    local totemGround = terrainSurfacePosition(center + Vector3.new(0, 0, 37), 0)
+    local totem = Instance.new("Model")
+    totem.Name = "MossglenWayfarerTotem"
+    totem.Parent = model
+    local wood = Color3.fromRGB(69, 50, 35)
+    local darkWood = Color3.fromRGB(49, 38, 29)
+
+    local segmentSpecs = {
+        { Length = 3.6, Diameter = 1.65, Offset = Vector3.new(-0.15, 1.8, 0), Tilt = math.rad(-3) },
+        {
+            Length = 3.5,
+            Diameter = 1.5,
+            Offset = Vector3.new(0.12, 5.15, 0.05),
+            Tilt = math.rad(4),
+        },
+        {
+            Length = 2.8,
+            Diameter = 1.3,
+            Offset = Vector3.new(-0.08, 8.05, -0.03),
+            Tilt = math.rad(-5),
+        },
+    }
+    for index, spec in segmentSpecs do
+        local segment = makePart(
+            totem,
+            "TotemSegment" .. index,
+            Vector3.new(spec.Length, spec.Diameter, spec.Diameter),
+            CFrame.new(totemGround + spec.Offset)
+                * CFrame.Angles(0, math.rad(index * 17), math.rad(90) + spec.Tilt),
+            Enum.Material.Wood,
+            index % 2 == 0 and darkWood or wood
+        )
+        segment.Shape = Enum.PartType.Cylinder
+        segment.CanCollide = false
+        segment.CanTouch = false
+        segment.CanQuery = false
+        useMaterialVariant(segment, "MossWood")
+    end
+
+    for _, arm in
+        {
+            { Vector3.new(-1.45, 8.55, 0), math.rad(-22) },
+            { Vector3.new(1.45, 8.4, 0), math.rad(24) },
+        }
+    do
+        local branch = makePart(
+            totem,
+            "TotemFork",
+            Vector3.new(3.2, 0.8, 0.8),
+            CFrame.new(totemGround + arm[1]) * CFrame.Angles(0, 0, arm[2]),
+            Enum.Material.Wood,
+            darkWood
+        )
+        branch.CanCollide = false
+        branch.CanTouch = false
+        branch.CanQuery = false
+        useMaterialVariant(branch, "MossWood")
+    end
+
+    makeMossyRockSet(totem, totemGround, math.rad(15), 0.66)
+    makeFern(totem, totemGround + Vector3.new(-2.5, 0, 1.3), 0.62, math.rad(18))
+    makeFern(totem, totemGround + Vector3.new(2.4, 0, -1.1), 0.58, math.rad(-31))
+
     local rune = makePart(
-        model,
+        totem,
         "GroveRune",
-        Vector3.new(0.9, 2.7, 0.1),
-        totemBase * CFrame.new(0, 4.8, -1.06) * CFrame.Angles(0, 0, math.rad(45)),
+        Vector3.new(1.05, 3.0, 0.12),
+        CFrame.new(totemGround + Vector3.new(0, 5.5, -0.78)) * CFrame.Angles(0, 0, math.rad(45)),
         Enum.Material.Neon,
         Color3.fromRGB(101, 226, 182)
     )
     rune.CanCollide = false
+    rune.CanTouch = false
+    rune.CanQuery = false
     local glow = Instance.new("PointLight")
     glow.Color = rune.Color
-    glow.Brightness = 0.7
-    glow.Range = 12
+    glow.Brightness = 0.62
+    glow.Range = 11
+    glow.Shadows = false
     glow.Parent = rune
+    makeCollisionProxy(
+        totem,
+        "TotemCollision",
+        Vector3.new(2.2, 8.8, 2.2),
+        CFrame.new(totemGround + Vector3.new(0, 4.4, 0))
+    )
 
-    for _, offset in
+    -- Replace the old flat wooden arena markers with low moss/waystone accents.
+    for index, offset in
         {
             Vector3.new(-18, 0, -31),
             Vector3.new(18, 0, -31),
         }
     do
-        local marker = makePart(
+        local markerGround = terrainSurfacePosition(center + offset, 0)
+        makeMossyRockSet(model, markerGround, math.rad(index == 1 and 38 or -42), 0.54)
+        makeFern(
             model,
-            "GroveMarker",
-            Vector3.new(4.2, 0.3, 1.4),
-            CFrame.new(center + offset + Vector3.new(0, 0.18, 0)),
-            Enum.Material.Wood,
-            Color3.fromRGB(83, 61, 42)
+            markerGround + Vector3.new(index == 1 and -2.2 or 2.2, 0, 1.3),
+            0.58,
+            math.rad(index * 57)
         )
-        marker.CanCollide = false
     end
 
     return model
