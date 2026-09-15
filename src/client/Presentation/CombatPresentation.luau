@@ -521,6 +521,11 @@ function CombatPresentation.PlayBasicAttack(familyId)
     end
 end
 
+function CombatPresentation.GetSkillCastDuration(familyId, _definition)
+    local sequence = ATTACK_SEQUENCES[familyId] or ATTACK_SEQUENCES.default
+    return sequence.Duration
+end
+
 function CombatPresentation.PlaySkillCast(familyId, definition)
     local character = player.Character
     if not character then

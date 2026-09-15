@@ -7,6 +7,7 @@ local Workspace = game:GetService("Workspace")
 
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
 local Net = require(ReplicatedStorage.Shared.Net)
+local CombatFacing = require(script.Parent.Parent.Presentation.CombatFacing)
 
 local ThirdPersonController = {}
 
@@ -24,6 +25,7 @@ local dodgeDirection = Vector3.zero
 local function attachCharacter(character)
     humanoid = character:WaitForChild("Humanoid")
     root = character:WaitForChild("HumanoidRootPart")
+    CombatFacing.Reset()
     humanoid.AutoRotate = true
     humanoid.UseJumpPower = true
     humanoid.JumpPower = GameConfig.Movement.JumpPower
@@ -157,6 +159,7 @@ local function tryDodge()
         return
     end
     lastDodgeAt = now
+    CombatFacing.Reset()
 
     local direction = getWorldMoveDirection()
     if direction.Magnitude <= 0.01 then
@@ -240,6 +243,7 @@ function ThirdPersonController.Start()
 
             local now = os.clock()
             if player:GetAttribute("EverLeafStaggered") == true then
+                CombatFacing.Reset()
                 dodgeUntil = 0
                 dodgeDirection = Vector3.zero
                 if crouching then
@@ -269,6 +273,10 @@ function ThirdPersonController.Start()
                     setCrouching(false)
                 end
                 humanoid.AutoRotate = true
+            end
+
+            if root and root.Parent then
+                CombatFacing.Apply(root, humanoid, now)
             end
 
             if inputBlocked() then

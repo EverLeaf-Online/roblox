@@ -4,6 +4,7 @@ local UserInputService = game:GetService("UserInputService")
 
 local ActionClient = require(script.Parent.Parent.Services.ActionClient)
 local CatalogClient = require(script.Parent.Parent.Services.CatalogClient)
+local CombatFacing = require(script.Parent.Parent.Presentation.CombatFacing)
 local CombatPresentation = require(script.Parent.Parent.Presentation.CombatPresentation)
 local ProfileStore = require(script.Parent.Parent.State.ProfileStore)
 local SkillCooldownStore = require(script.Parent.Parent.State.SkillCooldownStore)
@@ -84,6 +85,8 @@ local function useSlot(slotIndex)
         showFailure("cooldown")
         return
     end
+    local castDuration = CombatPresentation.GetSkillCastDuration(profile.FamilyId, definition)
+    CombatFacing.LockToCamera(castDuration)
     CombatPresentation.PlaySkillCast(profile.FamilyId, definition)
 
     task.spawn(function()

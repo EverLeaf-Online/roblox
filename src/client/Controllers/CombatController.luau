@@ -5,8 +5,9 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
 local Net = require(ReplicatedStorage.Shared.Net)
-local ProfileStore = require(script.Parent.Parent.State.ProfileStore)
+local CombatFacing = require(script.Parent.Parent.Presentation.CombatFacing)
 local CombatPresentation = require(script.Parent.Parent.Presentation.CombatPresentation)
+local ProfileStore = require(script.Parent.Parent.State.ProfileStore)
 
 local CombatController = {}
 local player = Players.LocalPlayer
@@ -112,21 +113,6 @@ local function showFeedback(text, tone)
     end)
 end
 
-local function faceCameraDirection()
-    local character = player.Character
-    local root = character and character:FindFirstChild("HumanoidRootPart")
-    local camera = workspace.CurrentCamera
-    if not root or not camera then
-        return
-    end
-
-    local look = Vector3.new(camera.CFrame.LookVector.X, 0, camera.CFrame.LookVector.Z)
-    if look.Magnitude <= 0.001 then
-        return
-    end
-    root.CFrame = CFrame.lookAt(root.Position, root.Position + look.Unit)
-end
-
 local function performAttack()
     if attacking or not attackRemote then
         return
@@ -142,8 +128,9 @@ local function performAttack()
     attacking = true
     local profile = ProfileStore.Get()
     local familyId = profile and profile.FamilyId or ""
-    local animationEndsAt = os.clock() + CombatPresentation.GetBasicAttackDuration(familyId)
-    faceCameraDirection()
+    local attackDuration = CombatPresentation.GetBasicAttackDuration(familyId)
+    local animationEndsAt = os.clock() + attackDuration
+    CombatFacing.LockToCamera(attackDuration)
     CombatPresentation.PlayBasicAttack(familyId)
 
     task.spawn(function()
