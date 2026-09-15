@@ -39,14 +39,15 @@ assert(
     "client dodge should use modern LinearVelocity"
 )
 assert(
-    string.find(config, 'DodgeRollAnimationId = "rbxassetid://1258941951"', 1, true),
-    "combat roll must use the referenced DevForum animation"
-)
-assert(
     string.find(controller, 'rollAnimation = Instance.new("Animation")', 1, true)
         and string.find(controller, "animator:LoadAnimation(rollAnimation)", 1, true)
         and string.find(controller, "Enum.AnimationPriority.Action4", 1, true),
     "dodge must use a real Animator roll track"
+)
+assert(
+    string.find(controller, "KeyframeSequenceProvider:RegisterKeyframeSequence", 1, true)
+        and string.find(controller, "EverLeafCombatRollSequence", 1, true),
+    "combat roll must author a local keyframe sequence instead of relying on a third-party asset"
 )
 assert(
     string.find(controller, "CFrame.Angles(-spin", 1, true) == nil

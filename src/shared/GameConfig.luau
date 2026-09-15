@@ -81,7 +81,6 @@ GameConfig.Movement = {
     SprintSpeed = 24,
     CrouchSpeed = 9,
     JumpPower = 50,
-    DodgeRollAnimationId = "rbxassetid://1258941951",
     DodgeRollStartSpeed = 26,
     DodgeRollEndSpeed = 8,
     DodgeDuration = 0.55,

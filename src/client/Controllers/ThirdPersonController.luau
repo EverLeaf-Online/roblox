@@ -1,4 +1,5 @@
 local GuiService = game:GetService("GuiService")
+local KeyframeSequenceProvider = game:GetService("KeyframeSequenceProvider")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -52,6 +53,110 @@ local function clearDodgeMover()
     end
 end
 
+local function makePose(name, transform)
+    local pose = Instance.new("Pose")
+    pose.Name = name
+    pose.Weight = 1
+    pose.CFrame = transform or CFrame.new()
+    return pose
+end
+
+local function addR15RollKeyframe(sequence, time, spinDegrees, tuck)
+    local keyframe = Instance.new("Keyframe")
+    keyframe.Time = time
+
+    local rootPose = makePose("HumanoidRootPart")
+    rootPose.Weight = 0
+    local lower = makePose(
+        "LowerTorso",
+        CFrame.new(0, -0.9 * tuck, 0.15 * tuck) * CFrame.Angles(math.rad(spinDegrees), 0, 0)
+    )
+    local upper = makePose("UpperTorso", CFrame.Angles(math.rad(-18 * tuck), 0, 0))
+    local head = makePose("Head", CFrame.Angles(math.rad(24 * tuck), 0, 0))
+    local leftArm = makePose(
+        "LeftUpperArm",
+        CFrame.Angles(math.rad(-68 * tuck), math.rad(-8 * tuck), math.rad(-18 * tuck))
+    )
+    local rightArm = makePose(
+        "RightUpperArm",
+        CFrame.Angles(math.rad(-68 * tuck), math.rad(8 * tuck), math.rad(18 * tuck))
+    )
+    local leftLeg =
+        makePose("LeftUpperLeg", CFrame.Angles(math.rad(78 * tuck), 0, math.rad(-8 * tuck)))
+    local rightLeg =
+        makePose("RightUpperLeg", CFrame.Angles(math.rad(78 * tuck), 0, math.rad(8 * tuck)))
+
+    upper:AddSubPose(head)
+    upper:AddSubPose(leftArm)
+    upper:AddSubPose(rightArm)
+    lower:AddSubPose(upper)
+    lower:AddSubPose(leftLeg)
+    lower:AddSubPose(rightLeg)
+    rootPose:AddSubPose(lower)
+    keyframe:AddPose(rootPose)
+    sequence:AddKeyframe(keyframe)
+end
+
+local function addR6RollKeyframe(sequence, time, spinDegrees, tuck)
+    local keyframe = Instance.new("Keyframe")
+    keyframe.Time = time
+
+    local rootPose = makePose("HumanoidRootPart")
+    rootPose.Weight = 0
+    local torso = makePose(
+        "Torso",
+        CFrame.new(0, -0.8 * tuck, 0.15 * tuck) * CFrame.Angles(math.rad(spinDegrees), 0, 0)
+    )
+    torso:AddSubPose(makePose("Head", CFrame.Angles(math.rad(22 * tuck), 0, 0)))
+    torso:AddSubPose(
+        makePose("Left Arm", CFrame.Angles(math.rad(-64 * tuck), 0, math.rad(-16 * tuck)))
+    )
+    torso:AddSubPose(
+        makePose("Right Arm", CFrame.Angles(math.rad(-64 * tuck), 0, math.rad(16 * tuck)))
+    )
+    torso:AddSubPose(
+        makePose("Left Leg", CFrame.Angles(math.rad(72 * tuck), 0, math.rad(-6 * tuck)))
+    )
+    torso:AddSubPose(
+        makePose("Right Leg", CFrame.Angles(math.rad(72 * tuck), 0, math.rad(6 * tuck)))
+    )
+    rootPose:AddSubPose(torso)
+    keyframe:AddPose(rootPose)
+    sequence:AddKeyframe(keyframe)
+end
+
+local function buildLocalRollAnimationId(rigType)
+    local sequence = Instance.new("KeyframeSequence")
+    sequence.Name = "EverLeafCombatRollSequence"
+    sequence.Loop = false
+    sequence.Priority = Enum.AnimationPriority.Action4
+
+    local addFrame = if rigType == Enum.HumanoidRigType.R6
+        then addR6RollKeyframe
+        else addR15RollKeyframe
+    addFrame(sequence, 0.00, 0, 0)
+    addFrame(sequence, 0.10, -70, 0.78)
+    addFrame(sequence, 0.23, -145, 1.00)
+    addFrame(sequence, 0.36, -230, 0.95)
+    addFrame(sequence, 0.48, -305, 0.68)
+    addFrame(sequence, GameConfig.Movement.DodgeDuration, -360, 0)
+
+    local ok, animationId = pcall(function()
+        return KeyframeSequenceProvider:RegisterKeyframeSequence(sequence)
+    end)
+    sequence:Destroy()
+    if not ok then
+        warn(
+            string.format(
+                "[ThirdPersonController] local roll sequence registration failed: %s",
+                tostring(animationId)
+            )
+        )
+        return nil
+    end
+    return animationId
+end
+
 local function playRollAnimation()
     local character = player.Character
     local currentHumanoid = character and character:FindFirstChildOfClass("Humanoid")
@@ -60,12 +165,17 @@ local function playRollAnimation()
         return false
     end
 
-    -- Adapted directly from the referenced DevForum roll/dodge script:
-    -- play a dedicated roll AnimationTrack while a short velocity mover carries
-    -- the character forward. The server still owns cooldowns and i-frames.
+    local animationId = buildLocalRollAnimationId(currentHumanoid.RigType)
+    if not animationId then
+        return false
+    end
+
+    -- The referenced dodge scripts use a dedicated AnimationTrack plus a short
+    -- velocity mover. We keep that proven structure, but author the roll clip
+    -- locally so EverLeaf never depends on a third-party animation permission.
     rollAnimation = Instance.new("Animation")
     rollAnimation.Name = "EverLeafCombatRoll"
-    rollAnimation.AnimationId = GameConfig.Movement.DodgeRollAnimationId
+    rollAnimation.AnimationId = animationId
 
     local ok, loaded = pcall(function()
         return animator:LoadAnimation(rollAnimation)
@@ -94,7 +204,7 @@ local function playRollAnimation()
         end
     end
 
-    rollTrack:Play(0.04, 1, 1)
+    rollTrack:Play(0.035, 1, 1)
     if rollTrack.Length > 0 then
         rollTrack:AdjustSpeed(math.max(0.1, rollTrack.Length / GameConfig.Movement.DodgeDuration))
     end
