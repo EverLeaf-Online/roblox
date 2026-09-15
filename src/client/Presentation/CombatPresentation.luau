@@ -18,6 +18,29 @@ local attackGeneration = 0
 
 local IDENTITY = CFrame.new()
 
+-- Roblox avatars can expose animation-compatible rigs without the shoulder
+-- Motor6Ds that the additive pose layer expects. Never fail the attack
+-- presentation in that case: fall back to a real Animator track.
+local R15_FALLBACK_ANIMATIONS = table.freeze({
+    default = "rbxassetid://522635514", -- tool slash
+    ironbloom = "rbxassetid://522638767", -- heavier lunge
+    thornrunner = "rbxassetid://507770453", -- point / release silhouette
+    lumenweaver = "rbxassetid://507770453", -- forward cast silhouette
+    veilstrider = "rbxassetid://522635514", -- fast slash
+    brasshand = "rbxassetid://522638767", -- heavy lunge
+})
+
+local R6_FALLBACK_ANIMATIONS = table.freeze({
+    default = "rbxassetid://129967390",
+    ironbloom = "rbxassetid://129967478",
+    thornrunner = "rbxassetid://128853357",
+    lumenweaver = "rbxassetid://128853357",
+    veilstrider = "rbxassetid://129967390",
+    brasshand = "rbxassetid://129967478",
+})
+
+local fallbackTracks = setmetatable({}, { __mode = "k" })
+
 local function findMotor(character, names)
     for _, name in names do
         local joint = character:FindFirstChild(name, true)
@@ -28,17 +51,39 @@ local function findMotor(character, names)
     return nil
 end
 
+local function findMotorConnecting(character, partNames)
+    for _, descendant in character:GetDescendants() do
+        if descendant:IsA("Motor6D") then
+            local part0 = descendant.Part0
+            local part1 = descendant.Part1
+            local part0Name = part0 and part0.Name or ""
+            local part1Name = part1 and part1.Name or ""
+            for _, name in partNames do
+                if part0Name == name or part1Name == name then
+                    return descendant
+                end
+            end
+        end
+    end
+    return nil
+end
+
 local function rigJoints(character)
     local right = findMotor(character, { "RightShoulder", "Right Shoulder" })
+        or findMotorConnecting(character, { "RightUpperArm", "Right Arm" })
     if not right then
         return nil
     end
     return {
         Right = right,
-        Left = findMotor(character, { "LeftShoulder", "Left Shoulder" }),
-        RightElbow = findMotor(character, { "RightElbow" }),
-        LeftElbow = findMotor(character, { "LeftElbow" }),
-        Torso = findMotor(character, { "Waist", "RootJoint", "Root Joint" }),
+        Left = findMotor(character, { "LeftShoulder", "Left Shoulder" })
+            or findMotorConnecting(character, { "LeftUpperArm", "Left Arm" }),
+        RightElbow = findMotor(character, { "RightElbow" })
+            or findMotorConnecting(character, { "RightLowerArm" }),
+        LeftElbow = findMotor(character, { "LeftElbow" })
+            or findMotorConnecting(character, { "LeftLowerArm" }),
+        Torso = findMotor(character, { "Waist", "RootJoint", "Root Joint" })
+            or findMotorConnecting(character, { "UpperTorso", "Torso" }),
     }
 end
 
@@ -225,14 +270,68 @@ local function sampleSequence(sequence, alpha)
     return frames[#frames]
 end
 
+local function fallbackAnimationId(humanoid, familyId)
+    local animations = if humanoid.RigType == Enum.HumanoidRigType.R6
+        then R6_FALLBACK_ANIMATIONS
+        else R15_FALLBACK_ANIMATIONS
+    return animations[familyId] or animations.default
+end
+
+local function playAnimatorFallback(character, familyId, duration)
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if not humanoid then
+        return false
+    end
+    local animator = humanoid:FindFirstChildOfClass("Animator")
+    if not animator then
+        return false
+    end
+
+    local animationId = fallbackAnimationId(humanoid, familyId)
+    local perAnimator = fallbackTracks[animator]
+    if not perAnimator then
+        perAnimator = {}
+        fallbackTracks[animator] = perAnimator
+    end
+
+    local track = perAnimator[animationId]
+    if not track then
+        local animation = Instance.new("Animation")
+        animation.Name = "EverLeafAttackFallback"
+        animation.AnimationId = animationId
+        local ok, loaded = pcall(function()
+            return animator:LoadAnimation(animation)
+        end)
+        animation:Destroy()
+        if not ok or not loaded then
+            return false
+        end
+        track = loaded
+        track.Priority = Enum.AnimationPriority.Action4
+        track.Looped = false
+        perAnimator[animationId] = track
+    end
+
+    if track.IsPlaying then
+        track:Stop(0.02)
+    end
+    track:Play(0.035, 1, 1)
+    if track.Length > 0 and duration > 0 then
+        track:AdjustSpeed(math.max(0.1, track.Length / duration))
+    end
+    return true
+end
+
 local function playSequence(character, familyId)
+    local sequence = ATTACK_SEQUENCES[familyId] or ATTACK_SEQUENCES.default
     local resolved = rigJoints(character)
     if not resolved then
-        warn("[CombatPresentation] Player rig has no usable shoulder Motor6D")
+        if not playAnimatorFallback(character, familyId, sequence.Duration) then
+            warn("[CombatPresentation] Player rig has no usable attack animation path")
+        end
         return
     end
 
-    local sequence = ATTACK_SEQUENCES[familyId] or ATTACK_SEQUENCES.default
     attackGeneration += 1
     local generation = attackGeneration
     local startedAt = os.clock()
