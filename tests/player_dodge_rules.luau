@@ -10,9 +10,11 @@ local bootstrap = fs.readFile("src/server/bootstrap.server.luau")
 
 assert(string.find(config, "DodgeIFrameDuration = 0.22", 1, true), "dodge iframe config missing")
 assert(string.find(config, "NormalMaxHorizontalSpeed = 32", 1, true), "normal movement cap missing")
-assert(string.find(config, "DodgeRollStartSpeed = 26", 1, true), "roll start speed missing")
-assert(string.find(config, "DodgeRollEndSpeed = 8", 1, true), "roll end speed missing")
-assert(string.find(config, "DodgeDuration = 0.55", 1, true), "roll duration missing")
+assert(string.find(config, "DodgeRollStartSpeed = 14", 1, true), "roll start speed missing")
+assert(string.find(config, "DodgeRollPeakSpeed = 26", 1, true), "roll peak speed missing")
+assert(string.find(config, "DodgeRollEndSpeed = 7", 1, true), "roll end speed missing")
+assert(string.find(config, "DodgeRollPeakAlpha = 0.18", 1, true), "roll peak timing missing")
+assert(string.find(config, "DodgeDuration = 0.58", 1, true), "roll duration missing")
 assert(
     string.find(validator, "payload.Dodge == true", 1, true),
     "dodge movement intent validation missing"
@@ -46,8 +48,15 @@ assert(
 )
 assert(
     string.find(controller, "KeyframeSequenceProvider:RegisterKeyframeSequence", 1, true)
-        and string.find(controller, "EverLeafCombatRollSequence", 1, true),
+        and string.find(controller, "EverLeafCombatRollSequence", 1, true)
+        and string.find(controller, "PoseEasingStyle.CubicV2", 1, true)
+        and string.find(controller, "frameCount = 12", 1, true),
     "combat roll must author a local keyframe sequence instead of relying on a third-party asset"
+)
+assert(
+    string.find(controller, "local function prepareRollAnimation", 1, true)
+        and string.find(controller, "rollCharacter == character", 1, true),
+    "roll track must be cached/prewarmed per character instead of rebuilt on every dodge"
 )
 assert(
     string.find(controller, "CFrame.Angles(-spin", 1, true) == nil
@@ -56,8 +65,9 @@ assert(
 )
 assert(
     string.find(controller, "local function rollSpeed", 1, true)
-        and string.find(controller, "DodgeRollEndSpeed", 1, true),
-    "roll movement must decelerate instead of holding sprint-like velocity"
+        and string.find(controller, "DodgeRollPeakSpeed", 1, true)
+        and string.find(controller, "DodgeRollPeakAlpha", 1, true),
+    "roll movement must smoothly accelerate into and decelerate out of the roll"
 )
 assert(
     string.find(controller, "VelocityConstraintMode.Plane", 1, true),

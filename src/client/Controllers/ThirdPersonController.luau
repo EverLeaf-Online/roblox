@@ -27,22 +27,26 @@ local dodgeAttachment = nil
 local dodgeVelocity = nil
 local rollTrack = nil
 local rollAnimation = nil
+local rollCharacter = nil
 
 local function stopRollAnimation(fadeTime)
-    if rollTrack then
-        if rollTrack.IsPlaying then
-            rollTrack:Stop(fadeTime or 0.04)
-        end
-        rollTrack = nil
+    if rollTrack and rollTrack.IsPlaying then
+        rollTrack:Stop(fadeTime or 0.06)
     end
+end
+
+local function destroyRollAnimation()
+    stopRollAnimation(0)
+    rollTrack = nil
     if rollAnimation then
         rollAnimation:Destroy()
         rollAnimation = nil
     end
+    rollCharacter = nil
 end
 
 local function clearDodgeMover()
-    stopRollAnimation(0.04)
+    stopRollAnimation(0.06)
     if dodgeVelocity then
         dodgeVelocity:Destroy()
         dodgeVelocity = nil
@@ -58,6 +62,8 @@ local function makePose(name, transform)
     pose.Name = name
     pose.Weight = 1
     pose.CFrame = transform or CFrame.new()
+    pose.EasingStyle = Enum.PoseEasingStyle.CubicV2
+    pose.EasingDirection = Enum.PoseEasingDirection.InOut
     return pose
 end
 
@@ -134,12 +140,14 @@ local function buildLocalRollAnimationId(rigType)
     local addFrame = if rigType == Enum.HumanoidRigType.R6
         then addR6RollKeyframe
         else addR15RollKeyframe
-    addFrame(sequence, 0.00, 0, 0)
-    addFrame(sequence, 0.10, -70, 0.78)
-    addFrame(sequence, 0.23, -145, 1.00)
-    addFrame(sequence, 0.36, -230, 0.95)
-    addFrame(sequence, 0.48, -305, 0.68)
-    addFrame(sequence, GameConfig.Movement.DodgeDuration, -360, 0)
+    local frameCount = 12
+    for index = 0, frameCount do
+        local alpha = index / frameCount
+        local time = GameConfig.Movement.DodgeDuration * alpha
+        local spinDegrees = -360 * alpha
+        local tuck = math.sin(alpha * math.pi) ^ 0.72
+        addFrame(sequence, time, spinDegrees, tuck)
+    end
 
     local ok, animationId = pcall(function()
         return KeyframeSequenceProvider:RegisterKeyframeSequence(sequence)
@@ -157,8 +165,13 @@ local function buildLocalRollAnimationId(rigType)
     return animationId
 end
 
-local function playRollAnimation()
-    local character = player.Character
+local function prepareRollAnimation(character)
+    if rollTrack and rollAnimation and rollCharacter == character then
+        return true
+    end
+
+    destroyRollAnimation()
+
     local currentHumanoid = character and character:FindFirstChildOfClass("Humanoid")
     local animator = currentHumanoid and currentHumanoid:FindFirstChildOfClass("Animator")
     if not character or not currentHumanoid or not animator then
@@ -170,9 +183,6 @@ local function playRollAnimation()
         return false
     end
 
-    -- The referenced dodge scripts use a dedicated AnimationTrack plus a short
-    -- velocity mover. We keep that proven structure, but author the roll clip
-    -- locally so EverLeaf never depends on a third-party animation permission.
     rollAnimation = Instance.new("Animation")
     rollAnimation.Name = "EverLeafCombatRoll"
     rollAnimation.AnimationId = animationId
@@ -181,8 +191,7 @@ local function playRollAnimation()
         return animator:LoadAnimation(rollAnimation)
     end)
     if not ok or not loaded then
-        rollAnimation:Destroy()
-        rollAnimation = nil
+        destroyRollAnimation()
         warn("[ThirdPersonController] combat roll animation failed to load")
         return false
     end
@@ -190,6 +199,21 @@ local function playRollAnimation()
     rollTrack = loaded
     rollTrack.Priority = Enum.AnimationPriority.Action4
     rollTrack.Looped = false
+    rollCharacter = character
+    return true
+end
+
+local function playRollAnimation()
+    local character = player.Character
+    local currentHumanoid = character and character:FindFirstChildOfClass("Humanoid")
+    local animator = currentHumanoid and currentHumanoid:FindFirstChildOfClass("Animator")
+    if not character or not currentHumanoid or not animator then
+        return false
+    end
+
+    if not prepareRollAnimation(character) or not rollTrack then
+        return false
+    end
 
     for _, track in animator:GetPlayingAnimationTracks() do
         if
@@ -200,19 +224,20 @@ local function playRollAnimation()
                 or track.Priority == Enum.AnimationPriority.Movement
             )
         then
-            track:Stop(0.03)
+            track:Stop(0.06)
         end
     end
 
-    rollTrack:Play(0.035, 1, 1)
-    if rollTrack.Length > 0 then
-        rollTrack:AdjustSpeed(math.max(0.1, rollTrack.Length / GameConfig.Movement.DodgeDuration))
+    if rollTrack.IsPlaying then
+        rollTrack:Stop(0)
     end
+    rollTrack:Play(0.07, 1, 1)
     return true
 end
 
 local function attachCharacter(character)
     clearDodgeMover()
+    destroyRollAnimation()
     humanoid = character:WaitForChild("Humanoid")
     root = character:WaitForChild("HumanoidRootPart")
     CombatFacing.Reset()
@@ -225,6 +250,11 @@ local function attachCharacter(character)
     dodgeDirection = Vector3.zero
     crouching = false
     humanoid.CameraOffset = Vector3.zero
+    task.defer(function()
+        if player.Character == character then
+            prepareRollAnimation(character)
+        end
+    end)
 end
 
 local function inputBlocked()
@@ -285,9 +315,19 @@ local function getWorldMoveDirection()
 end
 
 local function rollSpeed(alpha)
-    local eased = alpha * alpha * (3 - 2 * alpha)
-    return GameConfig.Movement.DodgeRollStartSpeed
-        + (GameConfig.Movement.DodgeRollEndSpeed - GameConfig.Movement.DodgeRollStartSpeed)
+    local peakAlpha = GameConfig.Movement.DodgeRollPeakAlpha
+    if alpha <= peakAlpha then
+        local t = math.clamp(alpha / peakAlpha, 0, 1)
+        local eased = math.sin(t * math.pi * 0.5)
+        return GameConfig.Movement.DodgeRollStartSpeed
+            + (GameConfig.Movement.DodgeRollPeakSpeed - GameConfig.Movement.DodgeRollStartSpeed)
+                * eased
+    end
+
+    local t = math.clamp((alpha - peakAlpha) / (1 - peakAlpha), 0, 1)
+    local eased = 0.5 - 0.5 * math.cos(t * math.pi)
+    return GameConfig.Movement.DodgeRollPeakSpeed
+        + (GameConfig.Movement.DodgeRollEndSpeed - GameConfig.Movement.DodgeRollPeakSpeed)
             * eased
 end
 
