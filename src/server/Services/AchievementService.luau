@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local MonetizationConfig = require(ReplicatedStorage.Shared.MonetizationConfig)
+local AchievementSyncRules = require(ReplicatedStorage.Shared.Logic.AchievementSyncRules)
 local AchievementDefinitions = require(script.Parent.Parent.Content.AchievementDefinitions)
 
 local AchievementService = {}
@@ -62,23 +63,24 @@ function AchievementService.UnlockAndAward(player, profile, achievementId)
 end
 
 function AchievementService.SyncJoin(player, profile)
+    local plan = AchievementSyncRules.BuildJoinPlan(
+        profile,
+        AchievementDefinitions,
+        MonetizationConfig.FoundingPhaseActive
+    )
+
+    -- Repair platform badges from durable local achievement state first. This
+    -- covers prior transient BadgeService failures, including First Victory and
+    -- Founding Adventurer after the founding phase has ended.
+    for _, achievementId in plan.RepairIds do
+        task.spawn(AchievementService.AwardRobloxBadge, player, achievementId)
+    end
+
     local changed = false
-
-    local welcomeChanged =
-        AchievementService.UnlockAndAward(player, profile, "welcome_to_lumenreach")
-    changed = welcomeChanged or changed
-
-    if MonetizationConfig.FoundingPhaseActive then
-        local foundingChanged =
-            AchievementService.UnlockAndAward(player, profile, "founding_adventurer")
-        changed = foundingChanged or changed
+    for _, achievementId in plan.UnlockIds do
+        local unlocked = AchievementService.UnlockAndAward(player, profile, achievementId)
+        changed = unlocked or changed
     end
-
-    if profile.Level >= 10 then
-        local levelChanged = AchievementService.UnlockAndAward(player, profile, "level_10")
-        changed = levelChanged or changed
-    end
-
     return changed
 end
 
