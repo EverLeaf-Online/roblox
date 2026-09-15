@@ -38,6 +38,9 @@ local function basicAttackDefinition(profile)
         AttackPower = attack and attack.AttackPower or GameConfig.Combat.BeginnerAttackPower,
         StatScale = attack and attack.StatScale or GameConfig.Combat.BeginnerStatScale,
         Mastery = attack and attack.Mastery or GameConfig.Combat.DefaultMastery,
+        Knockback = attack and attack.Knockback or GameConfig.Combat.BeginnerKnockback,
+        Knockup = attack and attack.Knockup or GameConfig.Combat.BeginnerKnockup,
+        Stagger = attack and attack.Stagger or GameConfig.Combat.BeginnerStagger,
     }
 end
 
@@ -121,7 +124,13 @@ function CombatService.BasicAttack(player, profile)
         target,
         targetDefinition.MonsterConfig or targetDefinition,
         damage,
-        { Critical = damageMeta and damageMeta.Critical == true }
+        {
+            Critical = damageMeta and damageMeta.Critical == true,
+            SourcePosition = playerRoot.Position,
+            Knockback = attack.Knockback,
+            Knockup = attack.Knockup,
+            Stagger = attack.Stagger,
+        }
     )
     if not hitApplied then
         if hitResult == "dodged" then

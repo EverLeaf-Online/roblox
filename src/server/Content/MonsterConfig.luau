@@ -23,6 +23,8 @@ local definitions = {
         RespawnTime = 3,
         LeashRange = 0,
         HitStun = 0.2,
+        KnockbackResistance = 1,
+        StaggerResistance = 0,
         Reward = table.freeze({ Exp = 10, Currencies = table.freeze({ Shards = 1 }) }),
     }),
     lumen_mossling = table.freeze({

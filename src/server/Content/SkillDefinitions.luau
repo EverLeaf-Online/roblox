@@ -22,6 +22,9 @@ return table.freeze({
             VerticalRange = 8,
             ArcDegrees = 140,
             RequireLineOfSight = true,
+            Knockback = 12,
+            Knockup = 2.5,
+            Stagger = 0.3,
         }),
     }),
     steady_footing = table.freeze({
@@ -60,6 +63,9 @@ return table.freeze({
             VerticalRange = 8,
             ArcDegrees = 150,
             RequireLineOfSight = true,
+            Knockback = 18,
+            Knockup = 3,
+            Stagger = 0.42,
         }),
     }),
     ironbloom_rooted_guard = table.freeze({
@@ -100,6 +106,9 @@ return table.freeze({
             VerticalRange = 10,
             ArcDegrees = 72,
             RequireLineOfSight = true,
+            Knockback = 7,
+            Knockup = 1,
+            Stagger = 0.18,
         }),
     }),
     thornrunner_trail_focus = table.freeze({
@@ -142,6 +151,9 @@ return table.freeze({
             VerticalRange = 11,
             ArcDegrees = 105,
             RequireLineOfSight = true,
+            Knockback = 8,
+            Knockup = 2,
+            Stagger = 0.22,
         }),
     }),
     lumenweaver_resonance = table.freeze({
@@ -183,6 +195,9 @@ return table.freeze({
             VerticalRange = 8,
             ArcDegrees = 160,
             RequireLineOfSight = true,
+            Knockback = 13,
+            Knockup = 2,
+            Stagger = 0.28,
         }),
     }),
     veilstrider_edge_instinct = table.freeze({
@@ -224,6 +239,9 @@ return table.freeze({
             VerticalRange = 8,
             ArcDegrees = 135,
             RequireLineOfSight = true,
+            Knockback = 21,
+            Knockup = 4,
+            Stagger = 0.42,
         }),
     }),
     brasshand_forge_temper = table.freeze({
@@ -265,6 +283,9 @@ return table.freeze({
             VerticalRange = 9,
             ArcDegrees = 155,
             RequireLineOfSight = true,
+            Knockback = 24,
+            Knockup = 5,
+            Stagger = 0.5,
         }),
     }),
     thornrunner_gale_piercer = table.freeze({
@@ -292,6 +313,9 @@ return table.freeze({
             VerticalRange = 12,
             ArcDegrees = 64,
             RequireLineOfSight = true,
+            Knockback = 9,
+            Knockup = 1.5,
+            Stagger = 0.22,
         }),
     }),
     lumenweaver_prism_lance = table.freeze({
@@ -319,6 +343,9 @@ return table.freeze({
             VerticalRange = 13,
             ArcDegrees = 92,
             RequireLineOfSight = true,
+            Knockback = 12,
+            Knockup = 3,
+            Stagger = 0.3,
         }),
     }),
     veilstrider_gloam_rush = table.freeze({
@@ -345,6 +372,9 @@ return table.freeze({
             VerticalRange = 9,
             ArcDegrees = 170,
             RequireLineOfSight = true,
+            Knockback = 17,
+            Knockup = 3,
+            Stagger = 0.34,
         }),
     }),
     brasshand_forgebreaker = table.freeze({
@@ -371,6 +401,9 @@ return table.freeze({
             VerticalRange = 9,
             ArcDegrees = 140,
             RequireLineOfSight = true,
+            Knockback = 30,
+            Knockup = 6,
+            Stagger = 0.58,
         }),
     }),
 })

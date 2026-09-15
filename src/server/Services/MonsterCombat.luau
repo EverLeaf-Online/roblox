@@ -1,6 +1,9 @@
 local Debris = game:GetService("Debris")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
+local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
+local MonsterReactionMath = require(ReplicatedStorage.Shared.Math.MonsterReactionMath)
 local MonsterAnimationService = require(script.Parent.MonsterAnimationService)
 local PlayerDamageService = require(script.Parent.PlayerDamageService)
 
@@ -226,9 +229,31 @@ local function showDamage(monster, amount, text, color)
     Debris:AddItem(gui, 0.65)
 end
 
+local function applyPlayerKnockback(monster, sourcePosition, knockback, knockup)
+    local root = getRoot(monster)
+    if not root or root.Anchored or typeof(sourcePosition) ~= "Vector3" then
+        return
+    end
+    if knockback <= 0 and knockup <= 0 then
+        return
+    end
+
+    local delta = root.Position - sourcePosition
+    local planar = Vector3.new(delta.X, 0, delta.Z)
+    if planar.Magnitude <= 0.01 then
+        local look = root.CFrame.LookVector
+        planar = Vector3.new(look.X, 0, look.Z)
+    end
+    planar = planar.Magnitude > 0.01 and planar.Unit or Vector3.new(0, 0, 1)
+
+    local velocity = root.AssemblyLinearVelocity
+    root.AssemblyLinearVelocity =
+        Vector3.new(planar.X * knockback, math.max(velocity.Y, 0) + knockup, planar.Z * knockback)
+end
+
 local function playFlinch(monster, duration)
     local root = getRoot(monster)
-    if not root then
+    if not root or duration <= 0 then
         return
     end
     monster:SetAttribute("MonsterReaction", "Hit")
@@ -330,7 +355,11 @@ function MonsterCombat.ApplyPlayerHit(monster, definition, damage, options)
     end
     hitBurst(monster)
     if humanoid.Health > 0 then
-        playFlinch(monster, definition.HitStun or 0.22)
+        local reaction = MonsterReactionMath.Resolve(definition, options, GameConfig.Combat)
+        applyPlayerKnockback(monster, options.SourcePosition, reaction.Knockback, reaction.Knockup)
+        if reaction.Interrupts then
+            playFlinch(monster, reaction.Stagger)
+        end
     end
     return true, applied
 end

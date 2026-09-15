@@ -15,6 +15,11 @@ function SkillEffectService.Execute(player, profile, definition)
     end
 
     if effect.Type == "DamageAttack" then
+        local character = player.Character
+        local sourceRoot = character and character:FindFirstChild("HumanoidRootPart")
+        if not sourceRoot then
+            return false, "character_unavailable"
+        end
         local mode = effect.Mode or "Melee"
         local targetSpec = {
             Range = effect.Range or 10,
@@ -71,7 +76,13 @@ function SkillEffectService.Execute(player, profile, definition)
             target,
             targetDefinition.MonsterConfig or targetDefinition,
             damage,
-            { Critical = damageMeta and damageMeta.Critical == true }
+            {
+                Critical = damageMeta and damageMeta.Critical == true,
+                SourcePosition = sourceRoot.Position,
+                Knockback = effect.Knockback or 0,
+                Knockup = effect.Knockup or 0,
+                Stagger = effect.Stagger,
+            }
         )
         if not hitApplied then
             if hitResult == "dodged" then

@@ -65,6 +65,13 @@ for enemyId, monster in MonsterConfig.All() do
         depthSlack == nil or (type(depthSlack) == "number" and depthSlack >= 0),
         string.format("enemy %s AttackDepthSlack must be non-negative when set", enemyId)
     )
+    for _, fieldName in { "KnockbackResistance", "StaggerResistance" } do
+        local value = monster[fieldName]
+        assert(
+            value == nil or (type(value) == "number" and value >= 0 and value <= 1),
+            string.format("enemy %s %s must be normalized when set", enemyId, fieldName)
+        )
+    end
 
     local reward = monster.Reward
     if reward then
@@ -246,6 +253,13 @@ for skillId, skill in Skills do
             skill.Effect.Mode == "Melee" or skill.Effect.Mode == "Projectile",
             "damage skill mode valid: " .. skillId
         )
+        for _, fieldName in { "Knockback", "Knockup", "Stagger" } do
+            local value = skill.Effect[fieldName]
+            assert(
+                type(value) == "number" and value >= 0,
+                string.format("damage skill %s has non-negative %s", skillId, fieldName)
+            )
+        end
         if skill.Effect.Mode == "Melee" then
             assert(
                 type(skill.Effect.HitboxWidth) == "number" and skill.Effect.HitboxWidth > 0,

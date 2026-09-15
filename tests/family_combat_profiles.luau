@@ -21,6 +21,12 @@ for familyId, expectation in expected do
         type(attack.Mastery) == "number" and attack.Mastery >= 0.1 and attack.Mastery <= 1,
         familyId .. " mastery valid"
     )
+    assert(
+        type(attack.Knockback) == "number" and attack.Knockback >= 0,
+        familyId .. " knockback valid"
+    )
+    assert(type(attack.Knockup) == "number" and attack.Knockup >= 0, familyId .. " knockup valid")
+    assert(type(attack.Stagger) == "number" and attack.Stagger >= 0, familyId .. " stagger valid")
     if expectation.Ranged then
         assert(attack.Range >= 20, familyId .. " maintains ranged basic identity")
     else

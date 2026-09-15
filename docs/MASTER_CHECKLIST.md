@@ -339,7 +339,7 @@
 - [ ] Hit sound.
 - [ ] Hit VFX.
 - [ ] Hit-stop/impact feel.
-- [ ] Knockback/stagger.
+- [x] Player basic attacks and damaging skills now apply server-owned monster knockback/launch/stagger data with normal/elite/boss resistance tiers and per-monster override support; Studio feel tuning remains.
 - [ ] Miss/out-of-range feedback suitable for production.
 - [ ] Weapon-specific basic attacks.
 - [ ] Attack speed/cadence stat rules.
@@ -384,7 +384,7 @@
 - [x] Spawn trigger states: Idle → Triggered → Spawning → Active → Cooldown.
 - [x] Wave cooldown requires players to leave and re-enter before retriggering.
 - [x] Spawn regions placed for the current Lumenreach roster plus Brasshaven Rivet Scuttlers, Slagmites, Gearjaw Hounds, Cindercoils, Pressure Bastion, Furnace Husks, Arc Siphons, Railbreaker, Blueflame Sentries, Foundry Reavers, and Smelter Golem.
-- [ ] Production hitbox/hurtbox and enemy knockback/stagger-resistance rules.
+- [x] Production combat geometry/reaction foundation is standardized: player melee/skills and monster swings use server-owned hit volumes, while enemy knockback/stagger is resolved through normal/elite/boss resistance tiers; Studio tuning remains.
 - [ ] Studio tune pathfinding, spawn density, anti-farm timing, and multiplayer target behavior.
 - [ ] Replace any remaining simple/procedural monster visuals that fail the final art-quality bar.
 
