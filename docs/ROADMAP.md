@@ -1,6 +1,6 @@
 # EverLeaf Roblox Roadmap
 
-**Canonical status:** 2026-09-14
+**Canonical status:** 2026-09-15
 **Repository:** `EverLeaf-Online/roblox`
 **Detailed tracker:** [`MASTER_CHECKLIST.md`](MASTER_CHECKLIST.md)
 **Architecture:** [`ARCHITECTURE.md`](ARCHITECTURE.md)
@@ -69,9 +69,9 @@ Architecture closure completed:
 **Phase A exit passed:** every major game domain now has a canonical module/service boundary and a defined connection to neighboring systems. Feature completeness is deliberately deferred.
 
 
-### Current verified Phase B baseline — 2026-09-14
+### Current verified Phase B baseline — 2026-09-15
 
-Studio-verified today: third-person movement/camera, sprint/jump/dodge, left-click basic attack, hostile Mossling combat/player damage, React HUD/dialogue, Lumen Guide quest accept/progress/turn-in, and Rojo/Wally/React sync. Source-complete but not yet fully Studio-verified/polished: the multi-tab RPG menu shell, generic skills, party/instance/boss shells, and several backend service boundaries. The environment remains prototype-quality: Poly Haven PBR materials are now uploaded and Studio-verified, but the current Creator Store tree prefab is still visually unacceptable/fallen and must be replaced with a production upright foliage set.
+Studio-verified gameplay foundations remain third-person movement/camera, sprint/jump/dodge, basic combat, hostile enemy damage, React HUD/dialogue, quest accept/progress/turn-in, and Rojo/Wally/React sync. The Lumenreach source world has now been redesigned as a 2200×1700 MMO starter region with a true town hub, Level 1 starter field, large encounter rooms, branching exploration loops, natural terrain boundaries, a central gorge/bridge threshold, and the Brasshaven gate at the far-zone capstone. The redesigned world is source/build-verified; the new full-zone player-height art, collision, multiplayer traversal, and performance pass is the current Studio priority. The canonical world-design contract is maintained in `docs/LUMENREACH_WORLD_LAYOUT.md`.
 
 ### Phase B — 3D foundation + complete game shell — ACTIVE
 
@@ -100,24 +100,25 @@ Phase 1 is the first complete playable EverLeaf slice. It is not considered comp
 
 Required end-to-end loop:
 
-1. Spawn at Lumenreach Wayfarer Camp.
-2. Move, sprint, jump, dodge, and use the third-person camera.
-3. Talk to the Lumen Guide.
-4. Accept the first quest.
-5. Travel to the Mossglen combat grove.
-6. Fight Mosslings with basic attack and Beginner Strike.
-7. Take damage, die if necessary, and respawn cleanly at camp.
-8. Preserve HUD/menu/hotbar state across respawn.
-9. Complete the quest objective and explicitly turn the quest in.
-10. Receive rewards and see progression feedback.
-11. Use inventory/equipment/consumable actions without server-authority violations.
-12. Traverse a starter environment that no longer reads as placeholder graybox.
+1. Spawn safely in the Wayfarer Camp town plaza and orient from the hub landmarks/services.
+2. Move, sprint, jump, dodge, use the third-person camera, and interact with the starter NPC cluster.
+3. Accept the first quest from Ilyra and leave town through the signed Greenway road.
+4. Fight Mosslings in the dedicated Mossling Hollow / Greenway starter field without combat spilling into the road.
+5. Return/turn in, use the Quartermaster shop, and verify inventory/equipment/consumable actions.
+6. Reach Lumenwood Crossroads and understand the regional route choices from sightlines/signage alone.
+7. Explore Glowmere Wetland and cross the central gorge/Eastbridge into the mid-zone.
+8. Clear Gravebone Watch, then progress through Mossglen hunts, Brambleback Trail, and the Mosswarden field-boss space before the late-zone loops.
+9. Explore the Sunmoss highland and Veilfall ravine/Whisperroot side route without forced linear backtracking.
+10. Complete the Wayfarer Proving Circle / first advancement flow.
+11. Take damage, die if necessary, and respawn cleanly at Camp without losing HUD/menu/hotbar/progression state.
+12. Reach Level 10, complete the Brasshaven passage requirements, and travel through the far-edge Shattered Lumen Arch gate.
+13. Confirm the full 2200×1700 starter region remains readable, traversable, performant, and free of placeholder/broken environment assets.
 
 Phase 1 production priorities, in order:
 
 - **P1-A — Stability:** no red errors, no broken respawn/UI state, no invalid material/plugin dependencies, no remote-authority regressions.
 - **P1-B — Combat feel:** hit feedback, damage numbers, enemy telegraphs, leash/reset, knockback/stagger where appropriate, and production attack presentation.
-- **P1-C — Starter-zone art:** replace the fallen Creator Store tree prefab, use production-quality upright foliage, finish PBR ground/rock/wood coverage, improve rocks/ruins/logs/stumps/camp props, strengthen landmarks/path readability, and profile density.
+- **P1-C — MMO starter-zone world:** Studio-validate the new 2200×1700 Lumenreach layout, town hub, natural terrain boundaries, road grades, landmark silhouettes, encounter-room scale, foliage density, and far-edge Brasshaven transition; fix any player-height composition issue before adding more decorative density.
 - **P1-D — RPG shell:** finish responsive HUD/menu UX, inventory/equipment/skills/quests/settings usability, dedicated shop presentation, and notifications/reward feedback.
 - **P1-E — Content closure:** complete the first quest/reward/shop loop, starter loot, first advancement hook, Brasshaven transition shell, and Belforge entry shell only as far as required for Phase 1 continuity.
 - **P1-F — QA:** repeatable fresh-profile, death/respawn, rejoin, combat, quest, inventory, controller, and performance passes.

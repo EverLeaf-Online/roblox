@@ -34,7 +34,7 @@ return table.freeze({
         Reward = table.freeze({ Exp = 70, Currencies = table.freeze({ Shards = 8 }) }),
     }),
     gravebone_problem = table.freeze({
-        DisplayName = "Bones Beneath the Arch",
+        DisplayName = "Bones at Gravebone Watch",
         MinimumLevel = 3,
         StartNpcId = "moss_scout",
         PrerequisiteQuests = table.freeze({ "lumen_trail_watch" }),
@@ -65,10 +65,10 @@ return table.freeze({
         StartNpcId = "archive_keeper",
         PrerequisiteQuests = table.freeze({ "lumen_trail_watch" }),
         Objectives = table.freeze({
-            table.freeze({ Type = "Explore", Target = "shattered_lumen_arch", Required = 1 }),
-            table.freeze({ Type = "Explore", Target = "veilfall_cascade", Required = 1 }),
-            table.freeze({ Type = "Explore", Target = "sunmoss_overlook", Required = 1 }),
-            table.freeze({ Type = "Explore", Target = "whisperroot_hollow", Required = 1 }),
+            table.freeze({ Type = "Explore", Target = "gravebone_watch", Required = 1 }),
+            table.freeze({ Type = "Explore", Target = "eastbridge_crossing", Required = 1 }),
+            table.freeze({ Type = "Explore", Target = "mossglen_valley", Required = 1 }),
+            table.freeze({ Type = "Explore", Target = "glowmere_pool", Required = 1 }),
         }),
         Reward = table.freeze({
             Exp = 165,

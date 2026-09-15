@@ -4,7 +4,7 @@ return table.freeze({
         RegionId = "lumenreach",
         Dialogue = table.freeze({
             "Lumenreach rewards curiosity, but the old paths have teeth. Learn the camp, read the land, and never ignore a trail that suddenly goes quiet.",
-            "The Crossroads, Glowmere, Veilfall, and the Shattered Arch form the old wayfarer circuit. Walk it once and the region starts making sense.",
+            "The Greenway opens into Lumenwood Crossroads. The north road loops through Glowmere and Mossglen, the southern route drops toward Veilfall, and both eventually meet at the Shattered Arch.",
             "When the old grove finally stirs, come back to me. The road beyond Lumenreach does not open for untested travelers.",
         }),
         QuestOffers = table.freeze({
@@ -27,7 +27,7 @@ return table.freeze({
         DisplayName = "Tovin · Mossglen Scout",
         RegionId = "lumenreach",
         Dialogue = table.freeze({
-            "The wildlife is moving in patterns it should not. Skeletons at the Arch, ridgebeaks crowding Mossglen, and something heavy moving under the roots.",
+            "The wildlife is moving in patterns it should not. Skeletons have taken Gravebone Watch beyond Eastbridge, ridgebeaks are crowding Mossglen, and something heavy is moving under the roots.",
             "If you hear the grove go silent, do not assume you are alone. That is usually when the Mosswarden is closest.",
         }),
         QuestOffers = table.freeze({
@@ -56,7 +56,7 @@ return table.freeze({
         AdvancementQuestId = "first_advancement_trial",
         Dialogue = table.freeze({
             "Surviving the grove proves instinct. Choosing a path proves intent. The old Wayfarers kept five disciplines, and none of them forgive hesitation.",
-            "Walk the proving circle, then bring down the Gravebone Captain at the Shattered Arch. Return when you know what kind of fighter you intend to become.",
+            "Walk the proving circle, then return beyond Eastbridge and bring down the Gravebone Captain at Gravebone Watch. Return when you know what kind of fighter you intend to become.",
             "The trial is behind you. The choice ahead is permanent. Read each path carefully before you bind yourself to it.",
         }),
         QuestOffers = table.freeze({ "first_advancement_trial" }),
