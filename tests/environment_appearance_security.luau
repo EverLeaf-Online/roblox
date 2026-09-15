@@ -55,3 +55,11 @@ assert(
     string.find(lumenreach, '"RockFace"', 1, true) == nil,
     "player-facing Lumenreach composition must not place the paper-thin imported RockFace prefab"
 )
+assert(
+    string.find(lumenreach, "local function makeAngularRock", 1, true) ~= nil,
+    "Lumenreach uses angular non-PBR fallback rock formations for player-facing cliffs"
+)
+assert(
+    string.find(lumenreach, 'Instance.new("Beam")', 1, true) ~= nil,
+    "Veilfall waterfall uses Beam ribbons instead of opaque slab parts"
+)

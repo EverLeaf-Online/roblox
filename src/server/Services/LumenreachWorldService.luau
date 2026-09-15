@@ -556,6 +556,23 @@ local function makeRock(parent, position, size, rotation)
     return rock
 end
 
+local function makeAngularRock(parent, position, size, rotation, color)
+    local rock = makePart(
+        parent,
+        "AngularRock",
+        size,
+        CFrame.new(position) * CFrame.Angles(rotation.X, rotation.Y, rotation.Z),
+        Enum.Material.Slate,
+        color or Color3.fromRGB(95, 105, 100)
+    )
+    rock.CanCollide = false
+    rock.CanTouch = false
+    rock.CanQuery = false
+    rock.TopSurface = Enum.SurfaceType.Smooth
+    rock.BottomSurface = Enum.SurfaceType.Smooth
+    return rock
+end
+
 local function makeRockCluster(parent, position, scale, seed)
     local yaw = math.rad(((seed or 1) * 47) % 360)
     local prefab = placeGroundedPrefab(
@@ -655,7 +672,7 @@ local function makeRockFace(parent, position, yaw, scale)
     }
     for index, spec in specs do
         local worldPosition = (base * CFrame.new(spec.Offset * scale)).Position
-        local rock = makeRock(
+        local rock = makeAngularRock(
             model,
             worldPosition,
             spec.Size * scale,
@@ -1908,7 +1925,7 @@ local function makeWaterfall(parent, position)
         },
     }
     for index, spec in cliffRocks do
-        local rock = makeRock(
+        local rock = makeAngularRock(
             model,
             ground + spec.Offset,
             spec.Size,
@@ -1943,29 +1960,66 @@ local function makeWaterfall(parent, position)
         CFrame.new(ground + Vector3.new(10, 10, -1.2)) * CFrame.Angles(0, math.rad(-10), 0)
     )
 
-    -- Five narrow translucent ribbons break the old flat rectangular waterfall silhouette.
+    -- Camera-facing beams read as flowing water instead of stacked cyan blocks.
     local ribbonSpecs = {
-        { X = -3.15, Width = 1.35, Height = 17.2, Z = 7.65, Transparency = 0.66 },
-        { X = -1.55, Width = 1.8, Height = 19.0, Z = 7.78, Transparency = 0.61 },
-        { X = 0.15, Width = 2.05, Height = 20.0, Z = 7.84, Transparency = 0.58 },
-        { X = 1.95, Width = 1.55, Height = 18.3, Z = 7.74, Transparency = 0.64 },
-        { X = 3.35, Width = 1.0, Height = 15.8, Z = 7.62, Transparency = 0.70 },
+        { X = -2.6, Width = 1.45, Height = 17.6, Z = 7.72, Drift = -0.35 },
+        { X = -0.9, Width = 1.8, Height = 19.2, Z = 7.82, Drift = 0.15 },
+        { X = 0.85, Width = 2.0, Height = 20.0, Z = 7.86, Drift = -0.2 },
+        { X = 2.65, Width = 1.3, Height = 17.2, Z = 7.74, Drift = 0.3 },
     }
     for index, spec in ribbonSpecs do
-        local water = makePart(
+        local bottom = makePart(
             model,
-            "WaterRibbon" .. index,
-            Vector3.new(spec.Width, spec.Height, 0.38),
-            CFrame.new(ground + Vector3.new(spec.X, spec.Height * 0.5 + 0.35, spec.Z))
-                * CFrame.Angles(math.rad(-2 + index), 0, math.rad((index - 2) * 1.2)),
-            Enum.Material.Glass,
-            Color3.fromRGB(79, 188, 204)
+            "WaterBottom" .. index,
+            Vector3.new(0.12, 0.12, 0.12),
+            CFrame.new(ground + Vector3.new(spec.X, 0.55, spec.Z)),
+            Enum.Material.SmoothPlastic,
+            Color3.new(1, 1, 1)
         )
-        water.Transparency = spec.Transparency
-        water.CanCollide = false
-        water.CanTouch = false
-        water.CanQuery = false
-        water.Reflectance = 0.06
+        bottom.Transparency = 1
+        bottom.CanCollide = false
+        bottom.CanTouch = false
+        bottom.CanQuery = false
+
+        local top = makePart(
+            model,
+            "WaterTop" .. index,
+            Vector3.new(0.12, 0.12, 0.12),
+            CFrame.new(ground + Vector3.new(spec.X + spec.Drift, spec.Height, spec.Z - 0.15)),
+            Enum.Material.SmoothPlastic,
+            Color3.new(1, 1, 1)
+        )
+        top.Transparency = 1
+        top.CanCollide = false
+        top.CanTouch = false
+        top.CanQuery = false
+
+        local bottomAttachment = Instance.new("Attachment")
+        bottomAttachment.Name = "WaterBottomAttachment"
+        bottomAttachment.Parent = bottom
+        local topAttachment = Instance.new("Attachment")
+        topAttachment.Name = "WaterTopAttachment"
+        topAttachment.Parent = top
+
+        local beam = Instance.new("Beam")
+        beam.Name = "WaterRibbon" .. index
+        beam.Attachment0 = topAttachment
+        beam.Attachment1 = bottomAttachment
+        beam.FaceCamera = true
+        beam.Width0 = spec.Width * 0.78
+        beam.Width1 = spec.Width
+        beam.Segments = 8
+        beam.CurveSize0 = spec.Drift * 0.35
+        beam.CurveSize1 = -spec.Drift * 0.2
+        beam.LightEmission = 0.18
+        beam.LightInfluence = 0.35
+        beam.Color = ColorSequence.new(Color3.fromRGB(126, 213, 226), Color3.fromRGB(185, 238, 237))
+        beam.Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 0.5),
+            NumberSequenceKeypoint.new(0.72, 0.58),
+            NumberSequenceKeypoint.new(1, 0.72),
+        })
+        beam.Parent = model
     end
 
     local foam = makePart(
@@ -2273,7 +2327,7 @@ local function makeRockSpire(parent, position, scale)
         },
     }
     for index, spec in spireRocks do
-        local rock = makeRock(
+        local rock = makeAngularRock(
             model,
             ground + spec.Offset * scale,
             spec.Size * scale,
@@ -2893,7 +2947,7 @@ local function makeProvingCircle(parent)
         pathStone.Name = "PathStone" .. index
         pathStone.Parent = model
 
-        local markerRock = makeRock(
+        local markerRock = makeAngularRock(
             pathStone,
             (markerBase * CFrame.new(0, 2.55, 0.1)).Position,
             Vector3.new(3.9, 5.4, 2.8),
@@ -3021,7 +3075,7 @@ local function makeWhisperrootHollow(parent)
         },
     }
     for _, spec in crownSpecs do
-        local rock = makeRock(
+        local rock = makeAngularRock(
             model,
             ground + spec.Offset,
             spec.Size,
