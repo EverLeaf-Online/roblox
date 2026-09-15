@@ -1,3 +1,4 @@
+local MonetizationRules = require("../src/shared/Logic/MonetizationRules")
 local MonetizationConfig = require("../src/shared/MonetizationConfig")
 
 assert(MonetizationConfig.ExperienceId == 10766525835, "experience id")
@@ -30,5 +31,24 @@ assert(
     "founder aura benefit hook"
 )
 assert(table.find(MonetizationConfig.Benefits.Membership, "member_qol"), "membership benefit hook")
+
+local configOk, configReason = MonetizationRules.Validate(MonetizationConfig)
+assert(configOk, "monetization config valid: " .. tostring(configReason))
+assert(
+    MonetizationRules.ShouldFetchCatalogEntry(MonetizationConfig, "Founder"),
+    "founder catalog enabled"
+)
+assert(
+    MonetizationRules.ShouldFetchCatalogEntry(MonetizationConfig, "Support"),
+    "support catalog enabled"
+)
+assert(
+    not MonetizationRules.ShouldFetchCatalogEntry(MonetizationConfig, "Membership"),
+    "disabled membership not fetched"
+)
+assert(
+    not MonetizationRules.ShouldRefreshMembership(MonetizationConfig),
+    "disabled membership not refreshed"
+)
 
 print("monetization config tests passed")

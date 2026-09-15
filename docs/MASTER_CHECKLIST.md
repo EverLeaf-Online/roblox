@@ -596,7 +596,7 @@
 
 - [x] Cosmetic-only monetization rule documented.
 - [x] No Robux power purchases rule documented.
-- [x] Live Creator Hub IDs centralized for the Founder pass, support developer product, membership subscription, and five launch badges.
+- [x] Live Creator Hub IDs centralized for the Founder pass, support developer product, membership subscription, and five launch badges; disabled membership now skips client/server subscription API calls until explicitly enabled.
 - [x] Founder pass ownership is checked server-side; ownership grants the EverLeaf Founder badge plus permanent Founder title and Founder's Lumen aura cosmetics.
 - [x] Repeatable Support EverLeaf developer product uses server-owned `ProcessReceipt` handling with durable purchase-ID idempotency and audit logging.
 - [x] Subscription entitlement/status hooks are server-owned; membership sales remain intentionally disabled in-game until recurring benefits are fully verified and Creator Hub activation is deliberate.

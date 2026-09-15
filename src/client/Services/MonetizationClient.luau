@@ -3,6 +3,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local MonetizationConfig = require(ReplicatedStorage.Shared.MonetizationConfig)
+local MonetizationRules = require(ReplicatedStorage.Shared.Logic.MonetizationRules)
 local Net = require(ReplicatedStorage.Shared.Net)
 
 local MonetizationClient = {}
@@ -41,9 +42,18 @@ function MonetizationClient.GetCatalog(forceRefresh)
         return cachedCatalog
     end
 
-    local founderInfo = fetchProduct(MonetizationConfig.FounderPassId, Enum.InfoType.GamePass)
-    local supportInfo = fetchProduct(MonetizationConfig.SupportProductId, Enum.InfoType.Product)
-    local membershipInfo = fetchSubscription(MonetizationConfig.MembershipSubscriptionId)
+    local founderInfo = if MonetizationRules.ShouldFetchCatalogEntry(MonetizationConfig, "Founder")
+        then fetchProduct(MonetizationConfig.FounderPassId, Enum.InfoType.GamePass)
+        else nil
+    local supportInfo = if MonetizationRules.ShouldFetchCatalogEntry(MonetizationConfig, "Support")
+        then fetchProduct(MonetizationConfig.SupportProductId, Enum.InfoType.Product)
+        else nil
+    local membershipInfo = if MonetizationRules.ShouldFetchCatalogEntry(
+            MonetizationConfig,
+            "Membership"
+        )
+        then fetchSubscription(MonetizationConfig.MembershipSubscriptionId)
+        else nil
 
     cachedCatalog = {
         Founder = {

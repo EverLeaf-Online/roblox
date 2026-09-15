@@ -5,6 +5,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local MonetizationConfig = require(ReplicatedStorage.Shared.MonetizationConfig)
+local MonetizationRules = require(ReplicatedStorage.Shared.Logic.MonetizationRules)
 local CosmeticDefinitions = require(ReplicatedStorage.Shared.CosmeticDefinitions)
 local Net = require(ReplicatedStorage.Shared.Net)
 local AchievementService = require(script.Parent.AchievementService)
@@ -147,6 +148,11 @@ local function grantMonthlyMemberCosmetic(player, profile)
 end
 
 local function refreshMembership(player)
+    if not MonetizationRules.ShouldRefreshMembership(MonetizationConfig) then
+        setMembership(player, false, false)
+        return true, false
+    end
+
     local success, status = pcall(function()
         return MarketplaceService:GetUserSubscriptionStatusAsync(
             player,
@@ -383,6 +389,16 @@ function MonetizationService.Init()
         return
     end
     initialized = true
+
+    local configOk, configReason = MonetizationRules.Validate(MonetizationConfig)
+    if not configOk then
+        error(
+            string.format(
+                "[MonetizationService] Invalid monetization config: %s",
+                tostring(configReason)
+            )
+        )
+    end
 
     MarketplaceService.ProcessReceipt = processReceipt
 
