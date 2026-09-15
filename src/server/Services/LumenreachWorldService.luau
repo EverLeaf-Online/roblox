@@ -1919,41 +1919,44 @@ local function makeLocalAtmosphere(world)
 end
 
 local function makeRockSpire(parent, position, scale)
+    scale = scale or 1
+    local ground = terrainSurfacePosition(position, -0.18)
     local model = Instance.new("Model")
     model.Name = "LumenRockSpire"
     model.Parent = parent
 
-    local specs = {
-        { Vector3.new(0, 2.9, 0), Vector3.new(13.5, 6.8, 11.5), Vector3.new(0.03, 0.28, 0.06) },
-        { Vector3.new(-3.4, 6.2, -0.8), Vector3.new(8.4, 7.2, 7.6), Vector3.new(0.1, -0.18, 0.14) },
-        { Vector3.new(3.5, 5.3, 1.6), Vector3.new(7.4, 5.8, 8.6), Vector3.new(-0.12, 0.4, -0.08) },
-        { Vector3.new(-0.6, 9.4, 0.2), Vector3.new(7.0, 6.2, 6.5), Vector3.new(0.08, 0.12, 0.12) },
-        {
-            Vector3.new(1.7, 11.8, -0.6),
-            Vector3.new(4.8, 4.6, 5.2),
-            Vector3.new(-0.1, -0.28, 0.06),
-        },
+    local faceSpecs = {
+        { Offset = Vector3.new(-2.8, 0, 0.4), Yaw = math.rad(12), Size = 18.5, Scale = 0.95 },
+        { Offset = Vector3.new(3.4, 1.4, 1.6), Yaw = math.rad(-34), Size = 15.5, Scale = 0.82 },
+        { Offset = Vector3.new(0.6, 5.0, -1.8), Yaw = math.rad(67), Size = 12.5, Scale = 0.72 },
     }
-    for index, spec in specs do
-        local rock = makeRock(model, position + spec[1] * scale, spec[2] * scale, spec[3])
-        rock.Color = if index == 1
-            then Color3.fromRGB(91, 100, 96)
-            else if index % 2 == 0
-                then Color3.fromRGB(101, 109, 103)
-                else Color3.fromRGB(84, 94, 90)
+    for index, spec in faceSpecs do
+        local prefabName = "RockFace"
+        local placed = EnvironmentPrefabService.Place(
+            prefabName,
+            model,
+            CFrame.new(ground + spec.Offset * scale) * CFrame.Angles(0, spec.Yaw, 0),
+            prefabScaleForLongest(prefabName, spec.Size, scale * spec.Scale)
+        )
+        if placed then
+            placed.Name = "SpireRockFace" .. index
+            setInstanceCollision(placed, false)
+        end
     end
 
-    local moss = makeBall(
+    makeMossyRockSet(model, ground + Vector3.new(-3.8, 0, 3.4) * scale, math.rad(21), 0.9 * scale)
+    makeMossyRockSet(model, ground + Vector3.new(3.7, 0, -2.7) * scale, math.rad(-42), 0.78 * scale)
+    makeFern(model, ground + Vector3.new(-5.2, 0, -1.8) * scale, 0.85 * scale, math.rad(31))
+    makeFern(model, ground + Vector3.new(4.6, 0, 2.5) * scale, 0.76 * scale, math.rad(-54))
+
+    -- Collision stays intentionally simple even though the visible silhouette is
+    -- built from irregular imported rock faces. This prevents mesh-hull snagging.
+    makeCollisionProxy(
         model,
-        "MossCrown",
-        Vector3.new(7.8, 0.8, 6.8) * scale,
-        CFrame.new(position + Vector3.new(-0.5, 12.2, 0.3) * scale)
-            * CFrame.Angles(math.rad(4), math.rad(14), math.rad(-3)),
-        FOLIAGE_MATERIAL,
-        Color3.fromRGB(67, 108, 59)
+        "SpireCollision",
+        Vector3.new(10.5, 12.5, 9.5) * scale,
+        CFrame.new(ground + Vector3.new(0, 6.0, 0) * scale)
     )
-    moss.CanCollide = false
-    moss.CanTouch = false
     return model
 end
 
@@ -1961,13 +1964,13 @@ local function makeRuins(parent, origin)
     local model = Instance.new("Model")
     model.Name = "ShatteredLumenArch"
     model.Parent = parent
-    origin = origin or Vector3.zero
+    origin = terrainSurfacePosition(origin or Vector3.zero, 0)
 
-    local stone = Color3.fromRGB(108, 117, 111)
-    local darkStone = Color3.fromRGB(78, 87, 83)
+    local stone = Color3.fromRGB(104, 114, 108)
+    local darkStone = Color3.fromRGB(76, 88, 82)
 
-    local function ruinPart(name, size, offset, rotation, color)
-        return makePart(
+    local function ruinChunk(name, size, offset, rotation, color)
+        local chunk = makePart(
             model,
             name,
             size,
@@ -1975,57 +1978,134 @@ local function makeRuins(parent, origin)
             Enum.Material.Rock,
             color or stone
         )
+        chunk.CanCollide = false
+        chunk.CanTouch = false
+        useMaterialVariant(chunk, "MossyRock")
+        return chunk
     end
 
-    ruinPart(
-        "WestPillar",
-        Vector3.new(5, 18, 5),
-        Vector3.new(-11, 9, 0),
-        CFrame.Angles(0, 0, math.rad(-2))
+    local westChunks = {
+        { Vector3.new(5.8, 4.2, 5.4), Vector3.new(-11.0, 2.1, 0.2), math.rad(-4), math.rad(4) },
+        { Vector3.new(5.3, 4.0, 5.0), Vector3.new(-10.7, 6.0, -0.2), math.rad(3), math.rad(-3) },
+        { Vector3.new(5.6, 4.1, 5.2), Vector3.new(-11.3, 9.8, 0.25), math.rad(-5), math.rad(2) },
+        { Vector3.new(4.9, 3.8, 4.7), Vector3.new(-10.8, 13.4, -0.25), math.rad(4), math.rad(-6) },
+    }
+    for index, spec in westChunks do
+        ruinChunk(
+            "WestPillarChunk" .. index,
+            spec[1],
+            spec[2],
+            CFrame.Angles(0, spec[3], spec[4]),
+            index % 2 == 0 and darkStone or stone
+        )
+    end
+
+    local eastChunks = {
+        { Vector3.new(5.6, 4.1, 5.4), Vector3.new(11.0, 2.05, 0.15), math.rad(5), math.rad(-2) },
+        { Vector3.new(5.2, 4.0, 5.0), Vector3.new(10.7, 5.9, -0.2), math.rad(-4), math.rad(4) },
+        { Vector3.new(5.0, 3.7, 4.8), Vector3.new(11.2, 9.5, 0.3), math.rad(6), math.rad(5) },
+        { Vector3.new(4.4, 3.0, 4.3), Vector3.new(10.8, 12.6, -0.2), math.rad(-3), math.rad(-7) },
+    }
+    for index, spec in eastChunks do
+        ruinChunk(
+            "EastPillarChunk" .. index,
+            spec[1],
+            spec[2],
+            CFrame.Angles(0, spec[3], spec[4]),
+            index % 2 == 1 and darkStone or stone
+        )
+    end
+
+    -- The shattered lintel is intentionally split and tilted so the gate reads
+    -- as an old ruin rather than a rectangular doorway.
+    ruinChunk(
+        "WestArchCap",
+        Vector3.new(10.2, 3.2, 5.1),
+        Vector3.new(-6.4, 15.3, 0.1),
+        CFrame.Angles(math.rad(2), math.rad(-2), math.rad(7)),
+        stone
     )
-    ruinPart(
-        "EastPillar",
-        Vector3.new(5, 15, 5),
-        Vector3.new(11, 7.5, 0),
-        CFrame.Angles(0, 0, math.rad(3))
-    )
-    ruinPart(
-        "ArchLintel",
-        Vector3.new(27, 3.5, 5),
-        Vector3.new(0, 16.2, 0),
-        CFrame.Angles(0, 0, math.rad(1))
-    )
-    ruinPart(
-        "WestWall",
-        Vector3.new(4, 8, 20),
-        Vector3.new(-18, 4, 7),
-        CFrame.Angles(0, math.rad(10), math.rad(-2)),
+    ruinChunk(
+        "EastArchCap",
+        Vector3.new(9.0, 3.0, 4.8),
+        Vector3.new(6.9, 14.7, -0.15),
+        CFrame.Angles(math.rad(-2), math.rad(3), math.rad(-10)),
         darkStone
     )
-    ruinPart(
-        "EastWall",
-        Vector3.new(4, 7, 17),
-        Vector3.new(18, 3.5, 9),
-        CFrame.Angles(0, math.rad(-13), math.rad(2)),
-        darkStone
-    )
-    ruinPart(
-        "BrokenLintel",
-        Vector3.new(11, 2.7, 4),
-        Vector3.new(-17, 1.7, -11),
-        CFrame.Angles(math.rad(8), math.rad(32), math.rad(15))
-    )
-    ruinPart(
-        "FallenPillar",
-        Vector3.new(3.8, 13, 3.8),
-        Vector3.new(14, 2.2, -14),
-        CFrame.Angles(math.rad(82), math.rad(17), math.rad(5))
+    ruinChunk(
+        "BrokenCrownStone",
+        Vector3.new(5.4, 2.8, 4.6),
+        Vector3.new(-0.8, 17.0, 0.2),
+        CFrame.Angles(math.rad(4), math.rad(-7), math.rad(19)),
+        stone
     )
 
-    makeRockCluster(model, origin + Vector3.new(-23, 0.2, -12), 0.9, 6)
-    makeRockCluster(model, origin + Vector3.new(24, 0.2, -14), 0.82, 7)
-    makeCrystal(model, origin + Vector3.new(-7, 3.4, -8))
-    makeCrystal(model, origin + Vector3.new(9, 2.7, 7))
+    -- Broken side walls use short offset chunks instead of monolithic slabs.
+    for index, spec in
+        {
+            { Vector3.new(-18.0, 1.6, 4.5), Vector3.new(4.2, 3.2, 7.0), math.rad(12) },
+            { Vector3.new(-18.8, 4.2, 8.8), Vector3.new(4.0, 3.3, 6.0), math.rad(8) },
+            { Vector3.new(18.0, 1.5, 5.2), Vector3.new(4.1, 3.0, 6.8), math.rad(-15) },
+            { Vector3.new(18.6, 3.9, 9.1), Vector3.new(3.8, 3.2, 5.7), math.rad(-10) },
+        }
+    do
+        ruinChunk(
+            "BrokenWallChunk" .. index,
+            spec[2],
+            spec[1],
+            CFrame.Angles(0, spec[3], math.rad((index % 2 == 0) and 3 or -3)),
+            index % 2 == 0 and darkStone or stone
+        )
+    end
+
+    ruinChunk(
+        "FallenLintel",
+        Vector3.new(11.0, 2.6, 4.3),
+        Vector3.new(-17.2, 1.5, -11.0),
+        CFrame.Angles(math.rad(8), math.rad(32), math.rad(15)),
+        darkStone
+    )
+    ruinChunk(
+        "FallenPillar",
+        Vector3.new(4.0, 12.5, 4.0),
+        Vector3.new(14.0, 2.0, -14.0),
+        CFrame.Angles(math.rad(82), math.rad(17), math.rad(5)),
+        stone
+    )
+
+    -- Simple hidden blockers match only the main stone masses; visible chunks
+    -- remain non-colliding so players do not snag on decorative broken edges.
+    makeCollisionProxy(
+        model,
+        "WestPillarCollision",
+        Vector3.new(5.0, 15.2, 5.0),
+        CFrame.new(origin + Vector3.new(-11, 7.6, 0))
+    )
+    makeCollisionProxy(
+        model,
+        "EastPillarCollision",
+        Vector3.new(5.0, 13.7, 5.0),
+        CFrame.new(origin + Vector3.new(11, 6.85, 0))
+    )
+    makeCollisionProxy(
+        model,
+        "WestWallCollision",
+        Vector3.new(4.2, 6.2, 13.5),
+        CFrame.new(origin + Vector3.new(-18.3, 3.1, 7.0)) * CFrame.Angles(0, math.rad(10), 0)
+    )
+    makeCollisionProxy(
+        model,
+        "EastWallCollision",
+        Vector3.new(4.2, 5.8, 12.8),
+        CFrame.new(origin + Vector3.new(18.3, 2.9, 7.5)) * CFrame.Angles(0, math.rad(-12), 0)
+    )
+
+    makeMossyRockSet(model, origin + Vector3.new(-23, 0, -12), math.rad(24), 0.9)
+    makeMossyRockSet(model, origin + Vector3.new(24, 0, -14), math.rad(-31), 0.82)
+    makeFern(model, origin + Vector3.new(-14.5, 0, 5.8), 0.82, math.rad(23))
+    makeFern(model, origin + Vector3.new(14.8, 0, 6.6), 0.78, math.rad(-29))
+    makeCrystal(model, origin + Vector3.new(-7, 0, -8))
+    makeCrystal(model, origin + Vector3.new(9, 0, 7))
 
     local gate = makePart(
         model,
