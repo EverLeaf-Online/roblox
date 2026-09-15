@@ -13,7 +13,6 @@ Net.Events = table.freeze({
 })
 
 Net.Functions = table.freeze({
-    AllocateStat = "AllocateStat",
     RequestProfile = "RequestProfile",
     BasicAttack = "BasicAttack",
     GameAction = "GameAction",

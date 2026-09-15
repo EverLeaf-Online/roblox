@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local ActionPayloadRules = require(ReplicatedStorage.Shared.Validation.ActionPayloadRules)
 local ActionService = require(script.Parent.Services.ActionService)
 local BelforgeColossusService = require(script.Parent.Services.BelforgeColossusService)
 local BrasshavenWorldService = require(script.Parent.Services.BrasshavenWorldService)
@@ -31,7 +32,6 @@ local StatusEffectService = require(script.Parent.Services.StatusEffectService)
 local StudioEnvironmentAssetService = require(script.Parent.Services.StudioEnvironmentAssetService)
 local WorldTravelService = require(script.Parent.Services.WorldTravelService)
 local WorldVisualService = require(script.Parent.Services.WorldVisualService)
-local StatService = require(script.Parent.Services.StatService)
 
 local remotes = ReplicatedStorage:FindFirstChild(Net.RemoteFolderName)
 if not remotes then
@@ -59,7 +59,6 @@ local playerDamageEvent = ensureRemote("RemoteEvent", Net.Events.PlayerDamageEve
 local movementIntent = ensureRemote("RemoteEvent", Net.Events.MovementIntent)
 ensureRemote("RemoteEvent", Net.Events.WorldNotice)
 local requestProfile = ensureRemote("RemoteFunction", Net.Functions.RequestProfile)
-local allocateStat = ensureRemote("RemoteFunction", Net.Functions.AllocateStat)
 local basicAttack = ensureRemote("RemoteFunction", Net.Functions.BasicAttack)
 local gameAction = ensureRemote("RemoteFunction", Net.Functions.GameAction)
 local requestCatalog = ensureRemote("RemoteFunction", Net.Functions.RequestCatalog)
@@ -186,7 +185,10 @@ for _, player in Players:GetPlayers() do
     task.spawn(onPlayerAdded, player)
 end
 
-requestProfile.OnServerInvoke = function(player)
+requestProfile.OnServerInvoke = function(player, ...)
+    if select("#", ...) > 0 then
+        return nil
+    end
     local limit = GameConfig.Security.ProfileRequest
     if
         not RateLimiterService.Allow(
@@ -215,7 +217,7 @@ movementIntent.OnServerEvent:Connect(function(player, payload)
     then
         return
     end
-    if type(payload) ~= "table" or type(payload.Crouching) ~= "boolean" then
+    if not ActionPayloadRules.ValidateMovementIntent(payload) then
         return
     end
     local character = player.Character
@@ -235,33 +237,10 @@ movementIntent.OnServerEvent:Connect(function(player, payload)
     player:SetAttribute("EverLeafCrouching", payload.Crouching)
 end)
 
-allocateStat.OnServerInvoke = function(player, statName, amount)
-    local limit = GameConfig.Security.AllocateStat
-    if
-        not RateLimiterService.Allow(
-            player,
-            "AllocateStat",
-            limit.Capacity,
-            limit.RefillPerSecond,
-            1
-        )
-    then
-        return false, "rate_limited"
+basicAttack.OnServerInvoke = function(player, ...)
+    if select("#", ...) > 0 then
+        return false, "invalid_payload"
     end
-
-    local profile = PlayerDataService.Get(player)
-    if not profile then
-        return false, "profile_not_loaded"
-    end
-
-    local ok, reason = StatService.Allocate(profile, statName, amount)
-    if ok then
-        PlayerDataService.NotifyChanged(player)
-    end
-    return ok, reason
-end
-
-basicAttack.OnServerInvoke = function(player)
     local limit = GameConfig.Security.BasicAttack
     if
         not RateLimiterService.Allow(
@@ -283,7 +262,10 @@ basicAttack.OnServerInvoke = function(player)
     return CombatService.BasicAttack(player, profile)
 end
 
-requestCatalog.OnServerInvoke = function(player)
+requestCatalog.OnServerInvoke = function(player, ...)
+    if select("#", ...) > 0 then
+        return nil
+    end
     local limit = GameConfig.Security.CatalogRequest
     if
         not RateLimiterService.Allow(

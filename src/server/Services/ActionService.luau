@@ -1,3 +1,6 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ActionPayloadRules = require(ReplicatedStorage.Shared.Validation.ActionPayloadRules)
+
 local AdvancementService = require(script.Parent.AdvancementService)
 local BelforgeColossusService = require(script.Parent.BelforgeColossusService)
 local ConsumableService = require(script.Parent.ConsumableService)
@@ -139,6 +142,10 @@ function ActionService.Handle(player, profile, actionName, payload)
     end
     if type(payload) ~= "table" or not PayloadValidationService.IsBounded(payload) then
         return false, "invalid_payload"
+    end
+    local validPayload, payloadReason = ActionPayloadRules.Validate(actionName, payload)
+    if not validPayload then
+        return false, payloadReason
     end
     local handler = handlers[actionName]
     if not handler then

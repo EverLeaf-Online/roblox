@@ -615,7 +615,8 @@
 - [x] Atomic profile-mutation helper now protects reward grants, shop buy/sell, equipment swaps, and crafting from partial-success item/currency/profile corruption.
 - [x] Consumables remove the owned item before applying HP/MP effects, preventing free-effect failures.
 - [x] NPC/shop interaction sessions fail closed on expiry, ID mismatch, stale world objects, and out-of-range actions.
-- [ ] Audit every future remote for type/range/state validation.
+- [x] Current remote/action surface audited: `GameAction` now enforces strict per-action field allowlists, required/optional types, integer/range/string bounds, settings value contracts, and finite cosmetic slots before downstream state validation; repeat this audit for every future remote.
+- [x] Removed the unused legacy `AllocateStat` RemoteFunction so AP mutations have one authoritative `GameAction` path; remaining direct no-argument remotes reject extra args and `MovementIntent` rejects unexpected fields.
 - [x] Movement speed and displacement/teleport sanity checks foundation.
 - [x] Inventory/equipment dupe invariant tests cover capacity/stack failures, over-removal, equip swap conservation, full-inventory unequip rollback, thrown transaction rollback, and deterministic add/remove fuzzing.
 - [x] Currency/economy abuse regressions cover finite integer balances, overflow caps, corrupted-balance fail-closed behavior, overspend rejection, same-currency shop no-arbitrage, and repeated buy/sell sink conservation.

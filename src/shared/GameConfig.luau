@@ -50,10 +50,6 @@ GameConfig.DataStore = {
 }
 
 GameConfig.Security = {
-    AllocateStat = {
-        Capacity = 8,
-        RefillPerSecond = 4,
-    },
     BasicAttack = {
         Capacity = 6,
         RefillPerSecond = 5,

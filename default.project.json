@@ -17,9 +17,6 @@
         "ProfileChanged": {
           "$className": "RemoteEvent"
         },
-        "AllocateStat": {
-          "$className": "RemoteFunction"
-        },
         "RequestProfile": {
           "$className": "RemoteFunction"
         },
