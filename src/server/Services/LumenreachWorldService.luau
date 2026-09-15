@@ -2075,6 +2075,27 @@ local function makeLocalAtmosphere(world)
         Acceleration = Vector3.new(0.12, 0.1, 0.04),
         RotSpeed = NumberRange.new(-18, 18),
     }
+    local forestPollenProfile = {
+        Texture = "rbxasset://textures/particles/sparkles_main.dds",
+        Rate = 0.42,
+        Lifetime = NumberRange.new(4.8, 7.2),
+        Speed = NumberRange.new(0.08, 0.24),
+        SpreadAngle = Vector2.new(70, 45),
+        Color = Color3.fromRGB(205, 230, 176),
+        Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 0.72),
+            NumberSequenceKeypoint.new(0.45, 0.5),
+            NumberSequenceKeypoint.new(1, 1),
+        }),
+        Size = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 0.045),
+            NumberSequenceKeypoint.new(0.55, 0.095),
+            NumberSequenceKeypoint.new(1, 0.035),
+        }),
+        LightEmission = 0.08,
+        Acceleration = Vector3.new(0.11, 0.035, 0.05),
+        RotSpeed = NumberRange.new(-12, 12),
+    }
     local highlandProfile = {
         Texture = "rbxasset://textures/particles/sparkles_main.dds",
         Rate = 0.55,
@@ -2094,6 +2115,35 @@ local function makeLocalAtmosphere(world)
         Acceleration = Vector3.new(0.5, 0.05, 0.16),
         RotSpeed = NumberRange.new(-24, 24),
     }
+
+    for index, offset in
+        {
+            Vector3.new(-18, 4.2, 8),
+            Vector3.new(16, 4.8, -11),
+            Vector3.new(-4, 5.1, 24),
+        }
+    do
+        makeAmbientParticleAnchor(
+            world,
+            "CampForestPollen" .. index,
+            WORLD_ZONES.Camp + offset,
+            forestPollenProfile
+        )
+    end
+
+    for index, offset in
+        {
+            Vector3.new(-17, 5.1, 7),
+            Vector3.new(16, 5.5, -6),
+        }
+    do
+        makeAmbientParticleAnchor(
+            world,
+            "CrossroadsForestPollen" .. index,
+            WORLD_ZONES.Crossroads + offset,
+            forestPollenProfile
+        )
+    end
 
     for index, offset in
         {
