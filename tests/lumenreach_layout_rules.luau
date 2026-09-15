@@ -98,6 +98,17 @@ assert(
     string.find(source, "if clearOfTravelLanes(position, 10) then", 1, true) ~= nil,
     "zone-edge trees must preserve authored travel-lane clearance"
 )
+
+assert(
+    string.find(source, "local function fillMountainRidge", 1, true) ~= nil
+        and string.find(source, "local function fillMountainChain", 1, true) == nil,
+    "Lumenreach boundary terrain must use ridge massing rather than giant spherical mountain chains"
+)
+assert(
+    string.find(source, "gui.Size = UDim2.fromOffset(176, 24)", 1, true) ~= nil
+        and string.find(source, "gui.MaxDistance = 105", 1, true) ~= nil,
+    "floating landmark labels must stay compact at player height"
+)
 assert(
     string.find(source, "local TRAINING_ORIGIN = ZONES.Camp + Vector3.new(68, 0, -18)", 1, true)
         ~= nil,

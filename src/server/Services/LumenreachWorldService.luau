@@ -339,14 +339,43 @@ local function fillTerrainRoute(points, width, material)
     end
 end
 
-local function fillMountainChain(points, radius, material)
+local function fillMountainRidge(points, width, height, material)
     local terrain = Workspace.Terrain
-    for index, point in points do
-        local scale = 0.82 + ((index * 17) % 7) * 0.055
-        local r = radius * scale
-        terrain:FillBall(point + Vector3.new(0, r * 0.15, 0), r, material)
-        if index % 2 == 0 then
-            terrain:FillBall(point + Vector3.new(0, r * 0.55, 0), r * 0.62, Enum.Material.Rock)
+    for index = 1, #points - 1 do
+        local a = points[index]
+        local b = points[index + 1]
+        local flatDelta = Vector3.new(b.X - a.X, 0, b.Z - a.Z)
+        if flatDelta.Magnitude > 1 then
+            local midpoint = Vector3.new((a.X + b.X) * 0.5, 0, (a.Z + b.Z) * 0.5)
+            local frame = CFrame.lookAt(midpoint, midpoint + flatDelta.Unit)
+            local length = flatDelta.Magnitude + width * 0.7
+            local variation = 0.9 + ((index * 31) % 5) * 0.035
+            local ridgeHeight = height * variation
+
+            terrain:FillBlock(
+                frame + Vector3.new(0, ridgeHeight * 0.30, 0),
+                Vector3.new(width, ridgeHeight * 0.60, length),
+                material
+            )
+            terrain:FillBlock(
+                frame + Vector3.new(0, ridgeHeight * 0.59, 0),
+                Vector3.new(width * 0.72, ridgeHeight * 0.38, length * 0.91),
+                if index % 3 == 0 then Enum.Material.Rock else material
+            )
+            terrain:FillBlock(
+                frame + Vector3.new(0, ridgeHeight * 0.82, 0),
+                Vector3.new(width * 0.42, ridgeHeight * 0.25, length * 0.76),
+                Enum.Material.Rock
+            )
+
+            -- Small shoulder fills soften the stepped ridge without returning
+            -- to the giant spherical blobs that read as stacked green balls.
+            for shoulder = -1, 1, 2 do
+                local shoulderPosition = midpoint
+                    + frame.RightVector * shoulder * width * 0.27
+                    + Vector3.new(0, ridgeHeight * 0.32, 0)
+                terrain:FillBall(shoulderPosition, width * 0.22, material)
+            end
         end
     end
 end
@@ -425,25 +454,25 @@ local function buildTerrain()
     for z = -680, 720, 115 do
         table.insert(east, Vector3.new(1085, 28, z))
     end
-    fillMountainChain(north, 105, Enum.Material.Grass)
-    fillMountainChain(south, 108, Enum.Material.Grass)
-    fillMountainChain(west, 110, Enum.Material.Grass)
-    fillMountainChain(east, 112, Enum.Material.Rock)
+    fillMountainRidge(north, 92, 102, Enum.Material.Grass)
+    fillMountainRidge(south, 96, 106, Enum.Material.Grass)
+    fillMountainRidge(west, 98, 108, Enum.Material.Grass)
+    fillMountainRidge(east, 100, 116, Enum.Material.Rock)
 
     -- Internal terrain ridges divide rooms without arbitrary invisible walls.
-    fillMountainChain({
+    fillMountainRidge({
         Vector3.new(-830, 18, 270),
         Vector3.new(-760, 22, 350),
         Vector3.new(-680, 26, 430),
         Vector3.new(-600, 25, 520),
-    }, 70, Enum.Material.Grass)
-    fillMountainChain({
+    }, 68, 72, Enum.Material.Grass)
+    fillMountainRidge({
         Vector3.new(245, 8, -105),
         Vector3.new(330, 5, -135),
         Vector3.new(430, 8, -135),
         Vector3.new(540, 13, -110),
         Vector3.new(650, 18, -75),
-    }, 64, Enum.Material.Rock)
+    }, 62, 68, Enum.Material.Rock)
 
     for _, route in ROUTES do
         fillTerrainRoute(route.Points, route.Width + 7, Enum.Material.Ground)
@@ -691,8 +720,8 @@ local function makeLantern(parent, position, yaw)
     glow.CanQuery = false
     local light = Instance.new("PointLight")
     light.Color = glow.Color
-    light.Brightness = 1.2
-    light.Range = 16
+    light.Brightness = 1.85
+    light.Range = 22
     light.Shadows = true
     light.Parent = glow
     makeCollisionProxy(
@@ -889,7 +918,7 @@ local function makeTown(parent)
     makeLantern(parent, camp + Vector3.new(-28, 0, -38), 0)
     makeLantern(parent, camp + Vector3.new(32, 0, -38), 0)
 
-    makeSign(parent, camp + Vector3.new(103, 0, 12), math.rad(-90), "GREENWAY  →")
+    makeSign(parent, camp + Vector3.new(82, 0, 34), math.rad(-76), "GREENWAY  →")
     makeSign(parent, camp + Vector3.new(8, 0, -102), math.rad(180), "PROVING CIRCLE")
 
     -- A proper eastern gate frames departure without blocking the road.
@@ -899,8 +928,8 @@ local function makeTown(parent)
         makePart(
             parent,
             "TownGatePost",
-            Vector3.new(2.2, 13, 2.2),
-            gateBase * CFrame.new(side * 11, 6.5, 0),
+            Vector3.new(1.8, 10, 1.8),
+            gateBase * CFrame.new(side * 12.5, 5, 0),
             Enum.Material.Wood,
             Color3.fromRGB(70, 50, 34)
         )
@@ -908,8 +937,8 @@ local function makeTown(parent)
     local top = makePart(
         parent,
         "TownGateBeam",
-        Vector3.new(24, 1.5, 2.3),
-        gateBase * CFrame.new(0, 12.0, 0),
+        Vector3.new(28.5, 1.25, 2.0),
+        gateBase * CFrame.new(0, 9.35, 0),
         Enum.Material.Wood,
         Color3.fromRGB(70, 50, 34)
     )
@@ -1105,8 +1134,8 @@ local function makeLandmarkLabel(parent, position, text)
     anchor.CastShadow = false
     local gui = Instance.new("BillboardGui")
     gui.Name = "LandmarkLabel"
-    gui.Size = UDim2.fromOffset(280, 36)
-    gui.MaxDistance = 145
+    gui.Size = UDim2.fromOffset(176, 24)
+    gui.MaxDistance = 105
     gui.AlwaysOnTop = false
     gui.Parent = anchor
     local label = Instance.new("TextLabel")
@@ -1117,7 +1146,8 @@ local function makeLandmarkLabel(parent, position, text)
     label.TextStrokeColor3 = Color3.fromRGB(17, 29, 25)
     label.TextStrokeTransparency = 0.2
     label.Font = Enum.Font.GothamBold
-    label.TextScaled = true
+    label.TextScaled = false
+    label.TextSize = 18
     label.Parent = gui
 end
 

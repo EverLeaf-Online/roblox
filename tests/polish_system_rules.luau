@@ -16,6 +16,18 @@ assert(
         and string.find(worldVisuals, "Lighting.ClockTime =", 1, true) ~= nil,
     "WorldVisualService must advance the shared day/night clock"
 )
+
+assert(
+    string.find(worldVisuals, '"EverLeafNightVisibility"', 1, true) ~= nil
+        and string.find(
+                worldVisuals,
+                "nightVisibility.Brightness = nightFactor * 0.14",
+                1,
+                true
+            )
+            ~= nil,
+    "night cycle must retain playable visibility instead of becoming nearly black"
+)
 assert(
     string.find(combatPresentation, "local function impactParticleBurst", 1, true) ~= nil
         and string.find(combatPresentation, 'Instance.new("ParticleEmitter")', 1, true) ~= nil
