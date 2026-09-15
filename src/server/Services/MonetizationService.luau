@@ -440,7 +440,7 @@ function MonetizationService.Init()
                             player,
                             "success",
                             "EverLeaf Membership",
-                            "Membership is active. Your member benefits are now enabled.",
+                            "Membership is active. Member recognition and monthly cosmetic rewards are enabled.",
                             5
                         )
                         return

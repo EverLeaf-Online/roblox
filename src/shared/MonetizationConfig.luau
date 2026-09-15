@@ -4,12 +4,11 @@ local MonetizationConfig = {
     SupportProductId = 3712998285,
     MembershipSubscriptionId = "EXP-8349786609016766972",
 
-    -- Founder and support products are live in Creator Hub. Membership remains
-    -- deliberately disabled in-game until the recurring benefits are complete
-    -- and the Creator Hub subscription is activated.
+    -- All three monetization surfaces are enabled in-game. Creator Hub remains
+    -- the source of truth for whether the subscription itself is active/sellable.
     FounderSalesEnabled = true,
     SupportSalesEnabled = true,
-    MembershipSalesEnabled = false,
+    MembershipSalesEnabled = true,
     GiftingEnabled = false,
     PaidItemTradingEnabled = false,
 
@@ -38,7 +37,6 @@ local MonetizationConfig = {
         Membership = table.freeze({
             "member_title",
             "member_cosmetics",
-            "member_qol",
         }),
     },
 }

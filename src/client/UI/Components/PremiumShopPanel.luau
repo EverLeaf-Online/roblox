@@ -2,6 +2,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local React = require(ReplicatedStorage.Packages.React)
+local MonetizationConfig = require(ReplicatedStorage.Shared.MonetizationConfig)
 local MonetizationClient = require(script.Parent.Parent.Parent.Services.MonetizationClient)
 local NotificationStore = require(script.Parent.Parent.NotificationStore)
 
@@ -154,7 +155,8 @@ local function PremiumShopPanel()
 
     local founderEntry = catalog and catalog.Founder or { Enabled = true }
     local supportEntry = catalog and catalog.Support or { Enabled = true }
-    local membershipEntry = catalog and catalog.Membership or { Enabled = false }
+    local membershipEntry = catalog and catalog.Membership
+        or { Enabled = MonetizationConfig.MembershipSalesEnabled }
 
     local function prompt(kind, callback)
         local ok, reason = callback()
@@ -241,7 +243,7 @@ local function PremiumShopPanel()
                 then if renewing
                     then "Membership active · renewal on. Includes Member recognition and monthly non-power cosmetic rewards."
                     else "Membership active through the current period · renewal off. Earned monthly cosmetics stay yours."
-                else "Recurring Member title plus cosmetic and quality-of-life benefits while active. No combat power.",
+                else "Recurring Member recognition and monthly non-power cosmetic rewards while active. No combat power.",
             ButtonText = "JOIN MEMBERSHIP",
             OwnedText = renewing and "MANAGE RENEWAL" or "ENDING THIS PERIOD",
             Owned = member,
