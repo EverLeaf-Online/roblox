@@ -3122,33 +3122,38 @@ local function makeLandmarkLabel(parent, position, text)
     )
     anchor.Transparency = 1
     anchor.CanCollide = false
+    anchor.CanTouch = false
+    anchor.CanQuery = false
+    anchor.CastShadow = false
 
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "LandmarkLabel"
-    billboard.Size = UDim2.fromOffset(286, 32)
+    billboard.Size = UDim2.fromOffset(310, 40)
     billboard.AlwaysOnTop = false
-    billboard.MaxDistance = 68
+    billboard.MaxDistance = 56
     billboard.Parent = anchor
 
     local label = Instance.new("TextLabel")
-    label.Size = UDim2.fromScale(1, 1)
-    label.BackgroundTransparency = 0.28
-    label.BackgroundColor3 = Color3.fromRGB(14, 23, 21)
+    label.Size = UDim2.new(1, 0, 0, 30)
+    label.BackgroundTransparency = 1
     label.Text = text
     label.TextColor3 = Color3.fromRGB(226, 244, 230)
-    label.TextStrokeTransparency = 0.45
-    label.Font = Enum.Font.GothamBold
+    label.TextStrokeColor3 = Color3.fromRGB(18, 30, 26)
+    label.TextStrokeTransparency = 0.24
+    label.Font = Enum.Font.GothamMedium
     label.TextScaled = true
     label.TextWrapped = false
     label.Parent = billboard
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 8)
-    corner.Parent = label
-    local stroke = Instance.new("UIStroke")
-    stroke.Color = Color3.fromRGB(84, 134, 111)
-    stroke.Transparency = 0.5
-    stroke.Thickness = 1
-    stroke.Parent = label
+
+    local accent = Instance.new("Frame")
+    accent.Name = "LumenAccent"
+    accent.AnchorPoint = Vector2.new(0.5, 0)
+    accent.Position = UDim2.fromScale(0.5, 0.82)
+    accent.Size = UDim2.fromOffset(78, 2)
+    accent.BackgroundColor3 = Color3.fromRGB(103, 224, 187)
+    accent.BackgroundTransparency = 0.24
+    accent.BorderSizePixel = 0
+    accent.Parent = billboard
 end
 
 local function prepareGround(world)

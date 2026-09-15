@@ -506,6 +506,7 @@
 - [x] Wayfarer Camp departure and first mossling-hollow staging now use authored low-profile Lumen/rock/forest silhouettes outside the protected road and encounter envelopes, strengthening the first combat transition without adding route blockers; Studio player-height review remains open.
 - [x] Wayfarer Camp training space and Lumenwood Crossroads center now use terrain-flush, non-colliding authored ground language: irregular training scuffs around the dummy and a route-aligned four-branch Lumen wayfinder sigil at the hub, avoiding raised platform/graybox presentation; Studio visual QA remains open.
 - [x] Lumenreach route/protected-area cleanup now runs after all authored world props are placed, so late-added remnants and landmark dressing can no longer bypass final travel-lane/readability clearance.
+- [x] Lumenreach landmark titles now use transparent world-space typography with a restrained Lumen accent instead of floating dark rounded UI boxes; invisible anchors are non-touch/non-query so they do not add unnecessary ray hits.
 - [x] Approved imported environment assets integrated with runtime sanitization; free script-free Forest Trees `13913287259` can populate sanitized tree variants, while the old visible primitive fallbacks are disabled for production placement.
 - [x] Bad oversized cliff/rock placements corrected and terrain-supported.
 - [x] Camera obstruction issue from foliage/decor corrected.
