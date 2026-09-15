@@ -75,6 +75,7 @@
 - [x] Screenshot-driven V3 cleanup replaced the oversized spherical mountain-chain silhouettes with layered ridge terrain, reduced the starter gate/sign obstruction, compacted floating landmark labels, strengthened town lantern coverage, and added a night-visibility grade so the MMORPG route remains readable after sunset.
 - [x] Canonical route-aware placement prevents zone-edge trees from entering road shoulders; the V3 generator does not depend on a post-generation scenery scrub to rescue blocked lanes.
 - [x] Camera collision stabilized so non-solid foliage/decor no longer causes view snapping.
+- [x] Lumenreach V10 collision policy is source-complete: generated visual geometry defaults non-collidable, only intentional architectural surfaces are solid, trees/bridges/boardwalks/docks/fences use simplified collision proxies, and decorative trim/roofs/props no longer snag player movement. Studio walk-through QA remains.
 - [x] Legacy Whisperroot/showcase scenery was intentionally removed with the old map so V3 could be rebuilt cleanly; optional secret-world content will be re-authored only after core traversal QA.
 - [ ] Full player-height visual QA for every imported mesh, rock/cliff, root, log, and path obstruction.
 - [ ] Final lighting/sky/atmosphere art-direction pass for Phase 1. Approved Anime Island Skybox `14753835117` is now loaded visual-only through `WorldVisualService`; final Studio art-direction tuning remains.

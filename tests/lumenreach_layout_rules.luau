@@ -6,7 +6,7 @@ for _, required in
     {
         "local WORLD_WIDTH = 2200",
         "local WORLD_DEPTH = 1250",
-        "local WORLD_DESIGN_VERSION = 9",
+        "local WORLD_DESIGN_VERSION = 10",
         'world:SetAttribute("WorldDesignVersion", WORLD_DESIGN_VERSION)',
         'world:SetAttribute("TerrainFirstMMOLayout", true)',
         "terrain:Clear()",
@@ -380,6 +380,37 @@ assert(
 assert(
     string.find(source, "local WORLD_DEPTH = 1250", 1, true) ~= nil,
     "Lumenreach footprint must not retain the oversized empty 1800-stud north-south acreage"
+)
+
+assert(
+    string.find(source, "local SOLID_VISUAL_PARTS = table.freeze", 1, true) ~= nil
+        and string.find(source, "local function normalizeGeneratedCollisions", 1, true) ~= nil
+        and string.find(
+                source,
+                'descendant:GetAttribute("EverLeafCollisionProxy") == true',
+                1,
+                true
+            )
+            ~= nil,
+    "V10 must centralize Lumenreach collision policy instead of relying on incidental Part defaults"
+)
+assert(
+    string.find(source, "part.CanCollide = false", 1, true) ~= nil
+        and string.find(source, "wedge.CanCollide = false", 1, true) ~= nil
+        and string.find(source, "part.CanCollide = true", 1, true) ~= nil,
+    "generated render geometry must default non-collidable while explicit collision proxies stay solid"
+)
+assert(
+    string.find(source, '"FenceCollision"', 1, true) ~= nil
+        and string.find(source, '"DockCollision"', 1, true) ~= nil,
+    "fences and docks must use simple collision proxies instead of snag-prone decorative pieces"
+)
+assert(
+    string.find(source, "normalizeGeneratedCollisions(world)", 1, true) ~= nil
+        and string.find(source, "makeNpc(world, npcId)", 1, true) ~= nil
+        and string.find(source, "normalizeGeneratedCollisions(world)", 1, true)
+            < string.find(source, "makeNpc(world, npcId)", 1, true),
+    "world collision normalization must run before NPC/enemy models are created"
 )
 
 print("Lumenreach terrain-first MMO redesign rules tests passed")

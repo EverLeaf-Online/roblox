@@ -16,7 +16,7 @@ local LumenreachWorldService = {}
 local GENERATED_NAME = "EverLeafGeneratedWorld"
 local WORLD_WIDTH = 2200
 local WORLD_DEPTH = 1250
-local WORLD_DESIGN_VERSION = 9
+local WORLD_DESIGN_VERSION = 10
 
 -- Lumenreach is authored as a terrain-first MMORPG region. The generator below
 -- replaces the previous showcase composition completely: terrain is cleared,
@@ -238,6 +238,11 @@ local function makePart(parent, name, size, cframe, material, color)
     part.Color = color
     part.TopSurface = Enum.SurfaceType.Smooth
     part.BottomSurface = Enum.SurfaceType.Smooth
+    -- Render geometry never owns physics by accident. Intentional collision is
+    -- assigned later by the Lumenreach collision policy or an explicit proxy.
+    part.CanCollide = false
+    part.CanTouch = false
+    part.CanQuery = false
     part.Parent = parent
     return part
 end
@@ -250,6 +255,9 @@ local function makeWedge(parent, name, size, cframe, material, color)
     wedge.Anchored = true
     wedge.Material = material
     wedge.Color = color
+    wedge.CanCollide = false
+    wedge.CanTouch = false
+    wedge.CanQuery = false
     wedge.Parent = parent
     return wedge
 end
@@ -258,6 +266,7 @@ local function makeCollisionProxy(parent, name, size, cframe)
     local part =
         makePart(parent, name, size, cframe, Enum.Material.SmoothPlastic, Color3.new(0, 0, 0))
     part.Transparency = 1
+    part.CanCollide = true
     part.CanTouch = false
     part.CanQuery = false
     part.CastShadow = false
@@ -1314,7 +1323,9 @@ local function makeMarketStall(parent, position, yaw, accent)
         Enum.Material.WoodPlanks,
         Color3.fromRGB(104, 76, 49)
     )
-    counter.CanCollide = true
+    counter.CanCollide = false
+    counter.CanTouch = false
+    counter.CanQuery = false
     local lowerShelf = makePart(
         model,
         "LowerShelf",
@@ -1596,6 +1607,12 @@ local function makeFenceLine(parent, name, a, b, spacing, height)
         rail.CanTouch = false
         rail.CanQuery = false
     end
+    makeCollisionProxy(
+        model,
+        "FenceCollision",
+        Vector3.new(0.7, postHeight, length + 0.7),
+        frame * CFrame.new(0, postHeight * 0.5, 0)
+    )
     return model
 end
 
@@ -2329,6 +2346,12 @@ local function makeReedDock(parent, name, position, yaw, length)
             post.CanCollide = false
         end
     end
+    makeCollisionProxy(
+        model,
+        "DockCollision",
+        Vector3.new(7.6, 0.7, length + 2.5),
+        base * CFrame.new(0, 0.95, -length * 0.5)
+    )
     local skiff = makePart(
         model,
         "WayfarerSkiff",
@@ -5412,6 +5435,69 @@ local function makeExplorationContent(parent)
     makeExplorationTrigger(parent, "shattered_forward_camp", Vector3.new(555, 0, 220), 28)
 end
 
+local SOLID_VISUAL_PARTS = table.freeze({
+    Floor = true,
+    Deck = true,
+    RangerPorch = true,
+    StiltFloor = true,
+    StiltPorch = true,
+    StiltBackWall = true,
+    StiltSideWall = true,
+    MausoleumBase = true,
+    MausoleumPillar = true,
+    MausoleumBack = true,
+    ObservatoryBase = true,
+    ObservatoryPillar = true,
+    ObservatoryDeck = true,
+    SanctuaryFloor = true,
+    SanctuaryPillar = true,
+    FortressTowerCore = true,
+    GateTower = true,
+    ArchPillar = true,
+    ArchPost = true,
+    TownGatePost = true,
+    ShrineBase = true,
+    ShrinePillar = true,
+    TowerPost = true,
+    TowerDeck = true,
+    RuinFloor = true,
+    RuinStone = true,
+    BrokenPillar = true,
+    Pillar = true,
+    MonumentDais = true,
+    PathDisciplinePlinth = true,
+})
+
+local function shouldUseVisibleCollision(part)
+    if SOLID_VISUAL_PARTS[part.Name] then
+        return true
+    end
+    return string.sub(part.Name, 1, 4) == "Wall"
+end
+
+local function normalizeGeneratedCollisions(world)
+    for _, descendant in world:GetDescendants() do
+        if descendant:IsA("BasePart") then
+            if descendant:GetAttribute("EverLeafCollisionProxy") == true then
+                descendant.Transparency = 1
+                descendant.CanCollide = true
+                descendant.CanTouch = false
+                descendant.CanQuery = false
+                descendant.CastShadow = false
+            elseif descendant:IsA("SpawnLocation") then
+                descendant.CanCollide = false
+                descendant.CanTouch = false
+                descendant.CanQuery = false
+            else
+                local solid = shouldUseVisibleCollision(descendant)
+                descendant.CanCollide = solid
+                descendant.CanTouch = false
+                descendant.CanQuery = solid
+            end
+        end
+    end
+end
+
 local function makeEncounterContent(parent)
     EnemySpawnerService.Spawn(
         "training_dummy",
@@ -5610,6 +5696,7 @@ function LumenreachWorldService.Init()
     makeLabelsAndZones(world)
     makeExplorationContent(world)
     makeSpawns(world)
+    normalizeGeneratedCollisions(world)
 
     for npcId in NPC_STYLES do
         makeNpc(world, npcId)
