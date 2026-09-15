@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local ClassFamilyDefinitions = require(script.Parent.Parent.Content.ClassFamilyDefinitions)
 local DamageService = require(script.Parent.DamageService)
+local CombatHitboxService = require(script.Parent.CombatHitboxService)
 local EnemyService = require(script.Parent.EnemyService)
 local MonsterCombat = require(script.Parent.MonsterCombat)
 local ResourceService = require(script.Parent.ResourceService)
@@ -26,6 +27,8 @@ local function basicAttackDefinition(profile)
         VerticalRange = attack and attack.VerticalRange
             or GameConfig.Combat.BasicAttackVerticalRange,
         ArcDegrees = attack and attack.ArcDegrees or GameConfig.Combat.BasicAttackArcDegrees,
+        HitboxWidth = attack and attack.HitboxWidth or GameConfig.Combat.BasicAttackHitboxWidth,
+        AttackMode = attack and attack.AttackMode or "Melee",
         Cooldown = attack and attack.Cooldown or GameConfig.Combat.BasicAttackCooldown,
         AttackPower = attack and attack.AttackPower or GameConfig.Combat.BeginnerAttackPower,
         StatScale = attack and attack.StatScale or GameConfig.Combat.BeginnerStatScale,
@@ -42,12 +45,25 @@ function CombatService.BasicAttack(player, profile)
     end
 
     local attack = basicAttackDefinition(profile)
-    local target = TargetingService.FindBestEnemy(player, {
+    local now = os.clock()
+    local previous = lastAttackAt[player] or 0
+    if now - previous < attack.Cooldown then
+        return false, "cooldown"
+    end
+    -- A swing/shot consumes cadence even when it misses. This prevents clients
+    -- from probing the server hitbox at a rate higher than the actual weapon.
+    lastAttackAt[player] = now
+
+    local targetSpec = {
         Range = attack.Range,
         VerticalRange = attack.VerticalRange,
         ArcDegrees = attack.ArcDegrees,
+        HitboxWidth = attack.HitboxWidth,
         RequireLineOfSight = GameConfig.Combat.RequireLineOfSight,
-    })
+    }
+    local target = if attack.AttackMode == "Melee"
+        then CombatHitboxService.FindMeleeTarget(player, targetSpec)
+        else TargetingService.FindBestEnemy(player, targetSpec)
     if not target then
         return false, "no_target"
     end
@@ -59,14 +75,6 @@ function CombatService.BasicAttack(player, profile)
     if (targetRoot.Position - playerRoot.Position).Magnitude > attack.Range then
         return false, "out_of_range"
     end
-
-    local now = os.clock()
-    local previous = lastAttackAt[player] or 0
-    if now - previous < attack.Cooldown then
-        return false, "cooldown"
-    end
-
-    lastAttackAt[player] = now
     ResourceService.MarkCombat(player, profile)
     local damage, damageMeta = DamageService.RollBasicDamage(profile, {
         PrimaryStat = attack.PrimaryStat,

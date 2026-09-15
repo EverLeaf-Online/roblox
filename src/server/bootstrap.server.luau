@@ -56,6 +56,7 @@ local profileChanged = ensureRemote("RemoteEvent", Net.Events.ProfileChanged)
 local partyEvent = ensureRemote("RemoteEvent", Net.Events.PartyEvent)
 local interactionEvent = ensureRemote("RemoteEvent", Net.Events.InteractionEvent)
 local playerDamageEvent = ensureRemote("RemoteEvent", Net.Events.PlayerDamageEvent)
+local movementIntent = ensureRemote("RemoteEvent", Net.Events.MovementIntent)
 ensureRemote("RemoteEvent", Net.Events.WorldNotice)
 local requestProfile = ensureRemote("RemoteFunction", Net.Functions.RequestProfile)
 local allocateStat = ensureRemote("RemoteFunction", Net.Functions.AllocateStat)
@@ -131,6 +132,7 @@ PlayerDamageService.Event:Connect(function(player, payload)
 end)
 
 local function onPlayerAdded(player)
+    player:SetAttribute("EverLeafCrouching", false)
     local ok, profileOrReason = PlayerDataService.Load(player)
     if not ok then
         warn(
@@ -148,6 +150,7 @@ local function onPlayerAdded(player)
     DeathService.InitPlayer(player)
 
     player.CharacterAdded:Connect(function()
+        player:SetAttribute("EverLeafCrouching", false)
         task.defer(function()
             local profile = PlayerDataService.Get(player)
             if profile then
@@ -198,6 +201,39 @@ requestProfile.OnServerInvoke = function(player)
     end
     return SnapshotService.Build(player)
 end
+
+movementIntent.OnServerEvent:Connect(function(player, payload)
+    local limit = GameConfig.Security.MovementIntent
+    if
+        not RateLimiterService.Allow(
+            player,
+            "MovementIntent",
+            limit.Capacity,
+            limit.RefillPerSecond,
+            1
+        )
+    then
+        return
+    end
+    if type(payload) ~= "table" or type(payload.Crouching) ~= "boolean" then
+        return
+    end
+    local character = player.Character
+    local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+    if not humanoid or humanoid.Health <= 0 then
+        player:SetAttribute("EverLeafCrouching", false)
+        return
+    end
+    if payload.Crouching then
+        if
+            player:GetAttribute("EverLeafStaggered") == true
+            or humanoid.FloorMaterial == Enum.Material.Air
+        then
+            return
+        end
+    end
+    player:SetAttribute("EverLeafCrouching", payload.Crouching)
+end)
 
 allocateStat.OnServerInvoke = function(player, statName, amount)
     local limit = GameConfig.Security.AllocateStat

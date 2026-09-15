@@ -161,6 +161,7 @@
 
 - [x] 2.5D direction retired.
 - [x] Third-person camera-relative WASD/gamepad movement foundation.
+- [x] Crouch movement state is source-complete: C / gamepad R3 toggle, crouch-speed clamp, camera offset, server-validated stance intent, respawn reset; Studio posture/clearance feel still needs QA.
 - [x] Mouse/right-stick orbit camera foundation with camera collision.
 - [x] Sprint foundation (`Shift` / L3).
 - [x] Grounded jump foundation (`Space` / A).
@@ -170,7 +171,7 @@
 - [x] Enemy pursuit converted to full XYZ movement.
 - [x] Z-plane movement correction removed.
 - [x] Modern lighting/atmosphere baseline service.
-- [ ] Production hitbox/hurtbox system.
+- [x] Server-authoritative melee basic attacks now use forward overlap-box hit detection against active enemy models with arc/range/LOS validation; broader skill/enemy hurtbox standardization remains.
 - [ ] Lock-on / soft-target system decision and implementation.
 - [x] **PARTIAL:** PathfindingService pursuit/navigation is source-complete; full Studio obstacle/edge-case tuning remains.
 - [x] Lumenreach 3D benchmark graybox generated from canonical source.
@@ -290,6 +291,7 @@
 - [x] Original 2.5D controller prototype retired after 3D pivot.
 - [x] Full 3D camera-relative movement controller foundation.
 - [x] Full camera-relative WASD movement works in Studio.
+- [x] Crouch toggle implemented with server-authoritative stance state and crouch speed; Studio visual/clearance tuning remains.
 - [x] Jumping works in Studio.
 - [x] Free 3D forward/back/strafe movement is active; old depth-plane behavior is retired.
 - [x] Server movement sanity enforces speed plus horizontal/vertical displacement limits with teleport grace.
@@ -306,6 +308,8 @@
 - [x] Server horizontal speed plus horizontal/vertical displacement sanity checks with explicit teleport grace.
 
 ## 8. Combat — player attack
+
+- [ ] Replace instant ranged-basic resolution with server-simulated projectile travel/segment raycasts while keeping client projectiles presentation-only.
 
 ### Backend
 - [x] Basic-attack client controller exists.
@@ -324,7 +328,7 @@
 - [ ] Rig-aware player basic-attack pose layer is source-complete for default, Ironbloom, Thornrunner, Lumenweaver, Veilstrider, and Brasshand; live Studio visual verification is pending after replacing the ineffective old joint tween.
 - [x] Procedural basic-attack animation foundation now drives R6/R15 shoulders, R15 elbows, and torso through a post-animation additive pose layer.
 - [ ] Facing-aware attack direction.
-- [ ] Production hitbox/hurtbox implementation.
+- [x] Basic melee attack hitbox is server-owned and overlap-based; expand the same hurtbox contract to skills/enemy attacks as those systems are standardized.
 - [ ] Hit-confirm feedback.
 - [ ] Floating damage numbers.
 - [ ] Hit sound.

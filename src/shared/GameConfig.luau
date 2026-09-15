@@ -56,6 +56,10 @@ GameConfig.Security = {
         Capacity = 12,
         RefillPerSecond = 8,
     },
+    MovementIntent = {
+        Capacity = 8,
+        RefillPerSecond = 6,
+    },
     ProfileRequest = {
         Capacity = 4,
         RefillPerSecond = 1,
@@ -69,6 +73,7 @@ GameConfig.Security = {
 GameConfig.Movement = {
     WalkSpeed = 16,
     SprintSpeed = 24,
+    CrouchSpeed = 9,
     JumpPower = 50,
     DodgeSpeed = 42,
     DodgeDuration = 0.22,
@@ -78,6 +83,7 @@ GameConfig.Movement = {
     DisplacementSlack = 7,
     TeleportGraceSeconds = 0.75,
     GamepadDeadzone = 0.15,
+    CrouchCameraOffset = Vector3.new(0, -1.15, 0),
     ServerCheckInterval = 0.1,
 }
 
@@ -136,6 +142,7 @@ GameConfig.Combat = {
     BasicAttackRange = 9,
     BasicAttackVerticalRange = 6,
     BasicAttackArcDegrees = 120,
+    BasicAttackHitboxWidth = 7,
     RequireLineOfSight = true,
     PlayerDamageIFrames = 0.15,
     DefenseConstant = 100,

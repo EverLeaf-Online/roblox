@@ -13,7 +13,7 @@ local function hasLineOfSight(character, target, origin, targetPosition)
     return not result or result.Instance:IsDescendantOf(target)
 end
 
-function TargetingService.FindBestEnemy(player, spec)
+local function findBestFromList(player, candidates, spec)
     local character = player.Character
     local playerRoot = character and character:FindFirstChild("HumanoidRootPart")
     if not character or not playerRoot then
@@ -33,7 +33,7 @@ function TargetingService.FindBestEnemy(player, spec)
 
     local nearest = nil
     local nearestDistance = math.huge
-    for _, candidate in EnemyService.GetActiveEnemies() do
+    for _, candidate in candidates do
         local root = candidate:FindFirstChild("HumanoidRootPart") or candidate.PrimaryPart
         if root and EnemyService.IsValidTarget(candidate) then
             local delta = root.Position - playerRoot.Position
@@ -63,6 +63,17 @@ function TargetingService.FindBestEnemy(player, spec)
     end
 
     return nearest
+end
+
+function TargetingService.FindBestEnemyFromCandidates(player, candidates, spec)
+    if type(candidates) ~= "table" then
+        return nil
+    end
+    return findBestFromList(player, candidates, spec)
+end
+
+function TargetingService.FindBestEnemy(player, spec)
+    return findBestFromList(player, EnemyService.GetActiveEnemies(), spec)
 end
 
 function TargetingService.FindNearestEnemy(player, spec)

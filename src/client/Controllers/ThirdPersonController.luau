@@ -6,6 +6,7 @@ local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
+local Net = require(ReplicatedStorage.Shared.Net)
 
 local ThirdPersonController = {}
 
@@ -14,6 +15,8 @@ local humanoid = nil
 local root = nil
 local thumbstick = Vector2.zero
 local sprintHeld = false
+local crouching = false
+local movementIntentRemote = nil
 local lastDodgeAt = -math.huge
 local dodgeUntil = 0
 local dodgeDirection = Vector3.zero
@@ -27,6 +30,8 @@ local function attachCharacter(character)
     humanoid.WalkSpeed = GameConfig.Movement.WalkSpeed
     dodgeUntil = 0
     dodgeDirection = Vector3.zero
+    crouching = false
+    humanoid.CameraOffset = Vector3.zero
 end
 
 local function inputBlocked()
@@ -86,7 +91,41 @@ local function getWorldMoveDirection()
     return if direction.Magnitude > 1 then direction.Unit else direction
 end
 
+local function sendCrouchState()
+    if movementIntentRemote then
+        movementIntentRemote:FireServer({ Crouching = crouching })
+    end
+end
+
+local function setCrouching(value)
+    value = value == true
+    if crouching == value then
+        return
+    end
+    if value then
+        if
+            player:GetAttribute("EverLeafStaggered") == true
+            or dodgeUntil > os.clock()
+            or not humanoid
+            or humanoid.FloorMaterial == Enum.Material.Air
+        then
+            return
+        end
+        sprintHeld = false
+    end
+    crouching = value
+    if humanoid then
+        humanoid.CameraOffset = if crouching
+            then GameConfig.Movement.CrouchCameraOffset
+            else Vector3.zero
+    end
+    sendCrouchState()
+end
+
 local function tryJump()
+    if crouching then
+        setCrouching(false)
+    end
     if player:GetAttribute("EverLeafStaggered") == true then
         return
     end
@@ -100,6 +139,9 @@ local function tryJump()
 end
 
 local function tryDodge()
+    if crouching then
+        setCrouching(false)
+    end
     if player:GetAttribute("EverLeafStaggered") == true then
         return
     end
@@ -143,6 +185,14 @@ local function tryDodge()
 end
 
 function ThirdPersonController.Start()
+    local remotes = ReplicatedStorage:WaitForChild(Net.RemoteFolderName, 5)
+    if remotes then
+        local remote = remotes:WaitForChild(Net.Events.MovementIntent, 5)
+        if remote and remote:IsA("RemoteEvent") then
+            movementIntentRemote = remote
+        end
+    end
+
     player.CharacterAdded:Connect(attachCharacter)
     if player.Character then
         task.spawn(attachCharacter, player.Character)
@@ -158,7 +208,11 @@ function ThirdPersonController.Start()
         elseif
             input.KeyCode == Enum.KeyCode.LeftShift or input.KeyCode == Enum.KeyCode.ButtonL3
         then
-            sprintHeld = true
+            if not crouching then
+                sprintHeld = true
+            end
+        elseif input.KeyCode == Enum.KeyCode.C or input.KeyCode == Enum.KeyCode.ButtonR3 then
+            setCrouching(not crouching)
         elseif input.KeyCode == Enum.KeyCode.Q or input.KeyCode == Enum.KeyCode.ButtonB then
             tryDodge()
         end
@@ -188,6 +242,9 @@ function ThirdPersonController.Start()
             if player:GetAttribute("EverLeafStaggered") == true then
                 dodgeUntil = 0
                 dodgeDirection = Vector3.zero
+                if crouching then
+                    setCrouching(false)
+                end
                 humanoid.AutoRotate = true
                 humanoid.WalkSpeed = 0
                 humanoid:Move(Vector3.zero, false)
@@ -208,6 +265,9 @@ function ThirdPersonController.Start()
 
                 dodgeUntil = 0
                 dodgeDirection = Vector3.zero
+                if crouching then
+                    setCrouching(false)
+                end
                 humanoid.AutoRotate = true
             end
 
@@ -216,9 +276,11 @@ function ThirdPersonController.Start()
                 return
             end
 
-            humanoid.WalkSpeed = if sprintHeld
-                then GameConfig.Movement.SprintSpeed
-                else GameConfig.Movement.WalkSpeed
+            humanoid.WalkSpeed = if crouching
+                then GameConfig.Movement.CrouchSpeed
+                else if sprintHeld
+                    then GameConfig.Movement.SprintSpeed
+                    else GameConfig.Movement.WalkSpeed
             humanoid:Move(getWorldMoveDirection(), false)
         end
     )

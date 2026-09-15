@@ -54,6 +54,8 @@ local function correctPlayer(player)
     humanoid.JumpPower = GameConfig.Movement.JumpPower
     if player:GetAttribute("EverLeafStaggered") == true then
         humanoid.WalkSpeed = 0
+    elseif player:GetAttribute("EverLeafCrouching") == true then
+        humanoid.WalkSpeed = math.clamp(humanoid.WalkSpeed, 0, GameConfig.Movement.CrouchSpeed)
     else
         humanoid.WalkSpeed = math.clamp(humanoid.WalkSpeed, 0, GameConfig.Movement.SprintSpeed)
     end
