@@ -6,6 +6,7 @@ local RunService = game:GetService("RunService")
 
 local MonetizationConfig = require(ReplicatedStorage.Shared.MonetizationConfig)
 local MonetizationRules = require(ReplicatedStorage.Shared.Logic.MonetizationRules)
+local MonetizationSafetyRules = require(ReplicatedStorage.Shared.Logic.MonetizationSafetyRules)
 local CosmeticDefinitions = require(ReplicatedStorage.Shared.CosmeticDefinitions)
 local Net = require(ReplicatedStorage.Shared.Net)
 local AchievementService = require(script.Parent.AchievementService)
@@ -179,6 +180,14 @@ local function refreshMembership(player)
     if subscribed then
         local profile = PlayerDataService.Get(player)
         if profile then
+            local titleChanged = CosmeticService.Grant(profile, "member_title")
+            if not profile.Cosmetics.Equipped.Title or profile.Cosmetics.Equipped.Title == "" then
+                local equipped = CosmeticService.Equip(profile, "Title", "member_title")
+                titleChanged = equipped or titleChanged
+            end
+            if titleChanged then
+                PlayerDataService.NotifyChanged(player)
+            end
             grantMonthlyMemberCosmetic(player, profile)
         end
     end
@@ -396,6 +405,16 @@ function MonetizationService.Init()
             string.format(
                 "[MonetizationService] Invalid monetization config: %s",
                 tostring(configReason)
+            )
+        )
+    end
+    local safetyOk, safetyReason =
+        MonetizationSafetyRules.Validate(MonetizationConfig, CosmeticDefinitions)
+    if not safetyOk then
+        error(
+            string.format(
+                "[MonetizationService] Unsafe monetization config: %s",
+                tostring(safetyReason)
             )
         )
     end
