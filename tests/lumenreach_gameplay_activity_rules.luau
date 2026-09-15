@@ -107,4 +107,13 @@ for _ in string.gmatch(gameplay, "makeVeilCrystal%(") do
 end
 assert(gatherNodeCount >= 8, "Lumenreach should contain multiple authored gather-node placements")
 
+assert(
+    string.find(gameplay, '"BenchCollision"', 1, true) ~= nil,
+    "apothecary must prevent avatar/camera clipping"
+)
+assert(
+    string.find(gameplay, "Vector3.new(9.2, 0.48, 3.6)", 1, true) ~= nil,
+    "apothecary bench must stay player-scale"
+)
+
 print("Lumenreach gameplay activity rules tests passed")

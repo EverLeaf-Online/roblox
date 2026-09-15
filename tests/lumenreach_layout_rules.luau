@@ -313,4 +313,18 @@ for _, target in { "gravebone_watch", "eastbridge_crossing", "mossglen_valley", 
     )
 end
 
+assert(
+    string.find(source, '"ArchRoof"', 1, true) ~= nil
+        and string.find(source, '"ArchEave"', 1, true) == nil,
+    "street arches must use continuous roof planes, not detached wedge plates"
+)
+assert(
+    string.find(source, "local slopeLength = halfRun / math.cos(pitch)", 1, true) ~= nil,
+    "building roofs must derive panel length from span"
+)
+assert(
+    string.find(source, "base * CFrame.new(0, 8.45, 0)", 1, true) ~= nil,
+    "market canopy must clear player/camera height"
+)
+
 print("Lumenreach terrain-first MMO redesign rules tests passed")

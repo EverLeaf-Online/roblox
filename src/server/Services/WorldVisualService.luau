@@ -146,8 +146,8 @@ local function configureDayNightCycle(graphics)
     local hoursPerSecond = 24 / fullDayLength
     local nightVisibility = ensureEffect("ColorCorrectionEffect", "EverLeafNightVisibility")
     if nightVisibility then
-        safeSet(nightVisibility, "Contrast", -0.02)
-        safeSet(nightVisibility, "Saturation", -0.03)
+        safeSet(nightVisibility, "Contrast", -0.05)
+        safeSet(nightVisibility, "Saturation", -0.02)
     end
 
     dayNightConnection = RunService.Heartbeat:Connect(function(deltaTime)
@@ -155,7 +155,11 @@ local function configureDayNightCycle(graphics)
         if nightVisibility then
             local solar = (math.sin((Lighting.ClockTime - 6) / 24 * math.pi * 2) + 1) * 0.5
             local nightFactor = 1 - solar
-            nightVisibility.Brightness = nightFactor * 0.14
+            nightVisibility.Brightness = nightFactor * 0.26
+            Lighting.Ambient = Color3.fromRGB(75, 92, 85)
+                :Lerp(Color3.fromRGB(108, 123, 116), nightFactor)
+            Lighting.OutdoorAmbient = Color3.fromRGB(112, 126, 117)
+                :Lerp(Color3.fromRGB(132, 145, 137), nightFactor)
         end
     end)
 end

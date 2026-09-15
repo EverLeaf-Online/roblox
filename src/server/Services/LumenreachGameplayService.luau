@@ -317,29 +317,53 @@ local function makeApothecaryBench(parent, position)
     model.Name = "WayfarerApothecaryBench"
     model.Parent = parent
     local base = CFrame.new(ground)
-    part(
+
+    local top = part(
         model,
         "BenchTop",
-        Vector3.new(15, 1, 5.5),
-        base * CFrame.new(0, 3.2, 0),
+        Vector3.new(9.2, 0.48, 3.6),
+        base * CFrame.new(0, 2.55, 0),
         Enum.Material.WoodPlanks,
         COLORS.TimberLight
     )
-    for _, x in { -6.2, 6.2 } do
-        part(
-            model,
-            "BenchLeg",
-            Vector3.new(1, 3.2, 1),
-            base * CFrame.new(x, 1.6, 0),
-            Enum.Material.Wood,
-            COLORS.Timber
-        )
+    top.CanCollide = false
+    for _, x in { -3.7, 3.7 } do
+        for _, z in { -1.25, 1.25 } do
+            local leg = part(
+                model,
+                "BenchLeg",
+                Vector3.new(0.55, 2.25, 0.55),
+                base * CFrame.new(x, 1.125, z),
+                Enum.Material.Wood,
+                COLORS.Timber
+            )
+            leg.CanCollide = false
+        end
     end
+    local shelf = part(
+        model,
+        "BenchShelf",
+        Vector3.new(8.2, 0.35, 2.7),
+        base * CFrame.new(0, 0.8, 0.25),
+        Enum.Material.WoodPlanks,
+        Color3.fromRGB(86, 63, 42)
+    )
+    shelf.CanCollide = false
+    local backboard = part(
+        model,
+        "BenchBackboard",
+        Vector3.new(8.8, 2.8, 0.35),
+        base * CFrame.new(0, 4.05, 1.55),
+        Enum.Material.WoodPlanks,
+        Color3.fromRGB(82, 62, 43)
+    )
+    backboard.CanCollide = false
+
     local smallStation = part(
         model,
         "SmallTonicMortar",
-        Vector3.new(3.2, 1.8, 3.2),
-        base * CFrame.new(-4.0, 4.5, 0),
+        Vector3.new(1.65, 1.15, 1.65),
+        base * CFrame.new(-2.45, 3.35, -0.2),
         Enum.Material.Slate,
         Color3.fromRGB(69, 78, 75),
         "Cylinder"
@@ -347,12 +371,36 @@ local function makeApothecaryBench(parent, position)
     local fieldStation = part(
         model,
         "FieldTonicKettle",
-        Vector3.new(3.4, 2.3, 3.4),
-        base * CFrame.new(4.0, 4.8, 0),
+        Vector3.new(1.9, 1.55, 1.9),
+        base * CFrame.new(2.45, 3.52, -0.15),
         Enum.Material.Metal,
         Color3.fromRGB(78, 88, 86),
         "Ball"
     )
+    local glow = part(
+        model,
+        "BenchLumenLamp",
+        Vector3.new(0.45, 2.0, 0.45),
+        base * CFrame.new(0, 3.65, 1.25) * CFrame.Angles(0, math.rad(45), math.rad(8)),
+        Enum.Material.Neon,
+        COLORS.Lumen
+    )
+    glow.CanQuery = false
+
+    -- Solid invisible workstation volume prevents avatar/camera clipping through the bench.
+    local blocker = part(
+        model,
+        "BenchCollision",
+        Vector3.new(9.0, 4.3, 3.5),
+        base * CFrame.new(0, 2.15, 0),
+        Enum.Material.SmoothPlastic,
+        Color3.new(0, 0, 0)
+    )
+    blocker.Transparency = 1
+    blocker.CanCollide = true
+    blocker.CanQuery = false
+    blocker.CastShadow = false
+
     local smallPrompt = prompt(smallStation, "Brew", "Small Tonic · 2 Lumenleaf", 0.8)
     LumenreachActivityService.Bind(smallPrompt, {
         Type = "Craft",

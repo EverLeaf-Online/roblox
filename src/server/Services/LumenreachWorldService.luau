@@ -1009,7 +1009,7 @@ local function makeBuilding(parent, name, center, width, depth, height, yaw, acc
         model,
         "StoneFoundation",
         Vector3.new(width + 1.6, 0.8, depth + 1.6),
-        base * CFrame.new(0, 0.15, 0),
+        base * CFrame.new(0, 0.4, 0),
         Enum.Material.Slate,
         Color3.fromRGB(74, 82, 78)
     )
@@ -1017,7 +1017,7 @@ local function makeBuilding(parent, name, center, width, depth, height, yaw, acc
         model,
         "Floor",
         Vector3.new(width, 0.8, depth),
-        base * CFrame.new(0, 0.72, 0),
+        base * CFrame.new(0, 0.8, 0),
         Enum.Material.WoodPlanks,
         timber
     )
@@ -1025,16 +1025,16 @@ local function makeBuilding(parent, name, center, width, depth, height, yaw, acc
     local doorWidth = math.min(7, width * 0.28)
     local sideWidth = (width - doorWidth) * 0.5
     local wallSpecs = {
-        { Vector3.new(width, height, 1), Vector3.new(0, height * 0.5, depth * 0.5) },
-        { Vector3.new(1, height, depth), Vector3.new(-width * 0.5, height * 0.5, 0) },
-        { Vector3.new(1, height, depth), Vector3.new(width * 0.5, height * 0.5, 0) },
+        { Vector3.new(width, height, 1), Vector3.new(0, height * 0.5 + 0.8, depth * 0.5) },
+        { Vector3.new(1, height, depth), Vector3.new(-width * 0.5, height * 0.5 + 0.8, 0) },
+        { Vector3.new(1, height, depth), Vector3.new(width * 0.5, height * 0.5 + 0.8, 0) },
         {
             Vector3.new(sideWidth, height, 1),
-            Vector3.new(-(doorWidth + sideWidth) * 0.5, height * 0.5, -depth * 0.5),
+            Vector3.new(-(doorWidth + sideWidth) * 0.5, height * 0.5 + 0.8, -depth * 0.5),
         },
         {
             Vector3.new(sideWidth, height, 1),
-            Vector3.new((doorWidth + sideWidth) * 0.5, height * 0.5, -depth * 0.5),
+            Vector3.new((doorWidth + sideWidth) * 0.5, height * 0.5 + 0.8, -depth * 0.5),
         },
     }
     for index, spec in wallSpecs do
@@ -1053,8 +1053,8 @@ local function makeBuilding(parent, name, center, width, depth, height, yaw, acc
             makePart(
                 model,
                 "CornerPost",
-                Vector3.new(1.05, height + 0.8, 1.05),
-                base * CFrame.new(x * width * 0.5, height * 0.5, z * depth * 0.5),
+                Vector3.new(1.05, height + 1.2, 1.05),
+                base * CFrame.new(x * width * 0.5, height * 0.5 + 0.8, z * depth * 0.5),
                 Enum.Material.Wood,
                 timber
             )
@@ -1066,7 +1066,7 @@ local function makeBuilding(parent, name, center, width, depth, height, yaw, acc
             model,
             "Window",
             Vector3.new(4.5, 3.5, 0.25),
-            base * CFrame.new(side * width * 0.27, height * 0.56, -depth * 0.505),
+            base * CFrame.new(side * width * 0.27, height * 0.56 + 0.8, -depth * 0.505),
             Enum.Material.Glass,
             Color3.fromRGB(129, 207, 183)
         )
@@ -1076,16 +1076,20 @@ local function makeBuilding(parent, name, center, width, depth, height, yaw, acc
         window.CanQuery = false
     end
 
-    -- Clean, restrained gable: two correctly oriented roof panels, deliberately
-    -- kept above head height with modest overhang.
+    -- Derive the roof from the actual span so both panels meet at one ridge.
+    local pitch = math.rad(18)
+    local halfRun = width * 0.5 + 1.4
+    local slopeLength = halfRun / math.cos(pitch)
+    local rise = halfRun * math.tan(pitch)
+    local eaveY = height + 1.0
     for _, side in { -1, 1 } do
         local roof = makePart(
             model,
             "Roof",
-            Vector3.new(width * 0.56 + 1.4, 0.7, depth + 2.2),
+            Vector3.new(slopeLength + 0.15, 0.72, depth + 2.4),
             base
-                * CFrame.new(side * width * 0.25, height + 2.25, 0)
-                * CFrame.Angles(0, 0, math.rad(-side * 18)),
+                * CFrame.new(side * halfRun * 0.5, eaveY + rise * 0.5, 0)
+                * CFrame.Angles(0, 0, -side * pitch),
             Enum.Material.WoodPlanks,
             roofColor
         )
@@ -1097,8 +1101,8 @@ local function makeBuilding(parent, name, center, width, depth, height, yaw, acc
     local ridge = makePart(
         model,
         "RoofRidge",
-        Vector3.new(1.0, 1.0, depth + 2.5),
-        base * CFrame.new(0, height + 3.3, 0),
+        Vector3.new(0.9, 0.9, depth + 2.6),
+        base * CFrame.new(0, eaveY + rise, 0),
         Enum.Material.Wood,
         timber
     )
@@ -1110,7 +1114,7 @@ local function makeBuilding(parent, name, center, width, depth, height, yaw, acc
         model,
         "DoorLintel",
         Vector3.new(doorWidth, 0.7, 1.2),
-        base * CFrame.new(0, height - 0.5, -depth * 0.5 - 0.05),
+        base * CFrame.new(0, height + 0.25, -depth * 0.5 - 0.05),
         Enum.Material.Wood,
         timber
     )
@@ -1206,36 +1210,86 @@ local function makeMarketStall(parent, position, yaw, accent)
     local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
     local timber = Color3.fromRGB(79, 57, 39)
     local cloth = accent or Color3.fromRGB(82, 132, 104)
-    for _, x in { -5.2, 5.2 } do
-        makePart(
-            model,
-            "Post",
-            Vector3.new(0.7, 6.8, 0.7),
-            base * CFrame.new(x, 3.4, 0),
-            Enum.Material.Wood,
-            timber
-        )
+
+    for _, x in { -5.4, 5.4 } do
+        for _, z in { -2.5, 2.5 } do
+            local post = makePart(
+                model,
+                "Post",
+                Vector3.new(0.65, 8.6, 0.65),
+                base * CFrame.new(x, 4.3, z),
+                Enum.Material.Wood,
+                timber
+            )
+            post.CanCollide = false
+        end
     end
+
     local counter = makePart(
         model,
         "Counter",
-        Vector3.new(11.5, 1.0, 3.2),
-        base * CFrame.new(0, 2.1, 0.2),
+        Vector3.new(11.4, 0.65, 2.4),
+        base * CFrame.new(0, 2.45, -0.55),
+        Enum.Material.WoodPlanks,
+        Color3.fromRGB(104, 76, 49)
+    )
+    counter.CanCollide = true
+    local lowerShelf = makePart(
+        model,
+        "LowerShelf",
+        Vector3.new(10.8, 0.45, 2.8),
+        base * CFrame.new(0, 0.9, 0.9),
         Enum.Material.WoodPlanks,
         timber
     )
-    counter.CanCollide = false
+    lowerShelf.CanCollide = false
+    local backShelf = makePart(
+        model,
+        "BackShelf",
+        Vector3.new(10.8, 3.0, 0.45),
+        base * CFrame.new(0, 4.0, 2.55),
+        Enum.Material.WoodPlanks,
+        Color3.fromRGB(92, 69, 47)
+    )
+    backShelf.CanCollide = false
+
+    -- Full avatar clearance; the old canopy intersected player heads/cameras.
     local canopy = makePart(
         model,
         "Canopy",
-        Vector3.new(12.8, 0.45, 6.0),
-        base * CFrame.new(0, 6.6, 0),
+        Vector3.new(13.4, 0.42, 7.4),
+        base * CFrame.new(0, 8.45, 0) * CFrame.Angles(math.rad(-7), 0, 0),
         Enum.Material.Fabric,
         cloth
     )
     canopy.CanCollide = false
     canopy.CanTouch = false
     canopy.CanQuery = false
+    local valance = makePart(
+        model,
+        "CanopyValance",
+        Vector3.new(13.0, 1.05, 0.22),
+        base * CFrame.new(0, 7.55, -3.45),
+        Enum.Material.Fabric,
+        cloth:Lerp(Color3.new(0, 0, 0), 0.12)
+    )
+    valance.CanCollide = false
+    valance.CanTouch = false
+    valance.CanQuery = false
+
+    for index, x in { -3.6, 0, 3.6 } do
+        local crate = makePart(
+            model,
+            "DisplayCrate" .. index,
+            Vector3.new(2.3, 1.0, 1.8),
+            base * CFrame.new(x, 3.25, 0.1),
+            Enum.Material.WoodPlanks,
+            Color3.fromRGB(118, 87, 53)
+        )
+        crate.CanCollide = false
+        crate.CanTouch = false
+        crate.CanQuery = false
+    end
     return model
 end
 
@@ -1754,6 +1808,7 @@ local function makeWayfarerStreetArch(parent, name, position, yaw, width, accent
     local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
     width = width or 24
     accent = accent or SIGNATURE.Lumen
+
     for _, side in { -1, 1 } do
         local post = makePart(
             model,
@@ -1767,8 +1822,8 @@ local function makeWayfarerStreetArch(parent, name, position, yaw, width, accent
         local timber = makePart(
             model,
             "ArchTimber",
-            Vector3.new(0.65, 13, 2.7),
-            base * CFrame.new(side * width * 0.5, 6.4, -0.15),
+            Vector3.new(0.65, 12.7, 2.7),
+            base * CFrame.new(side * width * 0.5, 6.35, -0.15),
             Enum.Material.Wood,
             SIGNATURE.Timber
         )
@@ -1776,37 +1831,56 @@ local function makeWayfarerStreetArch(parent, name, position, yaw, width, accent
         makeSignatureCrystal(
             model,
             "ArchCrystal",
-            base * CFrame.new(side * width * 0.5, 10.8, -1.25),
-            2.7,
+            base * CFrame.new(side * width * 0.5, 10.9, -1.25),
+            2.6,
             accent
         )
     end
+
     local beam = makePart(
         model,
         "ArchBeam",
-        Vector3.new(width + 3, 2.1, 3.1),
-        base * CFrame.new(0, 11.8, 0),
+        Vector3.new(width + 3, 1.8, 3.1),
+        base * CFrame.new(0, 11.65, 0),
         Enum.Material.WoodPlanks,
         SIGNATURE.Timber
     )
     beam.CanCollide = false
     beam.CanTouch = false
     beam.CanQuery = false
+
+    -- Two continuous roof planes replace the detached wedge plates visible in Studio.
+    local pitch = math.rad(18)
+    local halfRun = width * 0.5 + 1.6
+    local slopeLength = halfRun / math.cos(pitch)
+    local rise = halfRun * math.tan(pitch)
+    local eaveY = 12.55
     for _, side in { -1, 1 } do
-        local eave = makeWedge(
+        local roof = makePart(
             model,
-            "ArchEave",
-            Vector3.new(width * 0.55, 2.4, 5.2),
+            "ArchRoof",
+            Vector3.new(slopeLength + 0.1, 0.58, 5.6),
             base
-                * CFrame.new(side * width * 0.23, 13.1, 0)
-                * CFrame.Angles(0, math.rad(90), math.rad(side * 7)),
+                * CFrame.new(side * halfRun * 0.5, eaveY + rise * 0.5, 0)
+                * CFrame.Angles(0, 0, -side * pitch),
             Enum.Material.WoodPlanks,
             SIGNATURE.SlateDark
         )
-        eave.CanCollide = false
-        eave.CanTouch = false
-        eave.CanQuery = false
+        roof.CanCollide = false
+        roof.CanTouch = false
+        roof.CanQuery = false
     end
+    local crest = makePart(
+        model,
+        "ArchRoofCrest",
+        Vector3.new(0.7, 0.7, 5.9),
+        base * CFrame.new(0, eaveY + rise, 0),
+        Enum.Material.Metal,
+        SIGNATURE.Bronze
+    )
+    crest.CanCollide = false
+    crest.CanTouch = false
+    crest.CanQuery = false
     return model
 end
 

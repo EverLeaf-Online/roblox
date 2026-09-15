@@ -19,9 +19,11 @@ assert(
 
 assert(
     string.find(worldVisuals, '"EverLeafNightVisibility"', 1, true) ~= nil
+        and string.find(worldVisuals, "nightVisibility.Brightness = nightFactor * 0.26", 1, true) ~= nil
+        and string.find(worldVisuals, "Lighting.Ambient = Color3.fromRGB(75, 92, 85)", 1, true) ~= nil
         and string.find(
                 worldVisuals,
-                "nightVisibility.Brightness = nightFactor * 0.14",
+                "Lighting.OutdoorAmbient = Color3.fromRGB(112, 126, 117)",
                 1,
                 true
             )
