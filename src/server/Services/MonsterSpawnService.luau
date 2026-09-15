@@ -252,6 +252,36 @@ function MonsterSpawnService.Register(trigger)
     end)
 end
 
+local function controllerByName(triggerName)
+    for trigger, controller in controllers do
+        if trigger.Parent and trigger:GetAttribute("TriggerName") == triggerName then
+            return trigger, controller
+        end
+    end
+    return nil, nil
+end
+
+function MonsterSpawnService.GetStateByName(triggerName)
+    local _, controller = controllerByName(triggerName)
+    return controller and controller.State or nil
+end
+
+function MonsterSpawnService.ForceCooldownByName(triggerName, cooldownSeconds)
+    local trigger, controller = controllerByName(triggerName)
+    if not trigger or not controller then
+        return false, "unknown_trigger"
+    end
+
+    for _, child in controller.Folder:GetChildren() do
+        child:Destroy()
+    end
+    controller.Alive = 0
+    controller.CooldownUntil = os.clock() + math.max(0, tonumber(cooldownSeconds) or 0)
+    controller.WaitingForExit = true
+    setState(trigger, controller, "Cooldown")
+    return true
+end
+
 function MonsterSpawnService.Init()
     for _, descendant in Workspace:GetDescendants() do
         if descendant:IsA("BasePart") and descendant.Name == "MonsterSpawnTrigger" then

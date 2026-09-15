@@ -87,6 +87,15 @@ function EnemyService.Register(enemy, enemyId, onDeath)
         EnemyAIService.Attach(enemy, definition.MonsterConfig)
     end
 
+    enemy.Destroying:Once(function()
+        if states[enemy] ~= state then
+            return
+        end
+        states[enemy] = nil
+        EnemyAIService.Detach(enemy)
+        CollectionService:RemoveTag(enemy, "EverLeafEnemy")
+    end)
+
     humanoid.Died:Connect(function()
         if state.Dead then
             return

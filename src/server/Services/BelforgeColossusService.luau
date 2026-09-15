@@ -6,13 +6,27 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local Workspace = game:GetService("Workspace")
 
+local BossDefinitions = require(script.Parent.Parent.Content.BossDefinitions)
+local BelforgeAccessRules = require(ReplicatedStorage.Shared.Logic.BelforgeAccessRules)
 local BelforgeColossusRules = require(ReplicatedStorage.Shared.Logic.BelforgeColossusRules)
+local BelforgeEncounterRules = require(ReplicatedStorage.Shared.Logic.BelforgeEncounterRules)
+local MonsterSpawnService = require(script.Parent.MonsterSpawnService)
 local PlayerDamageService = require(script.Parent.PlayerDamageService)
+local WorldTravelService = require(script.Parent.WorldTravelService)
 
 local BelforgeColossusService = {}
 local BOSS_ID = "belforge_colossus"
 local states = {}
 local accumulator = 0
+local ENCOUNTER_TRIGGER = "BelforgeColossusEncounter"
+local MAX_PLAYERS = BossDefinitions.belforge_colossus.MaxPlayers
+local WIPE_RESET_SECONDS = 8
+local encounter = {
+    State = "Open",
+    Participants = {},
+    Eliminated = {},
+    Boss = nil,
+}
 
 local function getRoot(model)
     return model and model:FindFirstChild("HumanoidRootPart")
@@ -216,6 +230,97 @@ local function updatePhase(enemy, state)
     return phase
 end
 
+local function participantCount()
+    local count = 0
+    for player in encounter.Participants do
+        if player.Parent == Players then
+            count += 1
+        end
+    end
+    return count
+end
+
+local function clearAttempt(nextState)
+    encounter.State = nextState or "Open"
+    encounter.Participants = {}
+    encounter.Eliminated = {}
+    encounter.Boss = nil
+end
+
+local function refreshCooldownState()
+    if encounter.State ~= "VictoryCooldown" and encounter.State ~= "Resetting" then
+        return
+    end
+    local spawnState = MonsterSpawnService.GetStateByName(ENCOUNTER_TRIGGER)
+    if spawnState == "Idle" then
+        clearAttempt("Open")
+    end
+end
+
+local function wipeIfNeeded()
+    if encounter.State ~= "Active" then
+        return
+    end
+    if not BelforgeEncounterRules.AllEliminated(encounter.Participants, encounter.Eliminated) then
+        return
+    end
+
+    encounter.State = "Resetting"
+    local boss = encounter.Boss
+    encounter.Boss = nil
+    if boss and boss.Parent then
+        boss:Destroy()
+    end
+    MonsterSpawnService.ForceCooldownByName(ENCOUNTER_TRIGGER, WIPE_RESET_SECONDS)
+end
+
+function BelforgeColossusService.EnterArena(player, profile)
+    refreshCooldownState()
+    local accessOk, accessReason = BelforgeAccessRules.CanEnterColossus(profile)
+    if not accessOk then
+        return false, accessReason
+    end
+    local isRegistered = encounter.Participants[player] == true
+    local canEnter, reason = BelforgeEncounterRules.CanEnter(
+        encounter.State,
+        isRegistered,
+        participantCount(),
+        MAX_PLAYERS
+    )
+    if not canEnter then
+        return false, reason
+    end
+
+    encounter.Participants[player] = true
+    encounter.Eliminated[player] = nil
+    WorldTravelService.SetRespawn(player, "belforge_antechamber")
+    local teleported, teleportReason =
+        WorldTravelService.Teleport(player, "belforge_colossus_arena")
+    if not teleported and not isRegistered then
+        encounter.Participants[player] = nil
+        encounter.Eliminated[player] = nil
+    end
+    return teleported, teleportReason
+end
+
+function BelforgeColossusService.LeaveArena(player)
+    if encounter.Participants[player] then
+        if encounter.State == "Active" then
+            encounter.Eliminated[player] = true
+            wipeIfNeeded()
+        else
+            encounter.Participants[player] = nil
+            encounter.Eliminated[player] = nil
+        end
+    end
+    return WorldTravelService.Teleport(player, "belforge_antechamber")
+end
+
+function BelforgeColossusService.GetEncounterState()
+    refreshCooldownState()
+    return encounter.State, participantCount()
+end
+
 local function attach(enemy)
     if states[enemy] or not enemy:IsA("Model") or enemy:GetAttribute("EnemyId") ~= BOSS_ID then
         return
@@ -233,6 +338,14 @@ local function attach(enemy)
         Alternate = false,
     }
     states[enemy] = state
+    encounter.State = "Active"
+    encounter.Boss = enemy
+    for _, player in playersWithin(root.Position, 150) do
+        if participantCount() < MAX_PLAYERS then
+            encounter.Participants[player] = true
+            encounter.Eliminated[player] = nil
+        end
+    end
     updatePhase(enemy, state)
 
     humanoid.HealthChanged:Connect(function()
@@ -242,9 +355,18 @@ local function attach(enemy)
     end)
     humanoid.Died:Connect(function()
         states[enemy] = nil
+        if encounter.Boss == enemy then
+            encounter.Boss = nil
+            encounter.State = "VictoryCooldown"
+            encounter.Participants = {}
+            encounter.Eliminated = {}
+        end
     end)
     enemy.Destroying:Once(function()
         states[enemy] = nil
+        if encounter.Boss == enemy then
+            encounter.Boss = nil
+        end
     end)
 end
 
@@ -256,6 +378,38 @@ function BelforgeColossusService.Init()
         task.defer(attach, enemy)
     end)
 
+    Players.PlayerRemoving:Connect(function(player)
+        if encounter.Participants[player] then
+            encounter.Eliminated[player] = true
+            wipeIfNeeded()
+        end
+        encounter.Participants[player] = nil
+        encounter.Eliminated[player] = nil
+    end)
+
+    for _, player in Players:GetPlayers() do
+        player.CharacterAdded:Connect(function(character)
+            local humanoid = character:WaitForChild("Humanoid")
+            humanoid.Died:Connect(function()
+                if encounter.State == "Active" and encounter.Participants[player] then
+                    encounter.Eliminated[player] = true
+                    wipeIfNeeded()
+                end
+            end)
+        end)
+    end
+    Players.PlayerAdded:Connect(function(player)
+        player.CharacterAdded:Connect(function(character)
+            local humanoid = character:WaitForChild("Humanoid")
+            humanoid.Died:Connect(function()
+                if encounter.State == "Active" and encounter.Participants[player] then
+                    encounter.Eliminated[player] = true
+                    wipeIfNeeded()
+                end
+            end)
+        end)
+    end)
+
     RunService.Heartbeat:Connect(function(deltaTime)
         accumulator += deltaTime
         if accumulator < 0.15 then
@@ -263,6 +417,7 @@ function BelforgeColossusService.Init()
         end
         accumulator = 0
         local now = os.clock()
+        refreshCooldownState()
         for enemy, state in states do
             local humanoid = state.Humanoid
             if not enemy.Parent or not humanoid.Parent or humanoid.Health <= 0 then

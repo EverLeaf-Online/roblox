@@ -510,10 +510,10 @@
 - [x] Telegraph-based Steam Burst and Hammerfall special attacks implemented.
 - [x] Floor telegraphs and server-authoritative AoE damage/knockback implemented.
 - [x] Three phases implemented: Pressure Rising, Furnace Breach, Critical Overheat.
-- [ ] Full encounter failure/wipe/active-fight lockout rules.
+- [x] Encounter attempt lifecycle implemented: six-player cap, pull lockout, death/exit elimination, no death-rush re-entry, full-wipe reset, and normal victory cooldown.
 - [x] Boss contributor rewards now grant qualifying participants individual reward/quest credit and owner-locked loot.
 - [x] Reward/drop path implemented: Colossus Core, Shards, Marks, EXP, Colossus Emblem quest reward.
-- [x] Arena death returns players to the Belforge antechamber; leaving Belforge restores Brasshaven respawn.
+- [x] Arena death returns players to the Belforge antechamber; leaving Belforge restores Brasshaven respawn; wipe resets do not grant boss rewards.
 - [ ] Final VFX/SFX/music pass.
 - [ ] Studio balance/playtest pass.
 

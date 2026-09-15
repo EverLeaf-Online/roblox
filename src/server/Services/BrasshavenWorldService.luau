@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
 local BelforgeAccessRules = require(ReplicatedStorage.Shared.Logic.BelforgeAccessRules)
+local BelforgeColossusService = require(script.Parent.BelforgeColossusService)
 local InteractionService = require(script.Parent.InteractionService)
 local PlayerDataService = require(script.Parent.PlayerDataService)
 local PortalService = require(script.Parent.PortalService)
@@ -920,12 +921,7 @@ local function makeBelforgeAntechamber(parent)
     arenaPrompt.Parent = innerDoor
     arenaPrompt.Triggered:Connect(function(player)
         local profile = PlayerDataService.Get(player)
-        local allowed = BelforgeAccessRules.CanEnterColossus(profile)
-        if not allowed then
-            return
-        end
-        WorldTravelService.SetRespawn(player, "belforge_antechamber")
-        WorldTravelService.Teleport(player, "belforge_colossus_arena")
+        BelforgeColossusService.EnterArena(player, profile)
     end)
 
     local spawnMarker = Instance.new("SpawnLocation")
@@ -1133,7 +1129,7 @@ local function makeBelforgeArena(parent)
     returnPrompt.RequiresLineOfSight = false
     returnPrompt.Parent = returnPad
     returnPrompt.Triggered:Connect(function(player)
-        WorldTravelService.Teleport(player, "belforge_antechamber")
+        BelforgeColossusService.LeaveArena(player)
     end)
 
     makeLabel(model, origin + Vector3.new(0, 28, 0), "BELFORGE COLOSSUS ARENA")
