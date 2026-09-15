@@ -158,6 +158,7 @@ GameConfig.Combat = {
     MonsterAttackVerticalRange = 5.5,
     MonsterAttackDepthSlack = 1,
     MonsterAttackRequireLineOfSight = true,
+    ThreatSwitchRatio = 1.15,
     PlayerDamageIFrames = 0.15,
     DefenseConstant = 100,
 }

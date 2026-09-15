@@ -8,6 +8,7 @@ local AchievementService = require(script.Parent.AchievementService)
 local EnemyAIService = require(script.Parent.EnemyAIService)
 local LootDropService = require(script.Parent.LootDropService)
 local MonsterCombat = require(script.Parent.MonsterCombat)
+local MonsterThreatService = require(script.Parent.MonsterThreatService)
 local PlayerDataService = require(script.Parent.PlayerDataService)
 local QuestService = require(script.Parent.QuestService)
 local RewardService = require(script.Parent.RewardService)
@@ -93,6 +94,7 @@ function EnemyService.Register(enemy, enemyId, onDeath)
         end
         states[enemy] = nil
         EnemyAIService.Detach(enemy)
+        MonsterThreatService.Clear(enemy)
         CollectionService:RemoveTag(enemy, "EverLeafEnemy")
     end)
 
@@ -125,6 +127,7 @@ function EnemyService.Register(enemy, enemyId, onDeath)
 
         states[enemy] = nil
         EnemyAIService.Detach(enemy)
+        MonsterThreatService.Clear(enemy)
         MonsterCombat.PlayDeath(enemy)
         CollectionService:RemoveTag(enemy, "EverLeafEnemy")
         if onDeath then
@@ -147,6 +150,7 @@ function EnemyService.RecordDamage(enemy, player, damage)
         return false
     end
     state.DamageByPlayer[player] = (state.DamageByPlayer[player] or 0) + damage
+    MonsterThreatService.Add(enemy, player, damage)
     return true
 end
 

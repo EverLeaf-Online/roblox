@@ -5,6 +5,7 @@ local RunService = game:GetService("RunService")
 local MonsterAnimationService = require(script.Parent.MonsterAnimationService)
 local MonsterAttackHitboxService = require(script.Parent.MonsterAttackHitboxService)
 local MonsterCombat = require(script.Parent.MonsterCombat)
+local MonsterThreatService = require(script.Parent.MonsterThreatService)
 
 local MonsterAI = {}
 local controllers = {}
@@ -187,6 +188,7 @@ function MonsterAI.Detach(monster)
         controller.AttackToken += 1
     end
     controllers[monster] = nil
+    MonsterThreatService.Clear(monster)
     MonsterAnimationService.Detach(monster)
 end
 
@@ -247,10 +249,21 @@ function MonsterAI.Init()
             end
 
             local definition = controller.Definition
-            local target, distance = nearestPlayer(root, definition.DetectionRange or 30)
+            local detectionRange = definition.DetectionRange or 30
+            local target, distance = MonsterThreatService.SelectTarget(
+                monster,
+                controller.Target,
+                root.Position,
+                detectionRange
+            )
+            if not target then
+                target, distance = nearestPlayer(root, detectionRange)
+            end
+
             local leashDistance = (root.Position - controller.SpawnPosition).Magnitude
             if leashDistance > (definition.LeashRange or 60) then
                 target = nil
+                MonsterThreatService.Clear(monster)
             end
 
             controller.Target = target
@@ -260,6 +273,7 @@ function MonsterAI.Init()
                     humanoid.WalkSpeed = definition.WalkSpeed or 10
                     moveWithPath(controller, humanoid, root, controller.SpawnPosition, now)
                 else
+                    MonsterThreatService.Clear(monster)
                     setState(monster, controller, "Idle")
                     humanoid:Move(Vector3.zero, false)
                 end

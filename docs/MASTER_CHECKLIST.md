@@ -41,6 +41,7 @@
 - [x] Enemy attack windup with damage applied at the impact moment.
 - [x] Normal monster melee impacts now revalidate a server-owned forward hurtbox volume + vertical reach + LOS at the impact frame, so sidesteps/behind-target movement/cover can evade telegraphed swings.
 - [x] Aggro leash/reset and return-to-home behavior.
+- [x] Server threat tables stabilize multiplayer aggro: damage builds threat, current-target hysteresis prevents nearest-player thrash, and threat clears on leash/reset/death; live party-combat QA remains open.
 - [x] PathfindingService pursuit foundation around obstacles.
 - [x] Monster dodge reactions, cooldowns, brief invulnerability, and backward evade movement.
 - [x] Visible world loot drops with ownership, labels, pickup prompts, and despawn timing.
