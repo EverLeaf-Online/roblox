@@ -65,15 +65,123 @@ end
 local function buildTrainingDummy()
     local definition = MonsterConfig.Get("training_dummy")
     local model, root =
-        makeBase(definition.TemplateName, definition.DisplayName, Vector3.new(2, 3, 1.5), 0)
-    local body = makePart(
+        makeBase(definition.TemplateName, definition.DisplayName, Vector3.new(2, 3, 2), 0)
+
+    local wood = Color3.fromRGB(112, 78, 48)
+    local darkWood = Color3.fromRGB(78, 52, 34)
+    local rope = Color3.fromRGB(172, 145, 101)
+    local cloth = Color3.fromRGB(134, 119, 86)
+    local target = Color3.fromRGB(177, 74, 59)
+
+    local base =
+        makePart(model, "WeightedBase", Vector3.new(4.2, 0.85, 3.6), darkWood, Enum.Material.Wood)
+    makeMotor(root, base, "BaseJoint", Vector3.new(0, -3.55, 0))
+
+    local post = makePart(
         model,
-        "Body",
-        Vector3.new(2.5, 4, 1.5),
-        Color3.fromRGB(169, 120, 79),
-        Enum.Material.Wood
+        "TrainingPost",
+        Vector3.new(5.8, 0.85, 0.85),
+        wood,
+        Enum.Material.Wood,
+        Enum.PartType.Cylinder
     )
-    makeMotor(root, body, "BodyJoint", Vector3.new(0, 0.5, 0))
+    makeMotor(root, post, "PostJoint", Vector3.new(0, -0.45, 0), CFrame.Angles(0, 0, math.rad(90)))
+
+    local crossbar = makePart(
+        model,
+        "Crossbar",
+        Vector3.new(5.2, 0.68, 0.68),
+        wood,
+        Enum.Material.Wood,
+        Enum.PartType.Cylinder
+    )
+    makeMotor(root, crossbar, "CrossbarJoint", Vector3.new(0, 0.65, 0), CFrame.Angles(0, 0, 0))
+
+    for index, y in { -1.35, 0.72 } do
+        local binding = makePart(
+            model,
+            "RopeBinding" .. index,
+            Vector3.new(0.32, 1.05, 1.05),
+            rope,
+            Enum.Material.Fabric,
+            Enum.PartType.Cylinder
+        )
+        makeMotor(root, binding, "RopeJoint" .. index, Vector3.new(0, y, 0), CFrame.new())
+    end
+
+    local head = makePart(
+        model,
+        "WrappedHead",
+        Vector3.new(2.0, 1.75, 1.55),
+        cloth,
+        Enum.Material.Fabric,
+        Enum.PartType.Ball
+    )
+    makeMotor(root, head, "HeadJoint", Vector3.new(0, 2.15, 0))
+
+    local plate = makePart(
+        model,
+        "TargetPlate",
+        Vector3.new(0.28, 2.25, 2.25),
+        Color3.fromRGB(194, 170, 117),
+        Enum.Material.Wood,
+        Enum.PartType.Cylinder
+    )
+    makeMotor(
+        root,
+        plate,
+        "TargetPlateJoint",
+        Vector3.new(0, 0.05, -0.58),
+        CFrame.Angles(0, math.rad(90), 0)
+    )
+
+    local bullseye = makePart(
+        model,
+        "Bullseye",
+        Vector3.new(0.12, 0.92, 0.92),
+        target,
+        Enum.Material.SmoothPlastic,
+        Enum.PartType.Cylinder
+    )
+    makeMotor(
+        root,
+        bullseye,
+        "BullseyeJoint",
+        Vector3.new(0, 0.05, -0.76),
+        CFrame.Angles(0, math.rad(90), 0)
+    )
+
+    local stakeLeft = makePart(
+        model,
+        "LeftBrace",
+        Vector3.new(3.0, 0.42, 0.42),
+        darkWood,
+        Enum.Material.Wood,
+        Enum.PartType.Cylinder
+    )
+    makeMotor(
+        root,
+        stakeLeft,
+        "LeftBraceJoint",
+        Vector3.new(-1.1, -2.35, 0),
+        CFrame.Angles(0, 0, math.rad(64))
+    )
+    local stakeRight = makePart(
+        model,
+        "RightBrace",
+        Vector3.new(3.0, 0.42, 0.42),
+        darkWood,
+        Enum.Material.Wood,
+        Enum.PartType.Cylinder
+    )
+    makeMotor(
+        root,
+        stakeRight,
+        "RightBraceJoint",
+        Vector3.new(1.1, -2.35, 0),
+        CFrame.Angles(0, 0, math.rad(-64))
+    )
+
     return model
 end
 

@@ -2,6 +2,7 @@ local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 
 local StylizedNpcFactory = {}
+local NpcGroundingRules = require(script.Parent.NpcGroundingRules)
 
 local R15_IDLE_ANIMATION = "rbxassetid://507766666"
 
@@ -563,11 +564,48 @@ local function addClothingLayers(model, spec, palette)
     end
 end
 
+local function partBottomRelativeToRoot(root, part)
+    local half = part.Size * 0.5
+    local lowest = math.huge
+    for _, x in { -1, 1 } do
+        for _, y in { -1, 1 } do
+            for _, z in { -1, 1 } do
+                local worldCorner =
+                    part.CFrame:PointToWorldSpace(Vector3.new(half.X * x, half.Y * y, half.Z * z))
+                local rootLocal = root.CFrame:PointToObjectSpace(worldCorner)
+                lowest = math.min(lowest, rootLocal.Y)
+            end
+        end
+    end
+    return lowest
+end
+
+local function measuredFootBottomLocalY(model, root)
+    local lowest = math.huge
+    for _, name in { "LeftFoot", "RightFoot" } do
+        local foot = bodyPart(model, name)
+        if foot then
+            lowest = math.min(lowest, partBottomRelativeToRoot(root, foot))
+        end
+    end
+    if lowest == math.huge then
+        return nil
+    end
+    return lowest
+end
+
 local function groundModel(model, requestedPosition, yaw)
     local root = bodyPart(model, "HumanoidRootPart")
     local humanoid = model:FindFirstChildOfClass("Humanoid")
     if not root or not humanoid then
         return false
+    end
+
+    -- Measure the assembled R15 rig before moving it. This stays correct across
+    -- avatar scale changes and does not depend on Humanoid.HipHeight semantics.
+    local footBottomLocalY = measuredFootBottomLocalY(model, root)
+    if not footBottomLocalY then
+        footBottomLocalY = -(humanoid.HipHeight + root.Size.Y * 0.5)
     end
 
     local rayParams = RaycastParams.new()
@@ -585,12 +623,8 @@ local function groundModel(model, requestedPosition, yaw)
         Vector3.new(requestedPosition.X, requestedPosition.Y + 100, requestedPosition.Z)
     local result = Workspace:Raycast(rayOrigin, Vector3.new(0, -220, 0), rayParams)
     local groundY = if result then result.Position.Y else requestedPosition.Y
-
-    -- R15 standing height is defined by Humanoid.HipHeight plus half of the
-    -- HumanoidRootPart height. Ground from that invariant instead of trying to
-    -- infer a floor from foot/accessory bounding boxes on scaled avatar rigs.
-    local clearance = 0.08
-    local rootY = groundY + humanoid.HipHeight + root.Size.Y * 0.5 + clearance
+    local clearance = 0.12
+    local rootY = NpcGroundingRules.ComputeRootY(groundY, footBottomLocalY, clearance)
     local desiredRoot = CFrame.new(requestedPosition.X, rootY, requestedPosition.Z)
         * CFrame.Angles(0, yaw or 0, 0)
 
@@ -599,6 +633,7 @@ local function groundModel(model, requestedPosition, yaw)
 
     model:SetAttribute("EverLeafGroundY", groundY)
     model:SetAttribute("EverLeafRootY", rootY)
+    model:SetAttribute("EverLeafFootBottomLocalY", footBottomLocalY)
     model:SetAttribute("EverLeafHipHeight", humanoid.HipHeight)
     model:SetAttribute("EverLeafGroundClearance", clearance)
     return true
