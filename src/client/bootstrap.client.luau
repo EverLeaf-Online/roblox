@@ -58,8 +58,15 @@ task.spawn(function()
         return
     end
 
-    profileReady.OnClientEvent:Connect(ProfileStore.Set)
-    profileChanged.OnClientEvent:Connect(ProfileStore.Set)
+    local function setProfileSnapshot(snapshot)
+        ProfileStore.Set(snapshot)
+        if snapshot then
+            PartyStore.Seed(snapshot.Party)
+        end
+    end
+
+    profileReady.OnClientEvent:Connect(setProfileSnapshot)
+    profileChanged.OnClientEvent:Connect(setProfileSnapshot)
     partyEvent.OnClientEvent:Connect(PartyStore.Push)
     worldNotice.OnClientEvent:Connect(function(payload)
         if type(payload) ~= "table" then
@@ -77,7 +84,7 @@ task.spawn(function()
         return requestProfile:InvokeServer()
     end)
     if ok and snapshot then
-        ProfileStore.Set(snapshot)
+        setProfileSnapshot(snapshot)
     elseif not ok then
         warn("[ClientBootstrap] Initial profile request failed")
     end

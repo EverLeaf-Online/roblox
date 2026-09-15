@@ -8,10 +8,13 @@ local ReactRoblox = require(ReplicatedStorage.Packages.ReactRoblox)
 
 local ActionClient = require(script.Parent.Parent.Services.ActionClient)
 local CatalogClient = require(script.Parent.Parent.Services.CatalogClient)
+local PartyStore = require(script.Parent.Parent.State.PartyStore)
 local ProfileStore = require(script.Parent.Parent.State.ProfileStore)
 local EverLeafIcons = require(script.Parent.Parent.UI.EverLeafIcons)
 local NotificationStore = require(script.Parent.Parent.UI.NotificationStore)
 local BossHud = require(script.Parent.Parent.UI.Components.BossHud)
+local PartyHud = require(script.Parent.Parent.UI.Components.PartyHud)
+local PartyOverlay = require(script.Parent.Parent.UI.Components.PartyOverlay)
 local AdvancementOverlay = require(script.Parent.Parent.UI.Components.AdvancementOverlay)
 local ShopOverlay = require(script.Parent.Parent.UI.Components.ShopOverlay)
 local ToastStack = require(script.Parent.Parent.UI.Components.ToastStack)
@@ -2454,6 +2457,8 @@ local function App()
     local interaction, setInteraction = React.useState(nil)
     local shopOpen, setShopOpen = React.useState(false)
     local advancementOpen, setAdvancementOpen = React.useState(false)
+    local partyOpen, setPartyOpen = React.useState(false)
+    local partyState, setPartyState = React.useState(PartyStore.GetState())
     local menuOpen, setMenuOpen = React.useState(false)
     local menuTab, setMenuTab = React.useState("CHARACTER")
     local health, setHealth = React.useState(100)
@@ -2466,6 +2471,31 @@ local function App()
     React.useEffect(function()
         local connection = UserInputService.LastInputTypeChanged:Connect(function(inputType)
             setInputMode(inputModeFromType(inputType))
+        end)
+        return function()
+            connection:Disconnect()
+        end
+    end, {})
+
+    React.useEffect(function()
+        local previousInviteUserId = nil
+        local connection = PartyStore.Changed:Connect(function(snapshot)
+            setPartyState(snapshot)
+            local invite = snapshot and snapshot.Invite
+            if invite and invite.FromUserId ~= previousInviteUserId then
+                previousInviteUserId = invite.FromUserId
+                NotificationStore.Push(
+                    "party",
+                    "Party Invite",
+                    string.format(
+                        "%s invited you. Press P or Select to respond.",
+                        invite.FromName or "A Wayfarer"
+                    ),
+                    5
+                )
+            elseif not invite then
+                previousInviteUserId = nil
+            end
         end)
         return function()
             connection:Disconnect()
@@ -2503,6 +2533,7 @@ local function App()
             setInteraction(nil)
             setShopOpen(false)
             setAdvancementOpen(false)
+            setPartyOpen(false)
             setMenuOpen(false)
             setDead(false)
             player:SetAttribute("EverLeafUiCapture", false)
@@ -2558,6 +2589,7 @@ local function App()
                 setMenuOpen(false)
                 setShopOpen(false)
                 setAdvancementOpen(false)
+                setPartyOpen(false)
                 setInteraction(payload)
             end
         end)
@@ -2569,12 +2601,12 @@ local function App()
     React.useEffect(function()
         player:SetAttribute(
             "EverLeafUiCapture",
-            interaction ~= nil or shopOpen or advancementOpen or menuOpen or dead
+            interaction ~= nil or shopOpen or advancementOpen or partyOpen or menuOpen or dead
         )
         return function()
             player:SetAttribute("EverLeafUiCapture", false)
         end
-    end, { interaction, shopOpen, advancementOpen, menuOpen, dead })
+    end, { interaction, shopOpen, advancementOpen, partyOpen, menuOpen, dead })
 
     React.useEffect(function()
         if inputMode ~= "GAMEPAD" then
@@ -2590,6 +2622,8 @@ local function App()
             targetName = "ShopBuyTab"
         elseif interaction then
             targetName = "DialogueClose"
+        elseif partyOpen then
+            targetName = if partyState and partyState.Invite then "PartyAccept" else "PartyPrimary"
         elseif menuOpen then
             targetName = "MenuNav_" .. menuTab
         end
@@ -2605,7 +2639,16 @@ local function App()
             end
         end
         return nil
-    end, { inputMode, interaction, shopOpen, advancementOpen, menuOpen, menuTab })
+    end, {
+        inputMode,
+        interaction,
+        shopOpen,
+        advancementOpen,
+        partyOpen,
+        partyState,
+        menuOpen,
+        menuTab,
+    })
 
     React.useEffect(function()
         local connection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
@@ -2614,7 +2657,11 @@ local function App()
             end
 
             local keyCode = input.KeyCode
-            local uiLayerOpen = interaction ~= nil or shopOpen or advancementOpen or menuOpen
+            local uiLayerOpen = interaction ~= nil
+                or shopOpen
+                or advancementOpen
+                or partyOpen
+                or menuOpen
 
             if keyCode == Enum.KeyCode.ButtonB and uiLayerOpen then
                 if advancementOpen then
@@ -2623,6 +2670,8 @@ local function App()
                     setShopOpen(false)
                 elseif interaction ~= nil then
                     setInteraction(nil)
+                elseif partyOpen then
+                    setPartyOpen(false)
                 elseif menuOpen then
                     setMenuOpen(false)
                 end
@@ -2634,6 +2683,7 @@ local function App()
                 and interaction == nil
                 and not shopOpen
                 and not advancementOpen
+                and not partyOpen
             then
                 setMenuOpen(not menuOpen)
                 return
@@ -2650,11 +2700,22 @@ local function App()
                 return
             end
 
+            if
+                (keyCode == Enum.KeyCode.P or keyCode == Enum.KeyCode.ButtonSelect)
+                and interaction == nil
+                and not shopOpen
+                and not advancementOpen
+                and not menuOpen
+            then
+                setPartyOpen(not partyOpen)
+                return
+            end
+
             if gameProcessed then
                 return
             end
 
-            if interaction == nil and not shopOpen and not advancementOpen then
+            if interaction == nil and not shopOpen and not advancementOpen and not partyOpen then
                 local tabByKey = {
                     [Enum.KeyCode.C] = "CHARACTER",
                     [Enum.KeyCode.I] = "INVENTORY",
@@ -2681,6 +2742,8 @@ local function App()
                     setShopOpen(false)
                 elseif interaction ~= nil then
                     setInteraction(nil)
+                elseif partyOpen then
+                    setPartyOpen(false)
                 elseif menuOpen then
                     setMenuOpen(false)
                 end
@@ -2689,9 +2752,9 @@ local function App()
         return function()
             connection:Disconnect()
         end
-    end, { interaction, shopOpen, advancementOpen, menuOpen, menuTab, dead })
+    end, { interaction, shopOpen, advancementOpen, partyOpen, menuOpen, menuTab, dead })
 
-    local uiOpen = interaction ~= nil or shopOpen or advancementOpen or menuOpen
+    local uiOpen = interaction ~= nil or shopOpen or advancementOpen or partyOpen or menuOpen
     return React.createElement(React.Fragment, nil, {
         HUD = React.createElement(HUD, {
             Profile = profile,
@@ -2700,6 +2763,16 @@ local function App()
             UiOpen = uiOpen,
             InputMode = inputMode,
         }),
+        PartyHud = React.createElement(PartyHud, {
+            Party = partyState and partyState.Party,
+            Hidden = uiOpen or dead,
+        }),
+        PartyOverlay = partyOpen and React.createElement(PartyOverlay, {
+            PartyState = partyState,
+            OnClose = function()
+                setPartyOpen(false)
+            end,
+        }) or nil,
         Menu = menuOpen and React.createElement(MainMenu, {
             Profile = profile,
             ActiveTab = menuTab,
@@ -2709,26 +2782,28 @@ local function App()
                 setMenuOpen(false)
             end,
         }) or nil,
-        Dialogue = interaction and not shopOpen and not advancementOpen and React.createElement(
-            Dialogue,
-            {
-                Description = interaction,
-                Profile = profile,
-                OnOpenShop = function()
-                    if interaction.ShopId then
-                        setShopOpen(true)
-                    end
-                end,
-                OnOpenAdvancement = function()
-                    if interaction.AdvancementMentor then
-                        setAdvancementOpen(true)
-                    end
-                end,
-                OnClose = function()
-                    setInteraction(nil)
-                end,
-            }
-        ) or nil,
+        Dialogue = interaction
+                and not shopOpen
+                and not advancementOpen
+                and not partyOpen
+                and React.createElement(Dialogue, {
+                    Description = interaction,
+                    Profile = profile,
+                    OnOpenShop = function()
+                        if interaction.ShopId then
+                            setShopOpen(true)
+                        end
+                    end,
+                    OnOpenAdvancement = function()
+                        if interaction.AdvancementMentor then
+                            setAdvancementOpen(true)
+                        end
+                    end,
+                    OnClose = function()
+                        setInteraction(nil)
+                    end,
+                })
+            or nil,
         Shop = shopOpen and interaction and interaction.ShopId and React.createElement(
             ShopOverlay,
             {

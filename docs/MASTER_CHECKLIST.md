@@ -142,6 +142,7 @@
 - [x] Generic boss state-machine interface.
 - [x] Crafting/enhancement/storage hooks.
 - [x] Party invite/accept/kick protocol.
+- [x] Party client state contract carries durable snapshots/invite expiry and remains synchronized across create/join/kick/leave/leader handoff.
 - [x] Instance teleport/lifecycle boundary.
 - [x] Admin/recovery/audit interfaces.
 - [x] Release/build/staging/production architecture.
@@ -397,7 +398,7 @@
 - [x] Loot presentation uses labeled glowing world orbs with type-based visual colors.
 - [x] Shards have an active early-game sink path through Lumenreach shops and Brasshaven Foundry Supply; broader late-game economy tuning remains.
 - [x] Marks now have a dedicated Belforge exchange with gated equipment rewards; later boss/event sink expansion remains.
-- [ ] Party loot ownership/sharing rules.
+- [x] Party/boss loot ownership rules defined: ordinary enemies remain winner-owned; qualifying boss contributors receive individual owner-locked drops and rewards.
 - [ ] Rare-drop presentation and loot-notification polish.
 
 ## 13. Inventory / equipment / items
@@ -560,14 +561,14 @@
 ## 21. Social / multiplayer
 
 - [x] Runtime party-state foundation (create/add/leave/leader handoff).
-- [ ] Party UI.
+- [x] Production party UI implemented: incoming invites, create/accept/decline/invite/kick/leave controls, live member roster, leader state, and compact live-HP party HUD.
 - [ ] Shared/individual reward rules.
 - [ ] Instance/party teleport flow.
 - [ ] Trading design decision.
 - [ ] Secure trading if approved.
 - [ ] Social/profile inspection.
 - [x] Achievement persistence/service foundation; titles/presentation pending.
-- [ ] Multiplayer boss rules.
+- [x] Multiplayer boss source rules implemented: six-player cap, pull lockout, participant elimination, wipe reset, contributor thresholds, individual boss rewards, and no death-rush re-entry; live multi-client QA remains.
 
 ## 22. Monetization
 

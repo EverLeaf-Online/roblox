@@ -75,19 +75,27 @@ handlers["party.create"] = function(player)
     if not ok then
         return false, reason
     end
-    return true
+    return true, PartyService.GetSnapshot(player)
 end
 handlers["party.invite"] = function(player, _, payload)
     return PartyService.Invite(player, payload.TargetUserId)
 end
 handlers["party.accept"] = function(player)
-    return PartyService.Accept(player)
+    local ok, result = PartyService.Accept(player)
+    if not ok then
+        return false, result
+    end
+    return true, PartyService.GetSnapshot(player)
 end
 handlers["party.decline"] = function(player)
     return PartyService.Decline(player)
 end
 handlers["party.kick"] = function(player, _, payload)
-    return PartyService.Kick(player, payload.TargetUserId)
+    local ok, result = PartyService.Kick(player, payload.TargetUserId)
+    if not ok then
+        return false, result
+    end
+    return true, PartyService.GetSnapshot(player)
 end
 handlers["party.leave"] = function(player)
     return PartyService.Leave(player)
