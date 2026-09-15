@@ -144,7 +144,12 @@ local function performAttack()
             showFeedback(reasonText[resultOrReason] or tostring(resultOrReason), "warning")
         else
             local result = resultOrReason or {}
-            CombatPresentation.PlayHit(familyId, result.TargetPosition, result.Dodged == true)
+            CombatPresentation.PlayHit(
+                familyId,
+                result.TargetPosition,
+                result.Dodged == true,
+                result.Critical == true
+            )
             local damage = result.Damage
             if result.Dodged == true then
                 showFeedback("Enemy dodged", "warning")

@@ -21,6 +21,11 @@ local FAILURE_TEXT = table.freeze({
     skill_not_learned = "That skill has not been learned.",
     invalid_skill = "That hotbar skill is unavailable.",
     projectile_unavailable = "That shot could not be launched.",
+    projectile_blocked = "That shot struck terrain or an obstacle.",
+    projectile_missed = "That shot missed its target.",
+    projectile_target_lost = "The target moved out of the shot.",
+    projectile_timeout = "That shot expired before impact.",
+    projectile_cancelled = "That shot was cancelled.",
 })
 
 local function showFailure(reason)
@@ -101,6 +106,9 @@ local function useSlot(slotIndex)
                 tonumber(result.CooldownRemaining) or tonumber(result.Cooldown) or 0
             )
             CombatPresentation.PlaySkillResult(profile.FamilyId, result)
+            if result.Kind == "Miss" then
+                showFailure(result.Reason)
+            end
         end
     end)
 end

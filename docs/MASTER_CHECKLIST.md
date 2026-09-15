@@ -334,13 +334,13 @@
 - [x] Basic attacks and active skills now share a camera-facing attack lock: facing is applied immediately, held through the cast/attack pose, and safely overridden by dodge/stagger; live Studio visual QA remains.
 - [x] Player melee basics and active melee skills use server-owned overlap hitboxes with range/arc/LOS validation; enemy hurtbox/attack standardization remains.
 - [x] Projectile basics are server-simulated over travel time; terrain can block shots and moving targets can evade the fired line.
-- [ ] Hit-confirm feedback.
-- [ ] Floating damage numbers.
-- [ ] Hit sound.
-- [ ] Hit VFX.
-- [ ] Hit-stop/impact feel.
+- [x] Confirmed basics and skills provide client hit confirmation plus family-specific impact presentation; critical hits are called out separately.
+- [x] Server-owned monster floating damage numbers are emitted for confirmed hits, including critical formatting.
+- [x] Server-owned monster hit-confirm sound plays at the struck enemy with spatial rolloff.
+- [x] Server hit burst/highlight plus family-specific client slash/burst impact VFX are wired to confirmed hits.
+- [x] Confirmed hits now trigger a short local camera/FOV impact impulse scaled by family/critical weight without freezing authoritative server simulation; Studio intensity tuning remains.
 - [x] Player basic attacks and damaging skills now apply server-owned monster knockback/launch/stagger data with normal/elite/boss resistance tiers and per-monster override support; Studio feel tuning remains.
-- [ ] Miss/out-of-range feedback suitable for production.
+- [x] Basic attacks and active skills surface no-target/out-of-range/projectile-blocked/missed/target-lost/timeout/cancelled feedback with local spam suppression.
 - [ ] Weapon-specific basic attacks.
 - [ ] Attack speed/cadence stat rules.
 

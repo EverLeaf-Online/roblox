@@ -6,6 +6,7 @@ local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
+local CameraImpulse = require(script.Parent.Parent.Presentation.CameraImpulse)
 
 local CameraController = {}
 local player = Players.LocalPlayer
@@ -22,6 +23,7 @@ local function attachCharacter(newCharacter)
     local look = root.CFrame.LookVector
     yaw = math.atan2(-look.X, -look.Z)
     cameraArmLength = nil
+    CameraImpulse.Reset()
 end
 
 local function cameraInputBlocked()
@@ -137,8 +139,6 @@ function CameraController.Start()
             if camera.CameraType ~= Enum.CameraType.Scriptable then
                 camera.CameraType = Enum.CameraType.Scriptable
             end
-            camera.FieldOfView = GameConfig.Camera.FieldOfView
-
             local focus = root.Position + Vector3.new(0, GameConfig.Camera.FocusHeight, 0)
             local orbit = CFrame.fromOrientation(pitch, yaw, 0)
             local idealOffset = -orbit.LookVector * GameConfig.Camera.Distance
@@ -167,7 +167,16 @@ function CameraController.Start()
             local desiredPosition = focus + idealOffset.Unit * cameraArmLength
             local desired = CFrame.lookAt(desiredPosition, focus)
             local alpha = 1 - math.exp(-GameConfig.Camera.Responsiveness * deltaTime)
-            camera.CFrame = camera.CFrame:Lerp(desired, alpha)
+            local smoothed = camera.CFrame:Lerp(desired, alpha)
+            local impulsePosition, impulseRotation, fovOffset = CameraImpulse.Step(deltaTime)
+            camera.CFrame = smoothed
+                * CFrame.new(impulsePosition)
+                * CFrame.Angles(
+                    math.rad(impulseRotation.X),
+                    math.rad(impulseRotation.Y),
+                    math.rad(impulseRotation.Z)
+                )
+            camera.FieldOfView = GameConfig.Camera.FieldOfView + fovOffset
         end
     )
 end

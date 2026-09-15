@@ -3,6 +3,8 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
+local CameraImpulse = require(script.Parent.CameraImpulse)
+
 local CombatPresentation = {}
 local player = Players.LocalPlayer
 
@@ -558,7 +560,12 @@ function CombatPresentation.PlaySkillResult(familyId, result)
         return
     end
     if result.Kind == "Damage" then
-        CombatPresentation.PlayHit(familyId, result.TargetPosition, result.Dodged == true)
+        CombatPresentation.PlayHit(
+            familyId,
+            result.TargetPosition,
+            result.Dodged == true,
+            result.Critical == true
+        )
     elseif result.Kind == "Miss" and typeof(result.TargetPosition) == "Vector3" then
         if result.Reason == "projectile_blocked" then
             burstImpact(
@@ -570,7 +577,7 @@ function CombatPresentation.PlaySkillResult(familyId, result)
     end
 end
 
-function CombatPresentation.PlayHit(familyId, targetPosition, dodged)
+function CombatPresentation.PlayHit(familyId, targetPosition, dodged, critical)
     if typeof(targetPosition) ~= "Vector3" or dodged then
         return
     end
@@ -579,6 +586,12 @@ function CombatPresentation.PlayHit(familyId, targetPosition, dodged)
         return
     end
     local color = FAMILY_COLORS[familyId] or Color3.fromRGB(188, 216, 201)
+    local impactStrength = if critical
+        then 1.1
+        else if familyId == "brasshand"
+            then 0.85
+            else if familyId == "ironbloom" then 0.72 else 0.5
+    CameraImpulse.Punch(impactStrength)
     if familyId == "veilstrider" then
         slashImpact(targetPosition, color, true)
     elseif familyId == "brasshand" then
