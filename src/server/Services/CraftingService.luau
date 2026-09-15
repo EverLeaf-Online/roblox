@@ -1,5 +1,8 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ProfileTransaction = require(ReplicatedStorage.Shared.Logic.ProfileTransaction)
 local RecipeDefinitions = require(script.Parent.Parent.Content.RecipeDefinitions)
 local InventoryService = require(script.Parent.InventoryService)
+
 local CraftingService = {}
 
 function CraftingService.Craft(profile, recipeId, quantity)
@@ -11,19 +14,37 @@ function CraftingService.Craft(profile, recipeId, quantity)
     if not recipe then
         return false, "unknown_recipe"
     end
-    for itemId, amount in recipe.Inputs do
-        if InventoryService.Count(profile, itemId) < amount * quantity then
-            return false, "missing_ingredients"
+
+    return ProfileTransaction.Run(profile, function(workingProfile)
+        for itemId, amount in recipe.Inputs do
+            if InventoryService.Count(workingProfile, itemId) < amount * quantity then
+                return false, "missing_ingredients"
+            end
         end
-    end
-    local outputQuantity = recipe.Output.Quantity * quantity
-    if not InventoryService.CanAdd(profile, recipe.Output.ItemId, outputQuantity) then
-        return false, "inventory_full"
-    end
-    for itemId, amount in recipe.Inputs do
-        InventoryService.Remove(profile, itemId, amount * quantity)
-    end
-    return InventoryService.Add(profile, recipe.Output.ItemId, outputQuantity)
+
+        -- Consume on the transaction copy before testing output capacity. This
+        -- correctly allows recipes whose ingredients free the slot needed by
+        -- the crafted result while remaining rollback-safe on any failure.
+        for itemId, amount in recipe.Inputs do
+            local removed, removeReason =
+                InventoryService.Remove(workingProfile, itemId, amount * quantity)
+            if not removed then
+                return false, removeReason
+            end
+        end
+
+        local outputQuantity = recipe.Output.Quantity * quantity
+        local added, addReason =
+            InventoryService.Add(workingProfile, recipe.Output.ItemId, outputQuantity)
+        if not added then
+            return false, addReason
+        end
+        return true,
+            {
+                ItemId = recipe.Output.ItemId,
+                Quantity = outputQuantity,
+            }
+    end)
 end
 
 return CraftingService

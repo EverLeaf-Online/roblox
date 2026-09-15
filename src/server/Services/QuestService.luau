@@ -64,12 +64,18 @@ function QuestService.TurnIn(profile, questId)
         return false, "objectives_incomplete"
     end
 
+    local rewardResult = nil
+    if definition.Reward then
+        local rewarded, resultOrReason = RewardService.Grant(profile, definition.Reward)
+        if not rewarded then
+            return false, resultOrReason
+        end
+        rewardResult = resultOrReason
+    end
+
     profile.Quests.Active[questId] = nil
     profile.Quests.Completed[questId] = true
-    if definition.Reward then
-        RewardService.Grant(profile, definition.Reward)
-    end
-    return true, { Reward = definition.Reward }
+    return true, { Reward = definition.Reward, RewardResult = rewardResult }
 end
 
 return QuestService

@@ -443,7 +443,7 @@
 - [x] Brasshaven passage/unlock quest.
 - [ ] Talk-objective type if future quest design needs it.
 - [ ] Quest journal filtering/sorting/presentation polish.
-- [ ] Action-time NPC distance revalidation audit for every future interaction mutation.
+- [x] Active NPC/shop sessions revalidate the registered world object and live player distance on every quest/shop/advancement mutation; future interaction types must use the same validation path.
 
 ## 15. Shops / services
 
@@ -591,6 +591,9 @@
 - [x] Server validates basic attack target/range/vertical tolerance/facing/LOS/cooldown.
 - [x] Rate limiter foundation.
 - [x] Data session locks.
+- [x] Atomic profile-mutation helper now protects reward grants, shop buy/sell, equipment swaps, and crafting from partial-success item/currency/profile corruption.
+- [x] Consumables remove the owned item before applying HP/MP effects, preventing free-effect failures.
+- [x] NPC/shop interaction sessions fail closed on expiry, ID mismatch, stale world objects, and out-of-range actions.
 - [ ] Audit every future remote for type/range/state validation.
 - [x] Movement speed and displacement/teleport sanity checks foundation.
 - [ ] Inventory/equipment dupe tests.
@@ -608,8 +611,8 @@
 - [x] Rojo headless build gate.
 - [x] First Studio Rojo sync test.
 - [x] First movement/jump Studio test.
-- [x] Left-click basic attack verified end-to-end in Studio with server damage and visible swing.
-- [x] Added pure regression coverage for quest lifecycle, rewards, inventory/equipment rules, skills, payload bounds, profile migration, movement sanity, Defense mitigation, Critical math/caps, and combat-stat UI labels.
+- [x] Left-click basic attack/server damage path is Studio-verified; the replacement rig-aware visible player attack animation is source-complete and still needs fresh Studio visual verification.
+- [x] Added pure regression coverage for quest lifecycle, rewards, inventory/equipment rules, skills, payload bounds, profile migration, movement sanity, Defense mitigation, Critical math/caps, combat-stat UI labels, atomic profile transactions, interaction-session validation, and cross-content reference integrity.
 - [x] Added progression regression coverage for Lumenreach story → Level 8 advancement and post-trial bridge → Level 10.
 - [ ] Add DataStore/session-lock test scenarios.
 - [ ] Add 2+ client Studio test scenarios.

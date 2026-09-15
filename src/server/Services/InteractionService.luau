@@ -123,7 +123,11 @@ function InteractionService.Begin(player, npcId, worldObject)
         return false, "too_far"
     end
 
-    InteractionSessionService.Begin(player, npcId, definition.ShopId)
+    local sessionOk, sessionReason =
+        InteractionSessionService.Begin(player, npcId, definition.ShopId, worldObject)
+    if not sessionOk then
+        return false, sessionReason
+    end
     local ok, description = InteractionService.Describe(npcId, PlayerDataService.Get(player))
     if ok then
         openedEvent:Fire(player, description)

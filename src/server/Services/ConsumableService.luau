@@ -11,6 +11,11 @@ function ConsumableService.Use(player, profile, itemId)
     if InventoryService.Count(profile, itemId) < 1 then
         return false, "item_missing"
     end
+    local removed, removeReason = InventoryService.Remove(profile, itemId, 1)
+    if not removed then
+        return false, removeReason
+    end
+
     local effects = definition.Effects or {}
     local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
     if effects.RestoreHP and humanoid and humanoid.Health > 0 then
@@ -19,7 +24,7 @@ function ConsumableService.Use(player, profile, itemId)
     if effects.RestoreMP then
         ResourceService.RestoreMP(player, profile, effects.RestoreMP)
     end
-    return InventoryService.Remove(profile, itemId, 1)
+    return true
 end
 
 return ConsumableService

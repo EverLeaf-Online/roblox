@@ -456,12 +456,8 @@ local function attach(enemy)
     states[enemy] = state
     encounter.State = "Active"
     encounter.Boss = enemy
-    for _, player in playersWithin(root.Position, 150) do
-        if participantCount() < MAX_PLAYERS then
-            encounter.Participants[player] = true
-            encounter.Eliminated[player] = nil
-        end
-    end
+    -- Participants are registered only by explicit arena entry. Nearby players
+    -- outside the sealed arena must never count toward wipe/lockout state.
     updatePhase(enemy, state)
 
     humanoid.HealthChanged:Connect(function()

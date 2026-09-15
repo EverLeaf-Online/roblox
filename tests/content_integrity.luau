@@ -1,0 +1,200 @@
+local Items = require("../src/server/Content/ItemDefinitions")
+local Shops = require("../src/server/Content/ShopDefinitions")
+local Drops = require("../src/server/Content/DropTableDefinitions")
+local Recipes = require("../src/server/Content/RecipeDefinitions")
+local Quests = require("../src/server/Content/QuestDefinitions")
+local Npcs = require("../src/server/Content/NpcDefinitions")
+local Regions = require("../src/server/Content/RegionDefinitions")
+local Portals = require("../src/server/Content/PortalDefinitions")
+local Bosses = require("../src/server/Content/BossDefinitions")
+local Skills = require("../src/server/Content/SkillDefinitions")
+local Families = require("../src/server/Content/ClassFamilyDefinitions")
+local MonsterConfig = require("../src/server/Content/MonsterConfig")
+local currencies = { Shards = true, Marks = true }
+
+for itemId, definition in Items do
+    assert(
+        type(definition.DisplayName) == "string" and definition.DisplayName ~= "",
+        "item display name: " .. itemId
+    )
+    if definition.SellPrice then
+        assert(currencies[definition.SellPrice.Currency], "valid sell currency: " .. itemId)
+        assert(
+            type(definition.SellPrice.Amount) == "number" and definition.SellPrice.Amount > 0,
+            "valid sell amount: " .. itemId
+        )
+    end
+end
+
+for shopId, shop in Shops do
+    assert(currencies[shop.Currency], "shop currency exists: " .. shopId)
+    for itemId, price in shop.Items do
+        assert(Items[itemId], string.format("shop %s references item %s", shopId, itemId))
+        assert(
+            type(price) == "number" and price > 0,
+            "positive shop price: " .. shopId .. "/" .. itemId
+        )
+    end
+end
+
+for enemyId, monster in MonsterConfig.All() do
+    local reward = monster.Reward
+    if reward then
+        assert(
+            reward.Exp == nil or (type(reward.Exp) == "number" and reward.Exp > 0),
+            "enemy reward EXP valid: " .. enemyId
+        )
+        for currencyName, amount in reward.Currencies or {} do
+            assert(
+                currencies[currencyName],
+                string.format("enemy %s reward currency exists: %s", enemyId, currencyName)
+            )
+            assert(
+                type(amount) == "number" and amount > 0,
+                "enemy reward currency amount valid: " .. enemyId
+            )
+        end
+        for itemId, quantity in reward.Items or {} do
+            assert(Items[itemId], string.format("enemy %s reward item exists: %s", enemyId, itemId))
+            assert(
+                type(quantity) == "number" and quantity > 0,
+                "enemy reward item quantity valid: " .. enemyId
+            )
+        end
+    end
+end
+
+for enemyId, entries in Drops do
+    assert(MonsterConfig.Get(enemyId), "drop table enemy exists: " .. enemyId)
+    for _, entry in entries do
+        assert(
+            Items[entry.ItemId],
+            string.format("drop %s references item %s", enemyId, tostring(entry.ItemId))
+        )
+        assert(
+            type(entry.Chance) == "number" and entry.Chance >= 0 and entry.Chance <= 1,
+            "drop chance bounds: " .. enemyId
+        )
+        assert(
+            type(entry.Min) == "number"
+                and type(entry.Max) == "number"
+                and entry.Min >= 1
+                and entry.Max >= entry.Min,
+            "drop quantity bounds: " .. enemyId
+        )
+    end
+end
+
+for recipeId, recipe in Recipes do
+    assert(Items[recipe.Output.ItemId], "recipe output exists: " .. recipeId)
+    assert(
+        type(recipe.Output.Quantity) == "number" and recipe.Output.Quantity >= 1,
+        "recipe output quantity: " .. recipeId
+    )
+    for itemId, amount in recipe.Inputs do
+        assert(Items[itemId], string.format("recipe %s input exists: %s", recipeId, itemId))
+        assert(type(amount) == "number" and amount >= 1, "recipe input quantity: " .. recipeId)
+    end
+end
+
+for questId, quest in Quests do
+    for _, prereq in quest.PrerequisiteQuests or {} do
+        assert(Quests[prereq], string.format("quest %s prerequisite exists: %s", questId, prereq))
+    end
+    for _, objective in quest.Objectives or {} do
+        if objective.Type == "Defeat" then
+            assert(
+                MonsterConfig.Get(objective.Target),
+                string.format(
+                    "quest %s defeat target exists: %s",
+                    questId,
+                    tostring(objective.Target)
+                )
+            )
+        elseif objective.Type == "Collect" then
+            assert(
+                Items[objective.Target],
+                string.format(
+                    "quest %s collect target exists: %s",
+                    questId,
+                    tostring(objective.Target)
+                )
+            )
+        end
+    end
+    local reward = quest.Reward
+    if reward then
+        for itemId in reward.Items or {} do
+            assert(Items[itemId], string.format("quest %s reward item exists: %s", questId, itemId))
+        end
+        for currencyName in reward.Currencies or {} do
+            assert(
+                currencies[currencyName],
+                string.format("quest %s reward currency exists: %s", questId, currencyName)
+            )
+        end
+        for _, regionId in reward.UnlockRegions or {} do
+            assert(
+                Regions[regionId],
+                string.format("quest %s unlock region exists: %s", questId, regionId)
+            )
+        end
+    end
+end
+
+for npcId, npc in Npcs do
+    if npc.ShopId then
+        assert(Shops[npc.ShopId], string.format("npc %s shop exists: %s", npcId, npc.ShopId))
+    end
+    for _, questId in npc.QuestOffers or {} do
+        assert(Quests[questId], string.format("npc %s quest exists: %s", npcId, questId))
+    end
+end
+
+for portalId, portal in Portals do
+    assert(
+        Regions[portal.SourceRegionId],
+        string.format("portal %s source region exists", portalId)
+    )
+    assert(
+        Regions[portal.TargetRegionId],
+        string.format("portal %s target region exists", portalId)
+    )
+    assert(
+        type(portal.TargetSpawnId) == "string" and portal.TargetSpawnId ~= "",
+        "portal target spawn set: " .. portalId
+    )
+end
+
+for bossId, boss in Bosses do
+    assert(
+        MonsterConfig.Get(boss.MonsterId),
+        string.format("boss %s monster exists: %s", bossId, tostring(boss.MonsterId))
+    )
+    assert(
+        Regions[boss.RegionId],
+        string.format("boss %s region exists: %s", bossId, tostring(boss.RegionId))
+    )
+end
+
+for familyId, family in Families do
+    assert(Items[family.StarterItemId], string.format("family %s starter item exists", familyId))
+    assert(Skills[family.StarterSkillId], string.format("family %s starter skill exists", familyId))
+    if family.SecondAdvancement then
+        assert(
+            Skills[family.SecondAdvancement.StarterSkillId],
+            string.format("family %s tier-2 skill exists", familyId)
+        )
+    end
+end
+
+for skillId, skill in Skills do
+    if skill.FamilyId then
+        assert(
+            Families[skill.FamilyId],
+            string.format("skill %s family exists: %s", skillId, skill.FamilyId)
+        )
+    end
+end
+
+print("content integrity tests passed")
