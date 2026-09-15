@@ -165,6 +165,83 @@ local function makeCollisionProxy(parent, name, size, cframe)
     return proxy
 end
 
+local function setInstanceCollision(instance, enabled)
+    if instance:IsA("BasePart") then
+        instance.CanCollide = enabled
+        instance.CanTouch = false
+    end
+    for _, descendant in instance:GetDescendants() do
+        if descendant:IsA("BasePart") then
+            descendant.CanCollide = enabled
+            descendant.CanTouch = false
+        end
+    end
+end
+
+local function terrainSurfacePosition(position, offsetY)
+    local terrain = Workspace:FindFirstChildOfClass("Terrain")
+    if not terrain then
+        return position + Vector3.new(0, offsetY or 0, 0)
+    end
+
+    local rayParams = RaycastParams.new()
+    rayParams.FilterType = Enum.RaycastFilterType.Include
+    rayParams.FilterDescendantsInstances = { terrain }
+    rayParams.IgnoreWater = true
+
+    local rayTop = math.max(position.Y + 160, 160)
+    local result = Workspace:Raycast(
+        Vector3.new(position.X, rayTop, position.Z),
+        Vector3.new(0, -480, 0),
+        rayParams
+    )
+    if not result then
+        return position + Vector3.new(0, offsetY or 0, 0)
+    end
+    return Vector3.new(position.X, result.Position.Y + (offsetY or 0), position.Z)
+end
+
+local function placeGroundedPrefab(prefabName, parent, position, yaw, scale, offsetY)
+    local grounded = terrainSurfacePosition(position, offsetY)
+    local placed = EnvironmentPrefabService.Place(
+        prefabName,
+        parent,
+        CFrame.new(grounded) * CFrame.Angles(0, yaw or 0, 0),
+        scale
+    )
+    return placed, grounded
+end
+
+local function findTreeTrunkPart(instance)
+    local best = nil
+    local bestScore = -math.huge
+    local candidates = { instance }
+    for _, descendant in instance:GetDescendants() do
+        table.insert(candidates, descendant)
+    end
+
+    for _, candidate in candidates do
+        if candidate:IsA("BasePart") then
+            local lower = string.lower(candidate.Name)
+            local nameScore = 0
+            if string.find(lower, "trunk", 1, true) then
+                nameScore = 1000
+            elseif string.find(lower, "stem", 1, true) then
+                nameScore = 700
+            elseif string.find(lower, "tree", 1, true) then
+                nameScore = 250
+            end
+            local verticalScore = candidate.Size.Y * 2
+            local score = nameScore + verticalScore
+            if score > bestScore then
+                best = candidate
+                bestScore = score
+            end
+        end
+    end
+    return best
+end
+
 local function useMaterialVariant(part, variantName)
     part:SetAttribute("EverLeafMaterialVariant", variantName)
     return part
@@ -241,27 +318,32 @@ local function placeImportedTree(parent, position, scale, variant, targetHeight,
         return nil
     end
 
-    local placed = EnvironmentPrefabService.Place(
+    local placed, groundedPosition = placeGroundedPrefab(
         prefabName,
         parent,
-        CFrame.new(position) * CFrame.Angles(0, yaw or 0, 0),
-        prefabScaleForHeight(prefabName, targetHeight, scale)
+        position,
+        yaw or 0,
+        prefabScaleForHeight(prefabName, targetHeight, scale),
+        0
     )
     if not placed then
         return nil
     end
 
-    -- Imported vegetation is normalized primarily for rendering. Give every
-    -- production tree a predictable trunk blocker so source-mesh naming or
-    -- collision metadata cannot make a tree walk-through.
+    -- Imported tree meshes are rendering only. Source mesh collision varies
+    -- wildly between asset variants and can snag players on invisible branch
+    -- hulls, so every production tree gets exactly one predictable trunk proxy.
+    setInstanceCollision(placed, false)
     local finalHeight = targetHeight * math.max(0.1, tonumber(scale) or 1)
     local trunkHeight = math.clamp(finalHeight * 0.42, 5.5, 12.5)
     local trunkRadius = math.clamp(finalHeight * 0.065, 1.25, 2.5)
+    local trunk = findTreeTrunkPart(placed)
+    local trunkXZ = trunk and trunk.Position or groundedPosition
     makeCollisionProxy(
         placed,
         "EverLeafTrunkCollision",
         Vector3.new(trunkRadius * 2, trunkHeight, trunkRadius * 2),
-        CFrame.new(position + Vector3.new(0, trunkHeight * 0.5, 0))
+        CFrame.new(trunkXZ.X, groundedPosition.Y + trunkHeight * 0.5, trunkXZ.Z)
     )
     return placed
 end
@@ -279,11 +361,13 @@ end
 
 local function makeFallenLog(parent, position, yaw, scale, variant)
     local prefabName = if variant == 2 then "FallenTreeTrunk2" else "FallenTreeTrunk"
-    local prefab = EnvironmentPrefabService.Place(
+    local prefab = placeGroundedPrefab(
         prefabName,
         parent,
-        CFrame.new(position) * CFrame.Angles(0, yaw, 0),
-        prefabScaleForLongest(prefabName, 10, scale)
+        position,
+        yaw,
+        prefabScaleForLongest(prefabName, 10, scale),
+        0.12
     )
     if prefab then
         return prefab
@@ -293,11 +377,13 @@ end
 
 local function makeStump(parent, position, scale, variant)
     local prefabName = if variant == 2 then "TreeStump2" else "TreeStump"
-    local prefab = EnvironmentPrefabService.Place(
+    local prefab = placeGroundedPrefab(
         prefabName,
         parent,
-        CFrame.new(position) * CFrame.Angles(0, math.rad(17 + (variant or 1) * 23), 0),
-        prefabScaleForHeight(prefabName, 3, scale)
+        position,
+        math.rad(17 + (variant or 1) * 23),
+        prefabScaleForHeight(prefabName, 3, scale),
+        0
     )
     if prefab then
         return prefab
@@ -306,11 +392,13 @@ local function makeStump(parent, position, scale, variant)
 end
 
 local function makePineRoots(parent, position, yaw, scale)
-    local prefab = EnvironmentPrefabService.Place(
+    local prefab = placeGroundedPrefab(
         "PineRoots",
         parent,
-        CFrame.new(position) * CFrame.Angles(0, yaw, 0),
-        prefabScaleForLongest("PineRoots", 7, scale)
+        position,
+        yaw,
+        prefabScaleForLongest("PineRoots", 7, scale),
+        0.02
     )
     if prefab then
         return prefab
@@ -319,12 +407,13 @@ local function makePineRoots(parent, position, yaw, scale)
 end
 
 local function makeFern(parent, position, scale, yaw)
-    local prefab = EnvironmentPrefabService.Place(
+    local prefab = placeGroundedPrefab(
         "FernPrimary",
         parent,
-        CFrame.new(position)
-            * CFrame.Angles(0, yaw or math.rad((math.floor(position.X + position.Z) * 37) % 360), 0),
-        prefabScaleForLongest("FernPrimary", 4.2, scale)
+        position,
+        yaw or math.rad((math.floor(position.X + position.Z) * 37) % 360),
+        prefabScaleForLongest("FernPrimary", 4.2, scale),
+        0.03
     )
     if prefab then
         return prefab
@@ -333,6 +422,7 @@ local function makeFern(parent, position, scale, yaw)
 end
 
 local function makeFlowerPatch(parent, position, scale, warm)
+    position = terrainSurfacePosition(position, 0.02)
     local model = Instance.new("Model")
     model.Name = "WildflowerPatch"
     model.Parent = parent
@@ -386,11 +476,13 @@ end
 
 local function makeRockCluster(parent, position, scale, seed)
     local yaw = math.rad(((seed or 1) * 47) % 360)
-    local prefab = EnvironmentPrefabService.Place(
+    local prefab = placeGroundedPrefab(
         "MossyRockSet",
         parent,
-        CFrame.new(position) * CFrame.Angles(0, yaw, 0),
-        prefabScaleForLongest("MossyRockSet", 7.5, scale)
+        position,
+        yaw,
+        prefabScaleForLongest("MossyRockSet", 7.5, scale),
+        -0.06
     )
     if prefab then
         for _, descendant in prefab:GetDescendants() do
@@ -404,24 +496,14 @@ local function makeRockCluster(parent, position, scale, seed)
     return nil
 end
 
-local function setInstanceCollision(instance, enabled)
-    if instance:IsA("BasePart") then
-        instance.CanCollide = enabled
-    end
-    for _, descendant in instance:GetDescendants() do
-        if descendant:IsA("BasePart") then
-            descendant.CanCollide = enabled
-            descendant.CanTouch = false
-        end
-    end
-end
-
 local function makeDryBranches(parent, position, yaw, scale)
-    local prefab = EnvironmentPrefabService.Place(
+    local prefab = placeGroundedPrefab(
         "DryBranches",
         parent,
-        CFrame.new(position) * CFrame.Angles(0, yaw, 0),
-        prefabScaleForLongest("DryBranches", 4.6, scale)
+        position,
+        yaw,
+        prefabScaleForLongest("DryBranches", 4.6, scale),
+        0.05
     )
     if prefab then
         setInstanceCollision(prefab, false)
@@ -431,11 +513,13 @@ local function makeDryBranches(parent, position, yaw, scale)
 end
 
 local function makeMossyRockSet(parent, position, yaw, scale)
-    local prefab = EnvironmentPrefabService.Place(
+    local prefab = placeGroundedPrefab(
         "MossyRockSet",
         parent,
-        CFrame.new(position) * CFrame.Angles(0, yaw, 0),
-        prefabScaleForLongest("MossyRockSet", 9, scale)
+        position,
+        yaw,
+        prefabScaleForLongest("MossyRockSet", 9, scale),
+        -0.08
     )
     if prefab then
         setInstanceCollision(prefab, true)
@@ -498,6 +582,7 @@ local function makeRockFace(parent, position, yaw, scale)
 end
 
 local function makeMushroomCluster(parent, position, scale, seed)
+    position = terrainSurfacePosition(position, 0.02)
     local model = Instance.new("Model")
     model.Name = "LumenMushroomCluster"
     model.Parent = parent
@@ -579,6 +664,7 @@ local function makeCattailCluster(parent, position, scale, seed)
 end
 
 local function makeWaystone(parent, position, yaw, scale)
+    position = terrainSurfacePosition(position, 0)
     local model = Instance.new("Model")
     model.Name = "LumenWaystone"
     model.Parent = parent
@@ -619,6 +705,7 @@ local function makeWaystone(parent, position, yaw, scale)
 end
 
 local function makeSupplyStack(parent, position, yaw)
+    position = terrainSurfacePosition(position, 0)
     local model = Instance.new("Model")
     model.Name = "WayfarerSupplies"
     model.Parent = parent
@@ -731,6 +818,7 @@ local function makeSupplyStack(parent, position, yaw)
 end
 
 local function makeSignpost(parent, position, yaw, primaryText, secondaryText)
+    position = terrainSurfacePosition(position, 0)
     local model = Instance.new("Model")
     model.Name = "WayfarerSignpost"
     model.Parent = parent
@@ -852,6 +940,7 @@ local function makeCrystal(parent, position)
 end
 
 local function makeGrassTuft(parent, position, scale)
+    position = terrainSurfacePosition(position, 0.02)
     local model = Instance.new("Model")
     model.Name = "GrassTuft"
     model.Parent = parent
@@ -880,6 +969,7 @@ local function makeGrassTuft(parent, position, scale)
 end
 
 local function makeBush(parent, position, scale)
+    position = terrainSurfacePosition(position, 0.03)
     local model = Instance.new("Model")
     model.Name = "LumenBush"
     model.Parent = parent
@@ -924,6 +1014,7 @@ local function makeRodBetween(parent, name, a, b, thickness, material, color)
 end
 
 local function makeCampfire(parent, position)
+    position = terrainSurfacePosition(position, 0)
     local model = Instance.new("Model")
     model.Name = "WayfarerCampfire"
     model.Parent = parent
@@ -995,6 +1086,7 @@ local function makeCampfire(parent, position)
 end
 
 local function makeTent(parent, position, yaw)
+    position = terrainSurfacePosition(position, 0.18)
     local model = Instance.new("Model")
     model.Name = "WayfarerTent"
     model.Parent = parent
@@ -1201,6 +1293,7 @@ local function makeTent(parent, position, yaw)
 end
 
 local function makeCampBench(parent, position, yaw)
+    position = terrainSurfacePosition(position, 0)
     local model = Instance.new("Model")
     model.Name = "WayfarerBench"
     model.Parent = parent
@@ -1229,6 +1322,7 @@ local function makeCampBench(parent, position, yaw)
 end
 
 local function makeMapTable(parent, position, yaw)
+    position = terrainSurfacePosition(position, 0)
     local model = Instance.new("Model")
     model.Name = "WayfarerMapTable"
     model.Parent = parent
@@ -1286,6 +1380,7 @@ local function makeMapTable(parent, position, yaw)
 end
 
 local function makeCampBanner(parent, position, yaw)
+    position = terrainSurfacePosition(position, 0)
     local model = Instance.new("Model")
     model.Name = "WayfarerBanner"
     model.Parent = parent
@@ -1333,6 +1428,7 @@ local function makeCampBanner(parent, position, yaw)
 end
 
 local function makeLantern(parent, position, yaw)
+    position = terrainSurfacePosition(position, 0)
     local model = Instance.new("Model")
     model.Name = "LumenLantern"
     model.Parent = parent
@@ -2136,6 +2232,7 @@ local function makeWhisperrootHollow(parent)
 end
 
 local function makeStoryRemnant(parent, position, yaw)
+    position = terrainSurfacePosition(position, 0.02)
     local model = Instance.new("Model")
     model.Name = "WayfarerRemnant"
     model.Parent = parent
@@ -3173,6 +3270,108 @@ local function makeHabitatPocket(parent, center, seed, scale)
     end
 end
 
+local function makeTrailThreshold(parent, center, direction, seed, scale)
+    scale = scale or 1
+    local flatDirection = Vector3.new(direction.X, 0, direction.Z)
+    if flatDirection.Magnitude <= 0.001 then
+        flatDirection = Vector3.new(0, 0, -1)
+    else
+        flatDirection = flatDirection.Unit
+    end
+    local frame = CFrame.lookAt(center, center + flatDirection)
+    local right = frame.RightVector
+
+    for _, side in { -1, 1 } do
+        local treePosition = center
+            + right * side * (21.5 * scale)
+            + flatDirection * (((seed + side) % 3 - 1) * 1.8)
+        makeCanopyTree(
+            parent,
+            treePosition,
+            (0.86 + ((seed + side) % 4) * 0.04) * scale,
+            math.rad((seed * 37 + side * 29) % 360)
+        )
+
+        local rockPosition = center + right * side * (14.5 * scale) - flatDirection * (2.0 * scale)
+        makeMossyRockSet(
+            parent,
+            rockPosition,
+            math.rad((seed * 23 + side * 41) % 360),
+            0.52 * scale
+        )
+
+        local fernPosition = center + right * side * (11.8 * scale) + flatDirection * (3.2 * scale)
+        makeFern(parent, fernPosition, 0.72 * scale, math.rad((seed * 17 + side * 61) % 360))
+    end
+
+    local waystoneSide = if seed % 2 == 0 then 1 else -1
+    local waystonePosition = center
+        + right * waystoneSide * (13.2 * scale)
+        + flatDirection * (5.2 * scale)
+    makeWaystone(
+        parent,
+        waystonePosition,
+        math.atan2(flatDirection.X, flatDirection.Z),
+        0.58 * scale
+    )
+end
+
+local function makeRouteThresholds(world)
+    local thresholds = {
+        {
+            Vector3.new(-260, 1.0, 146),
+            Vector3.new(-241, 1.4, 118) - Vector3.new(-281, 0.5, 169),
+            401,
+            0.94,
+        },
+        {
+            Vector3.new(-112, 3.8, 64),
+            BRIDGE_WEST - Vector3.new(-145, 4.0, 70),
+            407,
+            0.92,
+        },
+        {
+            Vector3.new(58, 2.8, 38),
+            Vector3.new(105, 2.0, 78) - BRIDGE_EAST,
+            409,
+            0.9,
+        },
+        {
+            Vector3.new(-103, 1.4, 220),
+            WORLD_ZONES.Glowmere - Vector3.new(-132, 2.5, 174),
+            419,
+            0.88,
+        },
+        {
+            Vector3.new(-273, -0.5, -55),
+            Vector3.new(-292, -2.3, -111) - Vector3.new(-239, 1.5, 5),
+            421,
+            0.92,
+        },
+        {
+            Vector3.new(82, 3.0, 5),
+            WORLD_ZONES.Ruins - Vector3.new(58, 2.8, 38),
+            431,
+            0.9,
+        },
+        {
+            Vector3.new(168, 1.5, 112),
+            WORLD_ZONES.CombatGrove - Vector3.new(105, 2.0, 78),
+            433,
+            0.94,
+        },
+        {
+            Vector3.new(219, 7.8, -174),
+            WORLD_ZONES.Overlook - Vector3.new(178, 5.2, -132),
+            439,
+            0.9,
+        },
+    }
+    for _, threshold in thresholds do
+        makeTrailThreshold(world, threshold[1], threshold[2], threshold[3], threshold[4])
+    end
+end
+
 local function decorate(world)
     -- A forest belt frames the whole map. Major clearings stay readable instead of being carpeted with props.
     placeTreeArc(world, Vector3.zero, 365, 305, 28, 12, 336, 2)
@@ -3274,6 +3473,11 @@ local function decorate(world)
     -- foreground and midground on both sides. This makes traversal feel like
     -- moving through a living forest instead of crossing large empty fields.
     dressTravelCorridors(world)
+
+    -- Major route transitions get paired vertical silhouettes and low ground
+    -- detail outside the safe lane. This separates Camp, Glowmere, Veilfall,
+    -- the Gorge crossing, Ruins/Mossglen, and Sunmoss without adding blockers.
+    makeRouteThresholds(world)
 
     -- Rock shelves and exposed faces make the new interior ridges legible at
     -- player height. These are deliberately inside the region, not on its border.
