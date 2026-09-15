@@ -542,14 +542,20 @@ end
 local function Objective(props)
     local profile = props.Profile or {}
     local active = profile.Quests and profile.Quests.Active
-    local title = "Explore Lumenreach"
-    local progressText = "Speak with Ilyra at Wayfarer Camp"
+    local world = profile.World or {}
+    local regionId = world.RegionId or "lumenreach"
+    local catalog = CatalogClient.Get()
+    local region = catalog and catalog.Regions and catalog.Regions[regionId]
+    local regionName = region and region.DisplayName or prettyId(regionId)
+    local title = "Explore " .. regionName
+    local progressText = if regionId == "lumenreach"
+        then "Speak with Ilyra at Wayfarer Camp"
+        else "Speak with local Wayfarers or check your quest log for available work"
     local ready = false
 
     if active then
         local questId, state = next(active)
         if questId then
-            local catalog = CatalogClient.Get()
             local definition = catalog and catalog.Quests and catalog.Quests[questId]
             title = definition and definition.DisplayName or tostring(questId)
             ready = state.ReadyToTurnIn == true
@@ -650,6 +656,11 @@ local function HUD(props)
     local currencies = profile.Currencies or {}
     local currentMP = tonumber(resources.CurrentMP) or 0
     local maxMP = tonumber(derived.MaxMP) or 1
+    local world = profile.World or {}
+    local regionId = world.RegionId or "lumenreach"
+    local catalog = CatalogClient.Get()
+    local region = catalog and catalog.Regions and catalog.Regions[regionId]
+    local regionName = region and region.DisplayName or prettyId(regionId)
     local compactVisible = not props.UiOpen
 
     return React.createElement(React.Fragment, nil, {
@@ -683,7 +694,7 @@ local function HUD(props)
                     AnchorPoint = Vector2.new(1, 0),
                     Position = UDim2.new(1, -16, 0, 14),
                     Size = UDim2.fromOffset(150, 28),
-                    Text = "LUMENREACH",
+                    Text = string.upper(regionName),
                     TextSize = 10,
                     Bold = true,
                     Color = COLORS.Muted,
