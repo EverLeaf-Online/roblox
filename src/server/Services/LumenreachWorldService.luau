@@ -4094,13 +4094,21 @@ local function makeWoodlandCluster(parent, center, seed, scale, protectOpeningRo
     local fernPosition = center + Vector3.new(3.8, 0, -2.7) * scale
     local grassPosition = center + Vector3.new(1.4, 0, 4.2) * scale
     if not protectOpeningRoute or isOpeningRouteClear(bushPosition, 10.5) then
-        makeBush(parent, bushPosition, 0.82 * scale)
+        if protectOpeningRoute then
+            makeMossyRockSet(parent, bushPosition, rotation + 0.2, 0.28 * scale)
+        else
+            makeBush(parent, bushPosition, 0.82 * scale)
+        end
     end
     if not protectOpeningRoute or isOpeningRouteClear(fernPosition, 9.5) then
         makeFern(parent, fernPosition, 0.78 * scale, rotation)
     end
     if not protectOpeningRoute or isOpeningRouteClear(grassPosition, 9.5) then
-        makeGrassTuft(parent, grassPosition, 0.78 * scale)
+        if protectOpeningRoute then
+            makeDryBranches(parent, grassPosition, rotation - 0.25, 0.32 * scale)
+        else
+            makeGrassTuft(parent, grassPosition, 0.78 * scale)
+        end
     end
     local groundDetailPosition = center + Vector3.new(-4.7, 0, -3.8) * scale
     if not protectOpeningRoute or isOpeningRouteClear(groundDetailPosition, 8.5) then
@@ -4272,7 +4280,8 @@ local function makeCampDepartureFrame(parent)
 
     makeMossyRockSet(parent, startPoint - right * 15.6 + direction * 2.0, yaw + math.rad(28), 0.5)
     makeFern(parent, startPoint - right * 13.2 + direction * 4.3, 0.72, yaw + math.rad(17))
-    makeFlowerPatch(parent, startPoint + right * 13.5 + direction * 4.0, 0.62, false)
+    makeDryBranches(parent, startPoint + right * 14.2 + direction * 4.0, yaw - math.rad(24), 0.42)
+    makeFern(parent, startPoint + right * 12.8 + direction * 5.2, 0.56, yaw - math.rad(31))
 end
 
 local function makeMosslingHollowFrame(parent)
@@ -4303,7 +4312,8 @@ local function makeMosslingHollowFrame(parent)
     makeCanopyTree(parent, farEdge + right * 16.0, 0.86, yaw - math.rad(27))
     makeFallenLog(parent, farEdge + right * 12.8, yaw + math.rad(72), 0.58, 2)
     makeCrystal(parent, farEdge - right * 10.8)
-    makeMushroomCluster(parent, farEdge + right * 7.8, 0.7, 613)
+    makePineRoots(parent, farEdge + right * 8.6, yaw - math.rad(17), 0.48)
+    makeFern(parent, farEdge + right * 6.6 + direction * 1.2, 0.64, yaw + math.rad(14))
 end
 
 local function makeTrainingYardMark(parent)

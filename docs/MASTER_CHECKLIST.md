@@ -511,6 +511,7 @@
 - [x] Wayfarer Camp and Lumenwood Crossroads now have a low-rate forest pollen/Lumen-dust atmosphere layer distinct from Glowmere/Veilfall mist and Sunmoss air effects; final Studio art/performance tuning remains open.
 - [x] Approved imported environment assets integrated with runtime sanitization; EverLeaf-owned Poly Haven trees are the production default with explicit bark/needle SurfaceAppearance maps, while the free Forest Trees `13913287259` pack remains sanitized/manual fallback-only and old primitive tree fallbacks stay disabled.
 - [x] Primary Lumenreach pine bark/foliage maps are pre-authored as Rojo `SurfaceAppearance` templates and cloned at runtime; imported raw layers are stripped without protected `ColorMap`/`NormalMap`/`RoughnessMap` writes.
+- [x] Camp departure, protected opening-route clusters, and the first Mossling hollow now use approved imported fern/deadwood/root/moss-rock dressing instead of prototype bush/grass/flower/mushroom props.
 - [x] Imported first-area environment assets strip raw `Texture`/`Decal` layers during sanitization; controlled PBR overrides replace legacy MeshPart texture state instead of stacking on top of it.
 - [x] Bad oversized cliff/rock placements corrected and terrain-supported.
 - [x] Final Lumenreach route/protected-area scrub resolves renamed imported props by preserved source-prefab metadata, with explicit wrapper clearance for integrated rock faces.
