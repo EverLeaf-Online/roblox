@@ -320,6 +320,17 @@ local function clearOfDressingExclusions(position, padding)
     return true
 end
 
+local function isInsideAnyZoneCore(position, radius)
+    for _, center in ZONES do
+        local dx = position.X - center.X
+        local dz = position.Z - center.Z
+        if dx * dx + dz * dz < radius * radius then
+            return true
+        end
+    end
+    return false
+end
+
 local function terrainSurfacePosition(position, offsetY)
     local terrain = Workspace:FindFirstChildOfClass("Terrain")
     if not terrain then
@@ -834,7 +845,7 @@ local function dressRouteEdges(parent, route, seed)
         if length > 1 then
             local direction = horizontal.Unit
             local right = Vector3.new(-direction.Z, 0, direction.X)
-            local samples = math.max(1, math.floor(length / 58))
+            local samples = math.max(1, math.floor(length / 40))
             for sample = 1, samples do
                 local alpha = sample / (samples + 1)
                 local center = a:Lerp(b, alpha)
@@ -857,6 +868,59 @@ local function dressRouteEdges(parent, route, seed)
                             20 + ((sample * 5 + seed) % 8),
                             math.rad((sample * 67 + seed * 19) % 360)
                         )
+                    end
+                end
+            end
+        end
+    end
+end
+
+local function scatterWorldFiller(parent)
+    local halfWidth = WORLD_WIDTH * 0.5
+    local halfDepth = WORLD_DEPTH * 0.5
+    local cellSize = 105
+    local zoneCoreRadius = 190
+    local wetlandCenter = ZONES.Glowmere + Vector3.new(20, 0, 18)
+    local wetlandRadius = 95
+
+    local columns = math.floor((WORLD_WIDTH - cellSize * 3) / cellSize)
+    local rows = math.floor((WORLD_DEPTH - cellSize * 3) / cellSize)
+    local seed = 900
+
+    for column = 0, columns do
+        for row = 0, rows do
+            seed += 1
+
+            -- Intentionally leave some cells open so filler breaks up dead space
+            -- without becoming a visible grid or choking traversal/combat.
+            if (seed * 17) % 3 ~= 0 then
+                local baseX = -halfWidth + cellSize * 1.5 + column * cellSize
+                local baseZ = -halfDepth + cellSize * 1.5 + row * cellSize
+                local jitterSpan = cellSize - 20
+                local jitterX = ((seed * 53) % jitterSpan) - jitterSpan * 0.5
+                local jitterZ = ((seed * 37) % jitterSpan) - jitterSpan * 0.5
+                local position = Vector3.new(baseX + jitterX, 0, baseZ + jitterZ)
+
+                local wetDx = position.X - wetlandCenter.X
+                local wetDz = position.Z - wetlandCenter.Z
+                local clearOfWetland = wetDx * wetDx + wetDz * wetDz > wetlandRadius * wetlandRadius
+
+                if
+                    clearOfWetland
+                    and not isInsideAnyZoneCore(position, zoneCoreRadius)
+                    and clearOfTravelLanes(position, 6)
+                    and clearOfDressingExclusions(position, 6)
+                then
+                    local theme = if (seed % 5) == 0
+                        then "dry"
+                        elseif (seed % 3) == 0 then "wet"
+                        else "forest"
+
+                    if seed % 2 == 0 then
+                        local height = 20 + (seed % 12)
+                        placeTree(parent, position, height, math.rad((seed * 61) % 360))
+                    else
+                        placeGroundDetail(parent, position, seed, theme)
                     end
                 end
             end
@@ -4528,27 +4592,31 @@ end
 local function decorateWorld(parent)
     -- V5 density pass: tree massing now reads as continuous woodland rather than
     -- isolated rings around empty fields. Combat centers and authored roads stay open.
-    placeTreeArc(parent, ZONES.Camp, 175, 145, 28, 28, 332, 1)
-    placeTreeArc(parent, ZONES.Greenway, 150, 116, 26, 15, 345, 2)
-    placeTreeArc(parent, ZONES.Crossroads, 124, 102, 22, 25, 335, 3)
-    placeTreeArc(parent, ZONES.Glowmere, 172, 148, 30, 5, 350, 4)
-    placeTreeArc(parent, ZONES.Gravebone, 142, 118, 26, 10, 350, 5)
-    placeTreeArc(parent, ZONES.Mossglen, 215, 170, 36, 10, 350, 6)
-    placeTreeArc(parent, ZONES.Sunmoss, 165, 134, 26, 15, 345, 7)
-    placeTreeArc(parent, ZONES.Veilfall, 170, 145, 28, 30, 330, 8)
-    placeTreeArc(parent, ZONES.Ruins, 185, 150, 28, 35, 325, 9)
-    placeTreeArc(parent, ZONES.Proving, 132, 118, 22, 20, 340, 10)
+    placeTreeArc(parent, ZONES.Camp, 175, 145, 40, 28, 332, 1)
+    placeTreeArc(parent, ZONES.Greenway, 150, 116, 37, 15, 345, 2)
+    placeTreeArc(parent, ZONES.Crossroads, 124, 102, 31, 25, 335, 3)
+    placeTreeArc(parent, ZONES.Glowmere, 172, 148, 42, 5, 350, 4)
+    placeTreeArc(parent, ZONES.Gravebone, 142, 118, 36, 10, 350, 5)
+    placeTreeArc(parent, ZONES.Mossglen, 215, 170, 50, 10, 350, 6)
+    placeTreeArc(parent, ZONES.Sunmoss, 165, 134, 36, 15, 345, 7)
+    placeTreeArc(parent, ZONES.Veilfall, 170, 145, 39, 30, 330, 8)
+    placeTreeArc(parent, ZONES.Ruins, 185, 150, 39, 35, 325, 9)
+    placeTreeArc(parent, ZONES.Proving, 132, 118, 31, 20, 340, 10)
 
     -- Fill the large negative-space belts between progression rooms. These are
     -- part of the generated V5 map itself, not objects layered onto an old map.
-    scatterForestBand(parent, Vector3.new(-790, 0, 430), 205, 150, 28, 21, "wet")
-    scatterForestBand(parent, Vector3.new(-720, 0, -410), 230, 155, 26, 22, "forest")
-    scatterForestBand(parent, Vector3.new(-135, 0, 590), 235, 145, 30, 23, "wet")
-    scatterForestBand(parent, Vector3.new(260, 0, 650), 250, 150, 32, 24, "forest")
-    scatterForestBand(parent, Vector3.new(680, 0, 610), 235, 155, 30, 25, "forest")
-    scatterForestBand(parent, Vector3.new(670, 0, -585), 245, 165, 32, 26, "dry")
-    scatterForestBand(parent, Vector3.new(940, 0, -390), 190, 155, 24, 27, "dry")
-    scatterForestBand(parent, Vector3.new(965, 0, 390), 180, 145, 22, 28, "forest")
+    scatterForestBand(parent, Vector3.new(-790, 0, 430), 205, 150, 42, 21, "wet")
+    scatterForestBand(parent, Vector3.new(-720, 0, -410), 230, 155, 39, 22, "forest")
+    scatterForestBand(parent, Vector3.new(-135, 0, 590), 235, 145, 45, 23, "wet")
+    scatterForestBand(parent, Vector3.new(260, 0, 650), 250, 150, 48, 24, "forest")
+    scatterForestBand(parent, Vector3.new(680, 0, 610), 235, 155, 45, 25, "forest")
+    scatterForestBand(parent, Vector3.new(670, 0, -585), 245, 165, 48, 26, "dry")
+    scatterForestBand(parent, Vector3.new(940, 0, -390), 190, 155, 36, 27, "dry")
+    scatterForestBand(parent, Vector3.new(965, 0, 390), 180, 145, 33, 28, "forest")
+
+    -- Fill the otherwise barren inter-zone acreage while preserving authored
+    -- settlements, roads, encounters, and the Glowmere wetland.
+    scatterWorldFiller(parent)
 
     -- Roads receive low-profile edge dressing so travel has visual rhythm every
     -- few seconds without narrowing the dodge/sprint lane.

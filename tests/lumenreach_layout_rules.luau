@@ -327,4 +327,15 @@ assert(
     "market canopy must clear player/camera height"
 )
 
+assert(
+    string.find(source, "local function scatterWorldFiller", 1, true) ~= nil
+        and string.find(source, "local cellSize = 105", 1, true) ~= nil
+        and string.find(source, "scatterWorldFiller(parent)", 1, true) ~= nil,
+    "Lumenreach must fill barren inter-zone acreage without touching authored zone cores"
+)
+assert(
+    string.find(source, "math.floor(length / 40)", 1, true) ~= nil,
+    "route-edge dressing must be frequent enough to avoid long barren road stretches"
+)
+
 print("Lumenreach terrain-first MMO redesign rules tests passed")
