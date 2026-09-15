@@ -2,7 +2,8 @@ local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local BossRewardRules = require(ReplicatedStorage.Shared.Logic.BossRewardRules)
+local CombatRewardRules = require(ReplicatedStorage.Shared.Logic.CombatRewardRules)
+local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
 local EnemyDefinitions = require(script.Parent.Parent.Content.EnemyDefinitions)
 local AchievementService = require(script.Parent.AchievementService)
 local EnemyAIService = require(script.Parent.EnemyAIService)
@@ -35,34 +36,25 @@ local function chooseWinner(state)
     return winner
 end
 
-local function rewardRecipients(state, humanoid)
-    local config = state.Definition.MonsterConfig
-    if not config or config.Boss ~= true then
-        local winner = chooseWinner(state)
-        return winner and { winner } or {}
-    end
-
-    local eligible = {}
+local function buildRewardPlan(state, humanoid)
+    local contributors = {}
+    local playerByUserId = {}
     for player, damage in state.DamageByPlayer do
-        if
-            player.Parent == Players
-            and BossRewardRules.IsEligible(
-                damage,
-                humanoid.MaxHealth,
-                config.MinimumRewardContribution
-            )
-        then
-            table.insert(eligible, player)
+        if player.Parent == Players and damage > 0 then
+            table.insert(contributors, { UserId = player.UserId, Damage = damage })
+            playerByUserId[player.UserId] = player
         end
     end
 
-    if #eligible == 0 then
-        local winner = chooseWinner(state)
-        if winner then
-            table.insert(eligible, winner)
-        end
-    end
-    return eligible
+    local config = state.Definition.MonsterConfig or state.Definition
+    local plan = CombatRewardRules.BuildPlan(
+        contributors,
+        humanoid.MaxHealth,
+        config,
+        state.Definition.Reward,
+        GameConfig.Combat
+    )
+    return plan, playerByUserId
 end
 
 function EnemyService.Register(enemy, enemyId, onDeath)
@@ -80,6 +72,7 @@ function EnemyService.Register(enemy, enemyId, onDeath)
     local state = {
         Definition = definition,
         DamageByPlayer = {},
+        TotalCreditedDamage = 0,
         Dead = false,
     }
     states[enemy] = state
@@ -105,13 +98,20 @@ function EnemyService.Register(enemy, enemyId, onDeath)
         state.Dead = true
 
         local winner = chooseWinner(state)
-        local recipients = rewardRecipients(state, humanoid)
-        for _, recipient in recipients do
-            local profile = PlayerDataService.Get(recipient)
-            if profile then
+        local rewardPlan, playerByUserId = buildRewardPlan(state, humanoid)
+        local lootUsers = {}
+        for _, userId in rewardPlan.LootUserIds do
+            lootUsers[userId] = true
+        end
+
+        for _, contributor in rewardPlan.Eligible do
+            local recipient = playerByUserId[contributor.UserId]
+            local profile = recipient and PlayerDataService.Get(recipient)
+            if recipient and profile then
                 local changed = false
-                if definition.Reward then
-                    local rewarded = RewardService.Grant(profile, definition.Reward)
+                local rewardShare = rewardPlan.RewardByUserId[contributor.UserId]
+                if CombatRewardRules.HasReward(rewardShare) then
+                    local rewarded = RewardService.Grant(profile, rewardShare)
                     changed = rewarded or changed
                 end
                 local questChanged = QuestService.Record(profile, "Defeat", enemyId, 1)
@@ -124,7 +124,9 @@ function EnemyService.Register(enemy, enemyId, onDeath)
                 if changed then
                     PlayerDataService.NotifyChanged(recipient)
                 end
-                LootDropService.RollAndSpawn(enemyId, enemy:GetPivot().Position, recipient)
+                if lootUsers[contributor.UserId] then
+                    LootDropService.RollAndSpawn(enemyId, enemy:GetPivot().Position, recipient)
+                end
             end
         end
 
@@ -152,9 +154,16 @@ function EnemyService.RecordDamage(enemy, player, damage)
     if not state or state.Dead or type(damage) ~= "number" or damage <= 0 then
         return false
     end
-    state.DamageByPlayer[player] = (state.DamageByPlayer[player] or 0) + damage
-    MonsterThreatService.Add(enemy, player, damage)
-    return true
+    local humanoid = getHumanoid(enemy)
+    local maxHealth = humanoid and humanoid.MaxHealth or state.Definition.MaxHealth or 1
+    local credited = CombatRewardRules.CreditDamage(state.TotalCreditedDamage, maxHealth, damage)
+    if credited <= 0 then
+        return false
+    end
+    state.TotalCreditedDamage += credited
+    state.DamageByPlayer[player] = (state.DamageByPlayer[player] or 0) + credited
+    MonsterThreatService.Add(enemy, player, credited)
+    return true, credited
 end
 
 function EnemyService.GetHumanoid(enemy)

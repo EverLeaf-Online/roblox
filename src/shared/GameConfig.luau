@@ -173,6 +173,8 @@ GameConfig.Combat = {
     BossMonsterStaggerResistance = 0.85,
     MonsterInterruptStaggerThresholdSeconds = 0.08,
     ThreatSwitchRatio = 1.15,
+    NormalRewardContributionFraction = 0.05,
+    EliteRewardContributionFraction = 0.03,
     PlayerDamageIFrames = 0.15,
     DefenseConstant = 100,
 }

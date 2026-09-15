@@ -107,6 +107,16 @@ for enemyId, monster in MonsterConfig.All() do
 
     local reward = monster.Reward
     if reward then
+        if monster.Boss ~= true then
+            assert(
+                reward.Items == nil,
+                "shared non-boss direct rewards cannot contain items: " .. enemyId
+            )
+            assert(
+                reward.UnlockRegions == nil,
+                "shared non-boss direct rewards cannot unlock regions: " .. enemyId
+            )
+        end
         assert(
             reward.Exp == nil or (type(reward.Exp) == "number" and reward.Exp > 0),
             "enemy reward EXP valid: " .. enemyId

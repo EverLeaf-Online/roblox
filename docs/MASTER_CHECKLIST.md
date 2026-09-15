@@ -583,7 +583,7 @@
 
 - [x] Runtime party-state foundation (create/add/leave/leader handoff).
 - [x] Production party UI implemented: incoming invites, create/accept/decline/invite/kick/leave controls, live member roster, leader state, and compact live-HP party HUD.
-- [ ] Shared/individual reward rules.
+- [x] Shared/individual combat reward rules: normal/elites use contribution-qualified, damage-weighted EXP/currency sharing with exact pool conservation and top-contributor loot ownership; bosses retain threshold-qualified full personal rewards and personal loot rolls; AFK/no-contribution party leeching is not rewarded.
 - [ ] Generic instance/party teleport flow; Belforge now has a source-complete party ready-check and synchronized group-entry path.
 - [ ] Trading design decision.
 - [ ] Secure trading if approved.
