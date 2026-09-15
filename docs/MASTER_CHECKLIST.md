@@ -20,6 +20,7 @@
 ### A. Stability / no-breakage gate
 
 - [x] Third-person movement/camera/sprint/jump/dodge Studio-verified.
+- [x] Spawn safety hardened: native SpawnLocations sit above authored floors, every respawn receives a server-side floor/rig-clearance settle pass, and travel resolves actual ground height to prevent underground spawns.
 - [x] Basic attack Studio-verified.
 - [x] Beginner Strike on hotbar slot 1 Studio-verified.
 - [x] Quest accept/progress/explicit turn-in Studio-verified.

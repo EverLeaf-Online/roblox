@@ -1349,7 +1349,7 @@ local function registerSpawn(parent, name, spawnId, position, yaw)
     local spawn = Instance.new("SpawnLocation")
     spawn.Name = name
     spawn.Size = Vector3.new(7, 0.5, 7)
-    spawn.CFrame = CFrame.new(ground + Vector3.new(0, 0.25, 0)) * CFrame.Angles(0, yaw or 0, 0)
+    spawn.CFrame = CFrame.new(ground + Vector3.new(0, 3.25, 0)) * CFrame.Angles(0, yaw or 0, 0)
     spawn.Anchored = true
     spawn.Neutral = true
     spawn.CanCollide = false

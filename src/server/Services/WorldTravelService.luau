@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
 
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
 local MovementSanityService = require(script.Parent.MovementSanityService)
@@ -6,8 +7,38 @@ local MovementSanityService = require(script.Parent.MovementSanityService)
 local WorldTravelService = {}
 local spawns = {}
 
+local DEFAULT_ROOT_OFFSET = 4.2
+local SAFE_RAY_UP = 8
+local SAFE_RAY_DOWN = 40
+local SAFE_FLOOR_PADDING = 0.8
+
 local function getSpawnPosition(spawn)
-    return spawn.Position + Vector3.new(0, 4.2, 0)
+    return spawn.Position + Vector3.new(0, DEFAULT_ROOT_OFFSET, 0)
+end
+
+local function resolveSafeSpawnCFrame(spawn, character, humanoid, root)
+    local params = RaycastParams.new()
+    params.FilterType = Enum.RaycastFilterType.Exclude
+    params.FilterDescendantsInstances = { spawn, character }
+    params.IgnoreWater = false
+
+    local rayOrigin = spawn.Position + Vector3.new(0, SAFE_RAY_UP, 0)
+    local hit = Workspace:Raycast(rayOrigin, Vector3.new(0, -SAFE_RAY_DOWN, 0), params)
+    if not hit then
+        return spawn.CFrame * CFrame.new(0, DEFAULT_ROOT_OFFSET, 0)
+    end
+
+    -- Roblox avatar rigs vary in HipHeight/root size. Resolve the root position
+    -- from the actual floor and current avatar dimensions instead of assuming a
+    -- fixed four-stud offset, which can leave tall/short avatars intersecting terrain.
+    local clearance = math.max(
+        DEFAULT_ROOT_OFFSET,
+        (tonumber(humanoid.HipHeight) or 0) + root.Size.Y * 0.5 + SAFE_FLOOR_PADDING
+    )
+    local targetPosition =
+        Vector3.new(spawn.Position.X, hit.Position.Y + clearance, spawn.Position.Z)
+    local rotationOnly = spawn.CFrame - spawn.Position
+    return CFrame.new(targetPosition) * rotationOnly
 end
 
 function WorldTravelService.RegisterSpawn(spawnId, instance)
@@ -139,7 +170,7 @@ function WorldTravelService.Teleport(player, spawnId, options)
     MovementSanityService.AllowTeleport(player)
     root.AssemblyLinearVelocity = Vector3.zero
     root.AssemblyAngularVelocity = Vector3.zero
-    character:PivotTo(spawn.CFrame * CFrame.new(0, 4.2, 0))
+    character:PivotTo(resolveSafeSpawnCFrame(spawn, character, humanoid, root))
     MovementSanityService.AllowTeleport(player)
     return true
 end

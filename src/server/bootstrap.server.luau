@@ -172,13 +172,22 @@ local function onPlayerAdded(player)
     syncPlayerWorld(player, profileOrReason, player.Character ~= nil)
     DeathService.InitPlayer(player)
 
-    player.CharacterAdded:Connect(function()
+    player.CharacterAdded:Connect(function(character)
         player:SetAttribute("EverLeafCrouching", false)
         player:SetAttribute("EverLeafDodging", false)
         StatusEffectService.Clear(player)
         task.defer(function()
+            local humanoid = character:WaitForChild("Humanoid", 5)
+            local root = character:WaitForChild("HumanoidRootPart", 5)
             local profile = PlayerDataService.Get(player)
-            if profile then
+            if profile and humanoid and root and player.Character == character then
+                -- RespawnLocation handles the engine spawn, then this authoritative
+                -- settle pass resolves the actual floor and avatar clearance. This
+                -- prevents terrain/build timing from leaving the character underground.
+                WorldTravelService.Teleport(player, profile.World.SpawnId, {
+                    SkipStreamingPrefetch = true,
+                })
+            elseif profile then
                 WorldTravelService.SetRespawn(player, profile.World.SpawnId)
             end
             CharacterStatsService.Apply(player, true)

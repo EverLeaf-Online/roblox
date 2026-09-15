@@ -605,7 +605,7 @@ local function makeBelforgeAntechamber(parent)
     local spawnMarker = Instance.new("SpawnLocation")
     spawnMarker.Name = "BelforgeAntechamberSpawn"
     spawnMarker.Size = Vector3.new(4, 1, 4)
-    spawnMarker.CFrame = CFrame.new(origin + Vector3.new(-38, 0.5, 0))
+    spawnMarker.CFrame = CFrame.new(origin + Vector3.new(-38, 3.25, 0))
     spawnMarker.Anchored = true
     spawnMarker.Neutral = true
     spawnMarker.Transparency = 1
