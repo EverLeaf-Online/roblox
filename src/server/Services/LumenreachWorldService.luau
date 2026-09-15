@@ -2781,45 +2781,63 @@ local function makeProvingCircle(parent)
         spoke.CanQuery = false
 
         local stonePosition = origin + direction * 15.5
+        local stoneGround = terrainSurfacePosition(stonePosition, 0)
+        local markerYaw = -angle + math.rad(90)
+        local markerBase = CFrame.new(stoneGround) * CFrame.Angles(0, markerYaw, 0)
         local pathStone = Instance.new("Model")
         pathStone.Name = "PathStone" .. index
         pathStone.Parent = model
-        for chunkIndex, chunk in
-            {
-                { Vector3.new(3.0, 2.6, 2.2), Vector3.new(0, 1.3, 0), math.rad(-3) },
-                { Vector3.new(2.7, 2.35, 2.0), Vector3.new(0.12, 3.65, -0.08), math.rad(4) },
-                { Vector3.new(2.35, 1.8, 1.8), Vector3.new(-0.1, 5.7, 0.05), math.rad(-6) },
-            }
-        do
-            local visible = makePart(
-                pathStone,
-                "StoneChunk" .. chunkIndex,
-                chunk[1],
-                CFrame.new(stonePosition + chunk[2])
-                    * CFrame.Angles(0, -angle + math.rad(90 + chunkIndex * 3), chunk[3]),
-                Enum.Material.Rock,
-                if chunkIndex == 2 then Color3.fromRGB(62, 77, 70) else Color3.fromRGB(72, 86, 78)
-            )
-            visible.CanCollide = false
-            visible.CanTouch = false
-            useMaterialVariant(visible, "MossyRock")
+
+        local placed = EnvironmentPrefabService.Place(
+            "RockFace",
+            pathStone,
+            markerBase
+                * CFrame.new(0, 2.8, 0.15)
+                * CFrame.Angles(
+                    math.rad((index % 3 - 1) * 3),
+                    0,
+                    math.rad((index % 2 == 0) and 6 or -6)
+                ),
+            prefabScaleForLongest("RockFace", 8.4, 0.5)
+        )
+        if placed then
+            placed.Name = "PathRock"
+            setRenderOnly(placed)
         end
+
+        makeMossyRockSet(
+            pathStone,
+            stoneGround - direction * 0.8,
+            markerYaw + math.rad((index % 3 - 1) * 8),
+            0.44
+        )
 
         local rune = makePart(
             pathStone,
             "PathRune",
-            Vector3.new(1.0, 2.35, 0.1),
-            CFrame.new(stonePosition + Vector3.new(0, 3.85, -1.05))
-                * CFrame.Angles(0, -angle + math.rad(90), math.rad(45)),
+            Vector3.new(1.0, 2.45, 0.1),
+            markerBase * CFrame.new(0, 3.75, -1.2) * CFrame.Angles(0, 0, math.rad(45)),
             Enum.Material.Neon,
             color
         )
         rune.CanCollide = false
         rune.CanTouch = false
         rune.CanQuery = false
-        rune.Transparency = 0.08
+        rune.Transparency = 0.06
 
-        makeMossyRockSet(model, stonePosition - direction * 1.4, -angle + math.rad(90), 0.38)
+        local runeLight = Instance.new("PointLight")
+        runeLight.Color = color
+        runeLight.Brightness = 0.34
+        runeLight.Range = 5.5
+        runeLight.Shadows = false
+        runeLight.Parent = rune
+
+        makeCollisionProxy(
+            pathStone,
+            "PathStoneCollision",
+            Vector3.new(2.4, 6.0, 2.5),
+            markerBase * CFrame.new(0, 3.0, 0.25)
+        )
     end
 
     local beacon = makeBall(
