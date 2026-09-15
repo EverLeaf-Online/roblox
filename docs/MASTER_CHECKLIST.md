@@ -474,6 +474,7 @@
 - [x] Sunmoss Overlook northern loop destination.
 - [x] Connected trail network and route beacons/waystones.
 - [x] Forest-density and roadside environmental dressing pass.
+- [x] Opening topology redesigned: compact Camp basin, separate Proving Circle side spur, curved woodland reveal, smaller Crossroads fork, curved downstream branches, location-specific signs, and larger canopy silhouettes; Studio visual QA remains.
 - [x] Opening-route composition pass rebuilt Camp/Crossroads signs, path lantern scale/placement, natural trail pebbles, irregular clearing edges, low terrain banks, and denser authored woodland clusters; Studio player-height review remains open.
 - [x] Approved imported environment assets integrated with runtime sanitization and procedural fallbacks.
 - [x] Bad oversized cliff/rock placements corrected and terrain-supported.

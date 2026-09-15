@@ -30,6 +30,29 @@ local WORLD_ZONES = table.freeze({
     Overlook = Vector3.new(155, 0, -225),
 })
 
+-- The opening is intentionally authored as a curved reveal rather than a
+-- straight road into a giant dirt junction. All terrain, clearance, and
+-- navigation dressing reference the same points so the route cannot drift.
+local OPENING_ROUTE_POINTS = table.freeze({
+    WORLD_ZONES.Camp + Vector3.new(42, 0, -4),
+    Vector3.new(-207, 0, 109),
+    Vector3.new(-190, 0, 91),
+    Vector3.new(-178, 0, 65),
+    Vector3.new(-151, 0, 50),
+    Vector3.new(-124, 0, 65),
+    Vector3.new(-101, 0, 52),
+    WORLD_ZONES.Crossroads + Vector3.new(-9, 0, 7),
+    WORLD_ZONES.Crossroads,
+})
+
+local PROVING_CIRCLE_ORIGIN = WORLD_ZONES.Camp + Vector3.new(8, 0, -78)
+local PROVING_SPUR_POINTS = table.freeze({
+    WORLD_ZONES.Camp + Vector3.new(5, 0, -34),
+    WORLD_ZONES.Camp + Vector3.new(1, 0, -50),
+    PROVING_CIRCLE_ORIGIN + Vector3.new(0, 0, 17),
+    PROVING_CIRCLE_ORIGIN,
+})
+
 local function makePart(parent, name, size, cframe, material, color)
     local part = Instance.new("Part")
     part.Name = name
@@ -193,6 +216,90 @@ local function makeTree(parent, position, scale, variant)
 
     model.PrimaryPart = trunkLower
     trunkUpper.CanCollide = true
+    return model
+end
+
+local function makeCanopyTree(parent, position, scale, yaw)
+    local model = Instance.new("Model")
+    model.Name = "LumenCanopyTree"
+    model.Parent = parent
+
+    scale = scale or 1
+    yaw = yaw or 0
+    local base = CFrame.new(position) * CFrame.Angles(0, yaw, 0)
+    local bark = Color3.fromRGB(70, 49, 35)
+    local barkLight = Color3.fromRGB(83, 58, 39)
+    local leafColors = {
+        Color3.fromRGB(45, 87, 52),
+        Color3.fromRGB(54, 104, 58),
+        Color3.fromRGB(67, 119, 63),
+        Color3.fromRGB(78, 132, 68),
+    }
+
+    local lower = makePart(
+        model,
+        "TrunkLower",
+        Vector3.new(3.0, 8.2, 3.0) * scale,
+        base * CFrame.new(0, 4.1 * scale, 0) * CFrame.Angles(math.rad(1), 0, math.rad(-2)),
+        Enum.Material.Wood,
+        bark
+    )
+    local upper = makePart(
+        model,
+        "TrunkUpper",
+        Vector3.new(2.2, 7.8, 2.2) * scale,
+        base
+            * CFrame.new(0.45 * scale, 11.6 * scale, 0.15 * scale)
+            * CFrame.Angles(math.rad(-3), math.rad(8), math.rad(4)),
+        Enum.Material.Wood,
+        barkLight
+    )
+
+    local branchEnds = {
+        Vector3.new(5.3, 14.0, -1.5),
+        Vector3.new(-4.8, 13.5, 1.8),
+        Vector3.new(2.7, 15.5, 4.2),
+        Vector3.new(-2.3, 16.0, -4.0),
+    }
+    for index, localEnd in branchEnds do
+        local a = (base * CFrame.new(0.2 * scale, 10.5 * scale, 0)).Position
+        local b = (base * CFrame.new(localEnd * scale)).Position
+        local delta = b - a
+        local branch = makePart(
+            model,
+            "CanopyBranch" .. index,
+            Vector3.new(0.72 * scale, 0.72 * scale, delta.Magnitude),
+            CFrame.lookAt((a + b) * 0.5, b),
+            Enum.Material.Wood,
+            bark
+        )
+        branch.CanCollide = false
+    end
+
+    local lobes = {
+        { Vector3.new(-4.4, 15.0, -0.8), Vector3.new(8.2, 6.4, 7.6), 1 },
+        { Vector3.new(4.1, 15.4, -1.2), Vector3.new(8.6, 6.8, 7.8), 2 },
+        { Vector3.new(-1.2, 18.5, 0.7), Vector3.new(9.2, 7.2, 8.5), 3 },
+        { Vector3.new(2.6, 17.5, 4.0), Vector3.new(7.4, 6.1, 7.2), 4 },
+        { Vector3.new(-3.0, 17.1, -4.0), Vector3.new(7.5, 6.0, 7.0), 2 },
+        { Vector3.new(0.4, 21.0, -1.2), Vector3.new(7.2, 5.8, 6.8), 3 },
+    }
+    for index, spec in lobes do
+        local leaf = makeBall(
+            model,
+            "CanopyMass" .. index,
+            spec[2] * scale,
+            base * CFrame.new(spec[1] * scale),
+            FOLIAGE_MATERIAL,
+            leafColors[spec[3]]
+        )
+        leaf.CanCollide = false
+        CollectionService:AddTag(leaf, "EverLeafWindSway")
+    end
+
+    lower.CanCollide = true
+    upper.CanCollide = true
+    model.PrimaryPart = lower
     return model
 end
 
@@ -644,68 +751,6 @@ local function makeWaystone(parent, position, yaw, scale)
     return model
 end
 
-local function makeTrailStones(parent)
-    local model = Instance.new("Model")
-    model.Name = "LumenTrailPebbles"
-    model.Parent = parent
-
-    -- Small, embedded shoulder stones. These should read as natural trail-edge
-    -- pebbles, never as rectangular paving bricks dropped in the travel lane.
-    local markers = {
-        { Vector3.new(-214, 0, 103), math.rad(-57), 1 },
-        { Vector3.new(-189, 0, 87), math.rad(-58), -1 },
-        { Vector3.new(-164, 0, 72), math.rad(-60), 1 },
-        { Vector3.new(-137, 0, 57), math.rad(-61), -1 },
-        { Vector3.new(-108, 0, 42), math.rad(-66), 1 },
-        { Vector3.new(-63, 0, 35), math.rad(-82), -1 },
-        { Vector3.new(-31, 0, 47), math.rad(-72), 1 },
-        { Vector3.new(6, 0, 59), math.rad(-78), -1 },
-        { Vector3.new(48, 0, 67), math.rad(-84), 1 },
-        { Vector3.new(89, 0, 74), math.rad(-85), -1 },
-        { Vector3.new(132, 0, 79), math.rad(-87), 1 },
-        { Vector3.new(173, 0, 81), math.rad(-88), -1 },
-        { Vector3.new(-70, 0, 6), math.rad(-25), 1 },
-        { Vector3.new(-39, 0, -14), math.rad(-35), -1 },
-        { Vector3.new(-6, 0, -32), math.rad(-56), 1 },
-        { Vector3.new(27, 0, -50), math.rad(-63), -1 },
-        { Vector3.new(54, 0, -70), math.rad(-44), 1 },
-    }
-
-    for index, entry in markers do
-        local forward = Vector3.new(math.sin(entry[2]), 0, math.cos(entry[2]))
-        local right = Vector3.new(forward.Z, 0, -forward.X)
-        local shoulder = entry[1] + right * (6.2 * entry[3])
-        local count = 3 + (index % 3)
-        for pebbleIndex = 1, count do
-            local along = (pebbleIndex - (count + 1) * 0.5) * 1.25
-            local outward = ((pebbleIndex % 2) * 0.75) + (index % 2) * 0.25
-            local pebblePosition = shoulder + forward * along + right * outward * entry[3]
-            local pebble = makeRock(
-                model,
-                pebblePosition + Vector3.new(0, 0.12 + (pebbleIndex % 2) * 0.05, 0),
-                Vector3.new(
-                    0.9 + (pebbleIndex % 3) * 0.28,
-                    0.35 + (pebbleIndex % 2) * 0.12,
-                    0.75 + ((pebbleIndex + index) % 3) * 0.24
-                ),
-                Vector3.new(
-                    math.rad((pebbleIndex % 3) * 4 - 4),
-                    entry[2] + pebbleIndex * 0.61,
-                    math.rad((index % 3) * 3 - 3)
-                )
-            )
-            pebble.Name = "TrailPebble" .. tostring(index) .. "_" .. tostring(pebbleIndex)
-            pebble.CanCollide = false
-            pebble.CanTouch = false
-            pebble.Color = if (index + pebbleIndex) % 3 == 0
-                then Color3.fromRGB(104, 111, 104)
-                else Color3.fromRGB(92, 101, 96)
-        end
-    end
-
-    return model
-end
-
 local function makeSupplyStack(parent, position, yaw)
     local model = Instance.new("Model")
     model.Name = "WayfarerSupplies"
@@ -818,12 +863,14 @@ local function makeSupplyStack(parent, position, yaw)
     return model
 end
 
-local function makeSignpost(parent, position, yaw)
+local function makeSignpost(parent, position, yaw, primaryText, secondaryText)
     local model = Instance.new("Model")
     model.Name = "WayfarerSignpost"
     model.Parent = parent
 
     local base = CFrame.new(position) * CFrame.Angles(0, yaw, 0)
+    primaryText = primaryText or "WAYFARER CAMP"
+    secondaryText = secondaryText or "LUMEN ARCH"
     local wood = Color3.fromRGB(69, 49, 34)
     local boardWood = Color3.fromRGB(118, 84, 48)
     local trimWood = Color3.fromRGB(82, 57, 38)
@@ -897,8 +944,8 @@ local function makeSignpost(parent, position, yaw)
         return board
     end
 
-    addBoard("CampBoard", "WAYFARER CAMP", 6.85, 1, 6.2, 1.5)
-    addBoard("RuinsBoard", "LUMEN ARCH", 5.35, -1, 5.35, -1.5)
+    addBoard("PrimaryBoard", primaryText, 6.85, 1, 6.4, 1.5)
+    addBoard("SecondaryBoard", secondaryText, 5.35, -1, 6.1, -1.5)
 
     local cap = makeBall(
         model,
@@ -2415,7 +2462,7 @@ local function makeCampNpc(parent, npcId, displayName, position, yaw, palette, r
 end
 
 local function makeProvingCircle(parent)
-    local origin = WORLD_ZONES.Camp + Vector3.new(74, 0, -42)
+    local origin = PROVING_CIRCLE_ORIGIN
     local model = Instance.new("Model")
     model.Name = "WayfarerProvingCircle"
     model.Parent = parent
@@ -2715,34 +2762,80 @@ local function prepareGround(world)
             )
         end
 
-        fillClearing(WORLD_ZONES.Camp, Vector3.new(118, 0, 82), Enum.Material.Ground)
-        fillClearing(WORLD_ZONES.Crossroads, Vector3.new(66, 0, 48), Enum.Material.Ground)
+        -- Camp is a compact basin. The Proving Circle is a separate side spur,
+        -- and Crossroads is a small fork rather than another rectangular plaza.
+        fillClearing(WORLD_ZONES.Camp, Vector3.new(98, 0, 66), Enum.Material.Ground)
         fillClearing(WORLD_ZONES.Ruins, Vector3.new(132, 0, 106), Enum.Material.Grass)
         fillClearing(WORLD_ZONES.CombatGrove, Vector3.new(170, 0, 138), Enum.Material.Grass)
         fillClearing(WORLD_ZONES.Glowmere, Vector3.new(148, 0, 120), Enum.Material.Grass)
         fillClearing(WORLD_ZONES.Waterfall, Vector3.new(126, 0, 104), Enum.Material.Grass)
         fillClearing(WORLD_ZONES.Overlook, Vector3.new(132, 0, 94), Enum.Material.Grass)
 
+        terrain:FillBall(
+            WORLD_ZONES.Crossroads + Vector3.new(0, -16.8, 0),
+            17.4,
+            Enum.Material.Ground
+        )
+        terrain:FillBall(
+            PROVING_CIRCLE_ORIGIN + Vector3.new(0, -16.2, 0),
+            16.8,
+            Enum.Material.Ground
+        )
+
+        -- Main opening route: narrow, curved, and revealed in stages.
+        local openingWidths = { 12.5, 11.5, 11, 11, 11.5, 11, 10.5, 10.5 }
+        for index = 1, #OPENING_ROUTE_POINTS - 1 do
+            fillTrail(
+                OPENING_ROUTE_POINTS[index],
+                OPENING_ROUTE_POINTS[index + 1],
+                openingWidths[index]
+            )
+        end
+
+        -- Advancement training is deliberately off the main road so the
+        -- opening sightline is not overloaded with unrelated landmarks.
+        for index = 1, #PROVING_SPUR_POINTS - 1 do
+            fillTrail(PROVING_SPUR_POINTS[index], PROVING_SPUR_POINTS[index + 1], 9.5)
+        end
+
+        -- Three readable branches leave Lumenwood Crossroads. Each bends out of
+        -- view instead of exposing the entire map from one giant intersection.
         local trails = {
-            { WORLD_ZONES.Camp + Vector3.new(46, 0, -8), Vector3.new(-182, 0, 86), 16 },
-            { Vector3.new(-182, 0, 86), WORLD_ZONES.Crossroads, 15 },
-            { WORLD_ZONES.Crossroads, Vector3.new(-12, 0, -18), 14 },
-            { Vector3.new(-12, 0, -18), WORLD_ZONES.Ruins + Vector3.new(-34, 0, 18), 13 },
-            { WORLD_ZONES.Crossroads + Vector3.new(16, 0, 8), Vector3.new(28, 0, 63), 15 },
-            { Vector3.new(28, 0, 63), Vector3.new(125, 0, 79), 15 },
-            { Vector3.new(125, 0, 79), WORLD_ZONES.CombatGrove + Vector3.new(-47, 0, -3), 16 },
-            { WORLD_ZONES.Crossroads + Vector3.new(-20, 0, -13), Vector3.new(-144, 0, -60), 12 },
-            { Vector3.new(-144, 0, -60), Vector3.new(-210, 0, -126), 12 },
-            { Vector3.new(-210, 0, -126), WORLD_ZONES.Waterfall + Vector3.new(24, 0, 28), 11 },
-            { WORLD_ZONES.Camp + Vector3.new(30, 0, 36), Vector3.new(-155, 0, 157), 13 },
-            { Vector3.new(-155, 0, 157), Vector3.new(-62, 0, 177), 13 },
-            { Vector3.new(-62, 0, 177), WORLD_ZONES.Glowmere + Vector3.new(-50, 0, 0), 13 },
-            { WORLD_ZONES.Glowmere + Vector3.new(45, 0, -14), Vector3.new(122, 0, 143), 13 },
-            { Vector3.new(122, 0, 143), WORLD_ZONES.CombatGrove + Vector3.new(-28, 0, 36), 14 },
-            { WORLD_ZONES.Ruins + Vector3.new(25, 0, -28), Vector3.new(112, 0, -160), 12 },
-            { Vector3.new(112, 0, -160), WORLD_ZONES.Overlook + Vector3.new(-20, 0, 23), 12 },
-            { WORLD_ZONES.Overlook + Vector3.new(36, 0, 18), Vector3.new(245, 0, -132), 11 },
-            { Vector3.new(245, 0, -132), WORLD_ZONES.CombatGrove + Vector3.new(35, 0, -43), 12 },
+            -- Shattered Lumen Arch / Brasshaven gate route.
+            { WORLD_ZONES.Crossroads, Vector3.new(-58, 0, 14), 10.5 },
+            { Vector3.new(-58, 0, 14), Vector3.new(-36, 0, -7), 10.5 },
+            { Vector3.new(-36, 0, -7), Vector3.new(-9, 0, -31), 10.5 },
+            { Vector3.new(-9, 0, -31), Vector3.new(22, 0, -52), 10.5 },
+            { Vector3.new(22, 0, -52), WORLD_ZONES.Ruins + Vector3.new(-34, 0, 18), 11 },
+
+            -- Mossglen / northern loop route.
+            { WORLD_ZONES.Crossroads, Vector3.new(-62, 0, 47), 11 },
+            { Vector3.new(-62, 0, 47), Vector3.new(-28, 0, 64), 11 },
+            { Vector3.new(-28, 0, 64), Vector3.new(24, 0, 73), 11.5 },
+            { Vector3.new(24, 0, 73), Vector3.new(82, 0, 77), 12 },
+            { Vector3.new(82, 0, 77), Vector3.new(125, 0, 79), 12 },
+            { Vector3.new(125, 0, 79), WORLD_ZONES.CombatGrove + Vector3.new(-47, 0, -3), 13 },
+
+            -- Veilfall / western lower route.
+            { WORLD_ZONES.Crossroads, Vector3.new(-98, 0, 7), 10 },
+            { Vector3.new(-98, 0, 7), Vector3.new(-126, 0, -22), 10 },
+            { Vector3.new(-126, 0, -22), Vector3.new(-158, 0, -57), 10 },
+            { Vector3.new(-158, 0, -57), Vector3.new(-192, 0, -94), 10 },
+            { Vector3.new(-192, 0, -94), WORLD_ZONES.Waterfall + Vector3.new(24, 0, 28), 10 },
+
+            -- Scenic north loop out of Camp toward Glowmere.
+            { WORLD_ZONES.Camp + Vector3.new(27, 0, 30), Vector3.new(-181, 0, 151), 10.5 },
+            { Vector3.new(-181, 0, 151), Vector3.new(-131, 0, 166), 10.5 },
+            { Vector3.new(-131, 0, 166), Vector3.new(-70, 0, 176), 10.5 },
+            { Vector3.new(-70, 0, 176), WORLD_ZONES.Glowmere + Vector3.new(-50, 0, 0), 10.5 },
+            { WORLD_ZONES.Glowmere + Vector3.new(45, 0, -14), Vector3.new(122, 0, 143), 11 },
+            { Vector3.new(122, 0, 143), WORLD_ZONES.CombatGrove + Vector3.new(-28, 0, 36), 12 },
+
+            -- Shattered Arch to Sunmoss and back toward Mossglen.
+            { WORLD_ZONES.Ruins + Vector3.new(25, 0, -28), Vector3.new(112, 0, -160), 10 },
+            { Vector3.new(112, 0, -160), WORLD_ZONES.Overlook + Vector3.new(-20, 0, 23), 10 },
+            { WORLD_ZONES.Overlook + Vector3.new(36, 0, 18), Vector3.new(245, 0, -132), 10 },
+            { Vector3.new(245, 0, -132), WORLD_ZONES.CombatGrove + Vector3.new(35, 0, -43), 10.5 },
         }
         for _, trail in trails do
             fillTrail(trail[1], trail[2], trail[3])
@@ -2752,48 +2845,67 @@ local function prepareGround(world)
         -- low banks sit outside the main travel lanes and make paths feel cut
         -- through a forest rather than painted across a flat baseplate.
         local lowBanks = {
-            { WORLD_ZONES.Camp + Vector3.new(-68, -8.5, -42), 13, Enum.Material.Grass },
-            { WORLD_ZONES.Camp + Vector3.new(-60, -9.5, 43), 14, Enum.Material.Grass },
-            { WORLD_ZONES.Camp + Vector3.new(4, -10, -52), 13, Enum.Material.Grass },
-            { WORLD_ZONES.Camp + Vector3.new(47, -9, 44), 14, Enum.Material.Grass },
-            { WORLD_ZONES.Camp + Vector3.new(63, -10, 8), 13, Enum.Material.Grass },
-            { WORLD_ZONES.Crossroads + Vector3.new(-43, -9, -31), 12, Enum.Material.Grass },
-            { WORLD_ZONES.Crossroads + Vector3.new(-37, -9, 32), 12, Enum.Material.Grass },
-            { WORLD_ZONES.Crossroads + Vector3.new(39, -9, -29), 12, Enum.Material.Grass },
-            { WORLD_ZONES.Crossroads + Vector3.new(42, -9, 29), 12, Enum.Material.Grass },
-            { Vector3.new(-185, -10, 116), 12, Enum.Material.Grass },
-            { Vector3.new(-152, -10, 101), 11, Enum.Material.Grass },
-            { Vector3.new(-120, -10, 83), 12, Enum.Material.Grass },
-            { Vector3.new(-86, -10, 66), 11, Enum.Material.Grass },
-            { Vector3.new(-45, -10, 55), 11, Enum.Material.Grass },
-            { Vector3.new(-5, -10, 69), 11, Enum.Material.Grass },
+            -- Camp basin framing.
+            { WORLD_ZONES.Camp + Vector3.new(-58, -9.0, -38), 13, Enum.Material.Grass },
+            { WORLD_ZONES.Camp + Vector3.new(-55, -9.5, 39), 14, Enum.Material.Grass },
+            { WORLD_ZONES.Camp + Vector3.new(3, -10.0, -48), 13, Enum.Material.Grass },
+            { WORLD_ZONES.Camp + Vector3.new(43, -9.5, 42), 14, Enum.Material.Grass },
+            { WORLD_ZONES.Camp + Vector3.new(55, -10.0, 15), 12, Enum.Material.Grass },
+
+            -- Curved main-route banks: alternate sides at bends so the road
+            -- feels enclosed without creating collision humps in the lane.
+            { Vector3.new(-205, -10.0, 132), 12, Enum.Material.Grass },
+            { Vector3.new(-216, -10.0, 78), 11, Enum.Material.Grass },
+            { Vector3.new(-171, -10.0, 101), 12, Enum.Material.Grass },
+            { Vector3.new(-165, -10.0, 32), 11, Enum.Material.Grass },
+            { Vector3.new(-132, -10.0, 88), 11, Enum.Material.Grass },
+            { Vector3.new(-119, -10.0, 31), 11, Enum.Material.Grass },
+            { Vector3.new(-93, -10.0, 73), 10, Enum.Material.Grass },
+            { Vector3.new(-101, -10.0, 16), 10, Enum.Material.Grass },
+
+            -- Small Crossroads bowl, not a wide open plain.
+            { WORLD_ZONES.Crossroads + Vector3.new(-31, -10.0, -24), 10, Enum.Material.Grass },
+            { WORLD_ZONES.Crossroads + Vector3.new(-29, -10.0, 27), 10, Enum.Material.Grass },
+            { WORLD_ZONES.Crossroads + Vector3.new(30, -10.0, -23), 10, Enum.Material.Grass },
+            { WORLD_ZONES.Crossroads + Vector3.new(31, -10.0, 25), 10, Enum.Material.Grass },
+
+            -- Proving-circle pocket framing.
+            { PROVING_CIRCLE_ORIGIN + Vector3.new(-22, -10.0, -12), 10, Enum.Material.Grass },
+            { PROVING_CIRCLE_ORIGIN + Vector3.new(22, -10.0, -10), 10, Enum.Material.Grass },
+            { PROVING_CIRCLE_ORIGIN + Vector3.new(0, -10.0, -25), 11, Enum.Material.Grass },
         }
         for _, bank in lowBanks do
             terrain:FillBall(bank[1], bank[2], bank[3])
         end
 
         local edgeRock = {
-            { WORLD_ZONES.Camp + Vector3.new(-73, -5.8, 7), 10 },
-            { WORLD_ZONES.Camp + Vector3.new(56, -6.0, -41), 9 },
-            { WORLD_ZONES.Crossroads + Vector3.new(-48, -6.0, 6), 9 },
-            { WORLD_ZONES.Crossroads + Vector3.new(45, -6.2, 5), 9 },
+            { WORLD_ZONES.Camp + Vector3.new(-61, -5.8, 4), 9 },
+            { WORLD_ZONES.Camp + Vector3.new(51, -6.0, -37), 8 },
+            { Vector3.new(-197, -6.2, 127), 8 },
+            { Vector3.new(-160, -6.2, 95), 7 },
+            { Vector3.new(-126, -6.2, 86), 7 },
+            { WORLD_ZONES.Crossroads + Vector3.new(-34, -6.2, 18), 8 },
+            { WORLD_ZONES.Crossroads + Vector3.new(34, -6.2, -16), 8 },
+            { PROVING_CIRCLE_ORIGIN + Vector3.new(-20, -6.2, 8), 7 },
         }
         for _, rock in edgeRock do
             terrain:FillBall(rock[1], rock[2], Enum.Material.Rock)
         end
 
         local grassIntrusions = {
-            WORLD_ZONES.Camp + Vector3.new(-56, -6.0, -31),
-            WORLD_ZONES.Camp + Vector3.new(-47, -6.0, 35),
-            WORLD_ZONES.Camp + Vector3.new(15, -6.0, -39),
-            WORLD_ZONES.Camp + Vector3.new(45, -6.0, 30),
-            WORLD_ZONES.Crossroads + Vector3.new(-28, -6.0, -22),
-            WORLD_ZONES.Crossroads + Vector3.new(-25, -6.0, 21),
-            WORLD_ZONES.Crossroads + Vector3.new(27, -6.0, -20),
-            WORLD_ZONES.Crossroads + Vector3.new(28, -6.0, 21),
+            WORLD_ZONES.Camp + Vector3.new(-45, -6.0, -29),
+            WORLD_ZONES.Camp + Vector3.new(-42, -6.0, 31),
+            WORLD_ZONES.Camp + Vector3.new(14, -6.0, -35),
+            WORLD_ZONES.Camp + Vector3.new(39, -6.0, 28),
+            WORLD_ZONES.Crossroads + Vector3.new(-22, -6.0, -18),
+            WORLD_ZONES.Crossroads + Vector3.new(-20, -6.0, 19),
+            WORLD_ZONES.Crossroads + Vector3.new(22, -6.0, -17),
+            WORLD_ZONES.Crossroads + Vector3.new(23, -6.0, 18),
+            PROVING_CIRCLE_ORIGIN + Vector3.new(-15, -6.0, 13),
+            PROVING_CIRCLE_ORIGIN + Vector3.new(16, -6.0, 12),
         }
         for index, intrusion in grassIntrusions do
-            terrain:FillBall(intrusion, 6.5 + (index % 3) * 1.2, Enum.Material.Grass)
+            terrain:FillBall(intrusion, 5.5 + (index % 3) * 0.9, Enum.Material.Grass)
         end
 
         local perimeterRidges = {
@@ -3044,11 +3156,6 @@ local function makeTrailsideCluster(parent, position, yaw, seed)
     end
 end
 
-local OPENING_ROUTE_SEGMENTS = {
-    { WORLD_ZONES.Camp + Vector3.new(46, 0, -8), Vector3.new(-182, 0, 86) },
-    { Vector3.new(-182, 0, 86), WORLD_ZONES.Crossroads },
-}
-
 local function horizontalDistanceToSegment(point, a, b)
     local point2 = Vector2.new(point.X, point.Z)
     local a2 = Vector2.new(a.X, a.Z)
@@ -3063,8 +3170,14 @@ local function horizontalDistanceToSegment(point, a, b)
 end
 
 local function isOpeningRouteClear(position, clearance)
-    for _, segment in OPENING_ROUTE_SEGMENTS do
-        if horizontalDistanceToSegment(position, segment[1], segment[2]) < clearance then
+    for index = 1, #OPENING_ROUTE_POINTS - 1 do
+        if
+            horizontalDistanceToSegment(
+                position,
+                OPENING_ROUTE_POINTS[index],
+                OPENING_ROUTE_POINTS[index + 1]
+            ) < clearance
+        then
             return false
         end
     end
@@ -3174,23 +3287,51 @@ local function decorate(world)
     -- Dense, authored clumps frame the opening route and create alternating
     -- compression/release instead of a uniformly sparse grass field.
     local openingClusters = {
-        { WORLD_ZONES.Camp + Vector3.new(-66, 0, -25), 201, 1.05 },
-        { WORLD_ZONES.Camp + Vector3.new(-57, 0, 42), 203, 0.96 },
-        { WORLD_ZONES.Camp + Vector3.new(-16, 0, -55), 205, 0.92 },
-        { WORLD_ZONES.Camp + Vector3.new(24, 0, 53), 207, 0.9 },
-        { WORLD_ZONES.Camp + Vector3.new(67, 0, 21), 209, 0.88 },
-        { Vector3.new(-208, 0, 133), 211, 0.88 },
-        { Vector3.new(-184, 0, 67), 213, 0.92 },
-        { Vector3.new(-154, 0, 119), 215, 0.86 },
-        { Vector3.new(-131, 0, 50), 217, 0.94 },
-        { Vector3.new(-111, 0, 88), 219, 0.9 },
-        { WORLD_ZONES.Crossroads + Vector3.new(-44, 0, 31), 221, 0.9 },
-        { WORLD_ZONES.Crossroads + Vector3.new(-35, 0, -34), 223, 0.95 },
-        { WORLD_ZONES.Crossroads + Vector3.new(38, 0, -32), 225, 0.9 },
-        { WORLD_ZONES.Crossroads + Vector3.new(44, 0, 29), 227, 0.94 },
+        -- Camp rim.
+        { WORLD_ZONES.Camp + Vector3.new(-58, 0, -30), 201, 1.02 },
+        { WORLD_ZONES.Camp + Vector3.new(-55, 0, 40), 203, 0.96 },
+        { WORLD_ZONES.Camp + Vector3.new(-10, 0, -54), 205, 0.92 },
+        { WORLD_ZONES.Camp + Vector3.new(25, 0, 49), 207, 0.9 },
+
+        -- Alternating outside bends along the curved woodland road.
+        { Vector3.new(-218, 0, 132), 211, 0.94 },
+        { Vector3.new(-220, 0, 75), 213, 0.9 },
+        { Vector3.new(-172, 0, 108), 215, 0.92 },
+        { Vector3.new(-167, 0, 30), 217, 0.9 },
+        { Vector3.new(-134, 0, 94), 219, 0.92 },
+        { Vector3.new(-126, 0, 27), 221, 0.9 },
+        { Vector3.new(-94, 0, 82), 223, 0.88 },
+        { Vector3.new(-105, 0, 13), 225, 0.9 },
+
+        -- Small crossroads frame.
+        { WORLD_ZONES.Crossroads + Vector3.new(-36, 0, 31), 227, 0.9 },
+        { WORLD_ZONES.Crossroads + Vector3.new(-35, 0, -31), 229, 0.92 },
+        { WORLD_ZONES.Crossroads + Vector3.new(35, 0, -29), 231, 0.9 },
+        { WORLD_ZONES.Crossroads + Vector3.new(37, 0, 29), 233, 0.92 },
     }
     for _, cluster in openingClusters do
         makeWoodlandCluster(world, cluster[1], cluster[2], cluster[3], true)
+    end
+
+    -- Larger canopy silhouettes create actual forest walls and hide the round
+    -- perimeter terrain from normal player-height sightlines.
+    local openingCanopyTrees = {
+        { WORLD_ZONES.Camp + Vector3.new(-52, 0, -43), 0.92, math.rad(15) },
+        { WORLD_ZONES.Camp + Vector3.new(-47, 0, 43), 1.0, math.rad(-28) },
+        { Vector3.new(-221, 0, 130), 0.96, math.rad(31) },
+        { Vector3.new(-218, 0, 73), 0.9, math.rad(-12) },
+        { Vector3.new(-169, 0, 109), 1.02, math.rad(24) },
+        { Vector3.new(-166, 0, 27), 0.94, math.rad(-37) },
+        { Vector3.new(-131, 0, 94), 1.0, math.rad(42) },
+        { Vector3.new(-124, 0, 25), 0.9, math.rad(-22) },
+        { Vector3.new(-92, 0, 80), 0.92, math.rad(18) },
+        { WORLD_ZONES.Crossroads + Vector3.new(38, 0, 31), 0.98, math.rad(-26) },
+        { WORLD_ZONES.Crossroads + Vector3.new(-37, 0, -31), 0.94, math.rad(33) },
+    }
+    for _, tree in openingCanopyTrees do
+        if isOpeningRouteClear(tree[1], 15.5) then
+            makeCanopyTree(world, tree[1], tree[2], tree[3])
+        end
     end
 
     local trailClusters = {
@@ -3222,23 +3363,24 @@ local function decorate(world)
     end
 
     local routeBeacons = {
-        { Vector3.new(-187, 0, 93), math.rad(-54), 0.58 },
-        { Vector3.new(-131, 0, 61), math.rad(-61), 0.62 },
-        { Vector3.new(-24, 0, -7), math.rad(-42), 0.58 },
-        { Vector3.new(53, 0, 66), math.rad(-78), 0.6 },
-        { Vector3.new(139, 0, 79), math.rad(-84), 0.64 },
-        { Vector3.new(-171, 0, -88), math.rad(44), 0.58 },
-        { Vector3.new(-85, 0, 169), math.rad(-88), 0.56 },
-        { Vector3.new(126, 0, -166), math.rad(26), 0.62 },
+        -- Opening bends.
+        { Vector3.new(-190, 0, 91), math.rad(25), 0.58, 1 },
+        { Vector3.new(-151, 0, 50), math.rad(62), 0.6, -1 },
+        { Vector3.new(-101, 0, 52), math.rad(145), 0.58, 1 },
+        -- Later-region wayfinding anchors.
+        { Vector3.new(53, 0, 66), math.rad(-78), 0.6, -1 },
+        { Vector3.new(139, 0, 79), math.rad(-84), 0.64, 1 },
+        { Vector3.new(-171, 0, -88), math.rad(44), 0.58, -1 },
+        { Vector3.new(-85, 0, 169), math.rad(-88), 0.56, 1 },
+        { Vector3.new(126, 0, -166), math.rad(26), 0.62, -1 },
     }
     for index, beacon in routeBeacons do
-        -- Route markers belong on the verge, never on the walkable centerline.
-        local side = if index % 2 == 0 then -1 else 1
         local localFrame = CFrame.new(beacon[1]) * CFrame.Angles(0, beacon[2], 0)
-        local waystonePosition = (localFrame * CFrame.new(8.5 * side, 0, 0)).Position
+        local side = beacon[4]
+        local waystonePosition = (localFrame * CFrame.new(9.5 * side, 0, 0)).Position
         makeWaystone(world, waystonePosition, beacon[2], beacon[3])
-        if index % 2 == 0 then
-            local lampPosition = (localFrame * CFrame.new(12.5 * side, 0, 0)).Position
+        if index == 1 or index == 3 or index == 5 or index == 7 then
+            local lampPosition = (localFrame * CFrame.new(14 * side, 0, 0)).Position
             local lampYaw = beacon[2] + if side > 0 then math.pi else 0
             makeLantern(world, lampPosition, lampYaw)
         end
@@ -3254,7 +3396,13 @@ local function decorate(world)
     makeSupplyStack(world, WORLD_ZONES.Camp + Vector3.new(-43, 0, 3), math.rad(-8))
     makeSupplyStack(world, WORLD_ZONES.Camp + Vector3.new(-21, 0, 43), math.rad(18))
     makeCampBanner(world, WORLD_ZONES.Camp + Vector3.new(-9, 0, 51), math.rad(3))
-    makeSignpost(world, WORLD_ZONES.Camp + Vector3.new(62, 0, -39), math.rad(-49))
+    makeSignpost(
+        world,
+        WORLD_ZONES.Camp + Vector3.new(47, 0, -31),
+        math.rad(-38),
+        "LUMENWOOD",
+        "PROVING CIRCLE"
+    )
     for _, offset in
         {
             { Vector3.new(44, 0, -39), math.rad(126) },
@@ -3283,20 +3431,21 @@ local function decorate(world)
     makeRockCluster(world, WORLD_ZONES.Camp + Vector3.new(58, 0, -26), 0.46, 241)
     makeGrassTuft(world, WORLD_ZONES.Camp + Vector3.new(55, 0, -20), 0.72)
 
-    -- Lumenwood Crossroads establishes the main navigation fork.
-    makeSignpost(world, WORLD_ZONES.Crossroads + Vector3.new(-27, 0, -14), math.rad(-72))
-    makeWaystone(world, WORLD_ZONES.Crossroads + Vector3.new(16, 0, -14), math.rad(18), 0.82)
-    makeWaystone(world, WORLD_ZONES.Crossroads + Vector3.new(-18, 0, 12), math.rad(-38), 0.74)
-    makeLantern(world, WORLD_ZONES.Crossroads + Vector3.new(-38, 0, -29), math.rad(32))
-    makeLantern(world, WORLD_ZONES.Crossroads + Vector3.new(39, 0, 30), math.rad(-148))
-    makeRockCluster(world, WORLD_ZONES.Crossroads + Vector3.new(31, 0, -26), 0.65, 12)
-    makeCampBench(world, WORLD_ZONES.Crossroads + Vector3.new(7, 0, 28), math.rad(9))
-    makeSupplyStack(world, WORLD_ZONES.Crossroads + Vector3.new(-34, 0, 25), math.rad(-17))
-    makeCampfire(world, WORLD_ZONES.Crossroads + Vector3.new(24, 0, 31))
-    makeStump(world, WORLD_ZONES.Crossroads + Vector3.new(-37, 0, -23), 0.64, 2)
-    makeFallenLog(world, WORLD_ZONES.Crossroads + Vector3.new(38, 0.2, -34), math.rad(22), 0.68, 2)
-    makeMossyRockSet(world, WORLD_ZONES.Crossroads + Vector3.new(-42, 0, 34), math.rad(-18), 0.72)
-    makeFlowerPatch(world, WORLD_ZONES.Crossroads + Vector3.new(35, 0, 31), 0.9, true)
+    -- Lumenwood Crossroads is a compact navigation landmark, not a second camp.
+    makeSignpost(
+        world,
+        WORLD_ZONES.Crossroads + Vector3.new(-22, 0, 18),
+        math.rad(-54),
+        "WAYFARER CAMP",
+        "LUMEN ARCH"
+    )
+    makeWaystone(world, WORLD_ZONES.Crossroads + Vector3.new(17, 0, 12), math.rad(-24), 0.88)
+    makeLantern(world, WORLD_ZONES.Crossroads + Vector3.new(-31, 0, -25), math.rad(38))
+    makeRockCluster(world, WORLD_ZONES.Crossroads + Vector3.new(26, 0, -21), 0.58, 12)
+    makeMossyRockSet(world, WORLD_ZONES.Crossroads + Vector3.new(-33, 0, 30), math.rad(-18), 0.62)
+    makeStump(world, WORLD_ZONES.Crossroads + Vector3.new(31, 0, 27), 0.58, 2)
+    makeFlowerPatch(world, WORLD_ZONES.Crossroads + Vector3.new(24, 0, 22), 0.72, true)
+    makeFern(world, WORLD_ZONES.Crossroads + Vector3.new(20, 0, 18), 0.75, math.rad(31))
 
     -- Veilfall is a rocky wet forest with a basin, stream, deadwood, and cliff dressing.
     makeWaterfall(world, WORLD_ZONES.Waterfall)
@@ -3352,7 +3501,13 @@ local function decorate(world)
     makeCampBench(world, WORLD_ZONES.Glowmere + Vector3.new(48, 0, 27), math.rad(-27))
     makeLantern(world, WORLD_ZONES.Glowmere + Vector3.new(-49, 0, 20))
     makeLantern(world, WORLD_ZONES.Glowmere + Vector3.new(49, 0, 18))
-    makeSignpost(world, WORLD_ZONES.Glowmere + Vector3.new(-57, 0, -38), math.rad(36))
+    makeSignpost(
+        world,
+        WORLD_ZONES.Glowmere + Vector3.new(-57, 0, -38),
+        math.rad(36),
+        "LUMENWOOD",
+        "MOSSGLEN"
+    )
 
     -- The Shattered Arch is now a destination in its own clearing.
     makeRuins(world, WORLD_ZONES.Ruins)
@@ -3377,7 +3532,13 @@ local function decorate(world)
     makeCampBench(world, WORLD_ZONES.CombatGrove + Vector3.new(66, 0, 6), math.rad(-81))
     makeLantern(world, WORLD_ZONES.CombatGrove + Vector3.new(-58, 0, -24))
     makeLantern(world, WORLD_ZONES.CombatGrove + Vector3.new(58, 0, -24))
-    makeSignpost(world, WORLD_ZONES.CombatGrove + Vector3.new(-47, 0, -51), math.rad(67))
+    makeSignpost(
+        world,
+        WORLD_ZONES.CombatGrove + Vector3.new(-47, 0, -51),
+        math.rad(67),
+        "LUMENWOOD",
+        "SUNMOSS"
+    )
 
     -- Sunmoss Overlook finishes the northern loop with large silhouettes instead of another flat clearing.
     makeRockSpire(world, WORLD_ZONES.Overlook + Vector3.new(-31, 0, 8), 1.15)
@@ -3389,7 +3550,13 @@ local function decorate(world)
     makeCampBench(world, WORLD_ZONES.Overlook + Vector3.new(-7, 2.1, 31), math.rad(176))
     makeLantern(world, WORLD_ZONES.Overlook + Vector3.new(-21, 1.5, 24))
     makeSupplyStack(world, WORLD_ZONES.Overlook + Vector3.new(37, 0, 31), math.rad(-23))
-    makeSignpost(world, WORLD_ZONES.Overlook + Vector3.new(-48, 0, 28), math.rad(54))
+    makeSignpost(
+        world,
+        WORLD_ZONES.Overlook + Vector3.new(-48, 0, 28),
+        math.rad(54),
+        "LUMEN ARCH",
+        "MOSSGLEN"
+    )
 
     -- The imported forest kit is used between destinations rather than stacked in one location.
     for _, entry in
@@ -3421,8 +3588,6 @@ local function decorate(world)
     do
         makeMossyRockSet(world, entry[1], entry[2], entry[3])
     end
-
-    makeTrailStones(world)
 end
 
 local function makeMonsterSpawnTrigger(world, name, position, config)
