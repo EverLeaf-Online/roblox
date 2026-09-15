@@ -52,6 +52,65 @@ local OPENING_ROUTE_POINTS = table.freeze({
 -- Advancement training sits south of Camp in its own wooded pocket instead of
 -- sharing the primary navigation sightline.
 local PROVING_CIRCLE_ORIGIN = WORLD_ZONES.Camp + Vector3.new(10, 0, -92)
+
+-- Decorative generation runs before authored encounters are registered. Keep the
+-- actual combat footprints free of trees, deadfall, roots, and large rocks so
+-- player-height fights remain readable even as the surrounding forest gets denser.
+local PROTECTED_GAMEPLAY_CLEARINGS = table.freeze({
+    table.freeze({
+        Id = "arrival_spawn",
+        Center = WORLD_ZONES.Camp + Vector3.new(-31, 0, 19),
+        Radius = 9.5,
+    }),
+    table.freeze({
+        Id = "training_dummy",
+        Center = WORLD_ZONES.Camp + Vector3.new(31, 0, -5),
+        Radius = 8.5,
+    }),
+    table.freeze({ Id = "proving_circle", Center = PROVING_CIRCLE_ORIGIN, Radius = 18.5 }),
+    table.freeze({
+        Id = "proving_entrance",
+        Center = PROVING_CIRCLE_ORIGIN + Vector3.new(0, 0, 17),
+        Radius = 10.5,
+    }),
+    table.freeze({ Id = "mossling_hollow", Center = Vector3.new(-226, 1.5, 123), Radius = 15.5 }),
+    table.freeze({
+        Id = "shattered_arch",
+        Center = WORLD_ZONES.Ruins + Vector3.new(-7, 0, 24),
+        Radius = 16.5,
+    }),
+    table.freeze({
+        Id = "glowmere_slimes",
+        Center = WORLD_ZONES.Glowmere + Vector3.new(39, 0, -20),
+        Radius = 15.5,
+    }),
+    table.freeze({
+        Id = "mossglen_ridgebeaks",
+        Center = WORLD_ZONES.CombatGrove + Vector3.new(-8, 0, -18),
+        Radius = 18.0,
+    }),
+    table.freeze({ Id = "brambleback_trail", Center = Vector3.new(118, 0, 121), Radius = 17.0 }),
+    table.freeze({
+        Id = "veilfall_wisps",
+        Center = WORLD_ZONES.Waterfall + Vector3.new(31, 0, 12),
+        Radius = 16.0,
+    }),
+    table.freeze({
+        Id = "gravebone_captain",
+        Center = WORLD_ZONES.Ruins + Vector3.new(33, 0, -29),
+        Radius = 10.5,
+    }),
+    table.freeze({
+        Id = "royal_glowcap",
+        Center = WORLD_ZONES.Glowmere + Vector3.new(-32, 0, 29),
+        Radius = 10.5,
+    }),
+    table.freeze({
+        Id = "mosswarden",
+        Center = WORLD_ZONES.CombatGrove + Vector3.new(32, 0, 34),
+        Radius = 23.0,
+    }),
+})
 local PROVING_SPUR_POINTS = table.freeze({
     WORLD_ZONES.Camp + Vector3.new(2, 0, -31),
     WORLD_ZONES.Camp + Vector3.new(-3, 0, -54),
@@ -2493,33 +2552,72 @@ local function makeCampNpc(parent, npcId, displayName, position, yaw, palette, r
 end
 
 local function makeProvingCircle(parent)
-    local origin = PROVING_CIRCLE_ORIGIN
+    local origin = terrainSurfacePosition(PROVING_CIRCLE_ORIGIN, 0)
     local model = Instance.new("Model")
     model.Name = "WayfarerProvingCircle"
     model.Parent = parent
 
-    local platform = makePart(
+    -- Preserve a predictable flat combat floor without leaving a giant visible
+    -- Roblox cylinder. The authored ring/inlays below provide the visual read.
+    local floor = makePart(
         model,
-        "ProvingStone",
-        Vector3.new(1.2, 25, 25),
-        CFrame.new(origin + Vector3.new(0, 0.55, 0)) * CFrame.Angles(0, 0, math.rad(90)),
-        Enum.Material.Slate,
-        Color3.fromRGB(62, 78, 69)
+        "ProvingFloorCollision",
+        Vector3.new(0.7, 23.5, 23.5),
+        CFrame.new(origin + Vector3.new(0, 0.08, 0)) * CFrame.Angles(0, 0, math.rad(90)),
+        Enum.Material.SmoothPlastic,
+        Color3.new(0, 0, 0)
     )
-    platform.Shape = Enum.PartType.Cylinder
-    platform.CanCollide = true
+    floor.Shape = Enum.PartType.Cylinder
+    floor.Transparency = 1
+    floor.CanCollide = true
+    floor.CanTouch = false
+    floor.CanQuery = false
+    floor.CastShadow = false
+    floor:SetAttribute("EverLeafCollisionProxy", true)
 
-    local inset = makePart(
+    -- Broken ring slabs sit just above the floor and make the trial space read
+    -- as an old Wayfarer site integrated into the forest rather than a platform.
+    for index = 1, 18 do
+        local angle = (index - 1) * math.pi * 2 / 18
+        local radius = 10.9 + ((index % 3) - 1) * 0.22
+        local slab = makePart(
+            model,
+            "ProvingRingStone" .. index,
+            Vector3.new(4.0 + (index % 2) * 0.35, 0.42 + (index % 3) * 0.05, 2.45),
+            CFrame.new(
+                origin
+                    + Vector3.new(
+                        math.cos(angle) * radius,
+                        0.23 + (index % 2) * 0.03,
+                        math.sin(angle) * radius
+                    )
+            )
+                * CFrame.Angles(
+                    math.rad((index % 3 - 1) * 1.4),
+                    -angle + math.rad(90 + (index % 3 - 1) * 2),
+                    math.rad((index % 4 - 2) * 1.2)
+                ),
+            Enum.Material.Rock,
+            if index % 3 == 0 then Color3.fromRGB(73, 88, 80) else Color3.fromRGB(83, 96, 87)
+        )
+        slab.CanCollide = false
+        slab.CanTouch = false
+        useMaterialVariant(slab, "MossyRock")
+    end
+
+    local centerInlay = makePart(
         model,
-        "LumenInlay",
-        Vector3.new(1.26, 15.5, 15.5),
-        CFrame.new(origin + Vector3.new(0, 0.61, 0)) * CFrame.Angles(0, 0, math.rad(90)),
+        "LumenHeart",
+        Vector3.new(0.12, 6.6, 6.6),
+        CFrame.new(origin + Vector3.new(0, 0.39, 0)) * CFrame.Angles(0, 0, math.rad(90)),
         Enum.Material.Neon,
-        Color3.fromRGB(52, 126, 91)
+        Color3.fromRGB(65, 151, 111)
     )
-    inset.Shape = Enum.PartType.Cylinder
-    inset.Transparency = 0.38
-    inset.CanCollide = false
+    centerInlay.Shape = Enum.PartType.Cylinder
+    centerInlay.Transparency = 0.5
+    centerInlay.CanCollide = false
+    centerInlay.CanTouch = false
+    centerInlay.CanQuery = false
 
     local familyColors = {
         Color3.fromRGB(98, 157, 103),
@@ -2530,43 +2628,87 @@ local function makeProvingCircle(parent)
     }
     for index, color in familyColors do
         local angle = math.rad(-90 + (index - 1) * 72)
-        local position = origin + Vector3.new(math.cos(angle) * 15.5, 0, math.sin(angle) * 15.5)
-        local stone = makePart(
+        local direction = Vector3.new(math.cos(angle), 0, math.sin(angle))
+
+        local spoke = makePart(
             model,
-            "PathStone" .. tostring(index),
-            Vector3.new(3.2, 6.4, 2.1),
-            CFrame.new(position + Vector3.new(0, 3.2, 0))
-                * CFrame.Angles(0, -angle + math.rad(90), 0),
-            Enum.Material.Slate,
-            Color3.fromRGB(55, 69, 63)
+            "PathSpoke" .. index,
+            Vector3.new(0.18, 0.08, 5.2),
+            CFrame.lookAt(
+                origin + direction * 5.1 + Vector3.new(0, 0.43, 0),
+                origin + direction * 10
+            ),
+            Enum.Material.Neon,
+            color
         )
-        stone.CanCollide = false
+        spoke.Transparency = 0.28
+        spoke.CanCollide = false
+        spoke.CanTouch = false
+        spoke.CanQuery = false
+
+        local stonePosition = origin + direction * 15.5
+        local pathStone = Instance.new("Model")
+        pathStone.Name = "PathStone" .. index
+        pathStone.Parent = model
+        for chunkIndex, chunk in
+            {
+                { Vector3.new(3.0, 2.6, 2.2), Vector3.new(0, 1.3, 0), math.rad(-3) },
+                { Vector3.new(2.7, 2.35, 2.0), Vector3.new(0.12, 3.65, -0.08), math.rad(4) },
+                { Vector3.new(2.35, 1.8, 1.8), Vector3.new(-0.1, 5.7, 0.05), math.rad(-6) },
+            }
+        do
+            local visible = makePart(
+                pathStone,
+                "StoneChunk" .. chunkIndex,
+                chunk[1],
+                CFrame.new(stonePosition + chunk[2])
+                    * CFrame.Angles(0, -angle + math.rad(90 + chunkIndex * 3), chunk[3]),
+                Enum.Material.Rock,
+                if chunkIndex == 2 then Color3.fromRGB(62, 77, 70) else Color3.fromRGB(72, 86, 78)
+            )
+            visible.CanCollide = false
+            visible.CanTouch = false
+            useMaterialVariant(visible, "MossyRock")
+        end
+
         local rune = makePart(
-            model,
-            "PathRune" .. tostring(index),
-            Vector3.new(1.15, 2.5, 0.12),
-            stone.CFrame * CFrame.new(0, 0.15, -1.08),
+            pathStone,
+            "PathRune",
+            Vector3.new(1.0, 2.35, 0.1),
+            CFrame.new(stonePosition + Vector3.new(0, 3.85, -1.05))
+                * CFrame.Angles(0, -angle + math.rad(90), math.rad(45)),
             Enum.Material.Neon,
             color
         )
         rune.CanCollide = false
+        rune.CanTouch = false
+        rune.CanQuery = false
+        rune.Transparency = 0.08
+
+        makeMossyRockSet(model, stonePosition - direction * 1.4, -angle + math.rad(90), 0.38)
     end
 
     local beacon = makeBall(
         model,
         "PathkeeperBeacon",
-        Vector3.new(1.1, 1.1, 1.1),
-        CFrame.new(origin + Vector3.new(0, 2.0, 0)),
+        Vector3.new(0.82, 0.82, 0.82),
+        CFrame.new(origin + Vector3.new(0, 1.65, 0)),
         Enum.Material.Neon,
         Color3.fromRGB(121, 244, 183)
     )
     beacon.CanCollide = false
+    beacon.CanTouch = false
+    beacon.CanQuery = false
     local light = Instance.new("PointLight")
     light.Color = Color3.fromRGB(121, 244, 183)
-    light.Brightness = 1.1
-    light.Range = 13
+    light.Brightness = 0.9
+    light.Range = 11
+    light.Shadows = false
     light.Parent = beacon
 
+    makeFern(model, origin + Vector3.new(-12.8, 0, 8.6), 0.56, math.rad(18))
+    makeFern(model, origin + Vector3.new(12.1, 0, -8.9), 0.52, math.rad(-31))
+    makeDryBranches(model, origin + Vector3.new(-13.2, 0, -6.8), math.rad(41), 0.46)
     return origin
 end
 
@@ -3515,6 +3657,7 @@ local function travelDecorationClearance(instanceName)
         WildflowerPatch = 6.5,
         LumenMushroomCluster = 6.0,
         RockCluster = 7.0,
+        RockFace = 9.0,
         PineRoots = 7.0,
         DryBranches = 7.0,
         FallenTreeTrunk = 9.0,
@@ -3567,6 +3710,47 @@ local function clearTravelLaneDecor(world)
             string.format(
                 "[LumenreachWorldService] Cleared %d decorative objects from travel lanes",
                 removed
+            )
+        )
+    end
+end
+
+local function distanceXZ(a, b)
+    local dx = a.X - b.X
+    local dz = a.Z - b.Z
+    return math.sqrt(dx * dx + dz * dz)
+end
+
+local function clearProtectedGameplayDecor(world)
+    local removedByClearing = {}
+    for _, child in world:GetChildren() do
+        if travelDecorationClearance(child.Name) then
+            local position, radius = horizontalBounds(child)
+            if position then
+                -- Imported meshes can have very broad visual canopies. For
+                -- gameplay clearance we care about the local physical footprint,
+                -- so cap the model radius just like the route scrub does.
+                radius = math.clamp(radius or 0, 0, 8)
+                for _, clearing in PROTECTED_GAMEPLAY_CLEARINGS do
+                    if distanceXZ(position, clearing.Center) < clearing.Radius + radius then
+                        child:Destroy()
+                        removedByClearing[clearing.Id] = (removedByClearing[clearing.Id] or 0) + 1
+                        break
+                    end
+                end
+            end
+        end
+    end
+
+    local total = 0
+    for _, count in removedByClearing do
+        total += count
+    end
+    if total > 0 then
+        print(
+            string.format(
+                "[LumenreachWorldService] Cleared %d decorative objects from protected gameplay areas",
+                total
             )
         )
     end
@@ -4352,6 +4536,7 @@ function LumenreachWorldService.Init()
     prepareGround(world)
     decorate(world)
     clearTravelLaneDecor(world)
+    clearProtectedGameplayDecor(world)
     PBRMaterialService.ApplyGeneratedWorld(world)
     makeSpawn(world)
     makeGuide(world, WORLD_ZONES.Camp + Vector3.new(31, 0, 8), math.rad(102))
