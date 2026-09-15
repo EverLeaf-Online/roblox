@@ -414,7 +414,7 @@
 - [ ] Weapon types.
 - [ ] Armor/accessory types.
 - [x] Consumable architecture with HP/MP restoration foundation.
-- [ ] Inventory capacity rules.
+- [x] Inventory capacity rules are server-enforced through stack/capacity validation and regression-tested.
 - [x] Item detail cards/tooltips show item type, stats/effects, sell value, and equipment requirements.
 - [x] React inventory UI supports browsing, consumable use, requirement-aware equipment actions, and selected-item details; Studio polish/QA remains.
 - [x] React equipment UI shows equipped slots, supports unequip, and exposes requirement-aware equip flow; Studio polish/QA remains.
