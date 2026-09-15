@@ -2705,7 +2705,7 @@ local function prepareGround(world)
                     midpoint - Vector3.new(0, 0.12, 0),
                     endPoint - Vector3.new(0, 0.12, 0)
                 ),
-                Vector3.new(width + 6.5, 1.05, length + 4),
+                Vector3.new(width + 14, 1.05, length + 4),
                 Enum.Material.Mud
             )
             terrain:FillBlock(
@@ -3044,7 +3044,34 @@ local function makeTrailsideCluster(parent, position, yaw, seed)
     end
 end
 
-local function makeWoodlandCluster(parent, center, seed, scale)
+local OPENING_ROUTE_SEGMENTS = {
+    { WORLD_ZONES.Camp + Vector3.new(46, 0, -8), Vector3.new(-182, 0, 86) },
+    { Vector3.new(-182, 0, 86), WORLD_ZONES.Crossroads },
+}
+
+local function horizontalDistanceToSegment(point, a, b)
+    local point2 = Vector2.new(point.X, point.Z)
+    local a2 = Vector2.new(a.X, a.Z)
+    local b2 = Vector2.new(b.X, b.Z)
+    local delta = b2 - a2
+    local lengthSquared = delta:Dot(delta)
+    if lengthSquared <= 0.001 then
+        return (point2 - a2).Magnitude
+    end
+    local alpha = math.clamp((point2 - a2):Dot(delta) / lengthSquared, 0, 1)
+    return (point2 - (a2 + delta * alpha)).Magnitude
+end
+
+local function isOpeningRouteClear(position, clearance)
+    for _, segment in OPENING_ROUTE_SEGMENTS do
+        if horizontalDistanceToSegment(position, segment[1], segment[2]) < clearance then
+            return false
+        end
+    end
+    return true
+end
+
+local function makeWoodlandCluster(parent, center, seed, scale, protectOpeningRoute)
     scale = scale or 1
     local rotation = seed * 0.71
     local treeOffsets = {
@@ -3053,39 +3080,47 @@ local function makeWoodlandCluster(parent, center, seed, scale)
         Vector3.new(math.cos(rotation + 4.2) * 6.4, 0, math.sin(rotation + 4.2) * 6.4),
     }
     for index, offset in treeOffsets do
-        makeTree(
-            parent,
-            center + offset * scale,
-            (0.82 + ((seed + index) % 4) * 0.08) * scale,
-            ((seed + index) % 3) + 1
-        )
+        local treePosition = center + offset * scale
+        if not protectOpeningRoute or isOpeningRouteClear(treePosition, 14.5) then
+            makeTree(
+                parent,
+                treePosition,
+                (0.82 + ((seed + index) % 4) * 0.08) * scale,
+                ((seed + index) % 3) + 1
+            )
+        end
     end
 
-    makeBush(parent, center + Vector3.new(-3.2, 0, 1.8) * scale, 0.82 * scale)
-    makeFern(parent, center + Vector3.new(3.8, 0, -2.7) * scale, 0.78 * scale, rotation)
-    makeGrassTuft(parent, center + Vector3.new(1.4, 0, 4.2) * scale, 0.78 * scale)
-    if seed % 2 == 0 then
-        makeFlowerPatch(
-            parent,
-            center + Vector3.new(-4.7, 0, -3.8) * scale,
-            0.68 * scale,
-            seed % 4 == 0
-        )
-    else
-        makeMushroomCluster(parent, center + Vector3.new(-4.2, 0, -3.4) * scale, 0.7 * scale, seed)
+    local bushPosition = center + Vector3.new(-3.2, 0, 1.8) * scale
+    local fernPosition = center + Vector3.new(3.8, 0, -2.7) * scale
+    local grassPosition = center + Vector3.new(1.4, 0, 4.2) * scale
+    if not protectOpeningRoute or isOpeningRouteClear(bushPosition, 10.5) then
+        makeBush(parent, bushPosition, 0.82 * scale)
     end
-    if seed % 3 == 0 then
-        makeFallenLog(
-            parent,
-            center + Vector3.new(5.8, 0.15, 4.8) * scale,
-            rotation + 0.45,
-            0.62 * scale,
-            (seed % 2) + 1
-        )
-    elseif seed % 3 == 1 then
-        makePineRoots(parent, center + Vector3.new(5.5, 0, 4.0) * scale, rotation, 0.58 * scale)
-    else
-        makeRockCluster(parent, center + Vector3.new(5.6, 0, 4.1) * scale, 0.5 * scale, seed)
+    if not protectOpeningRoute or isOpeningRouteClear(fernPosition, 9.5) then
+        makeFern(parent, fernPosition, 0.78 * scale, rotation)
+    end
+    if not protectOpeningRoute or isOpeningRouteClear(grassPosition, 9.5) then
+        makeGrassTuft(parent, grassPosition, 0.78 * scale)
+    end
+    local groundDetailPosition = center + Vector3.new(-4.7, 0, -3.8) * scale
+    if not protectOpeningRoute or isOpeningRouteClear(groundDetailPosition, 8.5) then
+        if seed % 2 == 0 then
+            makeFlowerPatch(parent, groundDetailPosition, 0.68 * scale, seed % 4 == 0)
+        else
+            makeMushroomCluster(parent, groundDetailPosition, 0.7 * scale, seed)
+        end
+    end
+
+    local heroDetailPosition = center + Vector3.new(5.8, 0.15, 4.8) * scale
+    if not protectOpeningRoute or isOpeningRouteClear(heroDetailPosition, 12) then
+        if seed % 3 == 0 then
+            makeFallenLog(parent, heroDetailPosition, rotation + 0.45, 0.62 * scale, (seed % 2) + 1)
+        elseif seed % 3 == 1 then
+            makePineRoots(parent, heroDetailPosition, rotation, 0.58 * scale)
+        else
+            makeRockCluster(parent, heroDetailPosition, 0.5 * scale, seed)
+        end
     end
 end
 
@@ -3155,13 +3190,13 @@ local function decorate(world)
         { WORLD_ZONES.Crossroads + Vector3.new(44, 0, 29), 227, 0.94 },
     }
     for _, cluster in openingClusters do
-        makeWoodlandCluster(world, cluster[1], cluster[2], cluster[3])
+        makeWoodlandCluster(world, cluster[1], cluster[2], cluster[3], true)
     end
 
     local trailClusters = {
         { Vector3.new(-207, 0, 69), math.rad(25), 11 },
         { Vector3.new(-169, 0, 113), math.rad(-31), 12 },
-        { Vector3.new(-126, 0, 48), math.rad(54), 13 },
+        { Vector3.new(-126, 0, 32), math.rad(54), 13 },
         { Vector3.new(-51, 0, 11), math.rad(-12), 14 },
         { Vector3.new(-17, 0, 8), math.rad(61), 15 },
         { Vector3.new(22, 0, -23), math.rad(-46), 16 },
@@ -3197,11 +3232,13 @@ local function decorate(world)
         { Vector3.new(126, 0, -166), math.rad(26), 0.62 },
     }
     for index, beacon in routeBeacons do
-        makeWaystone(world, beacon[1], beacon[2], beacon[3])
+        -- Route markers belong on the verge, never on the walkable centerline.
+        local side = if index % 2 == 0 then -1 else 1
+        local localFrame = CFrame.new(beacon[1]) * CFrame.Angles(0, beacon[2], 0)
+        local waystonePosition = (localFrame * CFrame.new(8.5 * side, 0, 0)).Position
+        makeWaystone(world, waystonePosition, beacon[2], beacon[3])
         if index % 2 == 0 then
-            local side = if index % 4 == 0 then 1 else -1
-            local localFrame = CFrame.new(beacon[1]) * CFrame.Angles(0, beacon[2], 0)
-            local lampPosition = (localFrame * CFrame.new(8.5 * side, 0, 0)).Position
+            local lampPosition = (localFrame * CFrame.new(12.5 * side, 0, 0)).Position
             local lampYaw = beacon[2] + if side > 0 then math.pi else 0
             makeLantern(world, lampPosition, lampYaw)
         end
@@ -3241,8 +3278,8 @@ local function decorate(world)
     makeFern(world, WORLD_ZONES.Camp + Vector3.new(-53, 0, 16), 0.88, math.rad(14))
     makeBush(world, WORLD_ZONES.Camp + Vector3.new(-38, 0, 47), 0.72)
     makeFlowerPatch(world, WORLD_ZONES.Camp + Vector3.new(-31, 0, 48), 0.72, false)
-    makeStump(world, WORLD_ZONES.Camp + Vector3.new(38, 0, -39), 0.62, 2)
-    makeFern(world, WORLD_ZONES.Camp + Vector3.new(43, 0, -43), 0.82, math.rad(-37))
+    makeStump(world, WORLD_ZONES.Camp + Vector3.new(43, 0, -46), 0.62, 2)
+    makeFern(world, WORLD_ZONES.Camp + Vector3.new(48, 0, -50), 0.82, math.rad(-37))
     makeRockCluster(world, WORLD_ZONES.Camp + Vector3.new(58, 0, -26), 0.46, 241)
     makeGrassTuft(world, WORLD_ZONES.Camp + Vector3.new(55, 0, -20), 0.72)
 
