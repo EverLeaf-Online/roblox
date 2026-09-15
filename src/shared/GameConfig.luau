@@ -23,6 +23,7 @@ GameConfig.Currencies = {
     "Shards",
     "Marks",
 }
+GameConfig.CurrencyMaximumBalance = 2_000_000_000
 
 GameConfig.Regions = {
     "Lumenreach",

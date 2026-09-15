@@ -20,7 +20,10 @@ for itemId, definition in Items do
     if definition.SellPrice then
         assert(currencies[definition.SellPrice.Currency], "valid sell currency: " .. itemId)
         assert(
-            type(definition.SellPrice.Amount) == "number" and definition.SellPrice.Amount > 0,
+            type(definition.SellPrice.Amount) == "number"
+                and definition.SellPrice.Amount % 1 == 0
+                and definition.SellPrice.Amount > 0
+                and definition.SellPrice.Amount <= 2_000_000_000,
             "valid sell amount: " .. itemId
         )
     end
@@ -31,9 +34,21 @@ for shopId, shop in Shops do
     for itemId, price in shop.Items do
         assert(Items[itemId], string.format("shop %s references item %s", shopId, itemId))
         assert(
-            type(price) == "number" and price > 0,
-            "positive shop price: " .. shopId .. "/" .. itemId
+            type(price) == "number" and price % 1 == 0 and price > 0 and price <= 2_000_000_000,
+            "positive integer shop price: " .. shopId .. "/" .. itemId
         )
+        local definition = Items[itemId]
+        local sellPrice = definition and definition.SellPrice
+        if sellPrice and sellPrice.Currency == shop.Currency then
+            assert(
+                sellPrice.Amount < price,
+                string.format(
+                    "shop %s same-currency sell value below buy value: %s",
+                    shopId,
+                    itemId
+                )
+            )
+        end
     end
 end
 

@@ -618,7 +618,7 @@
 - [ ] Audit every future remote for type/range/state validation.
 - [x] Movement speed and displacement/teleport sanity checks foundation.
 - [x] Inventory/equipment dupe invariant tests cover capacity/stack failures, over-removal, equip swap conservation, full-inventory unequip rollback, thrown transaction rollback, and deterministic add/remove fuzzing.
-- [ ] Currency/economy abuse tests.
+- [x] Currency/economy abuse regressions cover finite integer balances, overflow caps, corrupted-balance fail-closed behavior, overspend rejection, same-currency shop no-arbitrage, and repeated buy/sell sink conservation.
 - [ ] Quest/reward replay abuse tests.
 - [ ] Trading dupe/rollback tests if trading exists.
 - [ ] Client tampering tests.

@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CurrencyRules = require(ReplicatedStorage.Shared.Logic.CurrencyRules)
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
 
 local CurrencyService = {}
@@ -8,42 +9,50 @@ for _, currencyName in GameConfig.Currencies do
     allowed[currencyName] = true
 end
 
-local function validAmount(amount)
-    return type(amount) == "number" and amount % 1 == 0 and amount > 0
+local function getBalance(profile, currencyName)
+    if type(profile) ~= "table" or type(profile.Currencies) ~= "table" then
+        return nil
+    end
+    return profile.Currencies[currencyName]
 end
 
 function CurrencyService.Add(profile, currencyName, amount)
     if not allowed[currencyName] then
         return false, "invalid_currency"
     end
-    if not validAmount(amount) then
-        return false, "invalid_amount"
+    local balance = getBalance(profile, currencyName)
+    local ok, balanceOrReason =
+        CurrencyRules.Add(balance, amount, GameConfig.CurrencyMaximumBalance)
+    if not ok then
+        return false, balanceOrReason
     end
-
-    profile.Currencies[currencyName] += amount
-    return true, profile.Currencies[currencyName]
+    profile.Currencies[currencyName] = balanceOrReason
+    return true, balanceOrReason
 end
 
 function CurrencyService.CanAfford(profile, currencyName, amount)
-    if not allowed[currencyName] or not validAmount(amount) then
+    if not allowed[currencyName] then
         return false
     end
-    return profile.Currencies[currencyName] >= amount
+    return CurrencyRules.CanAfford(
+        getBalance(profile, currencyName),
+        amount,
+        GameConfig.CurrencyMaximumBalance
+    )
 end
 
 function CurrencyService.Spend(profile, currencyName, amount)
     if not allowed[currencyName] then
         return false, "invalid_currency"
     end
-    if not validAmount(amount) then
-        return false, "invalid_amount"
+    local balance = getBalance(profile, currencyName)
+    local ok, balanceOrReason =
+        CurrencyRules.Spend(balance, amount, GameConfig.CurrencyMaximumBalance)
+    if not ok then
+        return false, balanceOrReason
     end
-    if profile.Currencies[currencyName] < amount then
-        return false, "insufficient_funds"
-    end
-
-    profile.Currencies[currencyName] -= amount
-    return true, profile.Currencies[currencyName]
+    profile.Currencies[currencyName] = balanceOrReason
+    return true, balanceOrReason
 end
 
 return CurrencyService
