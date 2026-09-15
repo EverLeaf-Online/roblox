@@ -7,6 +7,7 @@ local EnvironmentPrefabService = require(script.Parent.EnvironmentPrefabService)
 local InteractionService = require(script.Parent.InteractionService)
 local InventoryService = require(script.Parent.InventoryService)
 local PBRMaterialService = require(script.Parent.PBRMaterialService)
+local EnvironmentClearanceRules = require(ReplicatedStorage.Shared.Logic.EnvironmentClearanceRules)
 local PlayerDataService = require(script.Parent.PlayerDataService)
 local ProfileTransaction = require(ReplicatedStorage.Shared.Logic.ProfileTransaction)
 local QuestService = require(script.Parent.QuestService)
@@ -616,6 +617,7 @@ end
 local function makeRockFace(parent, position, yaw, scale)
     local model = Instance.new("Model")
     model.Name = "IntegratedRockFace"
+    model:SetAttribute("EverLeafTravelClearance", 9.0)
     model.Parent = parent
 
     local base = CFrame.new(position) * CFrame.Angles(0, yaw, 0)
@@ -3959,38 +3961,15 @@ local function distanceToTravelRoute(position)
     return closest
 end
 
-local function travelDecorationClearance(instanceName)
-    if string.sub(instanceName, 1, 10) == "ForestTree" or instanceName == "TreePrimary" then
-        return 11.5
+local function travelDecorationClearance(instance)
+    if typeof(instance) ~= "Instance" then
+        return nil
     end
-    local clearances = {
-        -- Route furniture belongs beside the lane, never inside it. These are
-        -- scrubbed only when their actual bounds intrude into the walkable
-        -- corridor after all world decoration has been placed.
-        WayfarerSignpost = 5.5,
-        LumenLantern = 4.5,
-        LumenWaystone = 5.5,
-        WayfarerBench = 5.0,
-        WayfarerSupplies = 5.0,
-        GrassTuft = 7.5,
-        LumenBush = 8.0,
-        WildflowerPatch = 6.5,
-        LumenMushroomCluster = 6.0,
-        RockCluster = 7.0,
-        RockFace = 9.0,
-        PineRoots = 7.0,
-        DryBranches = 7.0,
-        FallenTreeTrunk = 9.0,
-        FallenTreeTrunk2 = 9.0,
-        FallenLog = 9.0,
-        MossyRockSet = 7.0,
-        TreeStump = 6.5,
-        TreeStump2 = 6.5,
-        FernPrimary = 6.0,
-        LumenCattails = 5.0,
-        WayfarerRemnant = 10.0,
-    }
-    return clearances[instanceName]
+    return EnvironmentClearanceRules.Resolve(
+        instance.Name,
+        instance:GetAttribute("SourcePrefabName"),
+        instance:GetAttribute("EverLeafTravelClearance")
+    )
 end
 
 local function horizontalBounds(instance)
@@ -4013,7 +3992,7 @@ end
 local function clearTravelLaneDecor(world)
     local removed = 0
     for _, child in world:GetChildren() do
-        local clearance = travelDecorationClearance(child.Name)
+        local clearance = travelDecorationClearance(child)
         if clearance then
             local position, radius = horizontalBounds(child)
             -- Use the actual horizontal footprint, not just the pivot. Clamp
@@ -4044,7 +4023,7 @@ end
 local function clearProtectedGameplayDecor(world)
     local removedByClearing = {}
     for _, child in world:GetChildren() do
-        if travelDecorationClearance(child.Name) then
+        if travelDecorationClearance(child) then
             local position, radius = horizontalBounds(child)
             if position then
                 -- Imported meshes can have very broad visual canopies. For

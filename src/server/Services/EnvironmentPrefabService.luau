@@ -279,6 +279,7 @@ function EnvironmentPrefabService.Register(prefabName, instance, sourceAssetId, 
         autoUprightTree(instance)
     end
     instance.Name = prefabName
+    instance:SetAttribute("SourcePrefabName", prefabName)
     instance:SetAttribute("SourceAssetId", sourceAssetId)
     instance:SetAttribute("GroundToPivot", options and options.GroundToPivot == true or false)
     instance.Parent = getFolder()
@@ -294,6 +295,7 @@ function EnvironmentPrefabService.Place(prefabName, parent, pivot, scale)
     local clone = prefab:Clone()
     normalizeModel(clone)
     clone.Name = prefabName
+    clone:SetAttribute("SourcePrefabName", prefabName)
     clone.Parent = parent
 
     scale = tonumber(scale) or 1

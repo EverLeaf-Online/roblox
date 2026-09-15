@@ -513,6 +513,7 @@
 - [x] Primary Lumenreach pine bark/foliage maps are pre-authored as Rojo `SurfaceAppearance` templates and cloned at runtime; imported raw layers are stripped without protected `ColorMap`/`NormalMap`/`RoughnessMap` writes.
 - [x] Imported first-area environment assets strip raw `Texture`/`Decal` layers during sanitization; controlled PBR overrides replace legacy MeshPart texture state instead of stacking on top of it.
 - [x] Bad oversized cliff/rock placements corrected and terrain-supported.
+- [x] Final Lumenreach route/protected-area scrub resolves renamed imported props by preserved source-prefab metadata, with explicit wrapper clearance for integrated rock faces.
 - [x] Camera obstruction issue from foliage/decor corrected.
 - [x] Lumenreach collision cleanup now gives imported production trees predictable invisible trunk blockers, makes tent side/rear walls physically solid while preserving entrances, removes legacy/default baseplates, and expands the Terrain safety foundation beyond playable bounds.
 - [x] Travel-lane cleanup now uses actual model/part horizontal bounds—not just pivots—and scrubs intruding signs, lanterns, waystones, benches, supplies, foliage, rocks, roots, and deadfall while keeping authored corridor dressing outside the safe lane.
