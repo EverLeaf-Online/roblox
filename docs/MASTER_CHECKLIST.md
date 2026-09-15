@@ -456,7 +456,7 @@
 - [x] Mossglen Scout Outfitter shop added.
 - [x] Wayfarer Archive Exchange shop added.
 - [x] Dialogue shop UI can display and purchase multiple configured items.
-- [ ] Dedicated shop window with item details, quantities, buy/sell tabs, and polished navigation.
+- [x] Dedicated shop window implemented with item details, quantities, buy/sell tabs, balances, and polished navigation; Studio interaction/balance QA remains.
 - [ ] Storage/bank design decision.
 - [ ] Enhancement/crafting design decision.
 
