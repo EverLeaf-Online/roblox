@@ -577,12 +577,35 @@ function CombatPresentation.PlaySkillResult(familyId, result)
         return
     end
     if result.Kind == "Damage" then
-        CombatPresentation.PlayHit(
-            familyId,
-            result.TargetPosition,
-            result.Dodged == true,
-            result.Critical == true
-        )
+        local hits = type(result.Hits) == "table" and result.Hits or nil
+        if hits and #hits > 0 then
+            for index, hit in hits do
+                if index == 1 then
+                    CombatPresentation.PlayHit(
+                        familyId,
+                        hit.TargetPosition,
+                        hit.Dodged == true,
+                        hit.Critical == true
+                    )
+                elseif typeof(hit.TargetPosition) == "Vector3" and hit.Dodged ~= true then
+                    local color = FAMILY_COLORS[familyId] or Color3.fromRGB(188, 216, 201)
+                    if familyId == "veilstrider" then
+                        slashImpact(hit.TargetPosition, color, true)
+                    elseif familyId == "ironbloom" then
+                        slashImpact(hit.TargetPosition, color, false)
+                    else
+                        burstImpact(hit.TargetPosition, color, familyId == "brasshand")
+                    end
+                end
+            end
+        else
+            CombatPresentation.PlayHit(
+                familyId,
+                result.TargetPosition,
+                result.Dodged == true,
+                result.Critical == true
+            )
+        end
     elseif result.Kind == "Miss" and typeof(result.TargetPosition) == "Vector3" then
         if result.Reason == "projectile_blocked" then
             burstImpact(

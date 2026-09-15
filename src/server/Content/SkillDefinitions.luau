@@ -13,6 +13,8 @@ return table.freeze({
         Effect = table.freeze({
             Type = "DamageAttack",
             Mode = "Melee",
+            TargetShape = "Cone",
+            MaxTargets = 1,
             HitboxWidth = 8,
             PrimaryStat = "Might",
             AttackPower = 9,
@@ -54,6 +56,8 @@ return table.freeze({
         Effect = table.freeze({
             Type = "DamageAttack",
             Mode = "Melee",
+            TargetShape = "Box",
+            MaxTargets = 2,
             HitboxWidth = 9,
             PrimaryStat = "Might",
             AttackPower = 16,
@@ -96,6 +100,8 @@ return table.freeze({
         Effect = table.freeze({
             Type = "DamageAttack",
             Mode = "Projectile",
+            TargetShape = "Projectile",
+            MaxTargets = 1,
             ProjectileSpeed = 96,
             ProjectileRadius = 0.32,
             PrimaryStat = "Finesse",
@@ -141,6 +147,8 @@ return table.freeze({
         Effect = table.freeze({
             Type = "DamageAttack",
             Mode = "Projectile",
+            TargetShape = "Projectile",
+            MaxTargets = 1,
             ProjectileSpeed = 72,
             ProjectileRadius = 0.48,
             PrimaryStat = "Insight",
@@ -186,6 +194,8 @@ return table.freeze({
         Effect = table.freeze({
             Type = "DamageAttack",
             Mode = "Melee",
+            TargetShape = "Cone",
+            MaxTargets = 2,
             HitboxWidth = 9.5,
             PrimaryStat = "Fortune",
             AttackPower = 13,
@@ -230,6 +240,9 @@ return table.freeze({
         Effect = table.freeze({
             Type = "DamageAttack",
             Mode = "Melee",
+            TargetShape = "Radius",
+            MaxTargets = 3,
+            TargetRadius = 7,
             HitboxWidth = 9,
             PrimaryStat = "Might",
             AttackPower = 19,
@@ -274,6 +287,8 @@ return table.freeze({
         Effect = table.freeze({
             Type = "DamageAttack",
             Mode = "Melee",
+            TargetShape = "Box",
+            MaxTargets = 3,
             HitboxWidth = 10,
             PrimaryStat = "Might",
             AttackPower = 31,
@@ -303,6 +318,8 @@ return table.freeze({
         Effect = table.freeze({
             Type = "DamageAttack",
             Mode = "Projectile",
+            TargetShape = "Projectile",
+            MaxTargets = 1,
             ProjectileSpeed = 108,
             ProjectileRadius = 0.34,
             PrimaryStat = "Finesse",
@@ -333,6 +350,8 @@ return table.freeze({
         Effect = table.freeze({
             Type = "DamageAttack",
             Mode = "Projectile",
+            TargetShape = "Projectile",
+            MaxTargets = 1,
             ProjectileSpeed = 84,
             ProjectileRadius = 0.52,
             PrimaryStat = "Insight",
@@ -363,6 +382,8 @@ return table.freeze({
         Effect = table.freeze({
             Type = "DamageAttack",
             Mode = "Melee",
+            TargetShape = "Cone",
+            MaxTargets = 3,
             HitboxWidth = 10,
             PrimaryStat = "Fortune",
             AttackPower = 25,
@@ -392,6 +413,9 @@ return table.freeze({
         Effect = table.freeze({
             Type = "DamageAttack",
             Mode = "Melee",
+            TargetShape = "Radius",
+            MaxTargets = 4,
+            TargetRadius = 8,
             HitboxWidth = 10.5,
             PrimaryStat = "Might",
             AttackPower = 35,

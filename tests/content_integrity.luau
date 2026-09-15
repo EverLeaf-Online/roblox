@@ -14,6 +14,7 @@ local EquipmentTypeRules = require("../src/shared/Logic/EquipmentTypeRules")
 local WeaponCombatProfiles = require("../src/shared/WeaponCombatProfiles")
 local StatusEffectDefinitions = require("../src/shared/StatusEffectDefinitions")
 local StatusEffectRules = require("../src/shared/Logic/StatusEffectRules")
+local SkillTargetingRules = require("../src/shared/Logic/SkillTargetingRules")
 local currencies = { Shards = true, Marks = true }
 
 for effectId, definition in StatusEffectDefinitions do
@@ -290,6 +291,11 @@ for skillId, skill in Skills do
         )
     end
     if skill.Effect and skill.Effect.Type == "DamageAttack" then
+        local targetingOk, targetingReason = SkillTargetingRules.Validate(skill.Effect)
+        assert(
+            targetingOk,
+            string.format("skill %s targeting valid: %s", skillId, tostring(targetingReason))
+        )
         assert(
             skill.Effect.Mode == "Melee" or skill.Effect.Mode == "Projectile",
             "damage skill mode valid: " .. skillId
