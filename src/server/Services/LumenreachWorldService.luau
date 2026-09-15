@@ -3583,7 +3583,12 @@ function LumenreachWorldService.Init()
     )
     makeExplorationTrigger(world, "sunmoss_overlook", WORLD_ZONES.Overlook, 20)
 
-    EnemySpawnerService.Spawn("training_dummy", WORLD_ZONES.Camp + Vector3.new(31, 4, -5), world)
+    EnemySpawnerService.Spawn(
+        "training_dummy",
+        WORLD_ZONES.Camp + Vector3.new(31, 0, -5),
+        world,
+        { GroundToTerrain = true, GroundClearance = 0.1 }
+    )
 
     makeMonsterSpawnTrigger(world, "LumenwoodMosslings", Vector3.new(-226, 1.5, 123), {
         MonsterType = "LumenMossling",

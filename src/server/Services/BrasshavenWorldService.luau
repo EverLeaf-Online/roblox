@@ -7,6 +7,7 @@ local BelforgeColossusService = require(script.Parent.BelforgeColossusService)
 local InteractionService = require(script.Parent.InteractionService)
 local PlayerDataService = require(script.Parent.PlayerDataService)
 local PortalService = require(script.Parent.PortalService)
+local StylizedNpcFactory = require(script.Parent.StylizedNpcFactory)
 local WorldNoticeService = require(script.Parent.WorldNoticeService)
 local WorldObjectService = require(script.Parent.WorldObjectService)
 local WorldTravelService = require(script.Parent.WorldTravelService)
@@ -179,427 +180,39 @@ local function makeReturnGate(parent, position)
     end)
 end
 
-local function makeForeman(parent, position)
-    local model = Instance.new("Model")
-    model.Name = "belforge_foreman"
-    model.Parent = parent
-    local base = CFrame.new(position) * CFrame.Angles(0, math.rad(-90), 0)
-
-    local function bodyPart(name, size, offset, material, color)
-        local part = makePart(model, name, size, base * CFrame.new(offset), material, color)
-        part.CanCollide = false
-        part.CanTouch = false
-        return part
+local function makeBrasshavenNpc(parent, spec)
+    local model, root, head = StylizedNpcFactory.Create(parent, {
+        Name = spec.NpcId,
+        NpcId = spec.NpcId,
+        Position = spec.Position,
+        Yaw = spec.Yaw,
+        Role = spec.VisualRole,
+        HairStyle = spec.HairStyle,
+        Build = spec.Build,
+        HeightScale = spec.HeightScale,
+        WidthScale = spec.WidthScale,
+        DepthScale = spec.DepthScale,
+        GroundMode = "World",
+        Palette = spec.Palette,
+    })
+    if not model or not root or not head then
+        return nil
     end
-
-    local root = bodyPart(
-        "HumanoidRootPart",
-        Vector3.new(2, 6.5, 1.8),
-        Vector3.new(0, 3.25, 0),
-        Enum.Material.SmoothPlastic,
-        Color3.new(0, 0, 0)
-    )
-    root.Transparency = 1
-    bodyPart(
-        "Torso",
-        Vector3.new(2.5, 2.6, 1.5),
-        Vector3.new(0, 3.85, 0),
-        Enum.Material.Fabric,
-        Color3.fromRGB(82, 69, 57)
-    )
-    bodyPart(
-        "Apron",
-        Vector3.new(2.15, 2.3, 0.15),
-        Vector3.new(0, 3.55, -0.83),
-        Enum.Material.Fabric,
-        Color3.fromRGB(131, 89, 48)
-    )
-    for _, side in { -1, 1 } do
-        bodyPart(
-            side < 0 and "LeftLeg" or "RightLeg",
-            Vector3.new(0.8, 2.4, 0.85),
-            Vector3.new(side * 0.58, 1.42, 0),
-            Enum.Material.Fabric,
-            Color3.fromRGB(54, 53, 51)
-        )
-        bodyPart(
-            side < 0 and "LeftArm" or "RightArm",
-            Vector3.new(0.72, 2.2, 0.78),
-            Vector3.new(side * 1.55, 3.8, 0),
-            Enum.Material.Fabric,
-            Color3.fromRGB(76, 63, 53)
-        )
-    end
-    local head = bodyPart(
-        "Head",
-        Vector3.new(1.7, 1.7, 1.6),
-        Vector3.new(0, 5.75, 0),
-        Enum.Material.SmoothPlastic,
-        Color3.fromRGB(204, 165, 128)
-    )
-    bodyPart(
-        "HardCap",
-        Vector3.new(1.95, 0.42, 1.8),
-        Vector3.new(0, 6.52, 0),
-        Enum.Material.Metal,
-        Color3.fromRGB(137, 96, 48)
-    )
 
     local plate = Instance.new("BillboardGui")
-    plate.Size = UDim2.fromOffset(225, 34)
+    plate.Name = "NpcNameplate"
+    plate.Size = UDim2.fromOffset(spec.NameplateWidth or 245, 34)
     plate.StudsOffsetWorldSpace = Vector3.new(0, 1.75, 0)
-    plate.MaxDistance = 50
+    plate.AlwaysOnTop = false
+    plate.MaxDistance = spec.MaxDistance or 52
     plate.Parent = head
+
     local text = Instance.new("TextLabel")
     text.Size = UDim2.fromScale(1, 1)
-    text.BackgroundColor3 = Color3.fromRGB(29, 25, 21)
-    text.BackgroundTransparency = 0.16
-    text.Text = "VALE · BELFORGE FOREMAN"
-    text.TextColor3 = Color3.fromRGB(237, 209, 154)
-    text.TextStrokeTransparency = 0.35
-    text.Font = Enum.Font.GothamBold
-    text.TextScaled = true
-    text.Parent = plate
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 7)
-    corner.Parent = text
-    local edge = Instance.new("UIStroke")
-    edge.Color = Color3.fromRGB(141, 98, 52)
-    edge.Transparency = 0.3
-    edge.Parent = text
-
-    model.PrimaryPart = root
-    WorldObjectService.Register(model, "Npc", "belforge_foreman")
-    local prompt = Instance.new("ProximityPrompt")
-    prompt.ActionText = "Talk"
-    prompt.ObjectText = "Vale · Belforge Foreman"
-    prompt.KeyboardKeyCode = Enum.KeyCode.E
-    prompt.MaxActivationDistance = 11
-    prompt.RequiresLineOfSight = false
-    prompt.Parent = root
-    prompt.Triggered:Connect(function(player)
-        InteractionService.Begin(player, "belforge_foreman", model)
-    end)
-end
-
-local function makeFoundryVendor(parent, npcId, displayName, position, palette)
-    local model = Instance.new("Model")
-    model.Name = npcId
-    model.Parent = parent
-    local base = CFrame.new(position) * CFrame.Angles(0, math.rad(180), 0)
-
-    local function bodyPart(name, size, offset, material, color)
-        local part = makePart(model, name, size, base * CFrame.new(offset), material, color)
-        part.CanCollide = false
-        part.CanTouch = false
-        return part
-    end
-
-    local root = bodyPart(
-        "HumanoidRootPart",
-        Vector3.new(2, 6.4, 1.8),
-        Vector3.new(0, 3.2, 0),
-        Enum.Material.SmoothPlastic,
-        Color3.new(0, 0, 0)
-    )
-    root.Transparency = 1
-    bodyPart(
-        "Torso",
-        Vector3.new(2.5, 2.55, 1.5),
-        Vector3.new(0, 3.8, 0),
-        Enum.Material.Fabric,
-        palette.Cloth
-    )
-    bodyPart(
-        "Apron",
-        Vector3.new(2.1, 2.2, 0.14),
-        Vector3.new(0, 3.5, -0.82),
-        Enum.Material.Fabric,
-        palette.Accent
-    )
-    for _, side in { -1, 1 } do
-        bodyPart(
-            side < 0 and "LeftLeg" or "RightLeg",
-            Vector3.new(0.8, 2.4, 0.85),
-            Vector3.new(side * 0.58, 1.4, 0),
-            Enum.Material.Fabric,
-            Color3.fromRGB(54, 53, 51)
-        )
-        bodyPart(
-            side < 0 and "LeftArm" or "RightArm",
-            Vector3.new(0.72, 2.15, 0.78),
-            Vector3.new(side * 1.55, 3.75, 0),
-            Enum.Material.Fabric,
-            palette.Cloth
-        )
-    end
-    local head = bodyPart(
-        "Head",
-        Vector3.new(1.7, 1.7, 1.6),
-        Vector3.new(0, 5.7, 0),
-        Enum.Material.SmoothPlastic,
-        palette.Skin
-    )
-    bodyPart(
-        "WorkCap",
-        Vector3.new(1.95, 0.38, 1.82),
-        Vector3.new(0, 6.46, 0),
-        Enum.Material.Metal,
-        palette.Accent
-    )
-
-    local plate = Instance.new("BillboardGui")
-    plate.Size = UDim2.fromOffset(240, 34)
-    plate.StudsOffsetWorldSpace = Vector3.new(0, 1.72, 0)
-    plate.MaxDistance = 50
-    plate.Parent = head
-    local text = Instance.new("TextLabel")
-    text.Size = UDim2.fromScale(1, 1)
-    text.BackgroundColor3 = Color3.fromRGB(29, 25, 21)
-    text.BackgroundTransparency = 0.16
-    text.Text = string.upper(displayName)
-    text.TextColor3 = palette.Text
-    text.TextStrokeTransparency = 0.35
-    text.Font = Enum.Font.GothamBold
-    text.TextScaled = true
-    text.Parent = plate
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 7)
-    corner.Parent = text
-    local edge = Instance.new("UIStroke")
-    edge.Color = palette.Accent
-    edge.Transparency = 0.3
-    edge.Parent = text
-
-    local counter = makePart(
-        model,
-        "Counter",
-        Vector3.new(7, 2.6, 2.6),
-        base * CFrame.new(0, 1.3, -3.6),
-        Enum.Material.WoodPlanks,
-        Color3.fromRGB(79, 60, 44)
-    )
-    counter.CanCollide = true
-    makePart(
-        model,
-        "CounterTrim",
-        Vector3.new(7.2, 0.28, 2.8),
-        base * CFrame.new(0, 2.72, -3.6),
-        Enum.Material.Metal,
-        palette.Accent
-    ).CanCollide =
-        false
-
-    model.PrimaryPart = root
-    WorldObjectService.Register(model, "Npc", npcId)
-    local prompt = Instance.new("ProximityPrompt")
-    prompt.ActionText = "Trade"
-    prompt.ObjectText = displayName
-    prompt.KeyboardKeyCode = Enum.KeyCode.E
-    prompt.MaxActivationDistance = 11
-    prompt.RequiresLineOfSight = false
-    prompt.Parent = root
-    prompt.Triggered:Connect(function(player)
-        InteractionService.Begin(player, npcId, model)
-    end)
-end
-
-local function makeEastworksEngineer(parent, position)
-    local model = Instance.new("Model")
-    model.Name = "eastworks_engineer"
-    model.Parent = parent
-    local base = CFrame.new(position) * CFrame.Angles(0, math.rad(165), 0)
-
-    local function bodyPart(name, size, offset, material, color)
-        local part = makePart(model, name, size, base * CFrame.new(offset), material, color)
-        part.CanCollide = false
-        part.CanTouch = false
-        return part
-    end
-
-    local root = bodyPart(
-        "HumanoidRootPart",
-        Vector3.new(2, 6.4, 1.8),
-        Vector3.new(0, 3.2, 0),
-        Enum.Material.SmoothPlastic,
-        Color3.new(0, 0, 0)
-    )
-    root.Transparency = 1
-    bodyPart(
-        "Torso",
-        Vector3.new(2.5, 2.55, 1.5),
-        Vector3.new(0, 3.8, 0),
-        Enum.Material.Fabric,
-        Color3.fromRGB(66, 73, 77)
-    )
-    bodyPart(
-        "EngineerApron",
-        Vector3.new(2.12, 2.25, 0.14),
-        Vector3.new(0, 3.5, -0.82),
-        Enum.Material.Fabric,
-        Color3.fromRGB(92, 117, 127)
-    )
-    for _, side in { -1, 1 } do
-        bodyPart(
-            side < 0 and "LeftLeg" or "RightLeg",
-            Vector3.new(0.8, 2.4, 0.85),
-            Vector3.new(side * 0.58, 1.4, 0),
-            Enum.Material.Fabric,
-            Color3.fromRGB(48, 52, 54)
-        )
-        bodyPart(
-            side < 0 and "LeftArm" or "RightArm",
-            Vector3.new(0.72, 2.15, 0.78),
-            Vector3.new(side * 1.55, 3.75, 0),
-            Enum.Material.Fabric,
-            Color3.fromRGB(66, 73, 77)
-        )
-    end
-    local head = bodyPart(
-        "Head",
-        Vector3.new(1.7, 1.7, 1.6),
-        Vector3.new(0, 5.7, 0),
-        Enum.Material.SmoothPlastic,
-        Color3.fromRGB(202, 166, 132)
-    )
-    bodyPart(
-        "EngineerCap",
-        Vector3.new(1.95, 0.4, 1.82),
-        Vector3.new(0, 6.46, 0),
-        Enum.Material.Metal,
-        Color3.fromRGB(92, 117, 127)
-    )
-    local tool = bodyPart(
-        "CalibrationRod",
-        Vector3.new(0.22, 3.0, 0.22),
-        Vector3.new(1.55, 2.8, -0.3),
-        Enum.Material.Metal,
-        Color3.fromRGB(154, 104, 54)
-    )
-    tool.CFrame *= CFrame.Angles(0, 0, math.rad(-12))
-
-    local plate = Instance.new("BillboardGui")
-    plate.Size = UDim2.fromOffset(245, 34)
-    plate.StudsOffsetWorldSpace = Vector3.new(0, 1.72, 0)
-    plate.MaxDistance = 52
-    plate.Parent = head
-    local text = Instance.new("TextLabel")
-    text.Size = UDim2.fromScale(1, 1)
-    text.BackgroundColor3 = Color3.fromRGB(24, 28, 30)
+    text.BackgroundColor3 = spec.BackgroundColor or Color3.fromRGB(27, 24, 22)
     text.BackgroundTransparency = 0.15
-    text.Text = "TAMSIN · EASTWORKS ENGINEER"
-    text.TextColor3 = Color3.fromRGB(191, 229, 238)
-    text.TextStrokeTransparency = 0.35
-    text.Font = Enum.Font.GothamBold
-    text.TextScaled = true
-    text.Parent = plate
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 7)
-    corner.Parent = text
-    local edge = Instance.new("UIStroke")
-    edge.Color = Color3.fromRGB(91, 142, 153)
-    edge.Transparency = 0.28
-    edge.Parent = text
-
-    model.PrimaryPart = root
-    WorldObjectService.Register(model, "Npc", "eastworks_engineer")
-    local prompt = Instance.new("ProximityPrompt")
-    prompt.ActionText = "Talk"
-    prompt.ObjectText = "Tamsin · Eastworks Engineer"
-    prompt.KeyboardKeyCode = Enum.KeyCode.E
-    prompt.MaxActivationDistance = 11
-    prompt.RequiresLineOfSight = false
-    prompt.Parent = root
-    prompt.Triggered:Connect(function(player)
-        InteractionService.Begin(player, "eastworks_engineer", model)
-    end)
-end
-
-local function makeBelforgeMarshal(parent, position)
-    local model = Instance.new("Model")
-    model.Name = "belforge_marshal"
-    model.Parent = parent
-    local base = CFrame.new(position) * CFrame.Angles(0, math.rad(150), 0)
-
-    local function bodyPart(name, size, offset, material, color)
-        local part = makePart(model, name, size, base * CFrame.new(offset), material, color)
-        part.CanCollide = false
-        part.CanTouch = false
-        return part
-    end
-
-    local root = bodyPart(
-        "HumanoidRootPart",
-        Vector3.new(2, 6.6, 1.8),
-        Vector3.new(0, 3.3, 0),
-        Enum.Material.SmoothPlastic,
-        Color3.new(0, 0, 0)
-    )
-    root.Transparency = 1
-    bodyPart(
-        "Torso",
-        Vector3.new(2.65, 2.7, 1.55),
-        Vector3.new(0, 3.95, 0),
-        Enum.Material.Fabric,
-        Color3.fromRGB(54, 57, 59)
-    )
-    bodyPart(
-        "MarshalCoat",
-        Vector3.new(2.35, 2.5, 0.16),
-        Vector3.new(0, 3.7, -0.86),
-        Enum.Material.Fabric,
-        Color3.fromRGB(103, 69, 47)
-    )
-    for _, side in { -1, 1 } do
-        bodyPart(
-            side < 0 and "LeftLeg" or "RightLeg",
-            Vector3.new(0.82, 2.5, 0.88),
-            Vector3.new(side * 0.6, 1.45, 0),
-            Enum.Material.Fabric,
-            Color3.fromRGB(45, 47, 48)
-        )
-        bodyPart(
-            side < 0 and "LeftArm" or "RightArm",
-            Vector3.new(0.75, 2.25, 0.8),
-            Vector3.new(side * 1.62, 3.9, 0),
-            Enum.Material.Fabric,
-            Color3.fromRGB(54, 57, 59)
-        )
-    end
-    local head = bodyPart(
-        "Head",
-        Vector3.new(1.72, 1.72, 1.62),
-        Vector3.new(0, 5.9, 0),
-        Enum.Material.SmoothPlastic,
-        Color3.fromRGB(187, 147, 113)
-    )
-    bodyPart(
-        "MarshalHelm",
-        Vector3.new(2.0, 0.62, 1.9),
-        Vector3.new(0, 6.62, 0),
-        Enum.Material.Metal,
-        Color3.fromRGB(74, 72, 68)
-    )
-    local badge = bodyPart(
-        "MarshalBadge",
-        Vector3.new(0.62, 0.62, 0.12),
-        Vector3.new(0.72, 4.35, -0.84),
-        Enum.Material.Metal,
-        Color3.fromRGB(217, 164, 76)
-    )
-    badge.CFrame *= CFrame.Angles(0, 0, math.rad(45))
-
-    local plate = Instance.new("BillboardGui")
-    plate.Size = UDim2.fromOffset(235, 34)
-    plate.StudsOffsetWorldSpace = Vector3.new(0, 1.78, 0)
-    plate.MaxDistance = 52
-    plate.Parent = head
-    local text = Instance.new("TextLabel")
-    text.Size = UDim2.fromScale(1, 1)
-    text.BackgroundColor3 = Color3.fromRGB(27, 24, 22)
-    text.BackgroundTransparency = 0.14
-    text.Text = "ROOK · BELFORGE MARSHAL"
-    text.TextColor3 = Color3.fromRGB(238, 203, 137)
+    text.Text = string.upper(spec.DisplayName)
+    text.TextColor3 = spec.TextColor or Color3.fromRGB(238, 203, 137)
     text.TextStrokeTransparency = 0.34
     text.Font = Enum.Font.GothamBold
     text.TextScaled = true
@@ -608,22 +221,152 @@ local function makeBelforgeMarshal(parent, position)
     corner.CornerRadius = UDim.new(0, 7)
     corner.Parent = text
     local edge = Instance.new("UIStroke")
-    edge.Color = Color3.fromRGB(160, 109, 57)
-    edge.Transparency = 0.25
+    edge.Color = spec.StrokeColor
+        or (spec.Palette and spec.Palette.Accent)
+        or Color3.fromRGB(160, 109, 57)
+    edge.Transparency = 0.26
     edge.Parent = text
 
-    model.PrimaryPart = root
-    WorldObjectService.Register(model, "Npc", "belforge_marshal")
+    WorldObjectService.Register(model, "Npc", spec.NpcId)
     local prompt = Instance.new("ProximityPrompt")
-    prompt.ActionText = "Talk"
-    prompt.ObjectText = "Rook · Belforge Marshal"
+    prompt.ActionText = spec.ActionText or "Talk"
+    prompt.ObjectText = spec.PromptText or spec.DisplayName
     prompt.KeyboardKeyCode = Enum.KeyCode.E
     prompt.MaxActivationDistance = 11
     prompt.RequiresLineOfSight = false
     prompt.Parent = root
     prompt.Triggered:Connect(function(player)
-        InteractionService.Begin(player, "belforge_marshal", model)
+        InteractionService.Begin(player, spec.NpcId, model)
     end)
+    return model
+end
+
+local function makeForeman(parent, position)
+    return makeBrasshavenNpc(parent, {
+        NpcId = "belforge_foreman",
+        DisplayName = "Vale · Belforge Foreman",
+        PromptText = "Vale · Belforge Foreman",
+        Position = position,
+        Yaw = math.rad(-90),
+        VisualRole = "Quartermaster",
+        HairStyle = "short",
+        Build = 1.08,
+        HeightScale = 1.02,
+        Palette = {
+            Cloth = Color3.fromRGB(82, 69, 57),
+            DarkCloth = Color3.fromRGB(54, 53, 51),
+            Accent = Color3.fromRGB(141, 98, 52),
+            Skin = Color3.fromRGB(204, 165, 128),
+            Hair = Color3.fromRGB(73, 50, 35),
+            EyeColor = Color3.fromRGB(75, 62, 48),
+            Leather = Color3.fromRGB(91, 61, 39),
+            Metal = Color3.fromRGB(154, 109, 57),
+        },
+        TextColor = Color3.fromRGB(237, 209, 154),
+        StrokeColor = Color3.fromRGB(141, 98, 52),
+    })
+end
+
+local function makeFoundryVendor(parent, npcId, displayName, position, palette)
+    local model = makeBrasshavenNpc(parent, {
+        NpcId = npcId,
+        DisplayName = displayName,
+        PromptText = displayName,
+        ActionText = "Trade",
+        Position = position,
+        Yaw = math.rad(180),
+        VisualRole = "Quartermaster",
+        HairStyle = if npcId == "belforge_mark_broker" then "bun" else "short",
+        Build = if npcId == "belforge_mark_broker" then 0.96 else 1.02,
+        Palette = {
+            Cloth = palette.Cloth,
+            DarkCloth = palette.Cloth:Lerp(Color3.new(0, 0, 0), 0.3),
+            Accent = palette.Accent,
+            Skin = palette.Skin,
+            Hair = if npcId == "belforge_mark_broker"
+                then Color3.fromRGB(69, 52, 43)
+                else Color3.fromRGB(91, 63, 42),
+            EyeColor = Color3.fromRGB(65, 58, 50),
+            Leather = Color3.fromRGB(82, 57, 39),
+            Metal = palette.Accent,
+        },
+        TextColor = palette.Text,
+        StrokeColor = palette.Accent,
+    })
+    if not model then
+        return nil
+    end
+    local counterBase = CFrame.new(position) * CFrame.Angles(0, math.rad(180), 0)
+    local counter = makePart(
+        model,
+        "Counter",
+        Vector3.new(7, 2.6, 2.6),
+        counterBase * CFrame.new(0, 1.3, -3.6),
+        Enum.Material.WoodPlanks,
+        Color3.fromRGB(79, 60, 44)
+    )
+    counter.CanCollide = true
+    makePart(
+        model,
+        "CounterTrim",
+        Vector3.new(7.2, 0.28, 2.8),
+        counterBase * CFrame.new(0, 2.72, -3.6),
+        Enum.Material.Metal,
+        palette.Accent
+    ).CanCollide =
+        false
+    return model
+end
+
+local function makeEastworksEngineer(parent, position)
+    return makeBrasshavenNpc(parent, {
+        NpcId = "eastworks_engineer",
+        DisplayName = "Tamsin · Eastworks Engineer",
+        PromptText = "Tamsin · Eastworks Engineer",
+        Position = position,
+        Yaw = math.rad(165),
+        VisualRole = "Archivist",
+        HairStyle = "bun",
+        Build = 0.96,
+        Palette = {
+            Cloth = Color3.fromRGB(66, 73, 77),
+            DarkCloth = Color3.fromRGB(48, 52, 54),
+            Accent = Color3.fromRGB(92, 117, 127),
+            Skin = Color3.fromRGB(202, 166, 132),
+            Hair = Color3.fromRGB(67, 52, 45),
+            EyeColor = Color3.fromRGB(70, 91, 97),
+            Leather = Color3.fromRGB(77, 58, 43),
+            Metal = Color3.fromRGB(154, 104, 54),
+        },
+        TextColor = Color3.fromRGB(191, 229, 238),
+        StrokeColor = Color3.fromRGB(91, 142, 153),
+    })
+end
+
+local function makeBelforgeMarshal(parent, position)
+    return makeBrasshavenNpc(parent, {
+        NpcId = "belforge_marshal",
+        DisplayName = "Rook · Belforge Marshal",
+        PromptText = "Rook · Belforge Marshal",
+        Position = position,
+        Yaw = math.rad(150),
+        VisualRole = "Scout",
+        HairStyle = "short",
+        Build = 1.09,
+        HeightScale = 1.05,
+        Palette = {
+            Cloth = Color3.fromRGB(54, 57, 59),
+            DarkCloth = Color3.fromRGB(45, 47, 48),
+            Accent = Color3.fromRGB(160, 109, 57),
+            Skin = Color3.fromRGB(187, 147, 113),
+            Hair = Color3.fromRGB(54, 45, 38),
+            EyeColor = Color3.fromRGB(79, 66, 50),
+            Leather = Color3.fromRGB(84, 58, 39),
+            Metal = Color3.fromRGB(217, 164, 76),
+        },
+        TextColor = Color3.fromRGB(238, 203, 137),
+        StrokeColor = Color3.fromRGB(160, 109, 57),
+    })
 end
 
 local function makeBelforgeGate(parent, position)
@@ -735,114 +478,31 @@ local function makeBelforgeGate(parent, position)
 end
 
 local function makeBelforgeOathkeeper(parent, position)
-    local model = Instance.new("Model")
-    model.Name = "belforge_oathkeeper"
-    model.Parent = parent
-    local base = CFrame.new(position) * CFrame.Angles(0, math.rad(-90), 0)
-
-    local function bodyPart(name, size, offset, material, color)
-        local part = makePart(model, name, size, base * CFrame.new(offset), material, color)
-        part.CanCollide = false
-        part.CanTouch = false
-        return part
-    end
-
-    local root = bodyPart(
-        "HumanoidRootPart",
-        Vector3.new(2, 6.5, 1.8),
-        Vector3.new(0, 3.25, 0),
-        Enum.Material.SmoothPlastic,
-        Color3.new(0, 0, 0)
-    )
-    root.Transparency = 1
-    bodyPart(
-        "Torso",
-        Vector3.new(2.5, 2.6, 1.5),
-        Vector3.new(0, 3.9, 0),
-        Enum.Material.Fabric,
-        Color3.fromRGB(58, 48, 45)
-    )
-    bodyPart(
-        "OathMantle",
-        Vector3.new(2.8, 0.7, 1.8),
-        Vector3.new(0, 4.75, 0),
-        Enum.Material.Fabric,
-        Color3.fromRGB(142, 90, 53)
-    )
-    for _, side in { -1, 1 } do
-        bodyPart(
-            side < 0 and "LeftLeg" or "RightLeg",
-            Vector3.new(0.8, 2.45, 0.86),
-            Vector3.new(side * 0.58, 1.42, 0),
-            Enum.Material.Fabric,
-            Color3.fromRGB(43, 42, 42)
-        )
-        bodyPart(
-            side < 0 and "LeftArm" or "RightArm",
-            Vector3.new(0.72, 2.2, 0.78),
-            Vector3.new(side * 1.55, 3.78, 0),
-            Enum.Material.Fabric,
-            Color3.fromRGB(58, 48, 45)
-        )
-    end
-    local head = bodyPart(
-        "Head",
-        Vector3.new(1.7, 1.7, 1.6),
-        Vector3.new(0, 5.75, 0),
-        Enum.Material.SmoothPlastic,
-        Color3.fromRGB(194, 154, 121)
-    )
-    bodyPart(
-        "OathBand",
-        Vector3.new(1.85, 0.22, 1.7),
-        Vector3.new(0, 6.22, 0),
-        Enum.Material.Metal,
-        Color3.fromRGB(190, 132, 60)
-    )
-    local seal = bodyPart(
-        "OathSeal",
-        Vector3.new(0.55, 0.55, 0.12),
-        Vector3.new(0.72, 4.3, -0.84),
-        Enum.Material.Neon,
-        Color3.fromRGB(231, 152, 73)
-    )
-    seal.CFrame *= CFrame.Angles(0, 0, math.rad(45))
-
-    local plate = Instance.new("BillboardGui")
-    plate.Size = UDim2.fromOffset(240, 34)
-    plate.StudsOffsetWorldSpace = Vector3.new(0, 1.75, 0)
-    plate.MaxDistance = 48
-    plate.Parent = head
-    local text = Instance.new("TextLabel")
-    text.Size = UDim2.fromScale(1, 1)
-    text.BackgroundColor3 = Color3.fromRGB(27, 22, 21)
-    text.BackgroundTransparency = 0.14
-    text.Text = "MARA · FORGE OATHKEEPER"
-    text.TextColor3 = Color3.fromRGB(245, 207, 145)
-    text.TextStrokeTransparency = 0.34
-    text.Font = Enum.Font.GothamBold
-    text.TextScaled = true
-    text.Parent = plate
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 7)
-    corner.Parent = text
-    local edge = Instance.new("UIStroke")
-    edge.Color = Color3.fromRGB(166, 104, 56)
-    edge.Transparency = 0.26
-    edge.Parent = text
-
-    model.PrimaryPart = root
-    WorldObjectService.Register(model, "Npc", "belforge_oathkeeper")
-    local prompt = Instance.new("ProximityPrompt")
-    prompt.ActionText = "Speak Oath"
-    prompt.ObjectText = "Mara · Forge Oathkeeper"
-    prompt.KeyboardKeyCode = Enum.KeyCode.E
-    prompt.MaxActivationDistance = 11
-    prompt.RequiresLineOfSight = false
-    prompt.Parent = root
-    prompt.Triggered:Connect(function(player)
-        InteractionService.Begin(player, "belforge_oathkeeper", model)
-    end)
+    return makeBrasshavenNpc(parent, {
+        NpcId = "belforge_oathkeeper",
+        DisplayName = "Mara · Forge Oathkeeper",
+        PromptText = "Mara · Forge Oathkeeper",
+        ActionText = "Speak Oath",
+        Position = position,
+        Yaw = math.rad(-90),
+        VisualRole = "Mentor",
+        HairStyle = "long",
+        Build = 1.0,
+        HeightScale = 1.02,
+        Palette = {
+            Cloth = Color3.fromRGB(58, 48, 45),
+            DarkCloth = Color3.fromRGB(43, 42, 42),
+            Accent = Color3.fromRGB(166, 104, 56),
+            Skin = Color3.fromRGB(194, 154, 121),
+            Hair = Color3.fromRGB(83, 59, 47),
+            EyeColor = Color3.fromRGB(94, 68, 52),
+            Leather = Color3.fromRGB(82, 58, 38),
+            Metal = Color3.fromRGB(190, 132, 60),
+            Lumen = Color3.fromRGB(231, 152, 73),
+        },
+        TextColor = Color3.fromRGB(245, 207, 145),
+        StrokeColor = Color3.fromRGB(166, 104, 56),
+    })
 end
 
 local function makeBelforgeAntechamber(parent)

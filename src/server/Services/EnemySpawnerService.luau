@@ -5,6 +5,7 @@ local MonsterConfig = require(script.Parent.Parent.Content.MonsterConfig)
 local EnemyAIService = require(script.Parent.EnemyAIService)
 local EnemyService = require(script.Parent.EnemyService)
 local MonsterTemplateService = require(script.Parent.MonsterTemplateService)
+local WorldGroundingService = require(script.Parent.WorldGroundingService)
 
 local EnemySpawnerService = {}
 
@@ -26,6 +27,16 @@ function EnemySpawnerService.Spawn(enemyIdOrTemplate, position, parent, options)
     enemy:SetAttribute("MonsterEmerging", options.Emerging == true)
     enemy:PivotTo(CFrame.new(position))
     enemy.Parent = parent or Workspace
+    if options.GroundToTerrain == true and options.Emerging ~= true then
+        local grounded, groundReason = WorldGroundingService.GroundModel(enemy, position, {
+            Clearance = options.GroundClearance,
+            IgnoreWater = true,
+        })
+        if not grounded then
+            enemy:Destroy()
+            return nil, groundReason
+        end
+    end
 
     local root = enemy:FindFirstChild("HumanoidRootPart")
     if root and root:IsA("BasePart") then

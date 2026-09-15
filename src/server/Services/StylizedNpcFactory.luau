@@ -600,7 +600,7 @@ local function measuredFootBottomWorldY(model)
     return lowest
 end
 
-local function groundModel(model, requestedPosition, yaw)
+local function groundModel(model, requestedPosition, yaw, groundMode)
     local root = bodyPart(model, "HumanoidRootPart")
     local humanoid = model:FindFirstChildOfClass("Humanoid")
     if not root or not humanoid then
@@ -622,14 +622,14 @@ local function groundModel(model, requestedPosition, yaw)
 
     local rayParams = RaycastParams.new()
     local terrain = Workspace:FindFirstChildOfClass("Terrain")
-    if terrain then
-        rayParams.FilterType = Enum.RaycastFilterType.Include
-        rayParams.FilterDescendantsInstances = { terrain }
-    else
+    if groundMode == "World" or not terrain then
         rayParams.FilterType = Enum.RaycastFilterType.Exclude
         rayParams.FilterDescendantsInstances = { model }
+    else
+        rayParams.FilterType = Enum.RaycastFilterType.Include
+        rayParams.FilterDescendantsInstances = { terrain }
     end
-    rayParams.IgnoreWater = false
+    rayParams.IgnoreWater = groundMode == "World"
 
     local rayOrigin =
         Vector3.new(requestedPosition.X, requestedPosition.Y + 100, requestedPosition.Z)
@@ -704,7 +704,7 @@ function StylizedNpcFactory.Create(parent, spec)
     makeFace(head, palette, spec.Role)
     makeHair(model, head, palette, spec.HairStyle or "short")
     addClothingLayers(model, spec, palette)
-    groundModel(model, spec.Position, spec.Yaw or 0)
+    groundModel(model, spec.Position, spec.Yaw or 0, spec.GroundMode)
     startIdleAnimation(model)
     model.PrimaryPart = root
     return model, root, head

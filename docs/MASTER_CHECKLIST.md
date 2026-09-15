@@ -57,6 +57,8 @@
 - [x] Production-oriented trees, ferns, deadwood, rock faces, mossy rock sets, stumps, roots, logs, mushrooms, cattails, and waystones integrated.
 - [x] Oversized/unintegrated cliff meshes and black stacked-rock formations corrected and blended into terrain.
 - [x] Starter camp rebuilt with larger tents, proper supplies, map table, benches, lanterns, signpost, and custom guide/NPC composition.
+- [x] Production NPC grounding is shared and runtime-resolved: Lumenreach R15 NPCs use terrain foot grounding, Brasshaven named NPCs use world-floor grounding, and the old Brasshaven primitive body builders are removed.
+- [x] Static enemy grounding is explicit and build-guarded: the training dummy uses measured model-to-terrain grounding, and `check.sh` rejects new direct enemy spawns that omit terrain grounding.
 - [x] Lumenreach camp NPCs now use grounded R15 humanoid rigs with distinct role silhouettes, clothing layers, face/hair treatment, props, idle animation support, and terrain-only foot grounding; Studio visual QA remains.
 - [x] Lumenreach NPC visual overhaul is source-complete: Ilyra, Orin, Tovin, Maela, and Seren now use a reusable stylized-character factory with rounded segmented limbs, unique hair/build silhouettes, layered clothing, and role-specific props; Studio visual QA remains.
 - [x] World density pass added continuous forest bands, roadside clusters, undergrowth, deadwood, rocks, and landmark dressing.
