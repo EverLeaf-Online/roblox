@@ -8,6 +8,7 @@ local InventoryService = require(script.Parent.InventoryService)
 local PBRMaterialService = require(script.Parent.PBRMaterialService)
 local PlayerDataService = require(script.Parent.PlayerDataService)
 local QuestService = require(script.Parent.QuestService)
+local StylizedNpcFactory = require(script.Parent.StylizedNpcFactory)
 local PortalService = require(script.Parent.PortalService)
 local WorldNoticeService = require(script.Parent.WorldNoticeService)
 local WorldObjectService = require(script.Parent.WorldObjectService)
@@ -71,6 +72,71 @@ local GORGE_POINTS = table.freeze({
 local BRIDGE_WEST = Vector3.new(-45, 3.3, 57)
 local BRIDGE_EAST = Vector3.new(26, 2.8, 50)
 
+local TRAVEL_ROUTE_SEGMENTS = {}
+local function addTravelPolyline(points)
+    for index = 1, #points - 1 do
+        table.insert(TRAVEL_ROUTE_SEGMENTS, { points[index], points[index + 1] })
+    end
+end
+
+addTravelPolyline(OPENING_ROUTE_POINTS)
+addTravelPolyline(PROVING_SPUR_POINTS)
+addTravelPolyline({ Vector3.new(-241, 1.4, 118), Vector3.new(-226, 1.5, 123) })
+addTravelPolyline({
+    WORLD_ZONES.Crossroads,
+    Vector3.new(-145, 4.0, 70),
+    Vector3.new(-112, 3.8, 64),
+    BRIDGE_WEST,
+    BRIDGE_EAST,
+    Vector3.new(58, 2.8, 38),
+})
+addTravelPolyline({
+    Vector3.new(58, 2.8, 38),
+    Vector3.new(82, 3.0, 5),
+    WORLD_ZONES.Ruins + Vector3.new(-30, 0, 18),
+})
+addTravelPolyline({
+    Vector3.new(58, 2.8, 38),
+    Vector3.new(105, 2.0, 78),
+    Vector3.new(168, 1.5, 112),
+    WORLD_ZONES.CombatGrove + Vector3.new(-45, 0, -5),
+})
+addTravelPolyline({
+    WORLD_ZONES.Crossroads + Vector3.new(0, 0, 15),
+    Vector3.new(-157, 3.4, 128),
+    Vector3.new(-132, 2.5, 174),
+    Vector3.new(-103, 1.4, 220),
+    WORLD_ZONES.Glowmere + Vector3.new(-22, 0, -7),
+})
+addTravelPolyline({
+    WORLD_ZONES.Crossroads + Vector3.new(-12, 0, -12),
+    Vector3.new(-208, 3.0, 42),
+    Vector3.new(-239, 1.5, 5),
+    Vector3.new(-273, -0.5, -55),
+    Vector3.new(-292, -2.3, -111),
+    WORLD_ZONES.Waterfall + Vector3.new(24, 0, 30),
+})
+addTravelPolyline({
+    WORLD_ZONES.Glowmere + Vector3.new(48, 0, -2),
+    Vector3.new(38, 0.5, 252),
+    Vector3.new(112, 0.8, 220),
+    Vector3.new(185, 1.0, 178),
+    WORLD_ZONES.CombatGrove + Vector3.new(-38, 0, 32),
+})
+addTravelPolyline({
+    WORLD_ZONES.Ruins + Vector3.new(20, 0, -25),
+    Vector3.new(178, 5.2, -132),
+    Vector3.new(219, 7.8, -174),
+    Vector3.new(257, 10.0, -210),
+    WORLD_ZONES.Overlook + Vector3.new(-20, 0, 15),
+})
+addTravelPolyline({
+    WORLD_ZONES.Overlook + Vector3.new(28, 0, 22),
+    Vector3.new(327, 8.0, -168),
+    Vector3.new(330, 4.0, -70),
+    WORLD_ZONES.CombatGrove + Vector3.new(42, 0, -45),
+})
+
 local function makePart(parent, name, size, cframe, material, color)
     local part = Instance.new("Part")
     part.Name = name
@@ -129,196 +195,55 @@ local function prefabScaleForLongest(prefabName, targetLongest, multiplier)
     return (targetLongest / longest) * multiplier
 end
 
+local TREE_VARIANT_COUNT = 12
+
+local function chooseTreePrefab(variant)
+    variant = math.max(1, math.floor(tonumber(variant) or 1))
+    local startIndex = ((variant - 1) % TREE_VARIANT_COUNT) + 1
+    for offset = 0, TREE_VARIANT_COUNT - 1 do
+        local index = ((startIndex + offset - 1) % TREE_VARIANT_COUNT) + 1
+        local name = "ForestTree" .. string.format("%02d", index)
+        if EnvironmentPrefabService.Get(name) then
+            return name
+        end
+    end
+    if EnvironmentPrefabService.Get("TreePrimary") then
+        return "TreePrimary"
+    end
+    return nil
+end
+
+local function placeImportedTree(parent, position, scale, variant, targetHeight, yaw)
+    local prefabName = chooseTreePrefab(variant)
+    if not prefabName then
+        -- Production policy: missing visual assets must never degrade into
+        -- placeholder sphere trees. Skip the placement and emit one warning.
+        if not LumenreachWorldService._warnedMissingTreePrefab then
+            LumenreachWorldService._warnedMissingTreePrefab = true
+            warn(
+                "[LumenreachWorldService] No approved tree prefab available; skipping tree placements"
+            )
+        end
+        return nil
+    end
+
+    return EnvironmentPrefabService.Place(
+        prefabName,
+        parent,
+        CFrame.new(position) * CFrame.Angles(0, yaw or 0, 0),
+        prefabScaleForHeight(prefabName, targetHeight, scale)
+    )
+end
+
 local function makeTree(parent, position, scale, variant)
     variant = variant or 1
-    local prefabYaw = math.rad((variant * 47) % 360)
-    local prefab = EnvironmentPrefabService.Place(
-        "TreePrimary",
-        parent,
-        CFrame.new(position) * CFrame.Angles(0, prefabYaw, 0),
-        prefabScaleForHeight("TreePrimary", 22, scale)
-    )
-    if prefab then
-        return prefab
-    end
-
-    local model = Instance.new("Model")
-    model.Name = "LumenTree"
-    model.Parent = parent
-
-    variant = variant or 1
-    local trunkColor = if variant == 2
-        then Color3.fromRGB(72, 49, 34)
-        else if variant == 3 then Color3.fromRGB(88, 61, 40) else Color3.fromRGB(78, 55, 39)
-    local leafPalette = {
-        Color3.fromRGB(49, 92, 54),
-        Color3.fromRGB(60, 111, 61),
-        Color3.fromRGB(72, 126, 66),
-        Color3.fromRGB(84, 139, 72),
-    }
-
-    local trunkLower = makePart(
-        model,
-        "TrunkLower",
-        Vector3.new(2.8, 6.5, 2.8) * scale,
-        CFrame.new(position + Vector3.new(0, 3.25 * scale, 0))
-            * CFrame.Angles(math.rad(variant - 2), math.rad(variant * 11), math.rad(2 - variant)),
-        Enum.Material.Wood,
-        trunkColor
-    )
-    local trunkUpper = makePart(
-        model,
-        "TrunkUpper",
-        Vector3.new(2.1, 6.8, 2.1) * scale,
-        CFrame.new(position + Vector3.new(0.35 * scale, 9.2 * scale, 0.15 * scale))
-            * CFrame.Angles(math.rad(-2), math.rad(variant * 17), math.rad(3)),
-        Enum.Material.Wood,
-        trunkColor
-    )
-
-    local branchSpecs = {
-        { Vector3.new(0.4, 10.3, 0), Vector3.new(4.8, 13.1, -1.8), 0.65 },
-        { Vector3.new(0.1, 9.6, 0.2), Vector3.new(-4.2, 12.3, 1.5), 0.58 },
-        { Vector3.new(0.4, 11.1, 0.1), Vector3.new(1.8, 14.7, 3.8), 0.5 },
-    }
-    if variant == 2 then
-        branchSpecs[1][2] = Vector3.new(5.4, 12.2, 2.5)
-        branchSpecs[2][2] = Vector3.new(-3.4, 13.6, -2.8)
-    elseif variant == 3 then
-        branchSpecs[3][2] = Vector3.new(-1.5, 15.4, 4.3)
-    end
-
-    for index, spec in branchSpecs do
-        local a = position + spec[1] * scale
-        local b = position + spec[2] * scale
-        local delta = b - a
-        local branch = makePart(
-            model,
-            "Branch" .. index,
-            Vector3.new(0.9, 0.9, delta.Magnitude) * Vector3.new(scale, scale, 1),
-            CFrame.lookAt((a + b) * 0.5, b),
-            Enum.Material.Wood,
-            trunkColor
-        )
-        branch.CanCollide = false
-    end
-
-    local lobes = {
-        { Vector3.new(-3.8, 13.0, 0.9), Vector3.new(6.8, 5.4, 6.4), 1 },
-        { Vector3.new(3.6, 13.6, -1.2), Vector3.new(7.1, 5.8, 6.7), 2 },
-        { Vector3.new(0.2, 16.2, 1.2), Vector3.new(7.8, 6.1, 7.2), 3 },
-        { Vector3.new(-1.9, 15.0, -3.1), Vector3.new(5.7, 4.8, 5.6), 2 },
-        { Vector3.new(2.8, 16.4, 3.0), Vector3.new(5.4, 4.6, 5.2), 4 },
-        { Vector3.new(0.7, 18.7, -0.6), Vector3.new(5.5, 4.8, 5.3), 3 },
-    }
-    if variant == 2 then
-        lobes[1][1] = Vector3.new(-4.5, 12.7, -1.8)
-        lobes[3][1] = Vector3.new(0.8, 16.8, 0)
-    elseif variant == 3 then
-        lobes[2][1] = Vector3.new(4.2, 14.2, 1.8)
-        lobes[5][1] = Vector3.new(-2.9, 17.0, 3.4)
-    end
-
-    for index, spec in lobes do
-        local leaf = makeBall(
-            model,
-            "Canopy" .. index,
-            spec[2] * scale,
-            CFrame.new(position + spec[1] * scale),
-            FOLIAGE_MATERIAL,
-            leafPalette[spec[3]]
-        )
-        leaf.CanCollide = false
-        CollectionService:AddTag(leaf, "EverLeafWindSway")
-    end
-
-    model.PrimaryPart = trunkLower
-    trunkUpper.CanCollide = true
-    return model
+    return placeImportedTree(parent, position, scale, variant, 22, math.rad((variant * 47) % 360))
 end
 
 local function makeCanopyTree(parent, position, scale, yaw)
-    local model = Instance.new("Model")
-    model.Name = "LumenCanopyTree"
-    model.Parent = parent
-
-    scale = scale or 1
     yaw = yaw or 0
-    local base = CFrame.new(position) * CFrame.Angles(0, yaw, 0)
-    local bark = Color3.fromRGB(70, 49, 35)
-    local barkLight = Color3.fromRGB(83, 58, 39)
-    local leafColors = {
-        Color3.fromRGB(45, 87, 52),
-        Color3.fromRGB(54, 104, 58),
-        Color3.fromRGB(67, 119, 63),
-        Color3.fromRGB(78, 132, 68),
-    }
-
-    local lower = makePart(
-        model,
-        "TrunkLower",
-        Vector3.new(3.0, 8.2, 3.0) * scale,
-        base * CFrame.new(0, 4.1 * scale, 0) * CFrame.Angles(math.rad(1), 0, math.rad(-2)),
-        Enum.Material.Wood,
-        bark
-    )
-    local upper = makePart(
-        model,
-        "TrunkUpper",
-        Vector3.new(2.2, 7.8, 2.2) * scale,
-        base
-            * CFrame.new(0.45 * scale, 11.6 * scale, 0.15 * scale)
-            * CFrame.Angles(math.rad(-3), math.rad(8), math.rad(4)),
-        Enum.Material.Wood,
-        barkLight
-    )
-
-    local branchEnds = {
-        Vector3.new(5.3, 14.0, -1.5),
-        Vector3.new(-4.8, 13.5, 1.8),
-        Vector3.new(2.7, 15.5, 4.2),
-        Vector3.new(-2.3, 16.0, -4.0),
-    }
-    for index, localEnd in branchEnds do
-        local a = (base * CFrame.new(0.2 * scale, 10.5 * scale, 0)).Position
-        local b = (base * CFrame.new(localEnd * scale)).Position
-        local delta = b - a
-        local branch = makePart(
-            model,
-            "CanopyBranch" .. index,
-            Vector3.new(0.72 * scale, 0.72 * scale, delta.Magnitude),
-            CFrame.lookAt((a + b) * 0.5, b),
-            Enum.Material.Wood,
-            bark
-        )
-        branch.CanCollide = false
-    end
-
-    local lobes = {
-        { Vector3.new(-4.4, 15.0, -0.8), Vector3.new(8.2, 6.4, 7.6), 1 },
-        { Vector3.new(4.1, 15.4, -1.2), Vector3.new(8.6, 6.8, 7.8), 2 },
-        { Vector3.new(-1.2, 18.5, 0.7), Vector3.new(9.2, 7.2, 8.5), 3 },
-        { Vector3.new(2.6, 17.5, 4.0), Vector3.new(7.4, 6.1, 7.2), 4 },
-        { Vector3.new(-3.0, 17.1, -4.0), Vector3.new(7.5, 6.0, 7.0), 2 },
-        { Vector3.new(0.4, 21.0, -1.2), Vector3.new(7.2, 5.8, 6.8), 3 },
-    }
-    for index, spec in lobes do
-        local leaf = makeBall(
-            model,
-            "CanopyMass" .. index,
-            spec[2] * scale,
-            base * CFrame.new(spec[1] * scale),
-            FOLIAGE_MATERIAL,
-            leafColors[spec[3]]
-        )
-        leaf.CanCollide = false
-        CollectionService:AddTag(leaf, "EverLeafWindSway")
-    end
-
-    lower.CanCollide = true
-    upper.CanCollide = true
-    model.PrimaryPart = lower
-    return model
+    local variant = (math.abs(math.floor(yaw * 1000)) % TREE_VARIANT_COUNT) + 1
+    return placeImportedTree(parent, position, scale or 1, variant, 30, yaw)
 end
 
 local function makeFallenLog(parent, position, yaw, scale, variant)
@@ -332,34 +257,7 @@ local function makeFallenLog(parent, position, yaw, scale, variant)
     if prefab then
         return prefab
     end
-
-    local model = Instance.new("Model")
-    model.Name = "FallenLog"
-    model.Parent = parent
-    local base = CFrame.new(position) * CFrame.Angles(0, yaw, math.rad(6))
-    local bark = Color3.fromRGB(70, 49, 34)
-    makePart(
-        model,
-        "Log",
-        Vector3.new(1.9, 1.7, 9) * scale,
-        base * CFrame.new(0, 0.9 * scale, 0),
-        Enum.Material.Wood,
-        bark
-    )
-    for _, z in { -3.1, 2.3 } do
-        local branch = makePart(
-            model,
-            "BrokenBranch",
-            Vector3.new(0.55, 0.55, 3.2) * scale,
-            base
-                * CFrame.new(0.4 * scale, 1.35 * scale, z * scale)
-                * CFrame.Angles(math.rad(35), math.rad(28), 0),
-            Enum.Material.Wood,
-            bark
-        )
-        branch.CanCollide = false
-    end
-    return model
+    return nil
 end
 
 local function makeStump(parent, position, scale, variant)
@@ -373,29 +271,7 @@ local function makeStump(parent, position, scale, variant)
     if prefab then
         return prefab
     end
-
-    local model = Instance.new("Model")
-    model.Name = "TreeStump"
-    model.Parent = parent
-    local stump = makePart(
-        model,
-        "Stump",
-        Vector3.new(2.6, 2.3, 2.6) * scale,
-        CFrame.new(position + Vector3.new(0, 1.15 * scale, 0))
-            * CFrame.Angles(0, math.rad(17), math.rad(4)),
-        Enum.Material.Wood,
-        Color3.fromRGB(76, 53, 36)
-    )
-    makeBall(
-        model,
-        "Moss",
-        Vector3.new(2.2, 0.65, 2.1) * scale,
-        stump.CFrame * CFrame.new(0, 1.0 * scale, 0),
-        FOLIAGE_MATERIAL,
-        Color3.fromRGB(63, 112, 63)
-    ).CanCollide =
-        false
-    return model
+    return nil
 end
 
 local function makePineRoots(parent, position, yaw, scale)
@@ -422,28 +298,7 @@ local function makeFern(parent, position, scale, yaw)
     if prefab then
         return prefab
     end
-
-    local model = Instance.new("Model")
-    model.Name = "LumenFern"
-    model.Parent = parent
-    local green = Color3.fromRGB(57, 112, 67)
-    for index = 1, 7 do
-        local angle = (index - 1) * (math.pi * 2 / 7)
-        local blade = makePart(
-            model,
-            "Frond" .. index,
-            Vector3.new(0.22, 0.42, 3.3) * scale,
-            CFrame.new(
-                position + Vector3.new(math.cos(angle) * 0.85, 0.72, math.sin(angle) * 0.85) * scale
-            ) * CFrame.Angles(math.rad(-20), -angle, math.rad(9)),
-            FOLIAGE_MATERIAL,
-            green
-        )
-        blade.CanCollide = false
-        blade.CastShadow = false
-        CollectionService:AddTag(blade, "EverLeafWindSway")
-    end
-    return model
+    return nil
 end
 
 local function makeFlowerPatch(parent, position, scale, warm)
@@ -499,37 +354,23 @@ local function makeRock(parent, position, size, rotation)
 end
 
 local function makeRockCluster(parent, position, scale, seed)
-    local model = Instance.new("Model")
-    model.Name = "RockCluster"
-    model.Parent = parent
-    local specs = {
-        { Vector3.new(0, 1.3, 0), Vector3.new(5.8, 3.1, 4.8), Vector3.new(0.12, 0.4, 0.08) },
-        { Vector3.new(3.1, 0.9, -1.4), Vector3.new(3.6, 2.2, 3.2), Vector3.new(0.2, -0.2, 0.18) },
-        { Vector3.new(-2.8, 0.7, 1.7), Vector3.new(2.9, 1.8, 3.5), Vector3.new(-0.1, 0.8, 0.12) },
-    }
-    for index, spec in specs do
-        local rock = makeRock(
-            model,
-            position + spec[1] * scale,
-            spec[2] * scale,
-            spec[3] + Vector3.new(0, (seed or 1) * index * 0.08, 0)
-        )
-        rock.Color = if index == 1
-            then Color3.fromRGB(104, 111, 108)
-            else Color3.fromRGB(119, 125, 120)
+    local yaw = math.rad(((seed or 1) * 47) % 360)
+    local prefab = EnvironmentPrefabService.Place(
+        "MossyRockSet",
+        parent,
+        CFrame.new(position) * CFrame.Angles(0, yaw, 0),
+        prefabScaleForLongest("MossyRockSet", 7.5, scale)
+    )
+    if prefab then
+        for _, descendant in prefab:GetDescendants() do
+            if descendant:IsA("BasePart") then
+                descendant.CanCollide = false
+                descendant.CanTouch = false
+            end
+        end
+        return prefab
     end
-    if seed and seed % 2 == 0 then
-        makeBall(
-            model,
-            "MossCap",
-            Vector3.new(3.8, 0.7, 3.2) * scale,
-            CFrame.new(position + Vector3.new(-0.4, 2.85, 0.2) * scale),
-            FOLIAGE_MATERIAL,
-            Color3.fromRGB(63, 106, 59)
-        ).CanCollide =
-            false
-    end
-    return model
+    return nil
 end
 
 local function setInstanceCollision(instance, enabled)
@@ -555,30 +396,7 @@ local function makeDryBranches(parent, position, yaw, scale)
         setInstanceCollision(prefab, false)
         return prefab
     end
-
-    local model = Instance.new("Model")
-    model.Name = "DryBranchesFallback"
-    model.Parent = parent
-    local base = CFrame.new(position) * CFrame.Angles(0, yaw, 0)
-    local branchColor = Color3.fromRGB(79, 58, 42)
-    for index, spec in
-        {
-            { Vector3.new(0, 0.28, 0), Vector3.new(0.28, 0.28, 5.8), math.rad(7) },
-            { Vector3.new(1.2, 0.35, -0.4), Vector3.new(0.22, 0.22, 4.2), math.rad(-24) },
-            { Vector3.new(-1.1, 0.32, 0.6), Vector3.new(0.2, 0.2, 3.6), math.rad(31) },
-        }
-    do
-        local branch = makePart(
-            model,
-            "Branch" .. index,
-            spec[2] * scale,
-            base * CFrame.new(spec[1] * scale) * CFrame.Angles(0, spec[3], math.rad(index * 3 - 5)),
-            Enum.Material.Wood,
-            branchColor
-        )
-        branch.CanCollide = false
-    end
-    return model
+    return nil
 end
 
 local function makeMossyRockSet(parent, position, yaw, scale)
@@ -592,7 +410,7 @@ local function makeMossyRockSet(parent, position, yaw, scale)
         setInstanceCollision(prefab, true)
         return prefab
     end
-    return makeRockCluster(parent, position, 0.9 * scale, math.max(1, math.floor(scale * 9)))
+    return nil
 end
 
 local function makeRockFace(parent, position, yaw, scale)
@@ -1006,25 +824,26 @@ local function makeGrassTuft(parent, position, scale)
     local model = Instance.new("Model")
     model.Name = "GrassTuft"
     model.Parent = parent
-
-    local color = Color3.fromRGB(74, 126, 68)
-    for index = 1, 3 do
-        local blade = makePart(
+    local placed = 0
+    for index, offset in
+        {
+            Vector3.new(-0.65, 0, 0.15),
+            Vector3.new(0.55, 0, -0.25),
+        }
+    do
+        local fern = makeFern(
             model,
-            "Blade" .. index,
-            Vector3.new(0.22, 2.6, 1.2) * scale,
-            CFrame.new(position + Vector3.new((index - 2) * 0.35 * scale, 1.2 * scale, 0))
-                * CFrame.Angles(
-                    math.rad(index * 6 - 12),
-                    math.rad(index * 53),
-                    math.rad(index * 7 - 14)
-                ),
-            FOLIAGE_MATERIAL,
-            color
+            position + offset * scale,
+            0.34 * scale,
+            math.rad(index * 83 + math.floor(position.X + position.Z) % 47)
         )
-        blade.CanCollide = false
-        blade.CastShadow = false
-        CollectionService:AddTag(blade, "EverLeafWindSway")
+        if fern then
+            placed += 1
+        end
+    end
+    if placed == 0 then
+        model:Destroy()
+        return nil
     end
     return model
 end
@@ -1033,25 +852,27 @@ local function makeBush(parent, position, scale)
     local model = Instance.new("Model")
     model.Name = "LumenBush"
     model.Parent = parent
-    local colors = {
-        Color3.fromRGB(61, 111, 63),
-        Color3.fromRGB(72, 126, 69),
-        Color3.fromRGB(82, 137, 75),
-    }
-    for index = 1, 5 do
-        local angle = index * math.pi * 0.4
-        local offset =
-            Vector3.new(math.cos(angle) * 1.25 * scale, 1.2 * scale, math.sin(angle) * 1.25 * scale)
-        local leaf = makeBall(
+    local placed = 0
+    for index, offset in
+        {
+            Vector3.new(-0.8, 0, 0.15),
+            Vector3.new(0.65, 0, 0.55),
+            Vector3.new(0.15, 0, -0.75),
+        }
+    do
+        local fern = makeFern(
             model,
-            "Leaf" .. index,
-            Vector3.new(3.2, 2.8, 3.2) * scale,
-            CFrame.new(position + offset),
-            FOLIAGE_MATERIAL,
-            colors[((index - 1) % #colors) + 1]
+            position + offset * scale,
+            (0.46 + index * 0.04) * scale,
+            math.rad(index * 101 + math.floor(position.X - position.Z) % 53)
         )
-        leaf.CanCollide = false
-        CollectionService:AddTag(leaf, "EverLeafWindSway")
+        if fern then
+            placed += 1
+        end
+    end
+    if placed == 0 then
+        model:Destroy()
+        return nil
     end
     return model
 end
@@ -1946,529 +1767,41 @@ local function makeCombatGrove(parent, center)
     return model
 end
 
-local function makeGuide(parent, position, yaw)
-    local model = Instance.new("Model")
-    model.Name = "LumenGuide"
-    model.Parent = parent
-
-    local base = CFrame.new(position) * CFrame.Angles(0, yaw or 0, 0)
-    local skin = Color3.fromRGB(218, 187, 153)
-    local coat = Color3.fromRGB(48, 91, 80)
-    local coatDark = Color3.fromRGB(29, 58, 53)
-    local clothLight = Color3.fromRGB(125, 139, 111)
-    local leather = Color3.fromRGB(91, 61, 39)
-    local leatherDark = Color3.fromRGB(58, 42, 31)
-    local brass = Color3.fromRGB(166, 132, 67)
-    local lumen = Color3.fromRGB(105, 231, 194)
-
-    local function guidePart(name, size, offset, material, color, rotation)
-        local part = makePart(
-            model,
-            name,
-            size,
-            base * CFrame.new(offset) * (rotation or CFrame.new()),
-            material,
-            color
-        )
-        part.CanCollide = false
-        part.CanTouch = false
-        return part
-    end
-
-    local root = guidePart(
-        "HumanoidRootPart",
-        Vector3.new(2.2, 7.4, 2.0),
-        Vector3.new(0, 3.7, 0),
-        Enum.Material.SmoothPlastic,
-        Color3.new(0, 0, 0)
-    )
-    root.Transparency = 1
-
-    for _, leg in
-        {
-            { "LeftLeg", Vector3.new(-0.58, 1.45, 0), math.rad(-2) },
-            { "RightLeg", Vector3.new(0.58, 1.45, 0), math.rad(2) },
-        }
-    do
-        guidePart(
-            leg[1],
-            Vector3.new(0.82, 1.85, 0.92),
-            leg[2],
-            Enum.Material.Fabric,
-            Color3.fromRGB(57, 66, 61),
-            CFrame.Angles(0, 0, leg[3])
-        )
-    end
-
-    for _, boot in
-        {
-            { "LeftBoot", Vector3.new(-0.58, 0.48, -0.12) },
-            { "RightBoot", Vector3.new(0.58, 0.48, -0.12) },
-        }
-    do
-        guidePart(
-            boot[1],
-            Vector3.new(0.95, 0.82, 1.35),
-            boot[2],
-            Enum.Material.SmoothPlastic,
-            leatherDark
-        )
-    end
-
-    guidePart(
-        "CoatSkirt",
-        Vector3.new(2.65, 1.8, 1.45),
-        Vector3.new(0, 2.55, 0.08),
-        Enum.Material.Fabric,
-        coatDark
-    )
-    guidePart(
-        "Torso",
-        Vector3.new(2.55, 2.3, 1.5),
-        Vector3.new(0, 4.05, 0),
-        Enum.Material.Fabric,
-        coat
-    )
-    guidePart(
-        "ChestPanel",
-        Vector3.new(1.75, 1.55, 0.14),
-        Vector3.new(0, 4.15, -0.82),
-        Enum.Material.Fabric,
-        clothLight,
-        CFrame.Angles(0, 0, math.rad(-5))
-    )
-    guidePart(
-        "Belt",
-        Vector3.new(2.72, 0.32, 1.62),
-        Vector3.new(0, 3.05, 0),
-        Enum.Material.Fabric,
-        leather
-    )
-    guidePart(
-        "BeltBuckle",
-        Vector3.new(0.42, 0.44, 0.12),
-        Vector3.new(0, 3.03, -0.86),
-        Enum.Material.Metal,
-        brass
-    )
-
-    guidePart(
-        "Cape",
-        Vector3.new(2.5, 3.25, 0.18),
-        Vector3.new(0, 3.55, 0.9),
-        Enum.Material.Fabric,
-        Color3.fromRGB(35, 69, 61),
-        CFrame.Angles(math.rad(-5), 0, 0)
-    )
-
-    for _, shoulder in
-        {
-            { "LeftShoulder", Vector3.new(-1.48, 4.65, 0) },
-            { "RightShoulder", Vector3.new(1.48, 4.65, 0) },
-        }
-    do
-        local pad = makeBall(
-            model,
-            shoulder[1],
-            Vector3.new(1.05, 0.72, 1.08),
-            base * CFrame.new(shoulder[2]),
-            Enum.Material.Fabric,
-            coatDark
-        )
-        pad.CanCollide = false
-    end
-
-    for _, arm in
-        {
-            { "LeftArm", Vector3.new(-1.48, 3.65, -0.03), math.rad(-9) },
-            { "RightArm", Vector3.new(1.52, 3.68, -0.05), math.rad(8) },
-        }
-    do
-        guidePart(
-            arm[1],
-            Vector3.new(0.78, 2.15, 0.82),
-            arm[2],
-            Enum.Material.Fabric,
-            coat,
-            CFrame.Angles(0, 0, arm[3])
-        )
-    end
-
-    for _, hand in
-        {
-            { "LeftHand", Vector3.new(-1.67, 2.45, -0.05) },
-            { "RightHand", Vector3.new(1.7, 2.48, -0.02) },
-        }
-    do
-        local handPart = makeBall(
-            model,
-            hand[1],
-            Vector3.new(0.72, 0.72, 0.72),
-            base * CFrame.new(hand[2]),
-            Enum.Material.SmoothPlastic,
-            skin
-        )
-        handPart.CanCollide = false
-    end
-
-    guidePart(
-        "NeckWrap",
-        Vector3.new(1.85, 0.5, 1.55),
-        Vector3.new(0, 5.15, 0),
-        Enum.Material.Fabric,
-        Color3.fromRGB(153, 108, 62)
-    )
-
-    local head = guidePart(
-        "Head",
-        Vector3.new(1.72, 1.78, 1.62),
-        Vector3.new(0, 6.05, -0.02),
-        Enum.Material.SmoothPlastic,
-        skin
-    )
-
-    guidePart(
-        "HoodTop",
-        Vector3.new(1.92, 0.48, 1.76),
-        Vector3.new(0, 6.82, 0.03),
-        Enum.Material.Fabric,
-        coatDark
-    )
-    for _, side in { -1, 1 } do
-        guidePart(
-            if side < 0 then "HoodLeft" else "HoodRight",
-            Vector3.new(0.34, 1.18, 1.72),
-            Vector3.new(side * 0.86, 6.12, 0.04),
-            Enum.Material.Fabric,
-            coatDark,
-            CFrame.Angles(0, 0, math.rad(side * 4))
-        )
-    end
-
-    for _, eye in
-        {
-            { "LeftEye", Vector3.new(-0.34, 6.18, -0.85) },
-            { "RightEye", Vector3.new(0.34, 6.18, -0.85) },
-        }
-    do
-        guidePart(
-            eye[1],
-            Vector3.new(0.16, 0.16, 0.08),
-            eye[2],
-            Enum.Material.SmoothPlastic,
-            Color3.fromRGB(38, 46, 42)
-        )
-    end
-    guidePart(
-        "Mouth",
-        Vector3.new(0.48, 0.08, 0.07),
-        Vector3.new(0, 5.78, -0.86),
-        Enum.Material.SmoothPlastic,
-        Color3.fromRGB(120, 74, 62)
-    )
-
-    guidePart(
-        "Satchel",
-        Vector3.new(1.3, 1.55, 0.62),
-        Vector3.new(-1.3, 3.15, 0.78),
-        Enum.Material.Fabric,
-        leather,
-        CFrame.Angles(0, 0, math.rad(7))
-    )
-    guidePart(
-        "SatchelFlap",
-        Vector3.new(1.12, 0.55, 0.12),
-        Vector3.new(-1.3, 3.55, 0.43),
-        Enum.Material.Fabric,
-        leatherDark,
-        CFrame.Angles(math.rad(10), 0, math.rad(7))
-    )
-
-    local staffBottom = (base * CFrame.new(2.05, 0.35, 0.2)).Position
-    local staffTop = (base * CFrame.new(2.05, 6.95, 0.2)).Position
-    makeRodBetween(
-        model,
-        "WayfinderStaff",
-        staffBottom,
-        staffTop,
-        0.24,
-        Enum.Material.Wood,
-        Color3.fromRGB(74, 52, 34)
-    )
-    local staffCrystal = makeBall(
-        model,
-        "StaffLumen",
-        Vector3.new(0.72, 0.92, 0.72),
-        CFrame.new(staffTop + Vector3.new(0, 0.28, 0)),
-        Enum.Material.Neon,
-        lumen
-    )
-    staffCrystal.CanCollide = false
-    local staffLight = Instance.new("PointLight")
-    staffLight.Color = lumen
-    staffLight.Brightness = 0.8
-    staffLight.Range = 9
-    staffLight.Parent = staffCrystal
-
-    local badge = guidePart(
-        "WayfarerBadge",
-        Vector3.new(0.42, 0.42, 0.08),
-        Vector3.new(0.72, 4.45, -0.87),
-        Enum.Material.Neon,
-        lumen,
-        CFrame.Angles(0, 0, math.rad(45))
-    )
-    badge.Transparency = 0.08
-
+local function attachNpcPresentation(model, root, head, npcId, displayName, accent, promptText)
     local nameplate = Instance.new("BillboardGui")
-    nameplate.Name = "GuideNameplate"
-    nameplate.Size = UDim2.fromOffset(190, 34)
-    nameplate.StudsOffsetWorldSpace = Vector3.new(0, 1.75, 0)
+    nameplate.Name = "NpcNameplate"
+    nameplate.Size = UDim2.fromOffset(206, 34)
+    nameplate.StudsOffsetWorldSpace = Vector3.new(0, 1.8, 0)
     nameplate.AlwaysOnTop = false
-    nameplate.MaxDistance = 48
+    nameplate.MaxDistance = 46
     nameplate.Parent = head
 
-    local nameLabel = Instance.new("TextLabel")
-    nameLabel.Size = UDim2.fromScale(1, 1)
-    nameLabel.BackgroundTransparency = 0.18
-    nameLabel.BackgroundColor3 = Color3.fromRGB(17, 27, 24)
-    nameLabel.Text = "ILYRA · WAYFARER GUIDE"
-    nameLabel.TextColor3 = Color3.fromRGB(215, 243, 226)
-    nameLabel.TextStrokeColor3 = Color3.fromRGB(24, 39, 34)
-    nameLabel.TextStrokeTransparency = 0.25
-    nameLabel.Font = Enum.Font.GothamBold
-    nameLabel.TextScaled = true
-    nameLabel.Parent = nameplate
-    local nameCorner = Instance.new("UICorner")
-    nameCorner.CornerRadius = UDim.new(0, 8)
-    nameCorner.Parent = nameLabel
-    local nameStroke = Instance.new("UIStroke")
-    nameStroke.Color = Color3.fromRGB(87, 142, 112)
-    nameStroke.Transparency = 0.35
-    nameStroke.Thickness = 1
-    nameStroke.Parent = nameLabel
-
-    model.PrimaryPart = root
-    WorldObjectService.Register(model, "Npc", "lumen_guide")
-
-    local prompt = Instance.new("ProximityPrompt")
-    prompt.Name = "TalkPrompt"
-    prompt.ActionText = "Talk"
-    prompt.ObjectText = "Ilyra · Lumen Guide"
-    prompt.KeyboardKeyCode = Enum.KeyCode.E
-    prompt.MaxActivationDistance = 11
-    prompt.RequiresLineOfSight = false
-    prompt.Parent = root
-    prompt.Triggered:Connect(function(player)
-        InteractionService.Begin(player, "lumen_guide", model)
-    end)
-
-    return model
-end
-
-local function makeCampNpc(parent, npcId, displayName, position, yaw, palette, role)
-    local model = Instance.new("Model")
-    model.Name = npcId
-    model.Parent = parent
-    local base = CFrame.new(position) * CFrame.Angles(0, yaw or 0, 0)
-    local cloth = palette.Cloth
-    local accent = palette.Accent
-    local skin = palette.Skin or Color3.fromRGB(214, 181, 146)
-    local leather = palette.Leather or Color3.fromRGB(84, 58, 39)
-
-    local function npcPart(name, size, offset, material, color, rotation)
-        local part = makePart(
-            model,
-            name,
-            size,
-            base * CFrame.new(offset) * (rotation or CFrame.new()),
-            material,
-            color
-        )
-        part.CanCollide = false
-        part.CanTouch = false
-        return part
-    end
-
-    local root = npcPart(
-        "HumanoidRootPart",
-        Vector3.new(2, 6.8, 1.8),
-        Vector3.new(0, 3.4, 0),
-        Enum.Material.SmoothPlastic,
-        Color3.new(0, 0, 0)
-    )
-    root.Transparency = 1
-    npcPart(
-        "Torso",
-        Vector3.new(2.5, 2.5, 1.45),
-        Vector3.new(0, 3.9, 0),
-        Enum.Material.Fabric,
-        cloth
-    )
-    npcPart(
-        "Belt",
-        Vector3.new(2.65, 0.3, 1.55),
-        Vector3.new(0, 2.8, 0),
-        Enum.Material.Fabric,
-        leather
-    )
-    for _, side in { -1, 1 } do
-        npcPart(
-            side < 0 and "LeftLeg" or "RightLeg",
-            Vector3.new(0.78, 2.5, 0.82),
-            Vector3.new(side * 0.58, 1.45, 0),
-            Enum.Material.Fabric,
-            Color3.fromRGB(58, 64, 60)
-        )
-        npcPart(
-            side < 0 and "LeftArm" or "RightArm",
-            Vector3.new(0.72, 2.2, 0.76),
-            Vector3.new(side * 1.55, 3.75, 0),
-            Enum.Material.Fabric,
-            cloth,
-            CFrame.Angles(0, 0, math.rad(side * 5))
-        )
-    end
-    local head = npcPart(
-        "Head",
-        Vector3.new(1.7, 1.7, 1.6),
-        Vector3.new(0, 5.75, 0),
-        Enum.Material.SmoothPlastic,
-        skin
-    )
-    for _, x in { -0.34, 0.34 } do
-        npcPart(
-            x < 0 and "LeftEye" or "RightEye",
-            Vector3.new(0.14, 0.14, 0.07),
-            Vector3.new(x, 5.95, -0.82),
-            Enum.Material.SmoothPlastic,
-            Color3.fromRGB(35, 42, 39)
-        )
-    end
-
-    if role == "Quartermaster" then
-        npcPart(
-            "Apron",
-            Vector3.new(2.0, 2.4, 0.14),
-            Vector3.new(0, 3.65, -0.78),
-            Enum.Material.Fabric,
-            accent
-        )
-        npcPart(
-            "Ledger",
-            Vector3.new(1.2, 0.18, 1.55),
-            Vector3.new(-1.35, 3.0, -0.7),
-            Enum.Material.Wood,
-            Color3.fromRGB(104, 75, 48),
-            CFrame.Angles(math.rad(15), math.rad(14), math.rad(-8))
-        )
-    elseif role == "Scout" then
-        npcPart(
-            "ScoutCape",
-            Vector3.new(2.4, 3.0, 0.16),
-            Vector3.new(0, 3.5, 0.88),
-            Enum.Material.Fabric,
-            accent,
-            CFrame.Angles(math.rad(-6), 0, 0)
-        )
-        npcPart(
-            "Pack",
-            Vector3.new(1.8, 2.0, 0.8),
-            Vector3.new(0, 3.5, 1.1),
-            Enum.Material.Fabric,
-            leather
-        )
-        npcPart(
-            "ShortSpear",
-            Vector3.new(0.18, 5.8, 0.18),
-            Vector3.new(1.75, 3.0, 0.25),
-            Enum.Material.Wood,
-            Color3.fromRGB(77, 54, 35),
-            CFrame.Angles(0, 0, math.rad(-7))
-        )
-    elseif role == "Archivist" then
-        npcPart(
-            "ArchiveMantle",
-            Vector3.new(2.8, 0.65, 1.8),
-            Vector3.new(0, 4.7, 0),
-            Enum.Material.Fabric,
-            accent
-        )
-        npcPart(
-            "Book",
-            Vector3.new(1.2, 0.35, 1.55),
-            Vector3.new(1.3, 2.9, -0.55),
-            Enum.Material.Fabric,
-            Color3.fromRGB(82, 59, 106),
-            CFrame.Angles(math.rad(20), math.rad(-12), math.rad(9))
-        )
-        npcPart(
-            "Headband",
-            Vector3.new(1.82, 0.22, 1.7),
-            Vector3.new(0, 6.22, 0),
-            Enum.Material.Fabric,
-            accent
-        )
-    elseif role == "Mentor" then
-        npcPart(
-            "PathkeeperMantle",
-            Vector3.new(3.0, 0.72, 1.92),
-            Vector3.new(0, 4.75, 0),
-            Enum.Material.Fabric,
-            accent
-        )
-        npcPart(
-            "PathkeeperStaff",
-            Vector3.new(0.2, 6.2, 0.2),
-            Vector3.new(1.65, 3.2, 0.3),
-            Enum.Material.Wood,
-            Color3.fromRGB(82, 58, 38),
-            CFrame.Angles(0, 0, math.rad(-6))
-        )
-        local pathLumen = npcPart(
-            "PathkeeperLumen",
-            Vector3.new(0.64, 0.64, 0.64),
-            Vector3.new(1.49, 6.28, 0.12),
-            Enum.Material.Neon,
-            Color3.fromRGB(113, 238, 170)
-        )
-        pathLumen.Shape = Enum.PartType.Ball
-        local light = Instance.new("PointLight")
-        light.Color = Color3.fromRGB(121, 244, 183)
-        light.Brightness = 0.75
-        light.Range = 8
-        light.Parent = pathLumen
-    end
-
-    local nameplate = Instance.new("BillboardGui")
-    nameplate.Size = UDim2.fromOffset(210, 32)
-    nameplate.StudsOffsetWorldSpace = Vector3.new(0, 1.65, 0)
-    nameplate.MaxDistance = 45
-    nameplate.Parent = head
     local label = Instance.new("TextLabel")
     label.Size = UDim2.fromScale(1, 1)
-    label.BackgroundTransparency = 0.18
-    label.BackgroundColor3 = Color3.fromRGB(17, 27, 24)
+    label.BackgroundTransparency = 0.2
+    label.BackgroundColor3 = Color3.fromRGB(15, 24, 22)
     label.Text = displayName
     label.TextColor3 = Color3.fromRGB(226, 243, 230)
-    label.TextStrokeTransparency = 0.25
+    label.TextStrokeColor3 = Color3.fromRGB(22, 34, 30)
+    label.TextStrokeTransparency = 0.32
     label.Font = Enum.Font.GothamBold
     label.TextScaled = true
     label.Parent = nameplate
-    local labelCorner = Instance.new("UICorner")
-    labelCorner.CornerRadius = UDim.new(0, 8)
-    labelCorner.Parent = label
-    local labelStroke = Instance.new("UIStroke")
-    labelStroke.Color = Color3.fromRGB(78, 126, 104)
-    labelStroke.Transparency = 0.42
-    labelStroke.Thickness = 1
-    labelStroke.Parent = label
 
-    model.PrimaryPart = root
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = label
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = accent or Color3.fromRGB(84, 134, 111)
+    stroke.Transparency = 0.38
+    stroke.Thickness = 1
+    stroke.Parent = label
+
     WorldObjectService.Register(model, "Npc", npcId)
     local prompt = Instance.new("ProximityPrompt")
+    prompt.Name = "TalkPrompt"
     prompt.ActionText = "Talk"
-    prompt.ObjectText = displayName
+    prompt.ObjectText = promptText or displayName
     prompt.KeyboardKeyCode = Enum.KeyCode.E
     prompt.MaxActivationDistance = 11
     prompt.RequiresLineOfSight = false
@@ -2476,6 +1809,96 @@ local function makeCampNpc(parent, npcId, displayName, position, yaw, palette, r
     prompt.Triggered:Connect(function(player)
         InteractionService.Begin(player, npcId, model)
     end)
+end
+
+local function makeGuide(parent, position, yaw)
+    local palette = {
+        Cloth = Color3.fromRGB(48, 91, 80),
+        DarkCloth = Color3.fromRGB(28, 58, 52),
+        Accent = Color3.fromRGB(126, 146, 111),
+        Skin = Color3.fromRGB(218, 187, 153),
+        Leather = Color3.fromRGB(91, 61, 39),
+        Hair = Color3.fromRGB(82, 48, 38),
+        EyeColor = Color3.fromRGB(43, 77, 64),
+        Lumen = Color3.fromRGB(105, 231, 194),
+        Metal = Color3.fromRGB(166, 132, 67),
+    }
+    local model, root, head = StylizedNpcFactory.Create(parent, {
+        Name = "LumenGuide",
+        NpcId = "lumen_guide",
+        Position = position,
+        Yaw = yaw,
+        Role = "Guide",
+        HairStyle = "long",
+        Build = 0.98,
+        Palette = palette,
+    })
+    attachNpcPresentation(
+        model,
+        root,
+        head,
+        "lumen_guide",
+        "ILYRA · WAYFARER GUIDE",
+        palette.Lumen,
+        "Ilyra · Wayfarer Guide"
+    )
+    return model
+end
+
+local function makeCampNpc(parent, npcId, displayName, position, yaw, palette, role)
+    local roleStyle = {
+        Quartermaster = {
+            HairStyle = "short",
+            Build = 1.08,
+            Hair = Color3.fromRGB(78, 53, 37),
+            Skin = Color3.fromRGB(198, 158, 123),
+            Eye = Color3.fromRGB(72, 63, 48),
+        },
+        Scout = {
+            HairStyle = "ponytail",
+            Build = 0.94,
+            Hair = Color3.fromRGB(92, 57, 39),
+            Skin = Color3.fromRGB(221, 185, 145),
+            Eye = Color3.fromRGB(49, 83, 61),
+        },
+        Archivist = {
+            HairStyle = "bun",
+            Build = 0.95,
+            Hair = Color3.fromRGB(60, 47, 71),
+            Skin = Color3.fromRGB(202, 165, 138),
+            Eye = Color3.fromRGB(79, 64, 105),
+        },
+        Mentor = {
+            HairStyle = "long",
+            Build = 1.02,
+            Hair = Color3.fromRGB(151, 157, 145),
+            Skin = Color3.fromRGB(211, 178, 145),
+            Eye = Color3.fromRGB(61, 105, 78),
+        },
+    }
+    local style = roleStyle[role] or roleStyle.Scout
+    local visualPalette = {
+        Cloth = palette.Cloth,
+        DarkCloth = palette.DarkCloth or palette.Cloth:Lerp(Color3.new(0, 0, 0), 0.24),
+        Accent = palette.Accent,
+        Skin = palette.Skin or style.Skin,
+        Leather = palette.Leather or Color3.fromRGB(84, 58, 39),
+        Hair = palette.Hair or style.Hair,
+        EyeColor = palette.EyeColor or style.Eye,
+        Lumen = palette.Lumen or Color3.fromRGB(113, 238, 170),
+        Metal = palette.Metal or Color3.fromRGB(162, 132, 72),
+    }
+    local model, root, head = StylizedNpcFactory.Create(parent, {
+        Name = npcId,
+        NpcId = npcId,
+        Position = position,
+        Yaw = yaw,
+        Role = role,
+        HairStyle = style.HairStyle,
+        Build = style.Build,
+        Palette = visualPalette,
+    })
+    attachNpcPresentation(model, root, head, npcId, displayName, visualPalette.Accent, displayName)
     return model
 end
 
@@ -3400,6 +2823,66 @@ local function horizontalDistanceToSegment(point, a, b)
     return (point2 - (a2 + delta * alpha)).Magnitude
 end
 
+local function distanceToTravelRoute(position)
+    local closest = math.huge
+    for _, segment in TRAVEL_ROUTE_SEGMENTS do
+        closest = math.min(closest, horizontalDistanceToSegment(position, segment[1], segment[2]))
+    end
+    return closest
+end
+
+local function travelDecorationClearance(instanceName)
+    if string.sub(instanceName, 1, 10) == "ForestTree" or instanceName == "TreePrimary" then
+        return 11.5
+    end
+    local clearances = {
+        GrassTuft = 7.5,
+        LumenBush = 8.0,
+        WildflowerPatch = 6.5,
+        LumenMushroomCluster = 6.0,
+        RockCluster = 7.0,
+        PineRoots = 7.0,
+        DryBranches = 7.0,
+        FallenTreeTrunk = 9.0,
+        FallenTreeTrunk2 = 9.0,
+        FallenLog = 9.0,
+        MossyRockSet = 7.0,
+        TreeStump = 6.5,
+        TreeStump2 = 6.5,
+        FernPrimary = 6.0,
+        LumenCattails = 5.0,
+        WayfarerRemnant = 10.0,
+    }
+    return clearances[instanceName]
+end
+
+local function clearTravelLaneDecor(world)
+    local removed = 0
+    for _, child in world:GetChildren() do
+        local clearance = travelDecorationClearance(child.Name)
+        if clearance then
+            local position = nil
+            if child:IsA("Model") then
+                position = child:GetPivot().Position
+            elseif child:IsA("BasePart") then
+                position = child.Position
+            end
+            if position and distanceToTravelRoute(position) < clearance then
+                child:Destroy()
+                removed += 1
+            end
+        end
+    end
+    if removed > 0 then
+        print(
+            string.format(
+                "[LumenreachWorldService] Cleared %d decorative objects from travel lanes",
+                removed
+            )
+        )
+    end
+end
+
 local function isOpeningRouteClear(position, clearance)
     for index = 1, #OPENING_ROUTE_POINTS - 1 do
         if
@@ -3998,6 +3481,7 @@ function LumenreachWorldService.Init()
 
     prepareGround(world)
     decorate(world)
+    clearTravelLaneDecor(world)
     PBRMaterialService.ApplyGeneratedWorld(world)
     makeSpawn(world)
     makeGuide(world, WORLD_ZONES.Camp + Vector3.new(31, 0, 8), math.rad(102))

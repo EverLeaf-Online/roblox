@@ -1,8 +1,10 @@
+local InsertService = game:GetService("InsertService")
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
+local EnvironmentAssetRegistry = require(script.Parent.Parent.Content.EnvironmentAssetRegistry)
 
 local WorldVisualService = {}
 
@@ -51,6 +53,62 @@ local function ensureAtmosphere()
         atmosphere.Parent = Lighting
     end
     return atmosphere
+end
+
+local function configureCreatorSkybox()
+    local entry = EnvironmentAssetRegistry.AnimeIslandSkybox
+    if
+        type(entry) ~= "table"
+        or entry.Status ~= "approved_for_sanitized_import"
+        or entry.Kind ~= "Sky"
+    then
+        return
+    end
+
+    local ok, containerOrError = pcall(function()
+        return InsertService:LoadAsset(entry.AssetId)
+    end)
+    if not ok then
+        warn(
+            string.format(
+                "[WorldVisualService] Could not load approved skybox %s (%s): %s",
+                tostring(entry.Name),
+                tostring(entry.AssetId),
+                tostring(containerOrError)
+            )
+        )
+        return
+    end
+
+    local sky = containerOrError:FindFirstChildWhichIsA("Sky", true)
+    if not sky then
+        containerOrError:Destroy()
+        warn(
+            string.format(
+                "[WorldVisualService] Approved skybox %s (%s) contained no Sky instance",
+                tostring(entry.Name),
+                tostring(entry.AssetId)
+            )
+        )
+        return
+    end
+
+    local safeSky = sky:Clone()
+    safeSky.Name = "EverLeafSky"
+    for _, child in Lighting:GetChildren() do
+        if child:IsA("Sky") then
+            child:Destroy()
+        end
+    end
+    safeSky.Parent = Lighting
+    containerOrError:Destroy()
+    print(
+        string.format(
+            "[WorldVisualService] Loaded visual-only skybox %s (%s)",
+            tostring(entry.Name),
+            tostring(entry.AssetId)
+        )
+    )
 end
 
 local function configurePostProcessing()
@@ -124,6 +182,7 @@ function WorldVisualService.Init()
     safeSet(atmosphere, "Color", Color3.fromRGB(199, 220, 255))
     safeSet(atmosphere, "Decay", Color3.fromRGB(106, 122, 111))
 
+    configureCreatorSkybox()
     configurePostProcessing()
     configureCloudsAndWind()
 end

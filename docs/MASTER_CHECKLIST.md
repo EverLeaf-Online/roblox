@@ -53,17 +53,19 @@
 - [x] Lumenreach rebuilt as a larger 900×760 explorable region with separated destinations and connected trail network.
 - [x] Wayfarer Camp, Lumenwood Crossroads, Shattered Lumen Arch, Mossglen Combat Grove, Veilfall Cascade, Glowmere Pool, and Sunmoss Overlook established.
 - [x] Poly Haven PBR material pipeline is live for forest ground, mossy rock, moss wood, wood-chip path, and wood/stone pathway.
-- [x] Bad/fallen Creator Store tree dependency replaced with approved original/Poly Haven environment assets and procedural foliage fallbacks.
+- [x] Production foliage now prefers approved imported assets only; the visible procedural sphere-tree/bush/rock fallbacks were removed from Lumenreach production placement so missing assets fail closed instead of degrading visual quality.
 - [x] Production-oriented trees, ferns, deadwood, rock faces, mossy rock sets, stumps, roots, logs, mushrooms, cattails, and waystones integrated.
 - [x] Oversized/unintegrated cliff meshes and black stacked-rock formations corrected and blended into terrain.
 - [x] Starter camp rebuilt with larger tents, proper supplies, map table, benches, lanterns, signpost, and custom guide/NPC composition.
+- [x] Lumenreach NPC visual overhaul is source-complete: Ilyra, Orin, Tovin, Maela, and Seren now use a reusable stylized-character factory with rounded segmented limbs, unique hair/build silhouettes, layered clothing, and role-specific props; Studio visual QA remains.
 - [x] World density pass added continuous forest bands, roadside clusters, undergrowth, deadwood, rocks, and landmark dressing.
 - [x] Lumenreach macro-layout replacement is source-complete: all major zones were repositioned, Crossroads moved onto a raised west-side saddle, Veilfall moved into a lowered ravine, Sunmoss moved onto an elevated ridge, a carved Lumen Gorge now divides west/east Lumenreach, and a required bridge crossing connects the two halves; fresh Studio visual QA remains.
 - [x] Interior terrain-room rebuild is source-complete: the visible perimeter hill ring was reduced to minor anchors; Camp basin, Crossroads saddle, Glowmere bowl, Veilfall canyon, east forest spine, Ruins shelf, Mossglen amphitheater, and Sunmoss highland now use interior ridge systems, exposed rock shelves, carved road passes, and mixed habitat pockets; Studio visual QA remains.
+- [x] Canonical all-route clearance graph + post-generation scrub removes decorative trees, bushes, grass, rocks, deadfall, roots, ferns, and Wayfarer remnants that overlap protected travel lanes.
 - [x] Camera collision stabilized so non-solid foliage/decor no longer causes view snapping.
 - [x] Environmental storytelling pass adds old wayfarer remnants and hidden Whisperroot Hollow.
 - [ ] Full player-height visual QA for every imported mesh, rock/cliff, root, log, and path obstruction.
-- [ ] Final lighting/sky/atmosphere art-direction pass for Phase 1.
+- [ ] Final lighting/sky/atmosphere art-direction pass for Phase 1. Approved Anime Island Skybox `14753835117` is now loaded visual-only through `WorldVisualService`; final Studio art-direction tuning remains.
 - [ ] Measure frame time, memory, streaming, and foliage-density budgets in Studio.
 
 ### D. UI / RPG shell
@@ -478,7 +480,7 @@
 - [x] Region topology rebuilt around distinct macro geography: compact west-basin Camp, separate Proving Circle pocket, climbing approach to raised Crossroads, central gorge/river, bridge transition to east-side Ruins/Mossglen, north Glowmere loop, lowered Veilfall route, and ascending Sunmoss highland loop; Studio visual QA remains.
 - [x] Interior terrain massing rebuilt around seven authored rooms with interior ridges/valleys instead of border hills; roads are re-cut as safe passes after terrain generation, and non-tree habitat pockets/rock faces now fill the mid-map spaces; Studio visual QA remains.
 - [x] Opening-route composition pass rebuilt Camp/Crossroads signs, path lantern scale/placement, clearing edges, terrain banks, and authored woodland framing; the obsolete repeated trail-pebble system was removed; Studio player-height review remains open.
-- [x] Approved imported environment assets integrated with runtime sanitization and procedural fallbacks.
+- [x] Approved imported environment assets integrated with runtime sanitization; free script-free Forest Trees `13913287259` can populate sanitized tree variants, while the old visible primitive fallbacks are disabled for production placement.
 - [x] Bad oversized cliff/rock placements corrected and terrain-supported.
 - [x] Camera obstruction issue from foliage/decor corrected.
 - [x] Custom Ilyra guide model and three additional camp NPCs placed with interaction prompts.
