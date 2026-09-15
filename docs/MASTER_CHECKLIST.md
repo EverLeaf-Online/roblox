@@ -610,6 +610,7 @@
 - [x] Roblox purchase receipt validation/idempotency implemented for the live developer product.
 - [x] Current paid offerings do not grant combat stats, progression, currencies, drop-rate advantages, advancement, or stronger equipment.
 - [x] In-game EverLeaf Store uses Roblox product/subscription metadata for displayed prices rather than hard-coded regional prices.
+- [ ] Creator Hub cleanup before public release: rename `Support EverLeaf – 50` and replace any icon text that hard-codes `50 Robux`, because Managed Pricing can show a lower regional price.
 - [x] Paid-item gifting/trading remain disabled; regional Price Level validation groundwork exists before either feature can ever be enabled.
 
 ## 23. Security / anti-exploit

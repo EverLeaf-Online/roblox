@@ -2949,6 +2949,8 @@ local function MainMenu(props)
     local questFilter, setQuestFilter = React.useState("ACTIVE")
     local catalog = CatalogClient.Get() or {}
     local tabs = { "CHARACTER", "INVENTORY", "SKILLS", "QUESTS", "STORE", "SETTINGS" }
+    local navHeight = #tabs * 54 - 8
+    local navFooterY = 82 + navHeight + 12
 
     local function invoke(action, payload, successText)
         local ok, result = ActionClient.Invoke(action, payload)
@@ -3138,13 +3140,13 @@ local function MainMenu(props)
                 ),
                 Nav = React.createElement("Frame", {
                     Position = UDim2.fromOffset(18, 82),
-                    Size = UDim2.fromOffset(152, 316),
+                    Size = UDim2.fromOffset(152, navHeight),
                     BackgroundTransparency = 1,
                     ZIndex = 33,
                 }, navChildren),
                 NavFooter = React.createElement(Panel, {
-                    Position = UDim2.fromOffset(18, 360),
-                    Size = UDim2.fromOffset(152, 126),
+                    Position = UDim2.fromOffset(18, navFooterY),
+                    Size = UDim2.fromOffset(152, 76),
                     BackgroundColor3 = COLORS.Panel,
                     StrokeTransparency = 0.68,
                     Children = {
@@ -3158,12 +3160,12 @@ local function MainMenu(props)
                             ZIndex = 34,
                         }),
                         Body = React.createElement(Label, {
-                            Position = UDim2.fromOffset(12, 31),
-                            Size = UDim2.new(1, -24, 0, 76),
+                            Position = UDim2.fromOffset(12, 29),
+                            Size = UDim2.new(1, -24, 0, 40),
                             Text = props.InputMode == "GAMEPAD"
-                                    and "D-PAD/L/R  Skills\nX  Interact\nB  Dodge / Back\nSTART  Menu"
-                                or "1–8  Skills\nE  Interact\nQ  Dodge\nEsc  Close",
-                            TextSize = 9,
+                                    and "D-PAD/L/R Skills · X Interact\nB Back · START Menu"
+                                or "1–8 Skills · E Interact\nQ Dodge · Esc Close",
+                            TextSize = 8,
                             Color = COLORS.Faint,
                             VerticalAlign = Enum.TextYAlignment.Top,
                             ZIndex = 34,

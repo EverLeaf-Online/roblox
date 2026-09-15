@@ -192,7 +192,7 @@ local function PremiumShopPanel()
             Position = UDim2.fromOffset(4, 28),
             Size = UDim2.new(1, -8, 0, 30),
             BackgroundTransparency = 1,
-            Text = "Support development with cosmetics, recognition, and convenience — never pay-to-win power.",
+            Text = "Support development with cosmetics and recognition — never pay-to-win power. Roblox managed pricing is shown live.",
             TextColor3 = COLORS.Muted,
             TextSize = 9,
             TextWrapped = true,
