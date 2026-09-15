@@ -96,6 +96,9 @@ function SkillService.Use(player, profile, skillId)
             else { Result = result }
         response.SkillId = skillId
         response.Cooldown = tonumber(definitionOrReason.Cooldown) or 0
+        local state = cooldowns[player]
+        response.CooldownRemaining =
+            math.max(0, (state and tonumber(state[skillId]) or 0) - os.clock())
         response.MPCost = transaction.MPCost
         return true, response
     end

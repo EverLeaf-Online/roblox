@@ -213,6 +213,26 @@ for skillId, skill in Skills do
         )
         assert(requirement.SkillId ~= skillId, "skill cannot require itself: " .. skillId)
     end
+    if skill.Effect and skill.Effect.Type == "DamageAttack" then
+        assert(
+            skill.Effect.Mode == "Melee" or skill.Effect.Mode == "Projectile",
+            "damage skill mode valid: " .. skillId
+        )
+        if skill.Effect.Mode == "Melee" then
+            assert(
+                type(skill.Effect.HitboxWidth) == "number" and skill.Effect.HitboxWidth > 0,
+                "melee skill hitbox width valid: " .. skillId
+            )
+        else
+            assert(
+                type(skill.Effect.ProjectileSpeed) == "number"
+                    and skill.Effect.ProjectileSpeed > 0
+                    and type(skill.Effect.ProjectileRadius) == "number"
+                    and skill.Effect.ProjectileRadius > 0,
+                "projectile skill geometry valid: " .. skillId
+            )
+        end
+    end
     if skill.PassiveBonuses then
         assert(skill.Kind == "Passive", "only passive skills define PassiveBonuses: " .. skillId)
         for statName, amount in skill.PassiveBonuses do

@@ -3,6 +3,8 @@ local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 
 local ActionClient = require(script.Parent.Parent.Services.ActionClient)
+local CatalogClient = require(script.Parent.Parent.Services.CatalogClient)
+local CombatPresentation = require(script.Parent.Parent.Presentation.CombatPresentation)
 local ProfileStore = require(script.Parent.Parent.State.ProfileStore)
 local SkillCooldownStore = require(script.Parent.Parent.State.SkillCooldownStore)
 local NotificationStore = require(script.Parent.Parent.UI.NotificationStore)
@@ -17,6 +19,7 @@ local FAILURE_TEXT = table.freeze({
     insufficient_mp = "You do not have enough MP.",
     skill_not_learned = "That skill has not been learned.",
     invalid_skill = "That hotbar skill is unavailable.",
+    projectile_unavailable = "That shot could not be launched.",
 })
 
 local function showFailure(reason)
@@ -75,6 +78,14 @@ local function useSlot(slotIndex)
         return
     end
 
+    local catalog = CatalogClient.Get() or {}
+    local definition = catalog.Skills and catalog.Skills[skillId]
+    if SkillCooldownStore.Remaining(skillId) > 0 then
+        showFailure("cooldown")
+        return
+    end
+    CombatPresentation.PlaySkillCast(profile.FamilyId, definition)
+
     task.spawn(function()
         local ok, result = ActionClient.Invoke("skill.use", { SkillId = skillId })
         if not ok then
@@ -82,7 +93,11 @@ local function useSlot(slotIndex)
             return
         end
         if type(result) == "table" then
-            SkillCooldownStore.Start(skillId, result.Cooldown)
+            SkillCooldownStore.Start(
+                skillId,
+                tonumber(result.CooldownRemaining) or tonumber(result.Cooldown) or 0
+            )
+            CombatPresentation.PlaySkillResult(profile.FamilyId, result)
         end
     end)
 end

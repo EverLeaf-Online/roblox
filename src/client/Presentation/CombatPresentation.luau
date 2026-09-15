@@ -521,6 +521,50 @@ function CombatPresentation.PlayBasicAttack(familyId)
     end
 end
 
+function CombatPresentation.PlaySkillCast(familyId, definition)
+    local character = player.Character
+    if not character then
+        return
+    end
+    playSequence(character, familyId)
+
+    local effect = definition and definition.Effect
+    if type(effect) ~= "table" or effect.Mode ~= "Projectile" then
+        return
+    end
+    local root = character:FindFirstChild("HumanoidRootPart")
+    if not root or not root:IsA("BasePart") then
+        return
+    end
+    local startPosition = handPosition(character, familyId)
+    local range = math.max(1, tonumber(effect.Range) or 20)
+    local speed = math.max(1, tonumber(effect.ProjectileSpeed) or 80)
+    projectile(
+        startPosition,
+        startPosition + root.CFrame.LookVector * range,
+        FAMILY_COLORS[familyId] or Color3.fromRGB(188, 216, 201),
+        familyId == "lumenweaver" and "orb" or "arrow",
+        speed
+    )
+end
+
+function CombatPresentation.PlaySkillResult(familyId, result)
+    if type(result) ~= "table" then
+        return
+    end
+    if result.Kind == "Damage" then
+        CombatPresentation.PlayHit(familyId, result.TargetPosition, result.Dodged == true)
+    elseif result.Kind == "Miss" and typeof(result.TargetPosition) == "Vector3" then
+        if result.Reason == "projectile_blocked" then
+            burstImpact(
+                result.TargetPosition,
+                FAMILY_COLORS[familyId] or Color3.fromRGB(188, 216, 201),
+                false
+            )
+        end
+    end
+end
+
 function CombatPresentation.PlayHit(familyId, targetPosition, dodged)
     if typeof(targetPosition) ~= "Vector3" or dodged then
         return

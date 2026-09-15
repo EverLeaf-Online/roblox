@@ -329,7 +329,7 @@
 - [ ] Rig-aware player basic-attack pose layer is source-complete for default, Ironbloom, Thornrunner, Lumenweaver, Veilstrider, and Brasshand; live Studio visual verification is pending after replacing the ineffective old joint tween.
 - [x] Procedural basic-attack animation foundation now drives R6/R15 shoulders, R15 elbows, and torso through a post-animation additive pose layer.
 - [ ] Facing-aware attack direction.
-- [x] Basic melee attack hitbox is server-owned and overlap-based; expand the same hurtbox contract to skills/enemy attacks as those systems are standardized.
+- [x] Player melee basics and active melee skills use server-owned overlap hitboxes with range/arc/LOS validation; enemy hurtbox/attack standardization remains.
 - [x] Projectile basics are server-simulated over travel time; terrain can block shots and moving targets can evade the fired line.
 - [ ] Hit-confirm feedback.
 - [ ] Floating damage numbers.
@@ -349,6 +349,7 @@
 - [x] Skill rank/max-rank architecture.
 - [x] Skill prerequisites are server-enforced through shared progression rules; prerequisite targets/ranks and cycles are regression-validated.
 - [x] Active-skill framework and current family/Tier-2 active roster are implemented with SP ranks, MP costs, cooldowns, server effects, and hotbar use; broader roster expansion remains content work.
+- [x] Active damage skills use the same authoritative combat geometry as basic attacks: melee overlap volumes or server-simulated projectiles with committed miss/block outcomes and presentation-only client VFX.
 - [x] Passive-skill framework is implemented with Steady Footing plus five Tier-1 family passives feeding real HP/MP/Defense/Crit/Attack derived stats.
 - [x] Runtime status-effect framework foundation.
 - [x] Skill MP/resource-cost validation foundation.
