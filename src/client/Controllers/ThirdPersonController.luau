@@ -24,33 +24,24 @@ local dodgeDirection = Vector3.zero
 local dodgeStartedAt = -math.huge
 local dodgeAttachment = nil
 local dodgeVelocity = nil
-local rollPoseMotors = {}
-local rollPoseConnection = nil
-local rollAnimateScript = nil
-local rollAnimateWasEnabled = false
+local rollTrack = nil
+local rollAnimation = nil
 
-local function restoreRollPose()
-    if rollPoseConnection then
-        rollPoseConnection:Disconnect()
-        rollPoseConnection = nil
-    end
-
-    for motor, baseTransform in rollPoseMotors do
-        if motor and motor.Parent then
-            motor.Transform = baseTransform
+local function stopRollAnimation(fadeTime)
+    if rollTrack then
+        if rollTrack.IsPlaying then
+            rollTrack:Stop(fadeTime or 0.04)
         end
+        rollTrack = nil
     end
-    table.clear(rollPoseMotors)
-
-    if rollAnimateScript and rollAnimateScript.Parent and rollAnimateWasEnabled then
-        rollAnimateScript.Enabled = true
+    if rollAnimation then
+        rollAnimation:Destroy()
+        rollAnimation = nil
     end
-    rollAnimateScript = nil
-    rollAnimateWasEnabled = false
 end
 
 local function clearDodgeMover()
-    restoreRollPose()
+    stopRollAnimation(0.04)
     if dodgeVelocity then
         dodgeVelocity:Destroy()
         dodgeVelocity = nil
@@ -59,6 +50,55 @@ local function clearDodgeMover()
         dodgeAttachment:Destroy()
         dodgeAttachment = nil
     end
+end
+
+local function playRollAnimation()
+    local character = player.Character
+    local currentHumanoid = character and character:FindFirstChildOfClass("Humanoid")
+    local animator = currentHumanoid and currentHumanoid:FindFirstChildOfClass("Animator")
+    if not character or not currentHumanoid or not animator then
+        return false
+    end
+
+    -- Adapted directly from the referenced DevForum roll/dodge script:
+    -- play a dedicated roll AnimationTrack while a short velocity mover carries
+    -- the character forward. The server still owns cooldowns and i-frames.
+    rollAnimation = Instance.new("Animation")
+    rollAnimation.Name = "EverLeafCombatRoll"
+    rollAnimation.AnimationId = GameConfig.Movement.DodgeRollAnimationId
+
+    local ok, loaded = pcall(function()
+        return animator:LoadAnimation(rollAnimation)
+    end)
+    if not ok or not loaded then
+        rollAnimation:Destroy()
+        rollAnimation = nil
+        warn("[ThirdPersonController] combat roll animation failed to load")
+        return false
+    end
+
+    rollTrack = loaded
+    rollTrack.Priority = Enum.AnimationPriority.Action4
+    rollTrack.Looped = false
+
+    for _, track in animator:GetPlayingAnimationTracks() do
+        if
+            track ~= rollTrack
+            and (
+                track.Priority == Enum.AnimationPriority.Core
+                or track.Priority == Enum.AnimationPriority.Idle
+                or track.Priority == Enum.AnimationPriority.Movement
+            )
+        then
+            track:Stop(0.03)
+        end
+    end
+
+    rollTrack:Play(0.04, 1, 1)
+    if rollTrack.Length > 0 then
+        rollTrack:AdjustSpeed(math.max(0.1, rollTrack.Length / GameConfig.Movement.DodgeDuration))
+    end
+    return true
 end
 
 local function attachCharacter(character)
@@ -132,95 +172,6 @@ local function getWorldMoveDirection()
     right = right.Unit
     local direction = right * input.X + forward * input.Y
     return if direction.Magnitude > 1 then direction.Unit else direction
-end
-
-local function findCharacterMotor(names)
-    local character = player.Character
-    if not character then
-        return nil
-    end
-    for _, name in names do
-        local motor = character:FindFirstChild(name, true)
-        if motor and motor:IsA("Motor6D") then
-            return motor
-        end
-    end
-    return nil
-end
-
-local function rememberPoseMotor(motor)
-    if motor and rollPoseMotors[motor] == nil then
-        rollPoseMotors[motor] = motor.Transform
-    end
-    return motor
-end
-
-local function stopLocomotionAnimations(character)
-    local animate = character:FindFirstChild("Animate")
-    if animate and animate:IsA("LocalScript") then
-        rollAnimateScript = animate
-        rollAnimateWasEnabled = animate.Enabled
-        animate.Enabled = false
-    end
-
-    local currentHumanoid = character:FindFirstChildOfClass("Humanoid")
-    local animator = currentHumanoid and currentHumanoid:FindFirstChildOfClass("Animator")
-    if animator then
-        for _, track in animator:GetPlayingAnimationTracks() do
-            if
-                track.Priority == Enum.AnimationPriority.Core
-                or track.Priority == Enum.AnimationPriority.Idle
-                or track.Priority == Enum.AnimationPriority.Movement
-            then
-                track:Stop(0.03)
-            end
-        end
-    end
-end
-
-local function beginRollPose()
-    restoreRollPose()
-    local character = player.Character
-    if not character then
-        return
-    end
-
-    stopLocomotionAnimations(character)
-
-    rememberPoseMotor(findCharacterMotor({ "Waist" }))
-    rememberPoseMotor(findCharacterMotor({ "Neck" }))
-    rememberPoseMotor(findCharacterMotor({ "LeftHip", "Left Hip" }))
-    rememberPoseMotor(findCharacterMotor({ "RightHip", "Right Hip" }))
-    rememberPoseMotor(findCharacterMotor({ "LeftShoulder", "Left Shoulder" }))
-    rememberPoseMotor(findCharacterMotor({ "RightShoulder", "Right Shoulder" }))
-
-    -- Roblox's Animator writes Motor6D.Transform during animation evaluation.
-    -- Apply the roll after that work in PreSimulation so the running animation
-    -- cannot visually replace the combat roll while the root is moving.
-    rollPoseConnection = RunService.PreSimulation:Connect(function()
-        if dodgeUntil <= 0 or os.clock() >= dodgeUntil then
-            return
-        end
-
-        local alpha =
-            math.clamp((os.clock() - dodgeStartedAt) / GameConfig.Movement.DodgeDuration, 0, 1)
-        local tuck = math.sin(alpha * math.pi)
-
-        for motor, baseTransform in rollPoseMotors do
-            local name = motor.Name
-            if string.find(name, "Hip") then
-                motor.Transform = baseTransform
-                    * CFrame.Angles(math.rad(64) * tuck, 0, math.rad(8) * tuck)
-            elseif string.find(name, "Shoulder") then
-                motor.Transform = baseTransform
-                    * CFrame.Angles(math.rad(-58) * tuck, 0, math.rad(10) * tuck)
-            elseif name == "Waist" then
-                motor.Transform = baseTransform * CFrame.Angles(math.rad(-28) * tuck, 0, 0)
-            elseif name == "Neck" then
-                motor.Transform = baseTransform * CFrame.Angles(math.rad(22) * tuck, 0, 0)
-            end
-        end
-    end)
 end
 
 local function rollSpeed(alpha)
@@ -325,7 +276,15 @@ local function tryDodge()
     end
 
     clearDodgeMover()
-    beginRollPose()
+    if not playRollAnimation() then
+        dodgeUntil = 0
+        dodgeStartedAt = -math.huge
+        dodgeDirection = Vector3.zero
+        humanoid.AutoRotate = true
+        humanoid.WalkSpeed = GameConfig.Movement.WalkSpeed
+        return
+    end
+
     dodgeAttachment = Instance.new("Attachment")
     dodgeAttachment.Name = "EverLeafDodgeAttachment"
     dodgeAttachment.Parent = root
@@ -435,13 +394,6 @@ function ThirdPersonController.Start()
                     humanoid:Move(Vector3.zero, false)
                     local alpha =
                         math.clamp((now - dodgeStartedAt) / GameConfig.Movement.DodgeDuration, 0, 1)
-                    local spin = alpha * math.pi * 2
-                    local upright = CFrame.lookAt(root.Position, root.Position + dodgeDirection)
-                    -- Rotate the actual character assembly for the visible somersault.
-                    -- Motor-only posing can be overwritten or ignored by some avatar rigs,
-                    -- which looked like a frozen character sliding across the ground.
-                    root.CFrame = upright * CFrame.Angles(-spin, 0, 0)
-                    root.AssemblyAngularVelocity = Vector3.zero
                     if dodgeVelocity and dodgeVelocity.Parent then
                         local speed = rollSpeed(alpha)
                         dodgeVelocity.PlaneVelocity =

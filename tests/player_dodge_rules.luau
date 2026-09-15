@@ -10,9 +10,9 @@ local bootstrap = fs.readFile("src/server/bootstrap.server.luau")
 
 assert(string.find(config, "DodgeIFrameDuration = 0.22", 1, true), "dodge iframe config missing")
 assert(string.find(config, "NormalMaxHorizontalSpeed = 32", 1, true), "normal movement cap missing")
-assert(string.find(config, "DodgeRollStartSpeed = 24", 1, true), "roll start speed missing")
-assert(string.find(config, "DodgeRollEndSpeed = 5", 1, true), "roll end speed missing")
-assert(string.find(config, "DodgeDuration = 0.52", 1, true), "roll duration missing")
+assert(string.find(config, "DodgeRollStartSpeed = 26", 1, true), "roll start speed missing")
+assert(string.find(config, "DodgeRollEndSpeed = 8", 1, true), "roll end speed missing")
+assert(string.find(config, "DodgeDuration = 0.55", 1, true), "roll duration missing")
 assert(
     string.find(validator, "payload.Dodge == true", 1, true),
     "dodge movement intent validation missing"
@@ -39,18 +39,19 @@ assert(
     "client dodge should use modern LinearVelocity"
 )
 assert(
-    string.find(controller, "RunService.PreSimulation:Connect", 1, true),
-    "dodge must keep the tuck pose after Animator evaluation"
+    string.find(config, 'DodgeRollAnimationId = "rbxassetid://1258941951"', 1, true),
+    "combat roll must use the referenced DevForum animation"
 )
 assert(
-    string.find(controller, "local spin = alpha * math.pi * 2", 1, true)
-        and string.find(controller, "root.CFrame = upright * CFrame.Angles(-spin, 0, 0)", 1, true),
-    "dodge must rotate the actual character assembly through a full somersault"
+    string.find(controller, 'rollAnimation = Instance.new("Animation")', 1, true)
+        and string.find(controller, "animator:LoadAnimation(rollAnimation)", 1, true)
+        and string.find(controller, "Enum.AnimationPriority.Action4", 1, true),
+    "dodge must use a real Animator roll track"
 )
 assert(
-    string.find(controller, 'character:FindFirstChild("Animate")', 1, true)
-        and string.find(controller, "animate.Enabled = false", 1, true),
-    "roll must suppress the default run animation while moving"
+    string.find(controller, "CFrame.Angles(-spin", 1, true) == nil
+        and string.find(controller, "beginRollPose", 1, true) == nil,
+    "dodge must never front-flip the whole character or use the old procedural pose"
 )
 assert(
     string.find(controller, "local function rollSpeed", 1, true)

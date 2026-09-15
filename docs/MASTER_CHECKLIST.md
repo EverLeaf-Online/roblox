@@ -173,7 +173,7 @@
 - [x] Mouse/right-stick orbit camera foundation with camera collision.
 - [x] Sprint foundation (`Shift` / L3).
 - [x] Grounded jump foundation (`Space` / A).
-- [x] Dodge foundation (`Q` / B) upgraded to a server-authorized action-combat dodge: validated direction/cooldown/ground state, short server-owned i-frame window, normal-vs-dodge movement sanity caps, and a modern planar `LinearVelocity` mover so ground friction does not make dodge distance inconsistent.
+- [x] Dodge foundation (`Q` / B) uses the referenced DevForum roll-script pattern: a real high-priority Animator roll track plus short planar `LinearVelocity`, while preserving server-authoritative direction/cooldown/ground checks and i-frames. Experimental whole-character front-flip/procedural pose code has been removed; live Studio animation-asset/visual QA remains.
 - [x] Basic attack moved to left-click / R2.
 - [x] Server targeting converted from X/Y/Z-plane gates to 3D range + facing cone + LOS.
 - [x] Enemy pursuit converted to full XYZ movement.
