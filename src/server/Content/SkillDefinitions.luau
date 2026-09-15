@@ -124,7 +124,7 @@ return table.freeze({
         Prerequisites = table.freeze({
             table.freeze({ SkillId = "thornrunner_piercing_shot", Rank = 3 }),
         }),
-        PassiveBonuses = table.freeze({ CritChance = 0.6, CritPower = 1.5 }),
+        PassiveBonuses = table.freeze({ CritChance = 0.6, CritPower = 1.5, AttackSpeed = 0.8 }),
     }),
     lumenweaver_lumen_bolt = table.freeze({
         Id = "lumenweaver_lumen_bolt",
@@ -169,7 +169,7 @@ return table.freeze({
         Prerequisites = table.freeze({
             table.freeze({ SkillId = "lumenweaver_lumen_bolt", Rank = 3 }),
         }),
-        PassiveBonuses = table.freeze({ MaxMP = 10, CritChance = 0.4 }),
+        PassiveBonuses = table.freeze({ MaxMP = 10, CritChance = 0.4, AttackSpeed = 0.5 }),
     }),
     veilstrider_crosscut = table.freeze({
         Id = "veilstrider_crosscut",
@@ -213,7 +213,7 @@ return table.freeze({
         Prerequisites = table.freeze({
             table.freeze({ SkillId = "veilstrider_crosscut", Rank = 3 }),
         }),
-        PassiveBonuses = table.freeze({ CritChance = 0.8, CritPower = 2 }),
+        PassiveBonuses = table.freeze({ CritChance = 0.8, CritPower = 2, AttackSpeed = 1 }),
     }),
     brasshand_kinetic_burst = table.freeze({
         Id = "brasshand_kinetic_burst",

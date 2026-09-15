@@ -1,5 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local AttackCadenceMath = require(ReplicatedStorage.Shared.Math.AttackCadenceMath)
 local DerivedStatsMath = require(ReplicatedStorage.Shared.Math.DerivedStatsMath)
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
 local EquipmentService = require(script.Parent.EquipmentService)
@@ -13,7 +14,7 @@ local function totalCoreStat(profile, statName)
 end
 
 function DerivedStatsService.Compute(profile)
-    return DerivedStatsMath.Compute(
+    local derived = DerivedStatsMath.Compute(
         profile.Level,
         totalCoreStat(profile, "Might"),
         totalCoreStat(profile, "Finesse"),
@@ -31,6 +32,10 @@ function DerivedStatsService.Compute(profile)
                 + SkillBonusService.GetStatBonus(profile, "CritPower"),
         }
     )
+    local rawAttackSpeed = EquipmentService.GetStatBonus(profile, "AttackSpeed")
+        + SkillBonusService.GetStatBonus(profile, "AttackSpeed")
+    derived.AttackSpeed = AttackCadenceMath.ResolveBonus(rawAttackSpeed, GameConfig.Combat)
+    return derived
 end
 
 return DerivedStatsService

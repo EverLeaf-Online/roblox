@@ -18,4 +18,10 @@ assert(
 )
 assert(#Rules.Compare({}, {}) == 0, "statless definitions compare cleanly")
 
+local speed = Rules.Compare(
+    { Stats = { AttackPower = 5, AttackSpeed = 7 } },
+    { Stats = { AttackPower = 5, AttackSpeed = 2 } }
+)
+assert(#speed == 1 and speed[1].Stat == "AttackSpeed" and speed[1].Delta == 5, "speed comparison")
+
 print("equipment comparison tests passed")

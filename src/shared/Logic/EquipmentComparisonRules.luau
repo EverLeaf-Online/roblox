@@ -2,6 +2,7 @@ local EquipmentComparisonRules = {}
 
 local STAT_ORDER = table.freeze({
     "AttackPower",
+    "AttackSpeed",
     "Might",
     "Finesse",
     "Insight",

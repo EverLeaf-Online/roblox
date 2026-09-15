@@ -1242,11 +1242,12 @@ local function CharacterPanel(profile, invoke)
                     ZIndex = 5,
                 }),
                 CombatStats = React.createElement(Label, {
-                    Position = UDim2.new(1, -300, 0, 58),
-                    Size = UDim2.fromOffset(280, 18),
+                    Position = UDim2.new(1, -390, 0, 58),
+                    Size = UDim2.fromOffset(370, 18),
                     Text = string.format(
-                        "DEF %s  ·  CRIT %.1f%%  ·  CRIT DMG %.0f%%",
+                        "DEF %s  ·  ATK SPD %.1f%%  ·  CRIT %.1f%%  ·  CRIT DMG %.0f%%",
                         tostring(derived.Defense or "—"),
+                        tonumber(derived.AttackSpeed) or 0,
                         (tonumber(derived.CritChance) or 0) * 100,
                         (tonumber(derived.CritMultiplier) or 1) * 100
                     ),

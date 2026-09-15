@@ -342,7 +342,7 @@
 - [x] Player basic attacks and damaging skills now apply server-owned monster knockback/launch/stagger data with normal/elite/boss resistance tiers and per-monster override support; Studio feel tuning remains.
 - [x] Basic attacks and active skills surface no-target/out-of-range/projectile-blocked/missed/target-lost/timeout/cancelled feedback with local spam suppression.
 - [ ] Weapon-specific basic attacks.
-- [ ] Attack speed/cadence stat rules.
+- [x] Server-owned basic-attack cadence now scales from capped AttackSpeed equipment/passive bonuses with a hard cooldown floor; effective AttackSpeed is exposed in snapshots/UI and regression-tested.
 
 ## 9. Skills
 

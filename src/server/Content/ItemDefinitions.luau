@@ -12,7 +12,7 @@ return table.freeze({
         Type = "Equipment",
         EquipmentSlot = "Weapon",
         StackLimit = 1,
-        Stats = table.freeze({ AttackPower = 5, Finesse = 1 }),
+        Stats = table.freeze({ AttackPower = 5, Finesse = 1, AttackSpeed = 3 }),
         SellPrice = table.freeze({ Currency = "Shards", Amount = 6 }),
     }),
     mossguard_charm = table.freeze({
@@ -44,7 +44,7 @@ return table.freeze({
         RequiredAdvancementTier = 1,
         RequiredLevel = 8,
         StackLimit = 1,
-        Stats = table.freeze({ AttackPower = 7, Finesse = 2, CritChance = 1 }),
+        Stats = table.freeze({ AttackPower = 7, Finesse = 2, CritChance = 1, AttackSpeed = 5 }),
         SellPrice = table.freeze({ Currency = "Shards", Amount = 10 }),
     }),
     lumenweaver_focus = table.freeze({
@@ -56,7 +56,7 @@ return table.freeze({
         RequiredAdvancementTier = 1,
         RequiredLevel = 10,
         StackLimit = 1,
-        Stats = table.freeze({ AttackPower = 7, Insight = 2, CritChance = 1 }),
+        Stats = table.freeze({ AttackPower = 7, Insight = 2, CritChance = 1, AttackSpeed = 3 }),
         SellPrice = table.freeze({ Currency = "Shards", Amount = 11 }),
     }),
     veilstrider_twinknives = table.freeze({
@@ -68,7 +68,7 @@ return table.freeze({
         RequiredAdvancementTier = 1,
         RequiredLevel = 8,
         StackLimit = 1,
-        Stats = table.freeze({ AttackPower = 7, Fortune = 2, CritChance = 2 }),
+        Stats = table.freeze({ AttackPower = 7, Fortune = 2, CritChance = 2, AttackSpeed = 7 }),
         SellPrice = table.freeze({ Currency = "Shards", Amount = 10 }),
     }),
     brasshand_rivet_maul = table.freeze({
@@ -102,7 +102,13 @@ return table.freeze({
         RequiredAdvancementTier = 1,
         RequiredLevel = 10,
         StackLimit = 1,
-        Stats = table.freeze({ Finesse = 1, Fortune = 1, Defense = 3, CritChance = 1 }),
+        Stats = table.freeze({
+            Finesse = 1,
+            Fortune = 1,
+            Defense = 3,
+            CritChance = 1,
+            AttackSpeed = 2,
+        }),
         SellPrice = table.freeze({ Currency = "Shards", Amount = 14 }),
     }),
     emberloop_charm = table.freeze({
@@ -131,6 +137,7 @@ return table.freeze({
             Fortune = 1,
             Defense = 2,
             CritChance = 1,
+            AttackSpeed = 2,
         }),
         SellPrice = table.freeze({ Currency = "Shards", Amount = 24 }),
     }),
@@ -329,6 +336,7 @@ return table.freeze({
             Defense = 4,
             CritChance = 2,
             CritPower = 10,
+            AttackSpeed = 3,
         }),
         SellPrice = table.freeze({ Currency = "Shards", Amount = 50 }),
     }),

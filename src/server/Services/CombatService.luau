@@ -2,13 +2,16 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local ClassFamilyDefinitions = require(script.Parent.Parent.Content.ClassFamilyDefinitions)
+local AttackCadenceMath = require(ReplicatedStorage.Shared.Math.AttackCadenceMath)
 local DamageService = require(script.Parent.DamageService)
 local CombatHitboxService = require(script.Parent.CombatHitboxService)
 local EnemyService = require(script.Parent.EnemyService)
+local EquipmentService = require(script.Parent.EquipmentService)
 local MonsterCombat = require(script.Parent.MonsterCombat)
 local ProjectileService = require(script.Parent.ProjectileService)
 local ResourceService = require(script.Parent.ResourceService)
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
+local SkillBonusService = require(script.Parent.SkillBonusService)
 local TargetingService = require(script.Parent.TargetingService)
 
 local CombatService = {}
@@ -22,6 +25,11 @@ local function basicAttackDefinition(profile)
     local family = type(profile.FamilyId) == "string" and ClassFamilyDefinitions[profile.FamilyId]
         or nil
     local attack = family and family.BasicAttack or nil
+    local baseCooldown = attack and attack.Cooldown or GameConfig.Combat.BasicAttackCooldown
+    local attackSpeedBonus = EquipmentService.GetStatBonus(profile, "AttackSpeed")
+        + SkillBonusService.GetStatBonus(profile, "AttackSpeed")
+    local cooldown, appliedAttackSpeed =
+        AttackCadenceMath.ResolveCooldown(baseCooldown, attackSpeedBonus, GameConfig.Combat)
     return {
         PrimaryStat = family and family.PrimaryStat or "Might",
         Range = attack and attack.Range or GameConfig.Combat.BasicAttackRange,
@@ -34,7 +42,8 @@ local function basicAttackDefinition(profile)
             or GameConfig.Combat.BasicProjectileSpeed,
         ProjectileRadius = attack and attack.ProjectileRadius
             or GameConfig.Combat.BasicProjectileRadius,
-        Cooldown = attack and attack.Cooldown or GameConfig.Combat.BasicAttackCooldown,
+        Cooldown = cooldown,
+        AttackSpeed = appliedAttackSpeed,
         AttackPower = attack and attack.AttackPower or GameConfig.Combat.BeginnerAttackPower,
         StatScale = attack and attack.StatScale or GameConfig.Combat.BeginnerStatScale,
         Mastery = attack and attack.Mastery or GameConfig.Combat.DefaultMastery,

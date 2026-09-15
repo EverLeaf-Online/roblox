@@ -17,6 +17,12 @@ for itemId, definition in Items do
         type(definition.DisplayName) == "string" and definition.DisplayName ~= "",
         "item display name: " .. itemId
     )
+    local attackSpeed = definition.Stats and definition.Stats.AttackSpeed
+    assert(
+        attackSpeed == nil
+            or (type(attackSpeed) == "number" and attackSpeed >= 0 and attackSpeed <= 30),
+        "item AttackSpeed bonus valid: " .. itemId
+    )
     if definition.SellPrice then
         assert(currencies[definition.SellPrice.Currency], "valid sell currency: " .. itemId)
         assert(
