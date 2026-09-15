@@ -1,4 +1,3 @@
-local InsertService = game:GetService("InsertService")
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
@@ -56,59 +55,28 @@ local function ensureAtmosphere()
 end
 
 local function configureCreatorSkybox()
+    -- Third-party Creator Store assets are not guaranteed to be loadable by
+    -- InsertService from a group-owned experience even when they are free.
+    -- Prefer a Sky already inserted through Studio/Toolbox and never emit
+    -- runtime authorization errors for the registry candidate.
+    local existing = Lighting:FindFirstChild("EverLeafSky")
+    if existing and existing:IsA("Sky") then
+        return
+    end
+
+    local localSky = Lighting:FindFirstChildOfClass("Sky")
+    if localSky then
+        localSky.Name = "EverLeafSky"
+        return
+    end
+
     local entry = EnvironmentAssetRegistry.AnimeIslandSkybox
-    if
-        type(entry) ~= "table"
-        or entry.Status ~= "approved_for_sanitized_import"
-        or entry.Kind ~= "Sky"
-    then
+    if type(entry) ~= "table" or entry.Status ~= "manual_studio_import" then
         return
     end
 
-    local ok, containerOrError = pcall(function()
-        return InsertService:LoadAsset(entry.AssetId)
-    end)
-    if not ok then
-        warn(
-            string.format(
-                "[WorldVisualService] Could not load approved skybox %s (%s): %s",
-                tostring(entry.Name),
-                tostring(entry.AssetId),
-                tostring(containerOrError)
-            )
-        )
-        return
-    end
-
-    local sky = containerOrError:FindFirstChildWhichIsA("Sky", true)
-    if not sky then
-        containerOrError:Destroy()
-        warn(
-            string.format(
-                "[WorldVisualService] Approved skybox %s (%s) contained no Sky instance",
-                tostring(entry.Name),
-                tostring(entry.AssetId)
-            )
-        )
-        return
-    end
-
-    local safeSky = sky:Clone()
-    safeSky.Name = "EverLeafSky"
-    for _, child in Lighting:GetChildren() do
-        if child:IsA("Sky") then
-            child:Destroy()
-        end
-    end
-    safeSky.Parent = Lighting
-    containerOrError:Destroy()
-    print(
-        string.format(
-            "[WorldVisualService] Loaded visual-only skybox %s (%s)",
-            tostring(entry.Name),
-            tostring(entry.AssetId)
-        )
-    )
+    -- No Sky has been inserted yet. Keep EverLeaf's source-controlled lighting
+    -- and atmosphere rather than failing or attempting an unauthorized fetch.
 end
 
 local function configurePostProcessing()

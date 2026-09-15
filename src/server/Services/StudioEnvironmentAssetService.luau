@@ -1,5 +1,6 @@
 local InsertService = game:GetService("InsertService")
 local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
 
 local EnvironmentAssetRegistry = require(script.Parent.Parent.Content.EnvironmentAssetRegistry)
 local EnvironmentPrefabService = require(script.Parent.EnvironmentPrefabService)
@@ -98,6 +99,74 @@ local function collectVariantCandidates(container)
     return candidates
 end
 
+local function findManualStudioSource(entry)
+    if not RunService:IsStudio() or entry.Status ~= "manual_studio_import" then
+        return nil
+    end
+    local sourceName = entry.ManualSourceName or entry.Name
+    if type(sourceName) ~= "string" or sourceName == "" then
+        return nil
+    end
+    local source = Workspace:FindFirstChild(sourceName)
+    if source and (source:IsA("Model") or source:IsA("Folder")) then
+        return source
+    end
+    return nil
+end
+
+local function importManualVariantAsset(entry)
+    local source = findManualStudioSource(entry)
+    if not source then
+        return false
+    end
+    local prefix = entry.VariantPrefix
+    if type(prefix) ~= "string" or prefix == "" then
+        return false
+    end
+    if EnvironmentPrefabService.Get(prefix .. "01") then
+        source:Destroy()
+        return true
+    end
+
+    local container = source:Clone()
+    local candidates = collectVariantCandidates(container)
+    local maximum = math.max(1, tonumber(entry.MaxVariants) or 8)
+    local registeredCount = 0
+    for index = 1, math.min(#candidates, maximum) do
+        local visual = candidates[index]:Clone()
+        local prefabName = prefix .. string.format("%02d", index)
+        local registered = EnvironmentPrefabService.Register(prefabName, visual, entry.AssetId, {
+            AutoUpright = entry.AutoUpright == true,
+            GroundToPivot = entry.GroundToPivot == true,
+            Appearance = entry.Appearance,
+        })
+        if registered then
+            registeredCount += 1
+        else
+            visual:Destroy()
+        end
+    end
+    container:Destroy()
+    source:Destroy()
+
+    if registeredCount > 0 then
+        print(
+            string.format(
+                "[StudioEnvironmentAssetService] Consumed local Studio source %s into %d sanitized variants",
+                tostring(entry.Name),
+                registeredCount
+            )
+        )
+        return true
+    end
+    warn(
+        string.format(
+            "[StudioEnvironmentAssetService] Local Studio source %s contained no usable variants",
+            tostring(entry.Name)
+        )
+    )
+    return false
+end
 local function importVariantAsset(entry)
     local prefix = entry.VariantPrefix
     if type(prefix) ~= "string" or prefix == "" then
@@ -216,14 +285,18 @@ function StudioEnvironmentAssetService.Init()
     local inStudio = RunService:IsStudio()
 
     for _, entry in EnvironmentAssetRegistry do
-        local approved = entry.Status == "approved_for_sanitized_import"
-            or entry.Status == "approved_for_studio_sanitized_import"
-        local allowedHere = inStudio or entry.AllowRuntimeLoad == true
-        if approved and allowedHere then
-            if entry.VariantPrefix then
-                importVariantAsset(entry)
-            elseif entry.PrefabName then
-                importAsset(entry)
+        if inStudio and entry.Status == "manual_studio_import" and entry.VariantPrefix then
+            importManualVariantAsset(entry)
+        else
+            local approved = entry.Status == "approved_for_sanitized_import"
+                or entry.Status == "approved_for_studio_sanitized_import"
+            local allowedHere = inStudio or entry.AllowRuntimeLoad == true
+            if approved and allowedHere then
+                if entry.VariantPrefix then
+                    importVariantAsset(entry)
+                elseif entry.PrefabName then
+                    importAsset(entry)
+                end
             end
         end
     end
