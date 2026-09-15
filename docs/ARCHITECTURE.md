@@ -154,3 +154,4 @@ The canonical physical layer is full 3D. There is no fixed combat plane and no Z
 - `EnemyAIService` pursues targets in XYZ space; production enemies will graduate to pathfinding/navigation as maps become nontrivial.
 - `MovementSanityService` enforces locomotion limits without constraining players to a plane.
 - World art must assume StreamingEnabled-scale construction, modular environment kits, collision proxies, and measured mesh/material budgets.
+- Distant region/arena travel must pre-stream the registered destination with `Player:RequestStreamAroundAsync()` before the authoritative server teleport; prefetch failures are fail-open and streaming integrity protects unloaded destinations.

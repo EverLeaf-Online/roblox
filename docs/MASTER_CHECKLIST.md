@@ -110,6 +110,7 @@
 - [x] Brasshaven now has a regression-tested Level 10–30 route: Vale carries 10–20, Tamsin carries 20–24, and Rook carries 24–30 through the upper foundry to the Belforge gate.
 - [x] Brasshaven Foundry Threshold starter shell is physically reachable with a working return gate.
 - [x] Region travel now moves the character transactionally and updates the saved/current respawn target.
+- [x] Region/Belforge travel proactively streams registered destinations server-side before teleport; group arena entry prefetches members concurrently and travel remains fail-open on stream timeout.
 - [x] Dedicated full buy/sell shop screen implemented beyond dialogue preview buttons; Studio interaction/balance QA remains.
 - [x] Level-up feedback is implemented and the source-authored Lumenreach 1–10 + Brasshaven 10–30 quest route has no mandatory grind gap in regression tests; Studio combat/economy tuning remains.
 - [x] First advancement hook/location/quest flow implemented with Seren, the Proving Circle, The Five Paths, and five permanent family choices.
@@ -511,6 +512,7 @@
 - [x] Industrial-fantasy visual direction established in source: basalt/brick/metal, brass trim, heat/arc emissives, smoke, foundry machinery, and distinct district silhouettes.
 - [x] Playable procedural graybox/content shell expanded through the full Level 10–30 route; Studio player-height art/collision QA remains.
 - [x] Functional Lumenreach connection with transactional travel and saved regional respawn behavior.
+- [x] Workspace instance streaming policy is explicit (`64` min / `1024` target, `PauseOutsideLoadedArea`, opportunistic stream-out); Studio memory/streaming budget profiling remains open.
 - [x] Foundry roads, service spine, district floors/walls, encounter yards, vents, rails, dynamos, crucibles, flux vaults, runoff channels, and upper-foundry structures implemented.
 - [x] Lumenreach return transition plus gated Belforge antechamber/return transition implemented.
 - [x] Brasshaven progression NPCs/services implemented: Vale, Tamsin, Rook, Nera, and Cale.

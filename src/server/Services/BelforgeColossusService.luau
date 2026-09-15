@@ -372,10 +372,16 @@ function BelforgeColossusService.RespondPartyReadyCheck(player, accepted)
         return false, assemblyReason
     end
 
+    -- Stream the sealed arena to every ready member in parallel before moving
+    -- anyone. A slow member must not multiply group-entry latency by party size.
+    WorldTravelService.PreparePlayers(result.Members, "belforge_colossus_arena")
+
     local entered = {}
     for _, member in result.Members do
         local profile = PlayerDataService.Get(member)
-        local moved, moveReason = BelforgeColossusService.EnterArena(member, profile)
+        local moved, moveReason = BelforgeColossusService.EnterArena(member, profile, {
+            SkipStreamingPrefetch = true,
+        })
         if not moved then
             for _, enteredMember in entered do
                 BelforgeColossusService.LeaveArena(enteredMember)
@@ -390,7 +396,7 @@ function BelforgeColossusService.RespondPartyReadyCheck(player, accepted)
     return true, { Complete = true, Entered = true }
 end
 
-function BelforgeColossusService.EnterArena(player, profile)
+function BelforgeColossusService.EnterArena(player, profile, options)
     refreshCooldownState()
     local accessOk, accessReason = BelforgeAccessRules.CanEnterColossus(profile)
     if not accessOk then
@@ -411,7 +417,7 @@ function BelforgeColossusService.EnterArena(player, profile)
     encounter.Eliminated[player] = nil
     WorldTravelService.SetRespawn(player, "belforge_antechamber")
     local teleported, teleportReason =
-        WorldTravelService.Teleport(player, "belforge_colossus_arena")
+        WorldTravelService.Teleport(player, "belforge_colossus_arena", options)
     if not teleported and not isRegistered then
         encounter.Participants[player] = nil
         encounter.Eliminated[player] = nil

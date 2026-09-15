@@ -55,7 +55,11 @@
     "Workspace": {
       "$className": "Workspace",
       "$properties": {
-        "StreamingEnabled": true
+        "StreamingEnabled": true,
+        "StreamingMinRadius": 64,
+        "StreamingTargetRadius": 1024,
+        "StreamingIntegrityMode": "PauseOutsideLoadedArea",
+        "StreamOutBehavior": "Opportunistic"
       }
     },
     "MaterialService": {

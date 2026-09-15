@@ -33,6 +33,10 @@ GameConfig.Bosses = {
     "Belforge Colossus",
 }
 
+GameConfig.Streaming = {
+    PrefetchTimeoutSeconds = 3,
+}
+
 GameConfig.DataStore = {
     Name = "EverLeafPlayerData_v1",
     SchemaVersion = 3,
