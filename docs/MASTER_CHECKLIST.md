@@ -309,7 +309,7 @@
 
 ## 8. Combat — player attack
 
-- [ ] Replace instant ranged-basic resolution with server-simulated projectile travel/segment raycasts while keeping client projectiles presentation-only.
+- [x] Thornrunner/Lumenweaver basic attacks use server-simulated projectile travel with per-frame sphere/segment casts, terrain blocking, miss/target-loss outcomes, and presentation-only client projectiles; Studio feel/timing QA remains.
 
 ### Backend
 - [x] Basic-attack client controller exists.
@@ -329,6 +329,7 @@
 - [x] Procedural basic-attack animation foundation now drives R6/R15 shoulders, R15 elbows, and torso through a post-animation additive pose layer.
 - [ ] Facing-aware attack direction.
 - [x] Basic melee attack hitbox is server-owned and overlap-based; expand the same hurtbox contract to skills/enemy attacks as those systems are standardized.
+- [x] Projectile basics are server-simulated over travel time; terrain can block shots and moving targets can evade the fired line.
 - [ ] Hit-confirm feedback.
 - [ ] Floating damage numbers.
 - [ ] Hit sound.

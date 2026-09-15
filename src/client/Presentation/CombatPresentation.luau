@@ -373,7 +373,7 @@ local function handPosition(character, familyId)
     return hand and hand.Position or character:GetPivot().Position
 end
 
-local function projectile(startPosition, targetPosition, color, kind)
+local function projectile(startPosition, targetPosition, color, kind, speed)
     local delta = targetPosition - startPosition
     if delta.Magnitude < 0.1 then
         return
@@ -424,7 +424,10 @@ local function projectile(startPosition, targetPosition, color, kind)
     local targetCFrame = CFrame.lookAt(targetPosition, targetPosition + delta.Unit)
     local tween = TweenService:Create(
         shot,
-        TweenInfo.new(math.clamp(delta.Magnitude / 110, 0.08, 0.2), Enum.EasingStyle.Linear),
+        TweenInfo.new(
+            math.clamp(delta.Magnitude / math.max(1, speed or 110), 0.08, 0.45),
+            Enum.EasingStyle.Linear
+        ),
         { CFrame = targetCFrame }
     )
     tween:Play()
@@ -484,6 +487,24 @@ local function burstImpact(targetPosition, color, heavy)
     Debris:AddItem(core, 0.22)
 end
 
+local function launchRangedBasic(character, familyId)
+    local color = FAMILY_COLORS[familyId] or Color3.fromRGB(188, 216, 201)
+    local root = character:FindFirstChild("HumanoidRootPart")
+    if not root then
+        return
+    end
+    local startPosition = handPosition(character, familyId)
+    local distance = if familyId == "thornrunner" then 23 else 21
+    local targetPosition = startPosition + root.CFrame.LookVector * distance
+    projectile(
+        startPosition,
+        targetPosition,
+        color,
+        if familyId == "lumenweaver" then "orb" else "arrow",
+        if familyId == "lumenweaver" then 68 else 88
+    )
+end
+
 function CombatPresentation.GetBasicAttackDuration(familyId)
     local sequence = ATTACK_SEQUENCES[familyId] or ATTACK_SEQUENCES.default
     return sequence.Duration
@@ -495,6 +516,9 @@ function CombatPresentation.PlayBasicAttack(familyId)
         return
     end
     playSequence(character, familyId)
+    if familyId == "thornrunner" or familyId == "lumenweaver" then
+        launchRangedBasic(character, familyId)
+    end
 end
 
 function CombatPresentation.PlayHit(familyId, targetPosition, dodged)
@@ -506,21 +530,7 @@ function CombatPresentation.PlayHit(familyId, targetPosition, dodged)
         return
     end
     local color = FAMILY_COLORS[familyId] or Color3.fromRGB(188, 216, 201)
-    if familyId == "thornrunner" then
-        projectile(
-            handPosition(character, familyId),
-            targetPosition + Vector3.new(0, 1.4, 0),
-            color,
-            "arrow"
-        )
-    elseif familyId == "lumenweaver" then
-        projectile(
-            handPosition(character, familyId),
-            targetPosition + Vector3.new(0, 1.5, 0),
-            color,
-            "orb"
-        )
-    elseif familyId == "veilstrider" then
+    if familyId == "veilstrider" then
         slashImpact(targetPosition, color, true)
     elseif familyId == "brasshand" then
         burstImpact(targetPosition, color, true)

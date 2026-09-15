@@ -6,6 +6,7 @@ local DamageService = require(script.Parent.DamageService)
 local CombatHitboxService = require(script.Parent.CombatHitboxService)
 local EnemyService = require(script.Parent.EnemyService)
 local MonsterCombat = require(script.Parent.MonsterCombat)
+local ProjectileService = require(script.Parent.ProjectileService)
 local ResourceService = require(script.Parent.ResourceService)
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
 local TargetingService = require(script.Parent.TargetingService)
@@ -29,6 +30,10 @@ local function basicAttackDefinition(profile)
         ArcDegrees = attack and attack.ArcDegrees or GameConfig.Combat.BasicAttackArcDegrees,
         HitboxWidth = attack and attack.HitboxWidth or GameConfig.Combat.BasicAttackHitboxWidth,
         AttackMode = attack and attack.AttackMode or "Melee",
+        ProjectileSpeed = attack and attack.ProjectileSpeed
+            or GameConfig.Combat.BasicProjectileSpeed,
+        ProjectileRadius = attack and attack.ProjectileRadius
+            or GameConfig.Combat.BasicProjectileRadius,
         Cooldown = attack and attack.Cooldown or GameConfig.Combat.BasicAttackCooldown,
         AttackPower = attack and attack.AttackPower or GameConfig.Combat.BeginnerAttackPower,
         StatScale = attack and attack.StatScale or GameConfig.Combat.BeginnerStatScale,
@@ -75,7 +80,27 @@ function CombatService.BasicAttack(player, profile)
     if (targetRoot.Position - playerRoot.Position).Magnitude > attack.Range then
         return false, "out_of_range"
     end
+
     ResourceService.MarkCombat(player, profile)
+    local impactPosition = targetRoot.Position
+    if attack.AttackMode == "Projectile" then
+        local projectileTarget, projectileReason, projectileImpact =
+            ProjectileService.TraceToTarget(player, target, {
+                Range = attack.Range,
+                ProjectileSpeed = attack.ProjectileSpeed,
+                ProjectileRadius = attack.ProjectileRadius,
+            })
+        impactPosition = projectileImpact or impactPosition
+        if not projectileTarget then
+            return false, projectileReason or "projectile_missed"
+        end
+        target = projectileTarget
+        targetRoot = getRoot(target) or target.PrimaryPart
+        if not targetRoot then
+            return false, "target_unavailable"
+        end
+    end
+
     local damage, damageMeta = DamageService.RollBasicDamage(profile, {
         PrimaryStat = attack.PrimaryStat,
         AttackPower = attack.AttackPower,
@@ -105,7 +130,7 @@ function CombatService.BasicAttack(player, profile)
                     Damage = 0,
                     Dodged = true,
                     TargetHealth = math.max(0, targetHumanoid.Health),
-                    TargetPosition = targetRoot.Position,
+                    TargetPosition = impactPosition,
                 }
         end
         return false, hitResult
@@ -117,7 +142,7 @@ function CombatService.BasicAttack(player, profile)
             Damage = hitResult,
             Critical = damageMeta and damageMeta.Critical == true,
             TargetHealth = math.max(0, targetHumanoid.Health),
-            TargetPosition = targetRoot.Position,
+            TargetPosition = impactPosition,
         }
 end
 

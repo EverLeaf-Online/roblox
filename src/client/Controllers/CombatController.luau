@@ -23,6 +23,12 @@ local reasonText = {
     target_unavailable = "Target is unavailable",
     character_unavailable = "Character is unavailable",
     rate_limited = "Slow down",
+    projectile_blocked = "Shot blocked",
+    projectile_missed = "Shot missed",
+    projectile_target_lost = "Target moved out of the shot",
+    projectile_timeout = "Shot expired",
+    projectile_cancelled = "Shot cancelled",
+    projectile_unavailable = "Shot unavailable",
 }
 
 local function getCombatGui()
