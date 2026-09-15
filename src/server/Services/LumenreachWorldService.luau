@@ -2896,6 +2896,59 @@ local function makeTrailsideCluster(parent, position, yaw, seed)
     end
 end
 
+local function dressTravelCorridors(parent)
+    local segmentIndex = 0
+    for _, segment in TRAVEL_ROUTE_SEGMENTS do
+        segmentIndex += 1
+        local a = segment[1]
+        local b = segment[2]
+        local flatDelta = Vector3.new(b.X - a.X, 0, b.Z - a.Z)
+        local length = flatDelta.Magnitude
+        if length >= 24 then
+            local forward = flatDelta.Unit
+            local right = Vector3.new(-forward.Z, 0, forward.X)
+            local samples = math.clamp(math.floor(length / 44), 1, 3)
+            for sample = 1, samples do
+                local alpha = sample / (samples + 1)
+                local center = a:Lerp(b, alpha)
+                local alongJitter = (((segmentIndex * 17 + sample * 29) % 9) - 4) * 1.2
+                for _, side in { -1, 1 } do
+                    local seed = segmentIndex * 97 + sample * 31 + side * 13
+                    local edgeDistance = 17 + (math.abs(seed) % 4) * 1.4
+                    local edgePosition = center
+                        + right * side * edgeDistance
+                        + forward * alongJitter
+                    local selector = math.abs(seed) % 5
+                    if selector == 0 then
+                        makeFern(parent, edgePosition, 0.72 + (sample % 2) * 0.08, seed * 0.11)
+                    elseif selector == 1 then
+                        makeBush(parent, edgePosition, 0.62 + (segmentIndex % 3) * 0.05)
+                    elseif selector == 2 then
+                        makeGrassTuft(parent, edgePosition, 0.72)
+                    elseif selector == 3 then
+                        makeMushroomCluster(parent, edgePosition, 0.58, seed)
+                    else
+                        makeFlowerPatch(parent, edgePosition, 0.58, seed % 2 == 0)
+                    end
+
+                    if (segmentIndex + sample + side) % 3 == 0 then
+                        local treeDistance = 27 + (math.abs(seed) % 4) * 1.8
+                        local treePosition = center
+                            + right * side * treeDistance
+                            + forward * (alongJitter * 0.55)
+                        makeTree(
+                            parent,
+                            treePosition,
+                            0.7 + (math.abs(seed) % 4) * 0.05,
+                            (math.abs(seed) % 3) + 1
+                        )
+                    end
+                end
+            end
+        end
+    end
+end
+
 local function horizontalDistanceToSegment(point, a, b)
     local point2 = Vector2.new(point.X, point.Z)
     local a2 = Vector2.new(a.X, a.Z)
@@ -3122,22 +3175,22 @@ end
 
 local function decorate(world)
     -- A forest belt frames the whole map. Major clearings stay readable instead of being carpeted with props.
-    placeTreeArc(world, Vector3.zero, 365, 305, 20, 12, 336, 2)
-    placeTreeArc(world, WORLD_ZONES.Camp, 78, 59, 22, 104, 262, 7)
-    placeTreeArc(world, WORLD_ZONES.Crossroads, 57, 44, 16, 18, 320, 9)
-    placeTreeArc(world, WORLD_ZONES.Ruins, 78, 65, 12, -45, 285, 11)
-    placeTreeArc(world, WORLD_ZONES.CombatGrove, 96, 78, 15, 35, 285, 17)
-    placeTreeArc(world, WORLD_ZONES.Glowmere, 91, 72, 12, 5, 320, 23)
-    placeTreeArc(world, WORLD_ZONES.Waterfall, 82, 68, 11, 100, 250, 31)
-    placeTreeArc(world, WORLD_ZONES.Overlook, 82, 62, 10, 10, 315, 37)
+    placeTreeArc(world, Vector3.zero, 365, 305, 28, 12, 336, 2)
+    placeTreeArc(world, WORLD_ZONES.Camp, 78, 59, 26, 104, 262, 7)
+    placeTreeArc(world, WORLD_ZONES.Crossroads, 57, 44, 20, 18, 320, 9)
+    placeTreeArc(world, WORLD_ZONES.Ruins, 78, 65, 16, -45, 285, 11)
+    placeTreeArc(world, WORLD_ZONES.CombatGrove, 96, 78, 18, 35, 285, 17)
+    placeTreeArc(world, WORLD_ZONES.Glowmere, 91, 72, 16, 5, 320, 23)
+    placeTreeArc(world, WORLD_ZONES.Waterfall, 82, 68, 14, 100, 250, 31)
+    placeTreeArc(world, WORLD_ZONES.Overlook, 82, 62, 14, 10, 315, 37)
 
-    dressZoneEdge(world, WORLD_ZONES.Camp, 61, 44, 20, 3)
-    dressZoneEdge(world, WORLD_ZONES.Crossroads, 42, 31, 16, 7)
-    dressZoneEdge(world, WORLD_ZONES.Ruins, 61, 48, 12, 11)
-    dressZoneEdge(world, WORLD_ZONES.CombatGrove, 72, 58, 14, 15)
-    dressZoneEdge(world, WORLD_ZONES.Glowmere, 67, 52, 15, 19)
-    dressZoneEdge(world, WORLD_ZONES.Waterfall, 61, 48, 13, 23)
-    dressZoneEdge(world, WORLD_ZONES.Overlook, 60, 44, 10, 29)
+    dressZoneEdge(world, WORLD_ZONES.Camp, 61, 44, 26, 3)
+    dressZoneEdge(world, WORLD_ZONES.Crossroads, 42, 31, 20, 7)
+    dressZoneEdge(world, WORLD_ZONES.Ruins, 61, 48, 16, 11)
+    dressZoneEdge(world, WORLD_ZONES.CombatGrove, 72, 58, 18, 15)
+    dressZoneEdge(world, WORLD_ZONES.Glowmere, 67, 52, 19, 19)
+    dressZoneEdge(world, WORLD_ZONES.Waterfall, 61, 48, 17, 23)
+    dressZoneEdge(world, WORLD_ZONES.Overlook, 60, 44, 14, 29)
 
     -- Fill the spaces between destinations with continuous forest instead of open grass fields.
     local forestPatches = {
@@ -3216,6 +3269,11 @@ local function decorate(world)
     for _, pocket in habitatPockets do
         makeHabitatPocket(world, pocket[1], pocket[2], pocket[3])
     end
+
+    -- Keep the main travel lanes readable while filling the immediate
+    -- foreground and midground on both sides. This makes traversal feel like
+    -- moving through a living forest instead of crossing large empty fields.
+    dressTravelCorridors(world)
 
     -- Rock shelves and exposed faces make the new interior ridges legible at
     -- player height. These are deliberately inside the region, not on its border.
