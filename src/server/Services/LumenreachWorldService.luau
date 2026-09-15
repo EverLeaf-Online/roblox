@@ -581,7 +581,14 @@ local function makeMossyRockSet(parent, position, yaw, scale)
         -0.08
     )
     if prefab then
-        setInstanceCollision(prefab, true)
+        -- Mossy rock sets are dressing, not traversal geometry. Imported mesh
+        -- collision is too irregular for reliable player-height movement.
+        setInstanceCollision(prefab, false)
+        for _, descendant in prefab:GetDescendants() do
+            if descendant:IsA("BasePart") then
+                descendant.CanQuery = false
+            end
+        end
         return prefab
     end
     return nil
@@ -600,7 +607,12 @@ local function makeRockFace(parent, position, yaw, scale)
         prefabScaleForLongest("RockFace", 16, scale)
     )
     if prefab then
-        setInstanceCollision(prefab, true)
+        setInstanceCollision(prefab, false)
+        for _, descendant in prefab:GetDescendants() do
+            if descendant:IsA("BasePart") then
+                descendant.CanQuery = false
+            end
+        end
     end
 
     local supportSpecs = {
@@ -624,7 +636,20 @@ local function makeRockFace(parent, position, yaw, scale)
         rock.Color = if index % 2 == 0
             then Color3.fromRGB(98, 105, 101)
             else Color3.fromRGB(88, 97, 94)
+        rock.CanCollide = false
+        rock.CanTouch = false
+        rock.CanQuery = false
     end
+
+    -- The authored silhouette stays visual-only while one broad hidden blocker
+    -- provides predictable cliff collision. This mirrors the landmark-specific
+    -- collision policy used by Veilfall, Sunmoss, and the Shattered Arch.
+    makeCollisionProxy(
+        model,
+        "IntegratedRockFaceCollision",
+        Vector3.new(13.5, 8.0, 8.0) * scale,
+        base * CFrame.new(0, 3.8 * scale, 1.2 * scale)
+    )
 
     local mossShelf = makeBall(
         model,
@@ -636,6 +661,7 @@ local function makeRockFace(parent, position, yaw, scale)
     )
     mossShelf.CanCollide = false
     mossShelf.CanTouch = false
+    mossShelf.CanQuery = false
 
     return model
 end
