@@ -237,6 +237,21 @@ local function setInstanceCollision(instance, enabled)
     end
 end
 
+local function setRenderOnly(instance)
+    if instance:IsA("BasePart") then
+        instance.CanCollide = false
+        instance.CanTouch = false
+        instance.CanQuery = false
+    end
+    for _, descendant in instance:GetDescendants() do
+        if descendant:IsA("BasePart") then
+            descendant.CanCollide = false
+            descendant.CanTouch = false
+            descendant.CanQuery = false
+        end
+    end
+end
+
 local function terrainSurfacePosition(position, offsetY)
     local terrain = Workspace:FindFirstChildOfClass("Terrain")
     if not terrain then
@@ -763,7 +778,7 @@ local function makeWaystone(parent, position, yaw, scale)
         Color3.fromRGB(78, 88, 82)
     )
     useMaterialVariant(foot, "MossyRock")
-    local pillar = makePart(
+    makePart(
         model,
         "Waystone",
         Vector3.new(1.8, 4.6, 1.2) * scale,
@@ -785,7 +800,14 @@ local function makeWaystone(parent, position, yaw, scale)
     light.Brightness = 0.45
     light.Range = 7 * scale
     light.Parent = rune
-    pillar.CanTouch = false
+
+    setRenderOnly(model)
+    makeCollisionProxy(
+        model,
+        "WaystoneCollision",
+        Vector3.new(1.95, 4.8, 1.45) * scale,
+        base * CFrame.new(0, 2.4 * scale, 0)
+    )
     return model
 end
 
@@ -899,6 +921,13 @@ local function makeSupplyStack(parent, position, yaw)
         strap.CanCollide = false
     end
 
+    setRenderOnly(model)
+    makeCollisionProxy(
+        model,
+        "SupplyCollision",
+        Vector3.new(7.0, 3.0, 4.6),
+        base * CFrame.new(0.65, 1.5, 0.35)
+    )
     return model
 end
 
@@ -1002,6 +1031,13 @@ local function makeSignpost(parent, position, yaw, primaryText, secondaryText)
     light.Range = 7
     light.Parent = cap
 
+    setRenderOnly(model)
+    makeCollisionProxy(
+        model,
+        "SignpostCollision",
+        Vector3.new(0.78, 8.7, 0.78),
+        base * CFrame.new(0, 4.35, 0)
+    )
     return model
 end
 
@@ -1481,6 +1517,13 @@ local function makeCampBench(parent, position, yaw)
             Color3.fromRGB(69, 50, 35)
         )
     end
+    setRenderOnly(model)
+    makeCollisionProxy(
+        model,
+        "BenchCollision",
+        Vector3.new(5.8, 1.5, 1.7),
+        base * CFrame.new(0, 0.75, 0)
+    )
     return model
 end
 
@@ -1539,6 +1582,13 @@ local function makeMapTable(parent, position, yaw)
         )
         marker.CanCollide = false
     end
+    setRenderOnly(model)
+    makeCollisionProxy(
+        model,
+        "MapTableCollision",
+        Vector3.new(6.35, 3.2, 3.95),
+        base * CFrame.new(0, 1.6, 0)
+    )
     return model
 end
 
@@ -1587,6 +1637,15 @@ local function makeCampBanner(parent, position, yaw)
         Color3.fromRGB(97, 218, 181)
     )
     rune.CanCollide = false
+    setRenderOnly(model)
+    for _, x in { -2.7, 2.7 } do
+        makeCollisionProxy(
+            model,
+            "BannerPostCollision",
+            Vector3.new(0.58, 7.7, 0.58),
+            base * CFrame.new(x, 3.85, 0)
+        )
+    end
     return model
 end
 
@@ -1697,6 +1756,14 @@ local function makeLantern(parent, position, yaw)
     light.Range = 18
     light.Shadows = true
     light.Parent = glow
+
+    setRenderOnly(model)
+    makeCollisionProxy(
+        model,
+        "LanternPostCollision",
+        Vector3.new(0.72, 8.9, 0.72),
+        base * CFrame.new(0, 4.45, 0)
+    )
     return model
 end
 
@@ -1727,7 +1794,31 @@ local function makeBridge(parent, position, yaw, length, width)
             Enum.Material.Wood,
             if index % 4 == 0 then darkWood else wood
         )
+        plank.CanCollide = false
         plank.CanTouch = false
+        plank.CanQuery = false
+    end
+
+    -- Visible planks are deliberately irregular for silhouette, but traversal
+    -- rides on a small set of overlapping smooth deck segments. This removes
+    -- seam/rise snagging while keeping the slight authored bridge crown.
+    local deckSegments = math.max(3, math.min(6, math.floor(length / 12) + 3))
+    local deckSegmentLength = length / deckSegments
+    for segmentIndex = 1, deckSegments do
+        local alpha = (segmentIndex - 0.5) / deckSegments
+        local z = -length * 0.5 + alpha * length
+        local rise = math.sin(alpha * math.pi) * 0.55
+        local previousAlpha = math.max(0, alpha - 0.5 / deckSegments)
+        local nextAlpha = math.min(1, alpha + 0.5 / deckSegments)
+        local previousRise = math.sin(previousAlpha * math.pi) * 0.55
+        local nextRise = math.sin(nextAlpha * math.pi) * 0.55
+        local pitch = -math.atan2(nextRise - previousRise, deckSegmentLength)
+        makeCollisionProxy(
+            model,
+            "BridgeDeckCollision",
+            Vector3.new(math.max(1, width - 0.55), 0.42, deckSegmentLength + 0.32),
+            base * CFrame.new(0, 0.72 + rise, z) * CFrame.Angles(pitch, 0, 0)
+        )
     end
 
     for _, side in { -1, 1 } do
