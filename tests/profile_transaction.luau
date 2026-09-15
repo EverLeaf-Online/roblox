@@ -25,3 +25,11 @@ assert(
 )
 
 print("profile transaction tests passed")
+
+local beforeLevel = profile.Level
+local throwOk, throwReason = ProfileTransaction.Run(profile, function(working)
+    working.Level = 999
+    error("forced transaction error")
+end)
+assert(not throwOk and throwReason == "transaction_error", "thrown transaction fails closed")
+assert(profile.Level == beforeLevel, "thrown transaction cannot partially commit")

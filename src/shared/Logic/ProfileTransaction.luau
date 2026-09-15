@@ -25,7 +25,10 @@ function ProfileTransaction.Run(profile, mutate)
         return false, "invalid_transaction"
     end
     local working = deepCopy(profile)
-    local ok, result, extra = mutate(working)
+    local callOk, ok, result, extra = pcall(mutate, working)
+    if not callOk then
+        return false, "transaction_error", tostring(ok)
+    end
     if not ok then
         return false, result, extra
     end

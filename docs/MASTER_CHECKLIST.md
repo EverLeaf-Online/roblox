@@ -617,7 +617,7 @@
 - [x] NPC/shop interaction sessions fail closed on expiry, ID mismatch, stale world objects, and out-of-range actions.
 - [ ] Audit every future remote for type/range/state validation.
 - [x] Movement speed and displacement/teleport sanity checks foundation.
-- [ ] Inventory/equipment dupe tests.
+- [x] Inventory/equipment dupe invariant tests cover capacity/stack failures, over-removal, equip swap conservation, full-inventory unequip rollback, thrown transaction rollback, and deterministic add/remove fuzzing.
 - [ ] Currency/economy abuse tests.
 - [ ] Quest/reward replay abuse tests.
 - [ ] Trading dupe/rollback tests if trading exists.
