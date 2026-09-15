@@ -131,7 +131,11 @@ function WorldTravelService.Teleport(player, spawnId, options)
         WorldTravelService.Prepare(player, spawnId)
     end
 
-    WorldTravelService.SetRespawn(player, spawnId)
+    local respawnSpawnId = options.RespawnSpawnId or spawnId
+    local respawnOk, respawnReason = WorldTravelService.SetRespawn(player, respawnSpawnId)
+    if not respawnOk then
+        return false, respawnReason
+    end
     MovementSanityService.AllowTeleport(player)
     root.AssemblyLinearVelocity = Vector3.zero
     root.AssemblyAngularVelocity = Vector3.zero

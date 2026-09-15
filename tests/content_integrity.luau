@@ -7,16 +7,23 @@ local Npcs = require("../src/server/Content/NpcDefinitions")
 local Regions = require("../src/server/Content/RegionDefinitions")
 local Portals = require("../src/server/Content/PortalDefinitions")
 local Bosses = require("../src/server/Content/BossDefinitions")
+local Instances = require("../src/server/Content/InstanceDefinitions")
 local Skills = require("../src/server/Content/SkillDefinitions")
 local Families = require("../src/server/Content/ClassFamilyDefinitions")
 local MonsterConfig = require("../src/server/Content/MonsterConfig")
 local EquipmentTypeRules = require("../src/shared/Logic/EquipmentTypeRules")
+local PartyInstanceRules = require("../src/shared/Logic/PartyInstanceRules")
 local WeaponCombatProfiles = require("../src/shared/WeaponCombatProfiles")
 local StatusEffectDefinitions = require("../src/shared/StatusEffectDefinitions")
 local StatusEffectRules = require("../src/shared/Logic/StatusEffectRules")
 local SkillTargetingRules = require("../src/shared/Logic/SkillTargetingRules")
 local SkillPresentationRules = require("../src/shared/Logic/SkillPresentationRules")
 local currencies = { Shards = true, Marks = true }
+
+for instanceId, definition in Instances do
+    local ok, reason = PartyInstanceRules.ValidateDefinition(instanceId, definition)
+    assert(ok, string.format("instance %s valid: %s", instanceId, tostring(reason)))
+end
 
 for effectId, definition in StatusEffectDefinitions do
     local ok, reason = StatusEffectRules.ValidateDefinition(effectId, definition)

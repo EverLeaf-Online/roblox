@@ -584,7 +584,7 @@
 - [x] Runtime party-state foundation (create/add/leave/leader handoff).
 - [x] Production party UI implemented: incoming invites, create/accept/decline/invite/kick/leave controls, live member roster, leader state, and compact live-HP party HUD.
 - [x] Shared/individual combat reward rules: normal/elites use contribution-qualified, damage-weighted EXP/currency sharing with exact pool conservation and top-contributor loot ownership; bosses retain threshold-qualified full personal rewards and personal loot rolls; AFK/no-contribution party leeching is not rewarded.
-- [ ] Generic instance/party teleport flow; Belforge now has a source-complete party ready-check and synchronized group-entry path.
+- [x] Generic same-server party-instance travel foundation: data-driven entry/destination/return spawns, min/max roster rules, assembly radius, ready-check timing, concurrent destination prefetch, group move, and rollback-on-partial-failure; Belforge is the first consumer. Cross-server reserved-place teleporting remains future expansion if needed.
 - [ ] Trading design decision.
 - [ ] Secure trading if approved.
 - [ ] Social/profile inspection.

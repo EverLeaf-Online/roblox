@@ -7,13 +7,14 @@ local TweenService = game:GetService("TweenService")
 local Workspace = game:GetService("Workspace")
 
 local BossDefinitions = require(script.Parent.Parent.Content.BossDefinitions)
+local InstanceDefinitions = require(script.Parent.Parent.Content.InstanceDefinitions)
 local BelforgeAccessRules = require(ReplicatedStorage.Shared.Logic.BelforgeAccessRules)
 local BelforgeColossusRules = require(ReplicatedStorage.Shared.Logic.BelforgeColossusRules)
 local BelforgeEncounterRules = require(ReplicatedStorage.Shared.Logic.BelforgeEncounterRules)
 local MonsterSpawnService = require(script.Parent.MonsterSpawnService)
+local PartyInstanceService = require(script.Parent.PartyInstanceService)
 local PartyService = require(script.Parent.PartyService)
 local PlayerDamageService = require(script.Parent.PlayerDamageService)
-local PlayerDataService = require(script.Parent.PlayerDataService)
 local WorldTravelService = require(script.Parent.WorldTravelService)
 
 local BelforgeColossusService = {}
@@ -23,8 +24,7 @@ local accumulator = 0
 local ENCOUNTER_TRIGGER = "BelforgeColossusEncounter"
 local MAX_PLAYERS = BossDefinitions.belforge_colossus.MaxPlayers
 local WIPE_RESET_SECONDS = 8
-local READY_CHECK_SECONDS = 20
-local ASSEMBLY_RADIUS = 72
+local INSTANCE = InstanceDefinitions.belforge_colossus
 local encounter = {
     State = "Open",
     Participants = {},
@@ -279,38 +279,16 @@ local function wipeIfNeeded()
 end
 
 local function validatePartyAssembly(party)
-    if not party or not party.Leader or #party.Members < 2 then
+    if not party or not party.Leader then
         return false, "party_too_small"
     end
     if #party.Members + participantCount() > MAX_PLAYERS then
         return false, "encounter_full"
     end
-
-    local antechamber = WorldTravelService.GetSpawn("belforge_antechamber")
-    if not antechamber then
-        return false, "spawn_unavailable"
-    end
-
-    for _, member in party.Members do
-        if member.Parent ~= Players then
-            return false, "party_member_unavailable"
-        end
-        local profile = PlayerDataService.Get(member)
+    return PartyInstanceService.ValidateAssembly(party, party.Leader, INSTANCE, function(_, profile)
         local allowed = BelforgeAccessRules.CanEnterColossus(profile)
-        if not allowed then
-            return false, "party_member_ineligible"
-        end
-        local character = member.Character
-        local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-        local root = character and character:FindFirstChild("HumanoidRootPart")
-        if not humanoid or humanoid.Health <= 0 or not root then
-            return false, "party_member_unavailable"
-        end
-        if (root.Position - antechamber.Position).Magnitude > ASSEMBLY_RADIUS then
-            return false, "party_not_assembled"
-        end
-    end
-    return true
+        return allowed, allowed and nil or "party_member_ineligible"
+    end)
 end
 
 function BelforgeColossusService.StartPartyReadyCheck(player, profile)
@@ -335,7 +313,7 @@ function BelforgeColossusService.StartPartyReadyCheck(player, profile)
     if not assembled then
         return false, assemblyReason
     end
-    return PartyService.StartReadyCheck(player, BOSS_ID, READY_CHECK_SECONDS)
+    return PartyService.StartReadyCheck(player, INSTANCE.Purpose, INSTANCE.ReadyCheckSeconds)
 end
 
 function BelforgeColossusService.RequestEntry(player, profile)
@@ -354,7 +332,7 @@ function BelforgeColossusService.RespondPartyReadyCheck(player, accepted)
     if not result.Complete then
         return true, result
     end
-    if result.Purpose ~= BOSS_ID then
+    if result.Purpose ~= INSTANCE.Purpose then
         PartyService.NotifyReadyCheckOutcome(result.Party, false, "invalid_ready_check")
         return false, "invalid_ready_check"
     end
@@ -372,28 +350,23 @@ function BelforgeColossusService.RespondPartyReadyCheck(player, accepted)
         return false, assemblyReason
     end
 
-    -- Stream the sealed arena to every ready member in parallel before moving
-    -- anyone. A slow member must not multiply group-entry latency by party size.
-    WorldTravelService.PreparePlayers(result.Members, "belforge_colossus_arena")
-
-    local entered = {}
-    for _, member in result.Members do
-        local profile = PlayerDataService.Get(member)
-        local moved, moveReason = BelforgeColossusService.EnterArena(member, profile, {
-            SkipStreamingPrefetch = true,
-        })
-        if not moved then
-            for _, enteredMember in entered do
-                BelforgeColossusService.LeaveArena(enteredMember)
-            end
-            PartyService.NotifyReadyCheckOutcome(result.Party, false, moveReason)
-            return false, moveReason
+    local moved, moveResult = PartyInstanceService.EnterGroup(
+        result.Members,
+        INSTANCE,
+        function(member, profile, travelOptions)
+            return BelforgeColossusService.EnterArena(member, profile, travelOptions)
+        end,
+        function(member)
+            return BelforgeColossusService.LeaveArena(member)
         end
-        table.insert(entered, member)
+    )
+    if not moved then
+        PartyService.NotifyReadyCheckOutcome(result.Party, false, moveResult)
+        return false, moveResult
     end
 
     PartyService.NotifyReadyCheckOutcome(result.Party, true, "belforge_entry")
-    return true, { Complete = true, Entered = true }
+    return true, { Complete = true, Entered = true, Count = moveResult.Count }
 end
 
 function BelforgeColossusService.EnterArena(player, profile, options)
@@ -415,9 +388,10 @@ function BelforgeColossusService.EnterArena(player, profile, options)
 
     encounter.Participants[player] = true
     encounter.Eliminated[player] = nil
-    WorldTravelService.SetRespawn(player, "belforge_antechamber")
+    options = table.clone(options or {})
+    options.RespawnSpawnId = INSTANCE.ReturnSpawnId
     local teleported, teleportReason =
-        WorldTravelService.Teleport(player, "belforge_colossus_arena", options)
+        WorldTravelService.Teleport(player, INSTANCE.DestinationSpawnId, options)
     if not teleported and not isRegistered then
         encounter.Participants[player] = nil
         encounter.Eliminated[player] = nil
@@ -435,7 +409,7 @@ function BelforgeColossusService.LeaveArena(player)
             encounter.Eliminated[player] = nil
         end
     end
-    return WorldTravelService.Teleport(player, "belforge_antechamber")
+    return WorldTravelService.Teleport(player, INSTANCE.ReturnSpawnId)
 end
 
 function BelforgeColossusService.GetEncounterState()
