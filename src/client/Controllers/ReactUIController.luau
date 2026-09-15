@@ -22,6 +22,7 @@ local AdvancementOverlay = require(script.Parent.Parent.UI.Components.Advancemen
 local ShopOverlay = require(script.Parent.Parent.UI.Components.ShopOverlay)
 local ToastStack = require(script.Parent.Parent.UI.Components.ToastStack)
 local EquipmentEligibilityRules = require(ReplicatedStorage.Shared.Logic.EquipmentEligibilityRules)
+local EquipmentComparisonRules = require(ReplicatedStorage.Shared.Logic.EquipmentComparisonRules)
 local Net = require(ReplicatedStorage.Shared.Net)
 local ProgressionMath = require(ReplicatedStorage.Shared.Math.ProgressionMath)
 
@@ -1421,8 +1422,8 @@ local function InventoryPanel(
             React.createElement(
                 "Frame",
                 {
-                    Position = UDim2.fromOffset(0, (index - 1) * 29),
-                    Size = UDim2.new(1, 0, 0, 27),
+                    Position = UDim2.fromOffset(0, (index - 1) * 23),
+                    Size = UDim2.new(1, 0, 0, 21),
                     BackgroundColor3 = COLORS.PanelRaised,
                     BackgroundTransparency = 0.14,
                     BorderSizePixel = 0,
@@ -1431,7 +1432,7 @@ local function InventoryPanel(
                 withChrome({
                     Slot = React.createElement(Label, {
                         Position = UDim2.fromOffset(10, 0),
-                        Size = UDim2.fromOffset(72, 27),
+                        Size = UDim2.fromOffset(72, 21),
                         Text = string.upper(slotName),
                         TextSize = 8,
                         Bold = true,
@@ -1449,7 +1450,7 @@ local function InventoryPanel(
                     Unequip = definition and React.createElement(Button, {
                         AnchorPoint = Vector2.new(1, 0.5),
                         Position = UDim2.new(1, -5, 0.5, 0),
-                        Size = UDim2.fromOffset(38, 23),
+                        Size = UDim2.fromOffset(34, 18),
                         Text = "×",
                         TextSize = 12,
                         Tone = "danger",
@@ -1488,13 +1489,57 @@ local function InventoryPanel(
             )
         else "Choose an inventory item to inspect it."
     local statsText = itemStatsText(selectedDefinition)
+    local equippedComparisonDefinition = nil
+    local comparisonEntries = {}
+    if selectedDefinition and selectedDefinition.Type == "Equipment" then
+        local equipmentSlot = selectedDefinition.EquipmentSlot
+        local equippedItemId = equipmentSlot and equipment[equipmentSlot]
+        equippedComparisonDefinition = equippedItemId
+                and equippedItemId ~= ""
+                and catalog.Items
+                and catalog.Items[equippedItemId]
+            or nil
+        comparisonEntries =
+            EquipmentComparisonRules.Compare(selectedDefinition, equippedComparisonDefinition)
+    end
+    local comparisonChildren = {}
+    for index, entry in comparisonEntries do
+        if index > 8 then
+            break
+        end
+        local column = (index - 1) % 2
+        local row = math.floor((index - 1) / 2)
+        comparisonChildren["Delta_" .. tostring(entry.Stat)] = React.createElement(Label, {
+            Position = UDim2.fromOffset(column * 111, row * 12),
+            Size = UDim2.fromOffset(108, 12),
+            Text = StatText.FormatDelta(entry.Stat, entry.Delta),
+            TextSize = 7,
+            Bold = true,
+            Color = entry.Delta > 0 and COLORS.Accent or COLORS.Danger,
+            ZIndex = 7,
+        })
+    end
+    if
+        #comparisonEntries == 0
+        and selectedDefinition
+        and selectedDefinition.Type == "Equipment"
+    then
+        comparisonChildren.NoChange = React.createElement(Label, {
+            Size = UDim2.fromOffset(220, 20),
+            Text = equippedComparisonDefinition and "No stat change"
+                or "No stat bonuses to compare",
+            TextSize = 8,
+            Color = COLORS.Faint,
+            ZIndex = 7,
+        })
+    end
 
     local action = nil
     if selectedDefinition and selectedRow then
         if selectedDefinition.Type == "Equipment" then
             action = React.createElement(Button, {
                 Position = UDim2.fromOffset(0, 0),
-                Size = UDim2.fromOffset(136, 30),
+                Size = UDim2.fromOffset(136, 28),
                 Text = equipEligible and "EQUIP" or (EQUIPMENT_LOCK_TEXT[equipReason] or "LOCKED"),
                 Tone = equipEligible and "accent" or nil,
                 Active = equipEligible,
@@ -1510,7 +1555,7 @@ local function InventoryPanel(
         elseif selectedDefinition.Type == "Consumable" then
             action = React.createElement(Button, {
                 Position = UDim2.fromOffset(0, 0),
-                Size = UDim2.fromOffset(136, 30),
+                Size = UDim2.fromOffset(136, 28),
                 Text = "USE",
                 Tone = "accent",
                 OnActivated = function()
@@ -1556,7 +1601,7 @@ local function InventoryPanel(
         }, withChrome(listChildren, 10, COLORS.Border, 0.55, 1)),
         Details = React.createElement(Panel, {
             Position = UDim2.fromOffset(348, 0),
-            Size = UDim2.fromOffset(250, 158),
+            Size = UDim2.fromOffset(250, 214),
             BackgroundColor3 = COLORS.PanelRaised,
             Children = {
                 Kicker = React.createElement(Label, {
@@ -1578,8 +1623,8 @@ local function InventoryPanel(
                     ZIndex = 6,
                 }),
                 DetailsText = React.createElement(Label, {
-                    Position = UDim2.fromOffset(14, 62),
-                    Size = UDim2.new(1, -28, 0, 38),
+                    Position = UDim2.fromOffset(14, 59),
+                    Size = UDim2.new(1, -28, 0, 28),
                     Text = details,
                     TextSize = 10,
                     Wrapped = true,
@@ -1588,7 +1633,7 @@ local function InventoryPanel(
                     ZIndex = 6,
                 }),
                 Stats = React.createElement(Label, {
-                    Position = UDim2.fromOffset(14, 100),
+                    Position = UDim2.fromOffset(14, 87),
                     Size = UDim2.new(1, -28, 0, 22),
                     Text = statsText ~= "" and statsText or "No stat bonuses",
                     TextSize = 9,
@@ -1596,9 +1641,29 @@ local function InventoryPanel(
                     Wrapped = true,
                     ZIndex = 6,
                 }),
+                CompareTitle = React.createElement(Label, {
+                    Position = UDim2.fromOffset(14, 109),
+                    Size = UDim2.new(1, -28, 0, 14),
+                    Text = selectedDefinition
+                            and selectedDefinition.Type == "Equipment"
+                            and (equippedComparisonDefinition and ("VS " .. string.upper(
+                                equippedComparisonDefinition.DisplayName or "EQUIPPED"
+                            )) or "VS EMPTY SLOT")
+                        or "",
+                    TextSize = 7,
+                    Bold = true,
+                    Color = COLORS.Muted,
+                    ZIndex = 6,
+                }),
+                Compare = React.createElement("Frame", {
+                    Position = UDim2.fromOffset(14, 124),
+                    Size = UDim2.new(1, -28, 0, 48),
+                    BackgroundTransparency = 1,
+                    ZIndex = 6,
+                }, comparisonChildren),
                 Requirement = React.createElement(Label, {
-                    Position = UDim2.fromOffset(14, 119),
-                    Size = UDim2.new(1, -28, 0, 16),
+                    Position = UDim2.fromOffset(14, 173),
+                    Size = UDim2.new(1, -28, 0, 12),
                     Text = selectedDefinition
                             and selectedDefinition.Type == "Equipment"
                             and (equipEligible and "Requirements met" or requirementText)
@@ -1609,15 +1674,15 @@ local function InventoryPanel(
                     ZIndex = 6,
                 }),
                 Action = React.createElement("Frame", {
-                    Position = UDim2.fromOffset(14, 132),
-                    Size = UDim2.fromOffset(136, 30),
+                    Position = UDim2.fromOffset(14, 186),
+                    Size = UDim2.fromOffset(136, 28),
                     BackgroundTransparency = 1,
                     ZIndex = 6,
                 }, { Action = action }),
             },
         }),
         EquippedTitle = React.createElement(Label, {
-            Position = UDim2.fromOffset(348, 168),
+            Position = UDim2.fromOffset(348, 220),
             Size = UDim2.fromOffset(250, 22),
             Text = "EQUIPPED",
             TextSize = 11,
@@ -1626,8 +1691,8 @@ local function InventoryPanel(
             ZIndex = 5,
         }),
         Equipped = React.createElement("Frame", {
-            Position = UDim2.fromOffset(348, 194),
-            Size = UDim2.fromOffset(250, 210),
+            Position = UDim2.fromOffset(348, 244),
+            Size = UDim2.fromOffset(250, 160),
             BackgroundTransparency = 1,
             ZIndex = 4,
         }, equipmentChildren),
