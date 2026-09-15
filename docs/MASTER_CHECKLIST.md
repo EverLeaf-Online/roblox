@@ -53,7 +53,7 @@
 
 ### C. Lumenreach environment production pass
 
-- [ ] **PARTIAL — SOURCE BUILT, NOT VISUALLY ACCEPTED:** Lumenreach currently has the 2350×1800 terrain-first topology, starter settlement, combat fields, crossings, loops, boundaries, and Brasshaven gate, but the current Studio result still reads too much like a prototype/blockout and is **not** considered production-quality MMORPG world art.
+- [ ] **PARTIAL — SOURCE BUILT, NOT VISUALLY ACCEPTED:** Lumenreach currently has the 2200×1250 terrain-first topology, starter settlement, combat fields, crossings, loops, boundaries, and Brasshaven gate, but the current Studio result still reads too much like a prototype/blockout and is **not** considered production-quality MMORPG world art.
 - [ ] **PARTIAL:** authored settlement/landmark structures exist across the region, but player-height composition, architectural quality, skyline density, street scale, traversal framing, and visual cohesion require Studio-driven rebuild/QA before this item can be checked complete.
 - [ ] **PARTIAL:** foliage/density systems exist, but foliage does not count as world-content completion and must not be used to mask underbuilt areas.
 - [ ] **PARTIAL:** population exists, but safe hubs and route spaces still require live Studio verification for believable MMO activity and spacing.
@@ -490,7 +490,7 @@
 ## 16. World — Lumenreach
 
 - [x] **Terrain-first V3 full replacement complete:** the previous generated Lumenreach model and Terrain are cleared before generation; the map is rebuilt from zero rather than receiving another layer of scenery.
-- [x] Canonical starter-region footprint is now **2350×1800 studs**, sized to fit cleanly before the separate Brasshaven world while supporting Level 1–10 MMO travel distance.
+- [x] Canonical starter-region footprint is now **2200×1250 studs**, sized to fit cleanly before the separate Brasshaven world while supporting Level 1–10 MMO travel distance.
 - [x] Wayfarer Camp rebuilt as a permanent starter **town**, not a tent camp: open stone plaza, Wayfarer Hall, Quartermaster House, Archive Lodge, Wayfarer Inn, training side yard, core NPC services, departure gate, and separate Proving road.
 - [x] Arrival spawn is isolated in the open plaza and no tent/building/decor footprint occupies it.
 - [x] Greenway Fields is the broad Level 1–3 starter combat field between town and Lumenwood Crossroads.
@@ -512,7 +512,7 @@
 - [x] Paper-thin RockFace meshes, oversized black fallback rocks, tent-camp composition, and scenery-first layering are excluded by regression tests.
 - [x] Existing quest IDs, exploration targets, advancement flow, monster roster, and `lumenreach_to_brasshaven` portal contract remain wired into the replacement world.
 - [x] `docs/LUMENREACH_WORLD_LAYOUT.md` is the canonical V3 map/layout contract.
-- [x] Lumenreach regression tests guard terrain-first generation order, 2350×1800 dimensions, road/bridge topology, permanent town architecture, zone metadata, and removed legacy visual paths.
+- [x] Lumenreach regression tests guard terrain-first generation order, 2200×1250 dimensions, road/bridge topology, permanent town architecture, zone metadata, and removed legacy visual paths.
 - [ ] **Studio player-height V3 visual QA:** terrain seams, road grades, town roofs/doors, bridge approaches, spawn orientation, landmark silhouettes, and prop/tree grounding.
 - [ ] **Studio multiplayer traversal QA:** 4+ players across every road/bridge and inside Greenway, Gravebone, Mossglen, Veilfall, Proving, and Shattered Arch encounter floors.
 - [ ] **Studio combat-layout QA:** confirm enemy spawn radii never place mobs into river water, steep slopes, roads, buildings, or inaccessible terrain shelves.

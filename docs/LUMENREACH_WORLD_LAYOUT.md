@@ -1,6 +1,8 @@
 # Lumenreach World Layout — Source Contract (Studio Acceptance Pending)
 
-**Canonical target:** 2350 × 1800 studs, Level 1–10 starter region.
+**Canonical target:** 2200 × 1250 studs, Level 1–10 starter region.
+
+**V9 population rule:** the playable footprint is intentionally compressed around the progression network, and inter-zone acreage is occupied by authored hamlets, patrol posts, ruined wards, farms/crofts, residents, branch roads, and service spaces. Trees/foliage do not count as world-population content.
 
 **Acceptance status:** the topology and content below exist in source, but the current Studio presentation is still considered a prototype/blockout. Nothing in this document means the environment is visually finished until player-height Studio QA passes.
 
@@ -74,7 +76,7 @@ All V7 architecture is native Roblox geometry or approved environment prefabs. N
 - The Proving Circle has its own mentor lodge, preparation shelter, oath shrine, and five-discipline trial architecture.
 - Ambient Wayfarers/guards/couriers/rangers populate major safe hubs so settlements visibly read as inhabited even when no quest NPC is nearby.
 
-- Continuous forest belts occupy the negative space between quest/combat rooms so the 2350×1800 region no longer reads as isolated clearings in an empty field.
+- Continuous forest belts occupy the negative space between quest/combat rooms so the 2200×1250 region no longer reads as isolated clearings in an empty field.
 - Route-edge dressing uses ferns, mossy rock sets, roots, stumps, dry branches, fallen logs, and occasional trees outside the party-width travel lane.
 - Spawn, training, boss, monster, bridge, and advancement spaces are explicit dressing exclusions. Density must never reduce action-combat readability.
 - The biome mix changes by area: Glowmere/Veilfall favor wet understory, Gravebone/Shattered Arch favor dry deadwood/stone, and Greenway/Mossglen/Sunmoss use living forest floor.
@@ -97,7 +99,7 @@ All V7 architecture is native Roblox geometry or approved environment prefabs. N
 
 `src/server/Services/LumenreachWorldService.luau` is the canonical V7 generator. It owns:
 
-- `WORLD_WIDTH = 2350` and `WORLD_DEPTH = 1800`;
+- `WORLD_WIDTH = 2200` and `WORLD_DEPTH = 1250`;
 - zone centers and progression bands;
 - the complete terrain route network;
 - terrain reset/foundation, mountain belts, internal ridges, wetland, gorge, and Sunmoss shelf;

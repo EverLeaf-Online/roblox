@@ -14,9 +14,9 @@ local WorldTravelService = require(script.Parent.WorldTravelService)
 local LumenreachWorldService = {}
 
 local GENERATED_NAME = "EverLeafGeneratedWorld"
-local WORLD_WIDTH = 2350
-local WORLD_DEPTH = 1800
-local WORLD_DESIGN_VERSION = 8
+local WORLD_WIDTH = 2200
+local WORLD_DEPTH = 1250
+local WORLD_DESIGN_VERSION = 9
 
 -- Lumenreach is authored as a terrain-first MMORPG region. The generator below
 -- replaces the previous showcase composition completely: terrain is cleared,
@@ -505,17 +505,17 @@ local function buildTerrain()
     -- Broad perimeter mountain belts provide natural map limits.
     local north = {}
     local south = {}
-    for x = -1140, 1080, 120 do
-        table.insert(north, Vector3.new(x, 25, 835 + ((x / 120) % 3) * 18))
-        table.insert(south, Vector3.new(x, 20, -795 - ((x / 120) % 4) * 13))
+    for x = -1060, 1040, 120 do
+        table.insert(north, Vector3.new(x, 25, 590 + ((x / 120) % 3) * 12))
+        table.insert(south, Vector3.new(x, 20, -575 - ((x / 120) % 4) * 9))
     end
     local west = {}
-    for z = -680, 720, 120 do
-        table.insert(west, Vector3.new(-1160, 18, z))
+    for z = -520, 540, 110 do
+        table.insert(west, Vector3.new(-1080, 18, z))
     end
     local east = {}
-    for z = -680, 720, 115 do
-        table.insert(east, Vector3.new(1085, 28, z))
+    for z = -520, 540, 110 do
+        table.insert(east, Vector3.new(1060, 28, z))
     end
     fillMountainRidge(north, 88, 78, Enum.Material.Grass)
     fillMountainRidge(south, 90, 80, Enum.Material.Grass)
@@ -3146,6 +3146,610 @@ local function makeSignatureWorldContent(parent)
     )
 end
 
+local function districtPoint(center, yaw, offset)
+    return center + CFrame.Angles(0, yaw or 0, 0):VectorToWorldSpace(offset)
+end
+
+local function makeCroftPlot(parent, name, position, yaw, width, depth, accent)
+    local ground = terrainSurfacePosition(position, 0)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+    width = width or 30
+    depth = depth or 24
+    accent = accent or Color3.fromRGB(113, 126, 75)
+
+    local soil = makePart(
+        model,
+        "CroftSoil",
+        Vector3.new(width, 0.35, depth),
+        base * CFrame.new(0, 0.18, 0),
+        Enum.Material.Ground,
+        Color3.fromRGB(74, 62, 44)
+    )
+    soil.CanCollide = false
+    soil.CanTouch = false
+    soil.CanQuery = false
+
+    for row = -3, 3 do
+        local strip = makePart(
+            model,
+            "CropRow",
+            Vector3.new(1.15, 0.45, depth - 3),
+            base * CFrame.new(row * (width / 8.5), 0.48, 0),
+            Enum.Material.LeafyGrass,
+            accent
+        )
+        strip.CanCollide = false
+        strip.CanTouch = false
+        strip.CanQuery = false
+    end
+
+    local fenceInset = 1.4
+    makeFenceLine(
+        model,
+        "CroftFenceNorth",
+        districtPoint(position, yaw, Vector3.new(-width * 0.5 + fenceInset, 0, depth * 0.5)),
+        districtPoint(position, yaw, Vector3.new(width * 0.5 - fenceInset, 0, depth * 0.5)),
+        7,
+        3.2
+    )
+    makeFenceLine(
+        model,
+        "CroftFenceWest",
+        districtPoint(position, yaw, Vector3.new(-width * 0.5, 0, -depth * 0.5)),
+        districtPoint(position, yaw, Vector3.new(-width * 0.5, 0, depth * 0.5)),
+        7,
+        3.2
+    )
+    makeFenceLine(
+        model,
+        "CroftFenceEast",
+        districtPoint(position, yaw, Vector3.new(width * 0.5, 0, -depth * 0.5)),
+        districtPoint(position, yaw, Vector3.new(width * 0.5, 0, depth * 0.5)),
+        7,
+        3.2
+    )
+
+    local scarecrow = makePart(
+        model,
+        "CroftScarecrowPost",
+        Vector3.new(0.6, 6.5, 0.6),
+        base * CFrame.new(width * 0.31, 3.25, -depth * 0.24),
+        Enum.Material.Wood,
+        SIGNATURE.Timber
+    )
+    scarecrow.CanCollide = false
+    local arms = makePart(
+        model,
+        "CroftScarecrowArms",
+        Vector3.new(5.5, 0.55, 0.55),
+        base * CFrame.new(width * 0.31, 4.8, -depth * 0.24),
+        Enum.Material.Wood,
+        SIGNATURE.Timber
+    )
+    arms.CanCollide = false
+    return model
+end
+
+local function makeOccupiedHamlet(parent, name, center, yaw, accent, cropAccent)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    accent = accent or Color3.fromRGB(96, 112, 88)
+    cropAccent = cropAccent or Color3.fromRGB(113, 126, 75)
+
+    local plaza = terrainSurfacePosition(center, 0)
+    Workspace.Terrain:FillBlock(
+        CFrame.new(plaza + Vector3.new(0, -0.45, 0)) * CFrame.Angles(0, yaw or 0, 0),
+        Vector3.new(78, 1.2, 62),
+        Enum.Material.Ground
+    )
+
+    local cottages = {
+        { Vector3.new(-27, 0, -20), 27, 20, 8, math.rad(20) },
+        { Vector3.new(25, 0, -21), 30, 21, 9, math.rad(-18) },
+        { Vector3.new(-28, 0, 21), 24, 19, 8, math.rad(158) },
+        { Vector3.new(26, 0, 22), 26, 20, 8, math.rad(-160) },
+    }
+    for index, spec in cottages do
+        makeBuilding(
+            model,
+            name .. "Cottage" .. index,
+            districtPoint(center, yaw, spec[1]),
+            spec[2],
+            spec[3],
+            spec[4],
+            (yaw or 0) + spec[5],
+            if index % 2 == 0 then accent:Lerp(Color3.fromRGB(145, 111, 73), 0.18) else accent
+        )
+    end
+
+    makeLumenWell(
+        model,
+        name .. "Well",
+        districtPoint(center, yaw, Vector3.new(0, 0, 0)),
+        SIGNATURE.Lumen
+    )
+    makeHearth(model, districtPoint(center, yaw, Vector3.new(0, 0, 22)))
+    makeMarketStall(
+        model,
+        districtPoint(center, yaw, Vector3.new(2, 0, -30)),
+        (yaw or 0) + math.rad(180),
+        accent:Lerp(SIGNATURE.ClothGold, 0.18)
+    )
+    makeSupplyStack(model, districtPoint(center, yaw, Vector3.new(39, 0, 7)), yaw or 0, 0.85)
+    makeWayfarerCart(
+        model,
+        name .. "Wagon",
+        districtPoint(center, yaw, Vector3.new(-41, 0, 4)),
+        (yaw or 0) + math.rad(90),
+        true
+    )
+    makeCroftPlot(
+        model,
+        name .. "CroftA",
+        districtPoint(center, yaw, Vector3.new(-52, 0, -28)),
+        yaw or 0,
+        28,
+        22,
+        cropAccent
+    )
+    makeCroftPlot(
+        model,
+        name .. "CroftB",
+        districtPoint(center, yaw, Vector3.new(52, 0, 28)),
+        yaw or 0,
+        28,
+        22,
+        cropAccent:Lerp(Color3.fromRGB(164, 141, 71), 0.18)
+    )
+    makeWayfarerStreetArch(
+        model,
+        name .. "EntryArch",
+        districtPoint(center, yaw, Vector3.new(0, 0, -47)),
+        yaw or 0,
+        18,
+        SIGNATURE.Lumen
+    )
+    return model
+end
+
+local function makePatrolPost(parent, name, center, yaw, accent)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    accent = accent or Color3.fromRGB(79, 105, 84)
+
+    Workspace.Terrain:FillBlock(
+        CFrame.new(terrainSurfacePosition(center, -0.35)) * CFrame.Angles(0, yaw or 0, 0),
+        Vector3.new(66, 1.0, 48),
+        Enum.Material.Ground
+    )
+    makeBuilding(
+        model,
+        name .. "Guardhouse",
+        districtPoint(center, yaw, Vector3.new(-20, 0, 4)),
+        27,
+        20,
+        9,
+        (yaw or 0) + math.rad(12),
+        accent
+    )
+    makeBuilding(
+        model,
+        name .. "Storehouse",
+        districtPoint(center, yaw, Vector3.new(20, 0, 8)),
+        24,
+        18,
+        8,
+        (yaw or 0) - math.rad(15),
+        accent:Lerp(Color3.fromRGB(133, 98, 65), 0.28)
+    )
+    makeWatchtower(model, districtPoint(center, yaw, Vector3.new(-27, 0, -25)), yaw or 0)
+    makeRoadsideShelter(
+        model,
+        name .. "Shelter",
+        districtPoint(center, yaw, Vector3.new(26, 0, -23)),
+        (yaw or 0) + math.rad(180)
+    )
+    makeHearth(model, districtPoint(center, yaw, Vector3.new(2, 0, 17)))
+    makeSupplyStack(model, districtPoint(center, yaw, Vector3.new(30, 0, 22)), yaw or 0, 0.8)
+    makeWayfarerCart(
+        model,
+        name .. "PatrolWagon",
+        districtPoint(center, yaw, Vector3.new(-5, 0, -31)),
+        yaw or 0,
+        true
+    )
+    makeWayfarerStreetArch(
+        model,
+        name .. "Gate",
+        districtPoint(center, yaw, Vector3.new(0, 0, -40)),
+        yaw or 0,
+        17,
+        SIGNATURE.Lumen
+    )
+    return model
+end
+
+local function makeRuinedDistrict(parent, name, center, yaw)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    local rotation = yaw or 0
+
+    Workspace.Terrain:FillBlock(
+        CFrame.new(terrainSurfacePosition(center, -0.3)) * CFrame.Angles(0, rotation, 0),
+        Vector3.new(78, 1.0, 62),
+        Enum.Material.Ground
+    )
+    makeRuinedHall(
+        model,
+        name .. "HallA",
+        districtPoint(center, rotation, Vector3.new(-24, 0, -12)),
+        30,
+        22,
+        rotation + math.rad(8)
+    )
+    makeRuinedHall(
+        model,
+        name .. "HallB",
+        districtPoint(center, rotation, Vector3.new(23, 0, 15)),
+        27,
+        20,
+        rotation - math.rad(14)
+    )
+    makeRuinWall(model, districtPoint(center, rotation, Vector3.new(0, 0, -35)), rotation, 55, 7)
+    makeRuinWall(
+        model,
+        districtPoint(center, rotation, Vector3.new(-38, 0, 8)),
+        rotation + math.rad(90),
+        40,
+        6
+    )
+    makeStoneShrine(
+        model,
+        name .. "BrokenShrine",
+        districtPoint(center, rotation, Vector3.new(34, 0, -22)),
+        rotation - math.rad(18),
+        Color3.fromRGB(118, 194, 169)
+    )
+    makeGraveboneMausoleum(
+        model,
+        name .. "Crypt",
+        districtPoint(center, rotation, Vector3.new(-5, 0, 37)),
+        rotation + math.rad(180)
+    )
+    makeWayfarerCart(
+        model,
+        name .. "AbandonedCart",
+        districtPoint(center, rotation, Vector3.new(39, 0, 27)),
+        rotation + math.rad(60),
+        false
+    )
+    return model
+end
+
+local function makeDistrictResident(parent, name, position, yaw, role, cloth, hairStyle)
+    local palette = {
+        Cloth = cloth,
+        DarkCloth = cloth:Lerp(Color3.new(0, 0, 0), 0.24),
+        Accent = cloth:Lerp(Color3.fromRGB(117, 235, 192), 0.32),
+        Skin = Color3.fromRGB(211, 176, 143),
+        Leather = Color3.fromRGB(84, 58, 39),
+        Hair = Color3.fromRGB(78, 52, 39),
+        EyeColor = Color3.fromRGB(58, 88, 68),
+        Lumen = Color3.fromRGB(111, 234, 185),
+        Metal = Color3.fromRGB(158, 128, 69),
+    }
+    local model = StylizedNpcFactory.Create(parent, {
+        Name = name,
+        Position = terrainSurfacePosition(position, 0),
+        Yaw = yaw or 0,
+        Role = role or "Scout",
+        HairStyle = hairStyle or "short",
+        Build = 0.96,
+        HeightScale = 1.0,
+        HeadScale = 0.96,
+        BodyTypeScale = 0.32,
+        ProportionScale = 0.32,
+        Palette = palette,
+    })
+    if model then
+        model:SetAttribute("AmbientResident", true)
+        model:SetAttribute("DistrictResident", true)
+        model:SetAttribute("DisplayRole", name)
+    end
+    return model
+end
+
+local function makeLumenreachDistrictNetwork(parent)
+    -- This is the population pass the region was missing: occupied places are
+    -- deliberately placed between the headline zones so walking the map never
+    -- becomes hundreds of studs of grass/road/trees with nothing to do or see.
+    local districts = {
+        {
+            Kind = "hamlet",
+            Name = "WayfarerLowerWard",
+            Center = Vector3.new(-875, 0, -145),
+            Yaw = math.rad(8),
+            Accent = Color3.fromRGB(92, 113, 91),
+            Crop = Color3.fromRGB(120, 136, 76),
+            Connector = ZONES.Camp + Vector3.new(18, 0, -104),
+        },
+        {
+            Kind = "hamlet",
+            Name = "GreenwayCrofts",
+            Center = Vector3.new(-785, 0, -102),
+            Yaw = math.rad(18),
+            Accent = Color3.fromRGB(104, 119, 82),
+            Crop = Color3.fromRGB(132, 146, 74),
+            Connector = ZONES.Greenway + Vector3.new(-45, 0, -40),
+        },
+        {
+            Kind = "patrol",
+            Name = "OldMileWatch",
+            Center = Vector3.new(-620, 0, 145),
+            Yaw = math.rad(72),
+            Accent = Color3.fromRGB(75, 101, 78),
+            Connector = Vector3.new(-610, 3, 52),
+        },
+        {
+            Kind = "hamlet",
+            Name = "GlowmereDrybank",
+            Center = Vector3.new(-535, 0, 350),
+            Yaw = math.rad(26),
+            Accent = Color3.fromRGB(75, 112, 103),
+            Crop = Color3.fromRGB(102, 138, 105),
+            Connector = Vector3.new(-470, 0, 300),
+        },
+        {
+            Kind = "patrol",
+            Name = "EastbridgeWestWard",
+            Center = Vector3.new(-350, 0, 28),
+            Yaw = math.rad(88),
+            Accent = Color3.fromRGB(78, 103, 82),
+            Connector = Vector3.new(-395, 4, 75),
+        },
+        {
+            Kind = "hamlet",
+            Name = "EastbridgeSouthWard",
+            Center = Vector3.new(-80, 0, 178),
+            Yaw = math.rad(-25),
+            Accent = Color3.fromRGB(86, 111, 88),
+            Crop = Color3.fromRGB(117, 132, 74),
+            Connector = Vector3.new(-30, 6, 185),
+        },
+        {
+            Kind = "ruin",
+            Name = "GraveboneOuterWard",
+            Center = Vector3.new(18, 0, -168),
+            Yaw = math.rad(22),
+            Connector = Vector3.new(58, 6, -90),
+        },
+        {
+            Kind = "hamlet",
+            Name = "MossglenTrailhead",
+            Center = Vector3.new(-35, 0, 330),
+            Yaw = math.rad(-18),
+            Accent = Color3.fromRGB(76, 108, 76),
+            Crop = Color3.fromRGB(105, 139, 72),
+            Connector = Vector3.new(40, 6, 255),
+        },
+        {
+            Kind = "patrol",
+            Name = "MossglenWoodcamp",
+            Center = Vector3.new(235, 0, 242),
+            Yaw = math.rad(-65),
+            Accent = Color3.fromRGB(77, 104, 75),
+            Connector = Vector3.new(350, 7, 200),
+        },
+        {
+            Kind = "hamlet",
+            Name = "SunmossAscentCamp",
+            Center = Vector3.new(345, 0, 455),
+            Yaw = math.rad(-30),
+            Accent = Color3.fromRGB(111, 115, 76),
+            Crop = Color3.fromRGB(154, 144, 74),
+            Connector = Vector3.new(385, 26, 395),
+        },
+        {
+            Kind = "patrol",
+            Name = "VeilfallUpperRefuge",
+            Center = Vector3.new(300, 0, -245),
+            Yaw = math.rad(45),
+            Accent = Color3.fromRGB(72, 106, 104),
+            Connector = Vector3.new(320, -8, -330),
+        },
+        {
+            Kind = "patrol",
+            Name = "ShatteredForwardCamp",
+            Center = Vector3.new(555, 0, 220),
+            Yaw = math.rad(-82),
+            Accent = Color3.fromRGB(72, 96, 80),
+            Connector = Vector3.new(540, 8, 150),
+        },
+        {
+            Kind = "ruin",
+            Name = "ShatteredBarracksRuins",
+            Center = Vector3.new(748, 0, 10),
+            Yaw = math.rad(82),
+            Connector = Vector3.new(720, 9, 100),
+        },
+        {
+            Kind = "hamlet",
+            Name = "ProvingAspirantWard",
+            Center = Vector3.new(-845, 0, -360),
+            Yaw = math.rad(10),
+            Accent = Color3.fromRGB(85, 104, 90),
+            Crop = Color3.fromRGB(118, 132, 76),
+            Connector = Vector3.new(-940, 4, -270),
+        },
+    }
+
+    for _, district in districts do
+        fillTerrainRoute({ district.Connector, district.Center }, 10, Enum.Material.Ground)
+        if district.Kind == "hamlet" then
+            makeOccupiedHamlet(
+                parent,
+                district.Name,
+                district.Center,
+                district.Yaw,
+                district.Accent,
+                district.Crop
+            )
+        elseif district.Kind == "patrol" then
+            makePatrolPost(parent, district.Name, district.Center, district.Yaw, district.Accent)
+        else
+            makeRuinedDistrict(parent, district.Name, district.Center, district.Yaw)
+        end
+    end
+
+    local residents = {
+        {
+            "Lower Ward Trader",
+            Vector3.new(-890, 0, -135),
+            math.rad(35),
+            "Quartermaster",
+            Color3.fromRGB(103, 82, 60),
+            "bun",
+        },
+        {
+            "Lower Ward Guard",
+            Vector3.new(-855, 0, -160),
+            math.rad(-20),
+            "Guard",
+            Color3.fromRGB(65, 92, 72),
+            "short",
+        },
+        {
+            "Greenway Farmer",
+            Vector3.new(-805, 0, -93),
+            math.rad(18),
+            "Quartermaster",
+            Color3.fromRGB(98, 104, 65),
+            "short",
+        },
+        {
+            "Greenway Carter",
+            Vector3.new(-758, 0, -117),
+            math.rad(-35),
+            "Scout",
+            Color3.fromRGB(84, 94, 69),
+            "ponytail",
+        },
+        {
+            "Old Mile Ranger",
+            Vector3.new(-628, 0, 138),
+            math.rad(70),
+            "Guard",
+            Color3.fromRGB(62, 91, 70),
+            "short",
+        },
+        {
+            "Glowmere Reedworker",
+            Vector3.new(-548, 0, 363),
+            math.rad(20),
+            "Quartermaster",
+            Color3.fromRGB(66, 102, 95),
+            "bun",
+        },
+        {
+            "Glowmere Ferryman",
+            Vector3.new(-510, 0, 340),
+            math.rad(-30),
+            "Scout",
+            Color3.fromRGB(72, 101, 94),
+            "short",
+        },
+        {
+            "Westbridge Patrol",
+            Vector3.new(-362, 0, 20),
+            math.rad(88),
+            "Guard",
+            Color3.fromRGB(63, 89, 70),
+            "short",
+        },
+        {
+            "Eastbridge Settler",
+            Vector3.new(-92, 0, 188),
+            math.rad(-20),
+            "Guide",
+            Color3.fromRGB(88, 108, 88),
+            "long",
+        },
+        {
+            "Gravebone Survivor",
+            Vector3.new(5, 0, -156),
+            math.rad(25),
+            "Guide",
+            Color3.fromRGB(78, 91, 83),
+            "long",
+        },
+        {
+            "Mossglen Woodcutter",
+            Vector3.new(222, 0, 252),
+            math.rad(-60),
+            "Quartermaster",
+            Color3.fromRGB(82, 93, 61),
+            "short",
+        },
+        {
+            "Mossglen Trail Ranger",
+            Vector3.new(-48, 0, 340),
+            math.rad(10),
+            "Scout",
+            Color3.fromRGB(64, 96, 69),
+            "ponytail",
+        },
+        {
+            "Sunmoss Pilgrim",
+            Vector3.new(330, 0, 462),
+            math.rad(-20),
+            "Archivist",
+            Color3.fromRGB(110, 109, 72),
+            "bun",
+        },
+        {
+            "Veilfall Sentry",
+            Vector3.new(286, 0, -238),
+            math.rad(45),
+            "Guard",
+            Color3.fromRGB(61, 91, 89),
+            "short",
+        },
+        {
+            "Forward Camp Scout",
+            Vector3.new(544, 0, 230),
+            math.rad(-80),
+            "Scout",
+            Color3.fromRGB(62, 89, 72),
+            "ponytail",
+        },
+        {
+            "Proving Aspirant",
+            Vector3.new(-860, 0, -350),
+            math.rad(15),
+            "Scout",
+            Color3.fromRGB(78, 96, 79),
+            "short",
+        },
+    }
+    for _, resident in residents do
+        makeDistrictResident(
+            parent,
+            resident[1],
+            resident[2],
+            resident[3],
+            resident[4],
+            resident[5],
+            resident[6]
+        )
+    end
+end
+
 local function makeTownExpansion(parent)
     local camp = ZONES.Camp
     makeBuilding(
@@ -4689,6 +5293,7 @@ local function makeZoneContent(parent)
     makeTown(parent)
     makeWorldSettlements(parent)
     makeSignatureWorldContent(parent)
+    makeLumenreachDistrictNetwork(parent)
 
     makeBuilding(
         parent,
@@ -4800,6 +5405,11 @@ local function makeExplorationContent(parent)
     makeExplorationTrigger(parent, "veilfall_cascade", ZONES.Veilfall + Vector3.new(-22, 0, 20), 32)
     makeExplorationTrigger(parent, "sunmoss_overlook", ZONES.Sunmoss, 36)
     makeExplorationTrigger(parent, "shattered_lumen_arch", ZONES.Ruins, 42)
+    makeExplorationTrigger(parent, "greenway_crofts", Vector3.new(-785, 0, -102), 26)
+    makeExplorationTrigger(parent, "glowmere_drybank", Vector3.new(-535, 0, 350), 28)
+    makeExplorationTrigger(parent, "eastbridge_south_ward", Vector3.new(-80, 0, 178), 28)
+    makeExplorationTrigger(parent, "mossglen_woodcamp", Vector3.new(235, 0, 242), 26)
+    makeExplorationTrigger(parent, "shattered_forward_camp", Vector3.new(555, 0, 220), 28)
 end
 
 local function makeEncounterContent(parent)
@@ -4925,6 +5535,62 @@ local function makeEncounterContent(parent)
             RespawnTime = 30,
         }
     )
+
+    -- Inter-zone activity pockets prevent travel from becoming dead acreage.
+    makeMonsterSpawnTrigger(parent, "OldMileMosslings", Vector3.new(-650, 0, 132), {
+        MonsterType = "LumenMossling",
+        SpawnAmount = 4,
+        TriggerRadius = 34,
+        SpawnRadius = 18,
+        MaxAliveMonster = 4,
+        SpawnDelay = 0.2,
+        RespawnTime = 22,
+    })
+    makeMonsterSpawnTrigger(parent, "DrybankSlimes", Vector3.new(-500, 0, 315), {
+        MonsterType = "Slime",
+        SpawnAmount = 4,
+        TriggerRadius = 36,
+        SpawnRadius = 18,
+        MaxAliveMonster = 4,
+        SpawnDelay = 0.22,
+        RespawnTime = 26,
+    })
+    makeMonsterSpawnTrigger(parent, "GraveboneRoadStragglers", Vector3.new(55, 0, -145), {
+        MonsterType = "Skeleton",
+        SpawnAmount = 4,
+        TriggerRadius = 36,
+        SpawnRadius = 18,
+        MaxAliveMonster = 4,
+        SpawnDelay = 0.22,
+        RespawnTime = 30,
+    })
+    makeMonsterSpawnTrigger(parent, "MossglenTrailRidgebeaks", Vector3.new(78, 0, 260), {
+        MonsterType = "PecoPeco",
+        SpawnAmount = 4,
+        TriggerRadius = 38,
+        SpawnRadius = 19,
+        MaxAliveMonster = 4,
+        SpawnDelay = 0.22,
+        RespawnTime = 27,
+    })
+    makeMonsterSpawnTrigger(parent, "SunmossAscentWisps", Vector3.new(360, 0, 385), {
+        MonsterType = "LumenWisp",
+        SpawnAmount = 4,
+        TriggerRadius = 38,
+        SpawnRadius = 18,
+        MaxAliveMonster = 4,
+        SpawnDelay = 0.22,
+        RespawnTime = 30,
+    })
+    makeMonsterSpawnTrigger(parent, "ShatteredRoadSkeletons", Vector3.new(600, 0, 145), {
+        MonsterType = "Skeleton",
+        SpawnAmount = 5,
+        TriggerRadius = 40,
+        SpawnRadius = 20,
+        MaxAliveMonster = 5,
+        SpawnDelay = 0.22,
+        RespawnTime = 30,
+    })
 end
 
 function LumenreachWorldService.Init()

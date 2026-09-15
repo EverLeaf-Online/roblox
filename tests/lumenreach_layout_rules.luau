@@ -4,9 +4,9 @@ local source = fs.readFile("src/server/Services/LumenreachWorldService.luau")
 
 for _, required in
     {
-        "local WORLD_WIDTH = 2350",
-        "local WORLD_DEPTH = 1800",
-        "local WORLD_DESIGN_VERSION = 8",
+        "local WORLD_WIDTH = 2200",
+        "local WORLD_DEPTH = 1250",
+        "local WORLD_DESIGN_VERSION = 9",
         'world:SetAttribute("WorldDesignVersion", WORLD_DESIGN_VERSION)',
         'world:SetAttribute("TerrainFirstMMOLayout", true)',
         "terrain:Clear()",
@@ -154,7 +154,8 @@ assert(
     "starter town redesign must not regress to the old tent-camp composition"
 )
 assert(
-    string.find(source, "local WORLD_WIDTH = 2200", 1, true) == nil
+    string.find(source, "local WORLD_WIDTH = 2350", 1, true) == nil
+        and string.find(source, "local WORLD_DEPTH = 1800", 1, true) == nil
         and string.find(source, "local WORLD_DEPTH = 1700", 1, true) == nil,
     "previous map dimensions must not be restored"
 )
@@ -358,6 +359,27 @@ assert(
 assert(
     string.find(source, "local zoneCoreRadius = 135", 1, true) ~= nil,
     "world filler must reach zone outskirts instead of leaving giant barren rings"
+)
+
+assert(
+    string.find(source, "local function makeLumenreachDistrictNetwork", 1, true) ~= nil
+        and string.find(source, '"WayfarerLowerWard"', 1, true) ~= nil
+        and string.find(source, '"GreenwayCrofts"', 1, true) ~= nil
+        and string.find(source, '"GlowmereDrybank"', 1, true) ~= nil
+        and string.find(source, '"MossglenWoodcamp"', 1, true) ~= nil
+        and string.find(source, '"ShatteredBarracksRuins"', 1, true) ~= nil,
+    "V9 must populate the inter-zone world with authored districts rather than foliage-only filler"
+)
+assert(
+    string.find(source, "makeOccupiedHamlet", 1, true) ~= nil
+        and string.find(source, "makePatrolPost", 1, true) ~= nil
+        and string.find(source, "makeRuinedDistrict", 1, true) ~= nil
+        and string.find(source, "makeCroftPlot", 1, true) ~= nil,
+    "V9 inter-zone population must include inhabited hamlets, patrol posts, ruins, and working crofts"
+)
+assert(
+    string.find(source, "local WORLD_DEPTH = 1250", 1, true) ~= nil,
+    "Lumenreach footprint must not retain the oversized empty 1800-stud north-south acreage"
 )
 
 print("Lumenreach terrain-first MMO redesign rules tests passed")
