@@ -27,8 +27,16 @@ local dodgeVelocity = nil
 local rollMotor = nil
 local rollMotorBaseTransform = nil
 local rollPoseMotors = {}
+local rollPoseConnection = nil
+local rollAnimateScript = nil
+local rollAnimateWasEnabled = false
 
 local function restoreRollPose()
+    if rollPoseConnection then
+        rollPoseConnection:Disconnect()
+        rollPoseConnection = nil
+    end
+
     if rollMotor and rollMotor.Parent and rollMotorBaseTransform then
         rollMotor.Transform = rollMotorBaseTransform
     end
@@ -41,6 +49,12 @@ local function restoreRollPose()
         end
     end
     table.clear(rollPoseMotors)
+
+    if rollAnimateScript and rollAnimateScript.Parent and rollAnimateWasEnabled then
+        rollAnimateScript.Enabled = true
+    end
+    rollAnimateScript = nil
+    rollAnimateWasEnabled = false
 end
 
 local function clearDodgeMover()
@@ -149,47 +163,83 @@ local function rememberPoseMotor(motor)
     return motor
 end
 
+local function stopLocomotionAnimations(character)
+    local animate = character:FindFirstChild("Animate")
+    if animate and animate:IsA("LocalScript") then
+        rollAnimateScript = animate
+        rollAnimateWasEnabled = animate.Enabled
+        animate.Enabled = false
+    end
+
+    local currentHumanoid = character:FindFirstChildOfClass("Humanoid")
+    local animator = currentHumanoid and currentHumanoid:FindFirstChildOfClass("Animator")
+    if animator then
+        for _, track in animator:GetPlayingAnimationTracks() do
+            if
+                track.Priority == Enum.AnimationPriority.Core
+                or track.Priority == Enum.AnimationPriority.Idle
+                or track.Priority == Enum.AnimationPriority.Movement
+            then
+                track:Stop(0.03)
+            end
+        end
+    end
+end
+
 local function beginRollPose()
     restoreRollPose()
-    rollMotor = findCharacterMotor({ "Root", "RootJoint" })
+    local character = player.Character
+    if not character then
+        return
+    end
+
+    stopLocomotionAnimations(character)
+
+    rollMotor = findCharacterMotor({ "Root", "RootJoint", "Root Joint" })
     if rollMotor then
         rollMotorBaseTransform = rollMotor.Transform
     end
 
     rememberPoseMotor(findCharacterMotor({ "Waist" }))
+    rememberPoseMotor(findCharacterMotor({ "Neck" }))
     rememberPoseMotor(findCharacterMotor({ "LeftHip", "Left Hip" }))
     rememberPoseMotor(findCharacterMotor({ "RightHip", "Right Hip" }))
     rememberPoseMotor(findCharacterMotor({ "LeftShoulder", "Left Shoulder" }))
     rememberPoseMotor(findCharacterMotor({ "RightShoulder", "Right Shoulder" }))
-end
 
-local function applyRollPose(alpha)
-    if not rollMotor or not rollMotor.Parent or not rollMotorBaseTransform then
-        return
-    end
-
-    local eased = 0.5 - 0.5 * math.cos(alpha * math.pi)
-    local fullRotation = alpha * math.pi * 2
-    local lift = math.sin(alpha * math.pi) * 0.85
-    rollMotor.Transform = rollMotorBaseTransform
-        * CFrame.new(0, lift, 0)
-        * CFrame.Angles(-fullRotation, 0, 0)
-
-    for motor, baseTransform in rollPoseMotors do
-        local name = motor.Name
-        local tuck = math.sin(alpha * math.pi)
-        if string.find(name, "Hip") then
-            motor.Transform = baseTransform * CFrame.Angles(math.rad(45) * tuck, 0, 0)
-        elseif string.find(name, "Shoulder") then
-            motor.Transform = baseTransform * CFrame.Angles(math.rad(-38) * tuck, 0, 0)
-        elseif name == "Waist" then
-            motor.Transform = baseTransform * CFrame.Angles(math.rad(-18) * tuck, 0, 0)
+    -- Roblox's Animator writes Motor6D.Transform during animation evaluation.
+    -- Apply the roll after that work in PreSimulation so the running animation
+    -- cannot visually replace the combat roll while the root is moving.
+    rollPoseConnection = RunService.PreSimulation:Connect(function()
+        if dodgeUntil <= 0 or os.clock() >= dodgeUntil or not rollMotor or not rollMotor.Parent then
+            return
         end
-    end
 
-    if eased >= 1 then
-        restoreRollPose()
-    end
+        local alpha =
+            math.clamp((os.clock() - dodgeStartedAt) / GameConfig.Movement.DodgeDuration, 0, 1)
+        local spin = alpha * math.pi * 2
+        local tuck = math.sin(alpha * math.pi)
+        local bob = math.sin(alpha * math.pi) * 0.35
+
+        rollMotor.Transform = rollMotorBaseTransform
+            * CFrame.new(0, -0.55 * tuck + bob, 0)
+            * CFrame.Angles(-spin, 0, 0)
+
+        for motor, baseTransform in rollPoseMotors do
+            local name = motor.Name
+            if string.find(name, "Hip") then
+                motor.Transform = baseTransform
+                    * CFrame.Angles(math.rad(64) * tuck, 0, math.rad(8) * tuck)
+            elseif string.find(name, "Shoulder") then
+                motor.Transform = baseTransform
+                    * CFrame.Angles(math.rad(-58) * tuck, 0, math.rad(10) * tuck)
+            elseif name == "Waist" then
+                motor.Transform = baseTransform * CFrame.Angles(math.rad(-28) * tuck, 0, 0)
+            elseif name == "Neck" then
+                motor.Transform = baseTransform * CFrame.Angles(math.rad(22) * tuck, 0, 0)
+            end
+        end
+    end)
 end
 
 local function rollSpeed(alpha)
@@ -399,7 +449,6 @@ function ThirdPersonController.Start()
                     humanoid:Move(Vector3.zero, false)
                     local alpha =
                         math.clamp((now - dodgeStartedAt) / GameConfig.Movement.DodgeDuration, 0, 1)
-                    applyRollPose(alpha)
                     if dodgeVelocity and dodgeVelocity.Parent then
                         local speed = rollSpeed(alpha)
                         dodgeVelocity.PlaneVelocity =
