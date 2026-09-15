@@ -1,7 +1,7 @@
 # EverLeaf Roblox — Master Checklist
 
 **Canonical status:** 2026-09-15
-**Latest gameplay checkpoint:** source-complete Level 1–30 vertical-slice systems through Belforge — Tier-2 advancement, Colossus boss lifecycle, party ready-check/group entry, Defense/Critical combat stats, full 8-slot hotbar UX/cooldowns, incoming-hit feedback, region-aware HUD, and requirement/comparison-aware equipment UI
+**Latest gameplay checkpoint:** source-complete Level 1–30 vertical slice through Belforge plus server-owned skill targeting/presentation, contribution-based multiplayer rewards, generic party-instance travel, secure social profile inspection, live badge/Founder pass/support product/membership integrations, cosmetic collection/recognition, and the latest Lumenreach collision/density cleanup
 **Purpose:** detailed implementation/status tracker for the entire project.
 **Roadmap:** [`ROADMAP.md`](ROADMAP.md)
 
@@ -116,7 +116,7 @@
 - [x] Dedicated full buy/sell shop screen implemented beyond dialogue preview buttons; Studio interaction/balance QA remains.
 - [x] Level-up feedback is implemented and the source-authored Lumenreach 1–10 + Brasshaven 10–30 quest route has no mandatory grind gap in regression tests; Studio combat/economy tuning remains.
 - [x] First advancement hook/location/quest flow implemented with Seren, the Proving Circle, The Five Paths, and five permanent family choices.
-- [x] Level-30 Belforge approach is functional: Sentinel completion + Level 30 unlocks a safe antechamber/return route, Mara handles second advancement there, and the inner Colossus seal remains closed until the real boss encounter is implemented.
+- [x] Level-30 Belforge approach is functional: Sentinel completion + Level 30 unlocks the safe antechamber/return route, Mara handles second advancement there, and the inner seal now feeds the real party ready-check/Colossus encounter lifecycle.
 
 ### F. Phase 1 exit validation
 
@@ -332,7 +332,7 @@
 - [ ] Rig-aware player basic-attack pose layer is source-complete for default, Ironbloom, Thornrunner, Lumenweaver, Veilstrider, and Brasshand; live Studio visual verification is pending after replacing the ineffective old joint tween.
 - [x] Procedural basic-attack animation foundation now drives R6/R15 shoulders, R15 elbows, and torso through a post-animation additive pose layer.
 - [x] Basic attacks and active skills now share a camera-facing attack lock: facing is applied immediately, held through the cast/attack pose, and safely overridden by dodge/stagger; live Studio visual QA remains.
-- [x] Player melee basics and active melee skills use server-owned overlap hitboxes with range/arc/LOS validation; enemy hurtbox/attack standardization remains.
+- [x] Player melee basics/skills and normal monster swings now use server-owned spatial hit volumes with range/arc/vertical/LOS validation; monster reaction/knockback/stagger resistance is standardized by normal/elite/boss tier.
 - [x] Projectile basics are server-simulated over travel time; terrain can block shots and moving targets can evade the fired line.
 - [x] Confirmed basics and skills provide client hit confirmation plus family-specific impact presentation; critical hits are called out separately.
 - [x] Server-owned monster floating damage numbers are emitted for confirmed hits, including critical formatting.
@@ -347,7 +347,7 @@
 ## 9. Skills
 
 - [x] Skill-definition schema foundation.
-- [x] Skill learning/cooldown/MP foundation plus generic targeting/effect execution; player-facing skill flow still pending.
+- [x] Skill learning/cooldown/MP foundation plus production player-facing execution is wired through the hotbar, server-owned targeting/effects, cast/result presentation, miss feedback, and cooldown synchronization.
 - [x] SP spending/validation foundation.
 - [x] Skill rank/max-rank architecture.
 - [x] Skill prerequisites are server-enforced through shared progression rules; prerequisite targets/ranks and cycles are regression-validated.
@@ -415,7 +415,7 @@
 - [x] Loot presentation uses labeled glowing world orbs with type-based visual colors.
 - [x] Shards have an active early-game sink path through Lumenreach shops and Brasshaven Foundry Supply; broader late-game economy tuning remains.
 - [x] Marks now have a dedicated Belforge exchange with gated equipment rewards; later boss/event sink expansion remains.
-- [x] Party/boss loot ownership rules defined: ordinary enemies remain winner-owned; qualifying boss contributors receive individual owner-locked drops and rewards.
+- [x] Combat reward ownership is contribution-aware: normal/elites split EXP/currency across qualified contributors with exact pool conservation and top-contributor loot ownership; bosses grant qualifying contributors full personal rewards and owner-locked loot rolls.
 - [ ] Rare-drop presentation and loot-notification polish.
 
 ## 13. Inventory / equipment / items
@@ -489,13 +489,15 @@
 - [x] Glowmere Pool bridge/wetland destination.
 - [x] Sunmoss Overlook northern loop destination.
 - [x] Connected trail network and route beacons/waystones.
-- [x] Forest-density and roadside environmental dressing pass.
+- [x] Forest-density and roadside environmental dressing pass, including denser zone-edge arcs plus authored travel-corridor foreground/midground foliage so routes no longer cross broad empty fields.
 - [x] Region topology rebuilt around distinct macro geography: compact west-basin Camp, separate Proving Circle pocket, climbing approach to raised Crossroads, central gorge/river, bridge transition to east-side Ruins/Mossglen, north Glowmere loop, lowered Veilfall route, and ascending Sunmoss highland loop; Studio visual QA remains.
 - [x] Interior terrain massing rebuilt around seven authored rooms with interior ridges/valleys instead of border hills; roads are re-cut as safe passes after terrain generation, and non-tree habitat pockets/rock faces now fill the mid-map spaces; Studio visual QA remains.
 - [x] Opening-route composition pass rebuilt Camp/Crossroads signs, path lantern scale/placement, clearing edges, terrain banks, and authored woodland framing; the obsolete repeated trail-pebble system was removed; Studio player-height review remains open.
 - [x] Approved imported environment assets integrated with runtime sanitization; free script-free Forest Trees `13913287259` can populate sanitized tree variants, while the old visible primitive fallbacks are disabled for production placement.
 - [x] Bad oversized cliff/rock placements corrected and terrain-supported.
 - [x] Camera obstruction issue from foliage/decor corrected.
+- [x] Lumenreach collision cleanup now gives imported production trees predictable invisible trunk blockers, makes tent side/rear walls physically solid while preserving entrances, removes legacy/default baseplates, and expands the Terrain safety foundation beyond playable bounds.
+- [x] Travel-lane cleanup now uses actual model/part horizontal bounds—not just pivots—and scrubs intruding signs, lanterns, waystones, benches, supplies, foliage, rocks, roots, and deadfall while keeping authored corridor dressing outside the safe lane.
 - [x] Ilyra, Orin, Tovin, Maela, and Seren use distinct grounded R15 NPC presentations with interaction prompts; final Studio visual QA remains.
 - [x] Training dummy and full first-region monster/wave placement.
 - [x] Hidden Whisperroot Hollow added with persistent one-time cache reward.
@@ -589,6 +591,7 @@
 - [ ] Secure trading if approved.
 - [x] Same-server social/profile inspection is server-curated and available from the party roster, exposing identity, level/family/tier, combat summary, equipped gear, equipped cosmetics, recognition, and achievement count while keeping inventory contents, currencies, quests, settings, secrets, and entitlement internals private.
 - [x] Achievement persistence/service foundation, Roblox badge awarding, join-time repair, Level 10/First Victory hooks, and entitlement-aware player title/nameplate presentation implemented.
+- [x] Badge synchronization repairs previously earned EverLeaf achievements on join without re-awarding already-owned Roblox badges, with pure sync-rule regression coverage.
 - [x] Multiplayer boss source rules implemented: six-player cap, pull lockout, participant elimination, wipe reset, contributor thresholds, individual boss rewards, and no death-rush re-entry; live multi-client QA remains.
 - [x] Belforge party ready-check implemented: leader-initiated at the physical seal, all members assembled/eligible, per-member confirmation, roster lock, expiry/cancel handling, and all-ready group teleport.
 
@@ -596,7 +599,7 @@
 
 - [x] Cosmetic-only monetization rule documented.
 - [x] No Robux power purchases rule documented.
-- [x] Live Creator Hub IDs centralized for the Founder pass, support developer product, membership subscription, and five launch badges; disabled membership now skips client/server subscription API calls until explicitly enabled.
+- [x] Live Creator Hub IDs are centralized for the Founder pass, support developer product, membership subscription, and five launch badges; all three monetization surfaces are enabled in-game while Creator Hub remains the source of truth for sellability/availability.
 - [x] Founder pass ownership is checked server-side; ownership grants the EverLeaf Founder badge plus permanent Founder title and Founder's Lumen aura cosmetics.
 - [x] Repeatable Support EverLeaf developer product uses server-owned `ProcessReceipt` handling with durable purchase-ID idempotency and audit logging.
 - [x] Subscription entitlement/status hooks are server-owned; membership sales are now enabled in-game for deliberate Creator Hub activation; first live subscription purchase/rejoin verification remains pending.
@@ -611,6 +614,8 @@
 - [x] Initial cosmetic effects implemented: Founder's Lumen aura and Founding Month member Lumen Trail.
 - [x] Roblox purchase receipt validation/idempotency implemented for the live developer product.
 - [x] Current paid offerings do not grant combat stats, progression, currencies, drop-rate advantages, advancement, or stronger equipment.
+- [x] Monetization safety rules are regression-tested so configured Founder/membership benefits remain cosmetic/recognition-only and cannot silently acquire progression-power benefit keys.
+- [x] Developer-product receipt rules validate product/purchase/player identifiers and durable purchase-ID idempotency before granting repeatable support credit.
 - [x] In-game EverLeaf Store uses Roblox product/subscription metadata for displayed prices rather than hard-coded regional prices.
 - [ ] Creator Hub cleanup before public release: rename `Support EverLeaf – 50` and replace any icon text that hard-codes `50 Robux`, because Managed Pricing can show a lower regional price.
 - [x] Paid-item gifting/trading remain disabled; regional Price Level validation groundwork exists before either feature can ever be enabled.
@@ -649,6 +654,8 @@
 - [x] Added progression regression coverage for Lumenreach story → Level 8 advancement and post-trial bridge → Level 10.
 - [x] Production retry/backoff policy is shared and deterministically fault-injected in tests: transient throttles recover, exhaustion returns the terminal error, exponential delays are verified, and no terminal sleep occurs.
 - [x] Pure two-server session-lock handoff simulation covers fresh-lock blocking, stale takeover, old-owner save rejection, and post-takeover anti-steal behavior; live multi-server stress remains open.
+- [x] Monetization/achievement/social/party-instance regressions now cover Creator Hub config integrity, cosmetic-only premium safety, developer-product receipt idempotency, badge repair rules, public-profile privacy projection, party-instance eligibility/rollback rules, and shared combat reward conservation.
+- [x] Network-contract regression coverage includes the monetization subscription-management remote alongside the existing gameplay remote definitions.
 - [x] Save revision simulation verifies mutations arriving during an in-flight snapshot remain dirty until a later successful save.
 - [ ] Add 2+ client Studio test scenarios.
 - [ ] Controller-only test pass.
