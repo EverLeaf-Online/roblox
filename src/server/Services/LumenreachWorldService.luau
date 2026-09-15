@@ -5013,8 +5013,6 @@ function LumenreachWorldService.Init()
 
     prepareGround(world)
     decorate(world)
-    clearTravelLaneDecor(world)
-    clearProtectedGameplayDecor(world)
     PBRMaterialService.ApplyGeneratedWorld(world)
     makeSpawn(world)
     makeGuide(world, WORLD_ZONES.Camp + Vector3.new(31, 0, 8), math.rad(102))
@@ -5060,6 +5058,12 @@ function LumenreachWorldService.Init()
     makeStoryRemnant(world, WORLD_ZONES.Ruins + Vector3.new(-34, 0, -42), math.rad(-41))
     makeStoryRemnant(world, WORLD_ZONES.Overlook + Vector3.new(46, 2.0, 12), math.rad(79))
     makeWhisperrootHollow(world)
+
+    -- Run final scene clearance only after all authored world props exist. This
+    -- prevents late-added remnants/landmarks from bypassing the route and
+    -- protected-gameplay readability rules established by the decoration pass.
+    clearTravelLaneDecor(world)
+    clearProtectedGameplayDecor(world)
 
     makeLandmarkLabel(world, WORLD_ZONES.Camp + Vector3.new(8, 15, 4), "LUMENREACH WAYFARER CAMP")
     makeLandmarkLabel(world, provingCircleOrigin + Vector3.new(0, 11, 0), "WAYFARER PROVING CIRCLE")
