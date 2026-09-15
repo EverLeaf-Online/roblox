@@ -114,7 +114,7 @@
 - [ ] Death and respawn do not break UI, controls, quest progress, resources, or hotbar state.
 - [ ] Rejoin preserves expected profile/inventory/equipment/quest state.
 - [ ] Keyboard/mouse full pass.
-- [ ] Gamepad/controller blocking-flow pass.
+- [ ] Gamepad/controller blocking-flow live Studio pass; source support is now implemented for movement, camera, attack, jump, sprint, dodge, all 8 skill slots, menu open/back/tab cycling, device-aware hotbar labels, and initial UI focus.
 - [ ] Multi-client basic party/network smoke test; boss contributor rewards are source-complete but still need live multi-client verification.
 - [ ] Full `./check.sh` gate passes at final Phase 1 checkpoint.
 - [ ] Studio Output contains no red errors during the canonical Phase 1 run.

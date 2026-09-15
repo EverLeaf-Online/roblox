@@ -237,7 +237,7 @@ local function SecondAdvancementView(props)
                     or Color3.fromRGB(211, 161, 96),
                 ZIndex = 62,
             }),
-            Confirm = React.createElement("TextButton", {
+            AdvancementConfirm = React.createElement("TextButton", {
                 AnchorPoint = Vector2.new(1, 0),
                 Position = UDim2.new(1, -26, 0, 378),
                 Size = UDim2.fromOffset(270, 54),
@@ -298,7 +298,7 @@ function AdvancementOverlay.Component(props)
             local isSelected = familyId == selectedId
             local accent = FAMILY_COLORS[familyId] or Color3.fromRGB(121, 244, 183)
             local unlockedByLevel = level >= (tonumber(family.FirstAdvancementLevel) or 999)
-            familyRows[familyId] = React.createElement("TextButton", {
+            familyRows["AdvancementFamily_" .. familyId] = React.createElement("TextButton", {
                 Position = UDim2.fromOffset(0, (index - 1) * 72),
                 Size = UDim2.new(1, -8, 0, 64),
                 BackgroundColor3 = isSelected and Color3.fromRGB(27, 57, 45)
@@ -570,7 +570,7 @@ function AdvancementOverlay.Component(props)
                 Color = Color3.fromRGB(149, 178, 164),
                 ZIndex = 62,
             }),
-            Confirm = React.createElement("TextButton", {
+            AdvancementConfirm = React.createElement("TextButton", {
                 AnchorPoint = Vector2.new(1, 0),
                 Position = UDim2.new(1, -22, 0, 466),
                 Size = UDim2.fromOffset(300, 52),

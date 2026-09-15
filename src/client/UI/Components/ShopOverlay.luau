@@ -98,7 +98,7 @@ local function ShopOverlay(props)
         local currency = if tab == "BUY"
             then description.ShopCurrency or "Shards"
             else row.Currency or "Shards"
-        listChildren["Row" .. tostring(index)] = React.createElement("TextButton", {
+        listChildren["ShopItem_" .. tostring(index)] = React.createElement("TextButton", {
             Position = UDim2.fromOffset(0, (index - 1) * 58),
             Size = UDim2.new(1, -8, 0, 50),
             BackgroundColor3 = rowSelected and Color3.fromRGB(31, 77, 57)
@@ -227,7 +227,7 @@ local function ShopOverlay(props)
                     Corner = React.createElement("UICorner", { CornerRadius = UDim.new(0, 7) }),
                 }),
             }),
-            BuyTab = React.createElement("TextButton", {
+            ShopBuyTab = React.createElement("TextButton", {
                 Position = UDim2.fromOffset(22, 82),
                 Size = UDim2.fromOffset(112, 34),
                 BackgroundColor3 = tab == "BUY" and Color3.fromRGB(37, 80, 61)
@@ -247,7 +247,7 @@ local function ShopOverlay(props)
             }, {
                 Corner = React.createElement("UICorner", { CornerRadius = UDim.new(0, 7) }),
             }),
-            SellTab = React.createElement("TextButton", {
+            ShopSellTab = React.createElement("TextButton", {
                 Position = UDim2.fromOffset(142, 82),
                 Size = UDim2.fromOffset(112, 34),
                 BackgroundColor3 = tab == "SELL" and Color3.fromRGB(37, 80, 61)
@@ -358,7 +358,7 @@ local function ShopOverlay(props)
                 TextXAlignment = Enum.TextXAlignment.Left,
                 ZIndex = 53,
             }),
-            Action = React.createElement("TextButton", {
+            ShopAction = React.createElement("TextButton", {
                 Position = UDim2.fromOffset(468, 411),
                 Size = UDim2.fromOffset(326, 46),
                 BackgroundColor3 = selected and Color3.fromRGB(37, 80, 61)

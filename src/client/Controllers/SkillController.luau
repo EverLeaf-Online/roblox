@@ -1,3 +1,4 @@
+local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 
@@ -18,8 +19,23 @@ local keyToSlot = {
     [Enum.KeyCode.Eight] = 8,
 }
 
+local gamepadToSlot = {
+    [Enum.KeyCode.DPadLeft] = 1,
+    [Enum.KeyCode.DPadUp] = 2,
+    [Enum.KeyCode.DPadRight] = 3,
+    [Enum.KeyCode.DPadDown] = 4,
+    [Enum.KeyCode.ButtonL1] = 5,
+    [Enum.KeyCode.ButtonR1] = 6,
+    [Enum.KeyCode.ButtonL2] = 7,
+    [Enum.KeyCode.ButtonR3] = 8,
+}
+
 local function useSlot(slotIndex)
-    if player:GetAttribute("EverLeafUiCapture") == true then
+    if
+        player:GetAttribute("EverLeafUiCapture") == true
+        or GuiService.MenuIsOpen
+        or UserInputService:GetFocusedTextBox() ~= nil
+    then
         return
     end
 
@@ -47,7 +63,7 @@ function SkillController.Start()
         if gameProcessed then
             return
         end
-        local slot = keyToSlot[input.KeyCode]
+        local slot = keyToSlot[input.KeyCode] or gamepadToSlot[input.KeyCode]
         if slot then
             useSlot(slot)
         end

@@ -1,3 +1,4 @@
+local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
@@ -57,6 +58,31 @@ local HOTKEYS = table.freeze({
     QUESTS = "J",
     SETTINGS = "M",
 })
+
+local GAMEPAD_HOTBAR_LABELS = table.freeze({ "DL", "DU", "DR", "DD", "L1", "R1", "L2", "R3" })
+
+local function inputModeFromType(inputType)
+    if inputType and string.find(inputType.Name, "Gamepad", 1, true) then
+        return "GAMEPAD"
+    elseif inputType == Enum.UserInputType.Touch then
+        return "TOUCH"
+    end
+    return "KEYBOARD"
+end
+
+local function selectNamedObject(name)
+    if type(name) ~= "string" or name == "" then
+        return
+    end
+    task.defer(function()
+        local playerGui = player:FindFirstChildOfClass("PlayerGui")
+        local mount = playerGui and playerGui:FindFirstChild("EverLeafReactMount")
+        local target = mount and mount:FindFirstChild(name, true)
+        if target and target:IsA("GuiObject") and target.Visible and target.Selectable then
+            GuiService.SelectedObject = target
+        end
+    end)
+end
 
 local NAV_ICONS = table.freeze({
     CHARACTER = EverLeafIcons.Character,
@@ -394,7 +420,8 @@ local function Hotbar(props)
                     withChrome({
                         Text = React.createElement(Label, {
                             Size = UDim2.fromScale(1, 1),
-                            Text = tostring(index),
+                            Text = props.InputMode == "GAMEPAD" and GAMEPAD_HOTBAR_LABELS[index]
+                                or tostring(index),
                             TextSize = 10,
                             Bold = true,
                             Align = Enum.TextXAlignment.Center,
@@ -737,6 +764,7 @@ local function HUD(props)
         Hotbar = React.createElement(Hotbar, {
             Profile = profile,
             Visible = compactVisible,
+            InputMode = props.InputMode,
         }),
     })
 end
@@ -798,7 +826,7 @@ local function Dialogue(props)
 
     local actionChildren = {}
     if questId then
-        actionChildren.Quest = React.createElement(Button, {
+        actionChildren.DialogueQuest = React.createElement(Button, {
             Position = UDim2.fromOffset(22, 198),
             Size = UDim2.fromOffset(220, 44),
             Text = questButtonText,
@@ -809,7 +837,7 @@ local function Dialogue(props)
         })
     end
     if description.ShopId and props.OnOpenShop then
-        actionChildren.Shop = React.createElement(Button, {
+        actionChildren.DialogueShop = React.createElement(Button, {
             Position = UDim2.fromOffset(22, questId and 250 or 198),
             Size = UDim2.fromOffset(220, 44),
             Text = "OPEN " .. string.upper(description.ShopDisplayName or "SHOP"),
@@ -826,7 +854,7 @@ local function Dialogue(props)
             else if currentTier >= targetTier
                 then string.format("TIER %d COMPLETE", targetTier)
                 else string.format("ADVANCE TO TIER %d", targetTier)
-        actionChildren.Advancement = React.createElement(Button, {
+        actionChildren.DialogueAdvancement = React.createElement(Button, {
             Position = UDim2.fromOffset(22, questId and 250 or 198),
             Size = UDim2.fromOffset(220, 44),
             Text = advancementText,
@@ -931,7 +959,7 @@ local function Dialogue(props)
                     Bold = true,
                     ZIndex = 22,
                 }),
-                Close = React.createElement(Button, {
+                DialogueClose = React.createElement(Button, {
                     AnchorPoint = Vector2.new(1, 0),
                     Position = UDim2.new(1, -16, 0, 16),
                     Size = UDim2.fromOffset(42, 36),
@@ -2042,7 +2070,7 @@ local function MainMenu(props)
     local navChildren = {}
     for index, tabName in tabs do
         local selected = activeTab == tabName
-        navChildren[tabName] = React.createElement(
+        navChildren["MenuNav_" .. tabName] = React.createElement(
             "TextButton",
             {
                 Position = UDim2.fromOffset(0, (index - 1) * 54),
@@ -2051,6 +2079,7 @@ local function MainMenu(props)
                 BackgroundTransparency = selected and 0 or 0.22,
                 BorderSizePixel = 0,
                 Text = "",
+                Selectable = true,
                 ZIndex = 34,
                 [React.Event.Activated] = function()
                     if props.OnTabChanged then
@@ -2174,7 +2203,7 @@ local function MainMenu(props)
                             Color = COLORS.Faint,
                             ZIndex = 33,
                         }),
-                        Close = React.createElement(Button, {
+                        MainMenuClose = React.createElement(Button, {
                             AnchorPoint = Vector2.new(1, 0.5),
                             Position = UDim2.new(1, -16, 0.5, 0),
                             Size = UDim2.fromOffset(40, 36),
@@ -2209,7 +2238,9 @@ local function MainMenu(props)
                         Body = React.createElement(Label, {
                             Position = UDim2.fromOffset(12, 31),
                             Size = UDim2.new(1, -24, 0, 76),
-                            Text = "1–8  Skills\nE  Interact\nQ  Dodge\nEsc  Close",
+                            Text = props.InputMode == "GAMEPAD"
+                                    and "D-PAD/L/R  Skills\nX  Interact\nB  Dodge / Back\nSTART  Menu"
+                                or "1–8  Skills\nE  Interact\nQ  Dodge\nEsc  Close",
                             TextSize = 9,
                             Color = COLORS.Faint,
                             VerticalAlign = Enum.TextYAlignment.Top,
@@ -2428,7 +2459,18 @@ local function App()
     local health, setHealth = React.useState(100)
     local maxHealth, setMaxHealth = React.useState(100)
     local dead, setDead = React.useState(false)
+    local inputMode, setInputMode =
+        React.useState(inputModeFromType(UserInputService:GetLastInputType()))
     local previousProfile = React.useRef(profile)
+
+    React.useEffect(function()
+        local connection = UserInputService.LastInputTypeChanged:Connect(function(inputType)
+            setInputMode(inputModeFromType(inputType))
+        end)
+        return function()
+            connection:Disconnect()
+        end
+    end, {})
 
     React.useEffect(function()
         local connection = ProfileStore.Subscribe(function(snapshot)
@@ -2535,8 +2577,80 @@ local function App()
     end, { interaction, shopOpen, advancementOpen, menuOpen, dead })
 
     React.useEffect(function()
+        if inputMode ~= "GAMEPAD" then
+            return nil
+        end
+
+        local targetName = nil
+        if advancementOpen and interaction then
+            targetName = if tonumber(interaction.AdvancementTargetTier) == 2
+                then "AdvancementConfirm"
+                else "AdvancementFamily_ironbloom"
+        elseif shopOpen then
+            targetName = "ShopBuyTab"
+        elseif interaction then
+            targetName = "DialogueClose"
+        elseif menuOpen then
+            targetName = "MenuNav_" .. menuTab
+        end
+
+        if targetName then
+            selectNamedObject(targetName)
+        else
+            local selected = GuiService.SelectedObject
+            local playerGui = player:FindFirstChildOfClass("PlayerGui")
+            local mount = playerGui and playerGui:FindFirstChild("EverLeafReactMount")
+            if selected and mount and selected:IsDescendantOf(mount) then
+                GuiService.SelectedObject = nil
+            end
+        end
+        return nil
+    end, { inputMode, interaction, shopOpen, advancementOpen, menuOpen, menuTab })
+
+    React.useEffect(function()
         local connection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
-            if gameProcessed or dead then
+            if dead then
+                return
+            end
+
+            local keyCode = input.KeyCode
+            local uiLayerOpen = interaction ~= nil or shopOpen or advancementOpen or menuOpen
+
+            if keyCode == Enum.KeyCode.ButtonB and uiLayerOpen then
+                if advancementOpen then
+                    setAdvancementOpen(false)
+                elseif shopOpen then
+                    setShopOpen(false)
+                elseif interaction ~= nil then
+                    setInteraction(nil)
+                elseif menuOpen then
+                    setMenuOpen(false)
+                end
+                return
+            end
+
+            if
+                keyCode == Enum.KeyCode.ButtonStart
+                and interaction == nil
+                and not shopOpen
+                and not advancementOpen
+            then
+                setMenuOpen(not menuOpen)
+                return
+            end
+
+            if
+                menuOpen and (keyCode == Enum.KeyCode.ButtonL1 or keyCode == Enum.KeyCode.ButtonR1)
+            then
+                local tabs = { "CHARACTER", "INVENTORY", "SKILLS", "QUESTS", "SETTINGS" }
+                local currentIndex = table.find(tabs, menuTab) or 1
+                local direction = keyCode == Enum.KeyCode.ButtonR1 and 1 or -1
+                local nextIndex = ((currentIndex - 1 + direction) % #tabs) + 1
+                setMenuTab(tabs[nextIndex])
+                return
+            end
+
+            if gameProcessed then
                 return
             end
 
@@ -2548,7 +2662,7 @@ local function App()
                     [Enum.KeyCode.J] = "QUESTS",
                     [Enum.KeyCode.M] = "SETTINGS",
                 }
-                local requestedTab = tabByKey[input.KeyCode]
+                local requestedTab = tabByKey[keyCode]
                 if requestedTab then
                     if menuOpen and menuTab == requestedTab then
                         setMenuOpen(false)
@@ -2560,7 +2674,7 @@ local function App()
                 end
             end
 
-            if input.KeyCode == Enum.KeyCode.Escape then
+            if keyCode == Enum.KeyCode.Escape then
                 if advancementOpen then
                     setAdvancementOpen(false)
                 elseif shopOpen then
@@ -2584,11 +2698,13 @@ local function App()
             Health = health,
             MaxHealth = maxHealth,
             UiOpen = uiOpen,
+            InputMode = inputMode,
         }),
         Menu = menuOpen and React.createElement(MainMenu, {
             Profile = profile,
             ActiveTab = menuTab,
             OnTabChanged = setMenuTab,
+            InputMode = inputMode,
             OnClose = function()
                 setMenuOpen(false)
             end,
