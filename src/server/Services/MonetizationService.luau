@@ -7,6 +7,7 @@ local RunService = game:GetService("RunService")
 local MonetizationConfig = require(ReplicatedStorage.Shared.MonetizationConfig)
 local MonetizationRules = require(ReplicatedStorage.Shared.Logic.MonetizationRules)
 local MonetizationSafetyRules = require(ReplicatedStorage.Shared.Logic.MonetizationSafetyRules)
+local PurchaseReceiptRules = require(ReplicatedStorage.Shared.Logic.PurchaseReceiptRules)
 local CosmeticDefinitions = require(ReplicatedStorage.Shared.CosmeticDefinitions)
 local Net = require(ReplicatedStorage.Shared.Net)
 local AchievementService = require(script.Parent.AchievementService)
@@ -195,15 +196,21 @@ local function refreshMembership(player)
 end
 
 local function recordSupportReceipt(receiptInfo)
-    local purchaseId = tostring(receiptInfo.PurchaseId or "")
-    if purchaseId == "" then
-        return false, false, "missing_purchase_id"
+    local valid, purchaseIdOrReason =
+        PurchaseReceiptRules.ValidateIncoming(receiptInfo, MonetizationConfig.SupportProductId)
+    if not valid then
+        return false, false, purchaseIdOrReason
     end
+    local purchaseId = purchaseIdOrReason
 
     local inserted = false
+    local conflict = false
     local success, result = pcall(function()
         return receiptStore:UpdateAsync("receipt:" .. purchaseId, function(existing)
             if existing ~= nil then
+                if not PurchaseReceiptRules.MatchesStored(existing, receiptInfo) then
+                    conflict = true
+                end
                 return existing
             end
             inserted = true
@@ -219,6 +226,9 @@ local function recordSupportReceipt(receiptInfo)
     end)
     if not success then
         return false, false, tostring(result)
+    end
+    if conflict then
+        return false, false, "receipt_conflict"
     end
     return true, inserted, result
 end
