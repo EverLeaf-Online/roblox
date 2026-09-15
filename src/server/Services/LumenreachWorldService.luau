@@ -9,6 +9,7 @@ local PBRMaterialService = require(script.Parent.PBRMaterialService)
 local PlayerDataService = require(script.Parent.PlayerDataService)
 local QuestService = require(script.Parent.QuestService)
 local PortalService = require(script.Parent.PortalService)
+local WorldNoticeService = require(script.Parent.WorldNoticeService)
 local WorldObjectService = require(script.Parent.WorldObjectService)
 local WorldTravelService = require(script.Parent.WorldTravelService)
 
@@ -1690,9 +1691,11 @@ local function makeRuins(parent, origin)
         if not profile then
             return
         end
-        local ok = PortalService.Travel(player, profile, "lumenreach_to_brasshaven", gate)
+        local ok, reason = PortalService.Travel(player, profile, "lumenreach_to_brasshaven", gate)
         if ok then
             PlayerDataService.NotifyChanged(player)
+        else
+            WorldNoticeService.SendReason(player, reason)
         end
     end)
 

@@ -7,6 +7,7 @@ local BelforgeColossusService = require(script.Parent.BelforgeColossusService)
 local InteractionService = require(script.Parent.InteractionService)
 local PlayerDataService = require(script.Parent.PlayerDataService)
 local PortalService = require(script.Parent.PortalService)
+local WorldNoticeService = require(script.Parent.WorldNoticeService)
 local WorldObjectService = require(script.Parent.WorldObjectService)
 local WorldTravelService = require(script.Parent.WorldTravelService)
 
@@ -169,9 +170,11 @@ local function makeReturnGate(parent, position)
         if not profile then
             return
         end
-        local ok = PortalService.Travel(player, profile, "brasshaven_to_lumenreach", gate)
+        local ok, reason = PortalService.Travel(player, profile, "brasshaven_to_lumenreach", gate)
         if ok then
             PlayerDataService.NotifyChanged(player)
+        else
+            WorldNoticeService.SendReason(player, reason)
         end
     end)
 end
@@ -714,11 +717,19 @@ local function makeBelforgeGate(parent, position)
     prompt.Parent = door
     prompt.Triggered:Connect(function(player)
         local profile = PlayerDataService.Get(player)
-        local allowed = BelforgeAccessRules.CanEnter(profile)
-        if not allowed then
+        if not profile then
+            WorldNoticeService.SendReason(player, "profile_not_loaded")
             return
         end
-        WorldTravelService.Teleport(player, "belforge_antechamber")
+        local allowed, reason = BelforgeAccessRules.CanEnter(profile)
+        if not allowed then
+            WorldNoticeService.SendReason(player, reason)
+            return
+        end
+        local moved, moveReason = WorldTravelService.Teleport(player, "belforge_antechamber")
+        if not moved then
+            WorldNoticeService.SendReason(player, moveReason)
+        end
     end)
     return model
 end
@@ -921,7 +932,14 @@ local function makeBelforgeAntechamber(parent)
     arenaPrompt.Parent = innerDoor
     arenaPrompt.Triggered:Connect(function(player)
         local profile = PlayerDataService.Get(player)
-        BelforgeColossusService.EnterArena(player, profile)
+        if not profile then
+            WorldNoticeService.SendReason(player, "profile_not_loaded")
+            return
+        end
+        local entered, reason = BelforgeColossusService.EnterArena(player, profile)
+        if not entered then
+            WorldNoticeService.SendReason(player, reason)
+        end
     end)
 
     local spawnMarker = Instance.new("SpawnLocation")
@@ -955,7 +973,10 @@ local function makeBelforgeAntechamber(parent)
     returnPrompt.Parent = returnPad
     returnPrompt.Triggered:Connect(function(player)
         WorldTravelService.SetRespawn(player, "brasshaven_start")
-        WorldTravelService.Teleport(player, "belforge_threshold_return")
+        local moved, reason = WorldTravelService.Teleport(player, "belforge_threshold_return")
+        if not moved then
+            WorldNoticeService.SendReason(player, reason)
+        end
     end)
 
     makeBelforgeOathkeeper(model, origin + Vector3.new(-8, 0, 17))
@@ -1129,7 +1150,10 @@ local function makeBelforgeArena(parent)
     returnPrompt.RequiresLineOfSight = false
     returnPrompt.Parent = returnPad
     returnPrompt.Triggered:Connect(function(player)
-        BelforgeColossusService.LeaveArena(player)
+        local left, reason = BelforgeColossusService.LeaveArena(player)
+        if not left then
+            WorldNoticeService.SendReason(player, reason)
+        end
     end)
 
     makeLabel(model, origin + Vector3.new(0, 28, 0), "BELFORGE COLOSSUS ARENA")

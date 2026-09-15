@@ -9,6 +9,7 @@ local ScreenController = require(script.Parent.Controllers.ScreenController)
 local SkillController = require(script.Parent.Controllers.SkillController)
 local ThirdPersonController = require(script.Parent.Controllers.ThirdPersonController)
 local Net = require(ReplicatedStorage.Shared.Net)
+local NotificationStore = require(script.Parent.UI.NotificationStore)
 local PartyStore = require(script.Parent.State.PartyStore)
 local ProfileStore = require(script.Parent.State.ProfileStore)
 
@@ -43,9 +44,16 @@ task.spawn(function()
     local profileReady = remotes:WaitForChild(Net.Events.ProfileReady, 5)
     local profileChanged = remotes:WaitForChild(Net.Events.ProfileChanged, 5)
     local partyEvent = remotes:WaitForChild(Net.Events.PartyEvent, 5)
+    local worldNotice = remotes:WaitForChild(Net.Events.WorldNotice, 5)
     local requestProfile = remotes:WaitForChild(Net.Functions.RequestProfile, 5)
 
-    if not profileReady or not profileChanged or not partyEvent or not requestProfile then
+    if
+        not profileReady
+        or not profileChanged
+        or not partyEvent
+        or not worldNotice
+        or not requestProfile
+    then
         warn("[ClientBootstrap] Profile remotes were not ready")
         return
     end
@@ -53,6 +61,17 @@ task.spawn(function()
     profileReady.OnClientEvent:Connect(ProfileStore.Set)
     profileChanged.OnClientEvent:Connect(ProfileStore.Set)
     partyEvent.OnClientEvent:Connect(PartyStore.Push)
+    worldNotice.OnClientEvent:Connect(function(payload)
+        if type(payload) ~= "table" then
+            return
+        end
+        NotificationStore.Push(
+            payload.Kind or "info",
+            payload.Title or "EverLeaf",
+            payload.Body or "",
+            payload.Duration or 4
+        )
+    end)
 
     local ok, snapshot = pcall(function()
         return requestProfile:InvokeServer()

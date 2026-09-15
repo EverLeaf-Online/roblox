@@ -79,6 +79,7 @@
 - [x] Dedicated buy/sell shop screen implemented with item selection, quantity controls, pricing, balance display, and server-authoritative transactions.
 - [x] Reusable item detail card implemented for shop/inventory-facing item inspection; hover/pointer refinement remains part of final UI QA.
 - [x] Notification/toast system implemented for level-up, currency/item rewards, quest acceptance/readiness/completion, shop success, and shop errors.
+- [x] Server-driven world notices now explain blocked region/Belforge/Colossus travel and encounter lockout/reset reasons through the production toast system.
 - [ ] Split monolithic `ReactUIController` into maintainable components after Phase 1 behavior is locked.
 
 ### E. RPG/content closure
