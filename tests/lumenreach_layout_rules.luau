@@ -6,7 +6,7 @@ for _, required in
     {
         "local WORLD_WIDTH = 2350",
         "local WORLD_DEPTH = 1800",
-        "local WORLD_DESIGN_VERSION = 5",
+        "local WORLD_DESIGN_VERSION = 6",
         'world:SetAttribute("WorldDesignVersion", WORLD_DESIGN_VERSION)',
         'world:SetAttribute("TerrainFirstMMOLayout", true)',
         "terrain:Clear()",
@@ -48,6 +48,20 @@ for _, required in
         '"PineRoots"',
         '"FallenTreeTrunk"',
         '"DryBranches"',
+        '"WayfarerHealerLodge"',
+        '"WayfarerCraftHall"',
+        '"WayfarerStable"',
+        '"CrossroadsWaystation"',
+        '"GlowmereKeeperHut"',
+        '"EastbridgeBarracks"',
+        '"GraveboneRuinedChapel"',
+        '"MossglenRangerLodge"',
+        '"SunmossObservatoryLodge"',
+        '"VeilfallRefuge"',
+        '"ShatteredArchOuterGate"',
+        '"ProvingMentorLodge"',
+        "local AMBIENT_RESIDENTS = table.freeze",
+        "makeAmbientPopulation(world)",
         "makeGreenwaySetpiece(parent)",
         "makeCrossroadsSetpiece(parent)",
         "makeGlowmereSetpiece(parent)",
@@ -162,16 +176,31 @@ assert(
     string.find(source, "scatterForestBand(parent, Vector3.new(-790, 0, 430)", 1, true) ~= nil
         and string.find(source, "scatterForestBand(parent, Vector3.new(670, 0, -585)", 1, true)
             ~= nil,
-    "V5 must fill the large dead-space woodland belts between progression rooms"
+    "V6 must fill the large dead-space woodland belts between progression rooms"
 )
 assert(
     string.find(source, "for index, route in ROUTES do", 1, true) ~= nil
         and string.find(source, "dressRouteEdges(parent, route, 40 + index)", 1, true) ~= nil,
-    "V5 must give travel routes safe edge dressing instead of leaving long empty corridors"
+    "V6 must give travel routes safe edge dressing instead of leaving long empty corridors"
 )
 assert(
     string.find(source, "clearOfDressingExclusions", 1, true) ~= nil,
     "dense environment dressing must preserve combat/spawn/advancement clearings"
+)
+
+assert(
+    string.find(source, "makeTownExpansion(parent)", 1, true) ~= nil
+        and string.find(source, "makeWorldSettlements(parent)", 1, true) ~= nil,
+    "V6 must populate the region with actual settlements and structures, not only foliage dressing"
+)
+assert(
+    string.find(source, '"ShatteredArchOuterGate"', 1, true) ~= nil
+        and string.find(source, '"GraveboneRuinedChapel"', 1, true) ~= nil,
+    "late Lumenreach must contain fortress/ruin architecture"
+)
+assert(
+    string.find(source, "AmbientResident", 1, true) ~= nil,
+    "V6 settlements must include non-interactive ambient residents so inhabited spaces do not feel abandoned"
 )
 
 local townCalls = 0

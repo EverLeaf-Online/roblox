@@ -1,8 +1,8 @@
-# Lumenreach MMO World Layout — Living World V5
+# Lumenreach MMO World Layout — Populated World V6
 
 **Canonical target:** 2350 × 1800 studs, Level 1–10 starter region.
 
-Lumenreach V5 is a full replacement of the earlier showcase/camp composition. The runtime generator clears the previous generated model and Terrain, rebuilds macro topography from scratch, cuts the road network into the land, and only then places the authored structures, trees, NPCs, bridges, encounter spaces, landmarks, and portal required by gameplay. New work must extend this terrain-first layout; it must not stack scenery over older geometry.
+Lumenreach V6 is a full replacement of the earlier showcase/camp composition. The runtime generator clears the previous generated model and Terrain, rebuilds macro topography from scratch, cuts the road network into the land, and only then places the authored structures, trees, NPCs, bridges, encounter spaces, landmarks, and portal required by gameplay. New work must extend this terrain-first layout; it must not stack scenery over older geometry.
 
 ## Topology
 
@@ -40,9 +40,9 @@ The starter route is intentionally readable as geography rather than a chain of 
 | Shattered Lumen Arch | 8–10 | Regional capstone, late Skeleton field, Brasshaven gate |
 | Wayfarer Proving Circle | 7–10 | First advancement milestone detached from leveling traffic |
 
-## V5 living-world identity
+## V6 populated-world identity
 
-V5 keeps the terrain-first macro layout and removes the remaining dead-space feeling. Dense but controlled woodland belts now connect the authored subzones, route shoulders receive low-profile environmental rhythm, and each biome gets distinct forest-floor dressing while protected combat/spawn/advancement pockets stay open. Every major subzone still has an authored silhouette, rest/observation point, or ruin language placed around — never through — its combat and traversal center.
+V6 addresses the larger problem behind the “empty world” feedback: Lumenreach now contains actual built places and inhabitants across the whole Level 1–10 journey. The forest/terrain pass remains, but it is no longer being treated as a substitute for world content. Wayfarer Camp expands into a small settlement, frontier zones gain lodges/outposts/waystations, and the late game transitions through ruined settlements and a border fortress.
 
 - **Wayfarer Camp** is a permanent starter town with a social hearth plaza, four service buildings, quartermaster/archive stalls, benches, training yard, arrival signage, Lumen gate pylons, and a wide party-safe departure gate.
 - **Greenway Fields** reads as the first reclaimed road outside town, with roadside ruins and a safe rest edge framing the starter combat meadow.
@@ -55,9 +55,15 @@ V5 keeps the terrain-first macro layout and removes the remaining dead-space fee
 - **Veilfall Ravine** uses a dedicated overlook, ruin fragment, and wayfinding pylons around the cascade and Wisp field.
 - **Shattered Lumen Arch** now has a processional pylon avenue and broken side walls so the Level 8–10 capstone reads as a regional threshold before the portal itself.
 
-All V5 architecture is native Roblox geometry or approved environment prefabs. No RockFace mesh, giant fallback boulders, tent-town regression, or scenery layering is allowed. The generator still clears and rebuilds the complete region on initialization.
+All V6 architecture is native Roblox geometry or approved environment prefabs. No RockFace mesh, giant fallback boulders, tent-town regression, or scenery layering is allowed. The generator still clears and rebuilds the complete region on initialization.
 
-### V5 density rules
+### V6 population and density rules
+
+- Wayfarer Camp now contains nine permanent buildings plus watchtowers, palisades, supply areas, service stalls, and a real arrival/departure street.
+- Greenway, Crossroads, Glowmere, Eastbridge, Mossglen, Sunmoss, and Veilfall each contain built habitation or staffed travel infrastructure, not just landmarks.
+- Gravebone Watch and the Shattered Lumen Arch are built as ruined settlements/fortifications with gatehouses, halls, walls, towers, memorials, and processional architecture.
+- The Proving Circle has its own mentor lodge, preparation shelter, oath shrine, and five-discipline trial architecture.
+- Ambient Wayfarers/guards/couriers/rangers populate major safe hubs so settlements visibly read as inhabited even when no quest NPC is nearby.
 
 - Continuous forest belts occupy the negative space between quest/combat rooms so the 2350×1800 region no longer reads as isolated clearings in an empty field.
 - Route-edge dressing uses ferns, mossy rock sets, roots, stumps, dry branches, fallen logs, and occasional trees outside the party-width travel lane.
@@ -80,7 +86,7 @@ All V5 architecture is native Roblox geometry or approved environment prefabs. N
 
 ## Source contract
 
-`src/server/Services/LumenreachWorldService.luau` is the canonical V5 generator. It owns:
+`src/server/Services/LumenreachWorldService.luau` is the canonical V6 generator. It owns:
 
 - `WORLD_WIDTH = 2350` and `WORLD_DEPTH = 1800`;
 - zone centers and progression bands;

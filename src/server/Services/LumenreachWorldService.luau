@@ -16,7 +16,7 @@ local LumenreachWorldService = {}
 local GENERATED_NAME = "EverLeafGeneratedWorld"
 local WORLD_WIDTH = 2350
 local WORLD_DEPTH = 1800
-local WORLD_DESIGN_VERSION = 5
+local WORLD_DESIGN_VERSION = 6
 
 -- Lumenreach is authored as a terrain-first MMORPG region. The generator below
 -- replaces the previous showcase composition completely: terrain is cleared,
@@ -212,7 +212,10 @@ local GORGE_POINTS = table.freeze({
 local DRESSING_EXCLUSIONS = table.freeze({
     table.freeze({ Center = ARRIVAL_ORIGIN, Radius = 54 }),
     table.freeze({ Center = TRAINING_ORIGIN, Radius = 34 }),
-    table.freeze({ Center = ZONES.Proving, Radius = 42 }),
+    table.freeze({ Center = ZONES.Camp, Radius = 136 }),
+    table.freeze({ Center = ZONES.Crossroads, Radius = 82 }),
+    table.freeze({ Center = ZONES.EastLanding, Radius = 88 }),
+    table.freeze({ Center = ZONES.Proving, Radius = 50 }),
     table.freeze({ Center = ZONES.Greenway + Vector3.new(0, 0, 72), Radius = 48 }),
     table.freeze({ Center = ZONES.Glowmere + Vector3.new(-90, 0, 70), Radius = 50 }),
     table.freeze({ Center = ZONES.Glowmere + Vector3.new(-62, 0, 48), Radius = 24 }),
@@ -1417,6 +1420,683 @@ local function makeLumenPylon(parent, position, height)
     return model
 end
 
+local function makeFenceLine(parent, name, a, b, spacing, height)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    local groundA = terrainSurfacePosition(a, 0)
+    local groundB = terrainSurfacePosition(b, 0)
+    local delta = groundB - groundA
+    local length = delta.Magnitude
+    local frame = CFrame.lookAt((groundA + groundB) * 0.5, groundB)
+    local postSpacing = spacing or 8
+    local postHeight = height or 5
+    local posts = math.max(2, math.ceil(length / postSpacing))
+    local wood = Color3.fromRGB(72, 52, 37)
+    for index = 0, posts do
+        local alpha = index / posts
+        local z = -length * 0.5 + length * alpha
+        local post = makePart(
+            model,
+            "FencePost",
+            Vector3.new(0.7, postHeight, 0.7),
+            frame * CFrame.new(0, postHeight * 0.5, z),
+            Enum.Material.Wood,
+            wood
+        )
+        post.CanCollide = false
+        post.CanTouch = false
+        post.CanQuery = false
+    end
+    for _, y in { 1.8, 3.7 } do
+        local rail = makePart(
+            model,
+            "FenceRail",
+            Vector3.new(0.5, 0.45, length),
+            frame * CFrame.new(0, y, 0),
+            Enum.Material.Wood,
+            wood
+        )
+        rail.CanCollide = false
+        rail.CanTouch = false
+        rail.CanQuery = false
+    end
+    return model
+end
+
+local function makeSupplyStack(parent, position, yaw, scale)
+    local ground = terrainSurfacePosition(position, 0)
+    local model = Instance.new("Model")
+    model.Name = "WayfarerSupplyStack"
+    model.Parent = parent
+    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+    scale = scale or 1
+    local crateColor = Color3.fromRGB(106, 79, 50)
+    for index, spec in
+        {
+            { -2.2, 1.1, 0.0, 3.4, 2.2, 3.0 },
+            { 1.5, 1.0, 0.8, 2.8, 2.0, 2.6 },
+            { -0.4, 3.0, 0.4, 2.5, 1.9, 2.4 },
+        }
+    do
+        local crate = makePart(
+            model,
+            "SupplyCrate" .. index,
+            Vector3.new(spec[4], spec[5], spec[6]) * scale,
+            base * CFrame.new(spec[1] * scale, spec[2] * scale, spec[3] * scale),
+            Enum.Material.WoodPlanks,
+            crateColor
+        )
+        crate.CanCollide = false
+        crate.CanTouch = false
+        crate.CanQuery = false
+    end
+    local barrel = makePart(
+        model,
+        "SupplyBarrel",
+        Vector3.new(2.2, 3.0, 2.2) * scale,
+        base
+            * CFrame.new(3.2 * scale, 1.5 * scale, -0.8 * scale)
+            * CFrame.Angles(0, 0, math.rad(90)),
+        Enum.Material.Wood,
+        Color3.fromRGB(87, 63, 43)
+    )
+    barrel.Shape = Enum.PartType.Cylinder
+    barrel.CanCollide = false
+    barrel.CanTouch = false
+    barrel.CanQuery = false
+    return model
+end
+
+local function makeRoadsideShelter(parent, name, position, yaw)
+    local ground = terrainSurfacePosition(position, 0)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+    local wood = Color3.fromRGB(78, 58, 40)
+    for _, x in { -5.5, 5.5 } do
+        local post = makePart(
+            model,
+            "ShelterPost",
+            Vector3.new(0.8, 7.2, 0.8),
+            base * CFrame.new(x, 3.6, 0),
+            Enum.Material.Wood,
+            wood
+        )
+        post.CanCollide = false
+    end
+    local roof = makePart(
+        model,
+        "ShelterRoof",
+        Vector3.new(13.5, 0.7, 8.5),
+        base * CFrame.new(0, 7.2, 0) * CFrame.Angles(0, 0, math.rad(-5)),
+        Enum.Material.WoodPlanks,
+        Color3.fromRGB(48, 67, 57)
+    )
+    roof.CanCollide = false
+    roof.CanTouch = false
+    roof.CanQuery = false
+    makeBench(model, position + Vector3.new(0, 0, 1), yaw or 0)
+    return model
+end
+
+local function makeStoneShrine(parent, name, position, yaw, accent)
+    local ground = terrainSurfacePosition(position, 0)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+    local stone = Color3.fromRGB(78, 88, 83)
+    makePart(
+        model,
+        "ShrineBase",
+        Vector3.new(14, 1.2, 10),
+        base * CFrame.new(0, 0.6, 0),
+        Enum.Material.Slate,
+        stone
+    )
+    for _, x in { -4.8, 4.8 } do
+        makePart(
+            model,
+            "ShrinePillar",
+            Vector3.new(2.2, 9.5, 2.2),
+            base * CFrame.new(x, 5.4, 0),
+            Enum.Material.Slate,
+            stone
+        )
+    end
+    local crown = makePart(
+        model,
+        "ShrineCrown",
+        Vector3.new(13, 2.0, 3.0),
+        base * CFrame.new(0, 10.2, 0),
+        Enum.Material.Slate,
+        Color3.fromRGB(65, 76, 72)
+    )
+    crown.CanCollide = false
+    local lumen = makePart(
+        model,
+        "ShrineLumen",
+        Vector3.new(2.4, 5.6, 0.6),
+        base * CFrame.new(0, 5.2, -1.8),
+        Enum.Material.Neon,
+        accent or Color3.fromRGB(104, 231, 188)
+    )
+    lumen.CanCollide = false
+    lumen.CanTouch = false
+    lumen.CanQuery = false
+    local light = Instance.new("PointLight")
+    light.Color = lumen.Color
+    light.Brightness = 1.1
+    light.Range = 18
+    light.Parent = lumen
+    return model
+end
+
+local function makeRuinedHall(parent, name, center, width, depth, yaw)
+    local ground = terrainSurfacePosition(center, 0)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+    local stone = Color3.fromRGB(72, 80, 78)
+    makePart(
+        model,
+        "RuinFloor",
+        Vector3.new(width, 0.8, depth),
+        base * CFrame.new(0, 0.4, 0),
+        Enum.Material.Slate,
+        stone
+    )
+    makeRuinWall(model, center + (base.RightVector * (-width * 0.44)), yaw + math.rad(90), depth, 8)
+    makeRuinWall(
+        model,
+        center + (base.RightVector * (width * 0.44)),
+        yaw + math.rad(90),
+        depth * 0.72,
+        7
+    )
+    makeRuinWall(model, center + (base.LookVector * (depth * 0.44)), yaw, width * 0.8, 9)
+    for _, offset in
+        { Vector3.new(-width * 0.28, 0, -depth * 0.2), Vector3.new(width * 0.23, 0, depth * 0.14) }
+    do
+        local pillarGround = terrainSurfacePosition(center + base:VectorToWorldSpace(offset), 0)
+        makePart(
+            model,
+            "BrokenPillar",
+            Vector3.new(3, 8, 3),
+            CFrame.new(pillarGround + Vector3.new(0, 4, 0)),
+            Enum.Material.Slate,
+            stone
+        )
+    end
+    return model
+end
+
+local function makeGatehouse(parent, name, position, yaw, width)
+    local ground = terrainSurfacePosition(position, 0)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+    width = width or 28
+    local stone = Color3.fromRGB(73, 82, 79)
+    for _, side in { -1, 1 } do
+        makePart(
+            model,
+            "GateTower",
+            Vector3.new(8, 17, 10),
+            base * CFrame.new(side * width * 0.5, 8.5, 0),
+            Enum.Material.Slate,
+            stone
+        )
+    end
+    local beam = makePart(
+        model,
+        "GateLintel",
+        Vector3.new(width - 8, 4, 8),
+        base * CFrame.new(0, 15, 0),
+        Enum.Material.Slate,
+        Color3.fromRGB(62, 72, 69)
+    )
+    beam.CanCollide = false
+    return model
+end
+
+local function makeTownExpansion(parent)
+    local camp = ZONES.Camp
+    makeBuilding(
+        parent,
+        "WayfarerHealerLodge",
+        camp + Vector3.new(-105, 0, -54),
+        28,
+        22,
+        9,
+        math.rad(62),
+        Color3.fromRGB(96, 124, 101)
+    )
+    makeBuilding(
+        parent,
+        "WayfarerCraftHall",
+        camp + Vector3.new(8, 0, 86),
+        36,
+        25,
+        10,
+        math.rad(178),
+        Color3.fromRGB(123, 91, 64)
+    )
+    makeBuilding(
+        parent,
+        "WayfarerStorehouse",
+        camp + Vector3.new(-112, 0, 62),
+        25,
+        20,
+        8,
+        math.rad(108),
+        Color3.fromRGB(115, 94, 66)
+    )
+    makeBuilding(
+        parent,
+        "WayfarerStable",
+        camp + Vector3.new(102, 0, 72),
+        34,
+        24,
+        9,
+        math.rad(-150),
+        Color3.fromRGB(103, 86, 62)
+    )
+    makeBuilding(
+        parent,
+        "PathkeeperLodge",
+        camp + Vector3.new(15, 0, -104),
+        30,
+        22,
+        9,
+        math.rad(6),
+        Color3.fromRGB(77, 105, 88)
+    )
+    makeWatchtower(parent, camp + Vector3.new(-125, 0, -86), math.rad(25))
+    makeWatchtower(parent, camp + Vector3.new(124, 0, -82), math.rad(-25))
+    makeFenceLine(
+        parent,
+        "CampNorthPalisade",
+        camp + Vector3.new(-120, 0, 100),
+        camp + Vector3.new(112, 0, 100),
+        8,
+        5.5
+    )
+    makeFenceLine(
+        parent,
+        "CampSouthPalisadeWest",
+        camp + Vector3.new(-120, 0, -112),
+        camp + Vector3.new(-20, 0, -112),
+        8,
+        5.5
+    )
+    makeFenceLine(
+        parent,
+        "CampSouthPalisadeEast",
+        camp + Vector3.new(42, 0, -112),
+        camp + Vector3.new(112, 0, -112),
+        8,
+        5.5
+    )
+    makeFenceLine(
+        parent,
+        "CampWestPalisade",
+        camp + Vector3.new(-132, 0, -96),
+        camp + Vector3.new(-132, 0, 92),
+        8,
+        5.5
+    )
+    makeSupplyStack(parent, camp + Vector3.new(-84, 0, 43), math.rad(16), 1.0)
+    makeSupplyStack(parent, camp + Vector3.new(82, 0, 43), math.rad(-12), 1.0)
+    makeSupplyStack(parent, camp + Vector3.new(80, 0, -52), math.rad(32), 0.9)
+end
+
+local function makeWorldSettlements(parent)
+    -- Greenway settlement edge: visible habitation immediately outside town.
+    makeBuilding(
+        parent,
+        "GreenwayWayhouse",
+        ZONES.Greenway + Vector3.new(-92, 0, -62),
+        28,
+        21,
+        8,
+        math.rad(48),
+        Color3.fromRGB(97, 112, 80)
+    )
+    makeBuilding(
+        parent,
+        "GreenwayStoreShed",
+        ZONES.Greenway + Vector3.new(92, 0, -54),
+        22,
+        18,
+        7,
+        math.rad(-42),
+        Color3.fromRGB(112, 91, 62)
+    )
+    makeRoadsideShelter(
+        parent,
+        "GreenwayTravelShelter",
+        ZONES.Greenway + Vector3.new(18, 0, -92),
+        math.rad(8)
+    )
+    makeSupplyStack(parent, ZONES.Greenway + Vector3.new(-70, 0, -72), math.rad(32), 0.85)
+
+    -- Crossroads is a staffed Wayfarer waystation, not a sign in a field.
+    makeBuilding(
+        parent,
+        "CrossroadsWaystation",
+        ZONES.Crossroads + Vector3.new(-70, 0, -58),
+        30,
+        22,
+        9,
+        math.rad(38),
+        Color3.fromRGB(84, 108, 87)
+    )
+    makeBuilding(
+        parent,
+        "CrossroadsCourierHouse",
+        ZONES.Crossroads + Vector3.new(70, 0, 55),
+        24,
+        19,
+        8,
+        math.rad(-142),
+        Color3.fromRGB(111, 91, 66)
+    )
+    makeRoadsideShelter(
+        parent,
+        "CrossroadsRestShelter",
+        ZONES.Crossroads + Vector3.new(74, 0, -38),
+        math.rad(-65)
+    )
+    makeStoneShrine(
+        parent,
+        "CrossroadsWayfarerShrine",
+        ZONES.Crossroads + Vector3.new(-52, 0, 55),
+        math.rad(30),
+        Color3.fromRGB(104, 231, 188)
+    )
+
+    -- Glowmere has an actual wetland community around the shoreline.
+    makeBuilding(
+        parent,
+        "GlowmereKeeperHut",
+        ZONES.Glowmere + Vector3.new(-112, 0, -74),
+        26,
+        20,
+        8,
+        math.rad(32),
+        Color3.fromRGB(73, 107, 91)
+    )
+    makeBuilding(
+        parent,
+        "GlowmereReedHouse",
+        ZONES.Glowmere + Vector3.new(102, 0, -80),
+        24,
+        19,
+        8,
+        math.rad(-30),
+        Color3.fromRGB(92, 112, 86)
+    )
+    makeRoadsideShelter(
+        parent,
+        "GlowmereFisherShelter",
+        ZONES.Glowmere + Vector3.new(105, 0, 62),
+        math.rad(-118)
+    )
+    makeSupplyStack(parent, ZONES.Glowmere + Vector3.new(-90, 0, -82), math.rad(8), 0.8)
+
+    -- Eastbridge is a fortified frontier hamlet with several occupied structures.
+    makeBuilding(
+        parent,
+        "EastbridgeBarracks",
+        ZONES.EastLanding + Vector3.new(-58, 0, 48),
+        30,
+        22,
+        9,
+        math.rad(136),
+        Color3.fromRGB(83, 102, 78)
+    )
+    makeBuilding(
+        parent,
+        "EastbridgeStorehouse",
+        ZONES.EastLanding + Vector3.new(62, 0, -52),
+        27,
+        21,
+        8,
+        math.rad(-46),
+        Color3.fromRGB(118, 91, 60)
+    )
+    makeBuilding(
+        parent,
+        "EastbridgeMedicLodge",
+        ZONES.EastLanding + Vector3.new(-52, 0, -55),
+        24,
+        19,
+        8,
+        math.rad(44),
+        Color3.fromRGB(92, 119, 97)
+    )
+    makeGatehouse(
+        parent,
+        "EastbridgeGatehouse",
+        ZONES.EastLanding + Vector3.new(-82, 0, 0),
+        math.rad(90),
+        34
+    )
+    makeFenceLine(
+        parent,
+        "EastbridgeNorthWall",
+        ZONES.EastLanding + Vector3.new(-64, 0, 66),
+        ZONES.EastLanding + Vector3.new(64, 0, 66),
+        8,
+        5
+    )
+    makeFenceLine(
+        parent,
+        "EastbridgeSouthWall",
+        ZONES.EastLanding + Vector3.new(-64, 0, -68),
+        ZONES.EastLanding + Vector3.new(64, 0, -68),
+        8,
+        5
+    )
+    makeSupplyStack(parent, ZONES.EastLanding + Vector3.new(56, 0, 18), math.rad(-20), 0.9)
+
+    -- Gravebone reads as a destroyed fortified settlement and cemetery.
+    makeRuinedHall(
+        parent,
+        "GraveboneRuinedChapel",
+        ZONES.Gravebone + Vector3.new(-62, 0, 70),
+        34,
+        25,
+        math.rad(16)
+    )
+    makeRuinedHall(
+        parent,
+        "GraveboneGuardHall",
+        ZONES.Gravebone + Vector3.new(92, 0, -76),
+        28,
+        21,
+        math.rad(-24)
+    )
+    makeGatehouse(parent, "GraveboneBrokenGate", ZONES.Gravebone + Vector3.new(-5, 0, -105), 0, 30)
+    makeStoneShrine(
+        parent,
+        "GraveboneMemorial",
+        ZONES.Gravebone + Vector3.new(-92, 0, 18),
+        math.rad(88),
+        Color3.fromRGB(142, 198, 172)
+    )
+
+    -- Mossglen has a ranger enclave on the edge of its large party field.
+    makeBuilding(
+        parent,
+        "MossglenRangerLodge",
+        ZONES.Mossglen + Vector3.new(-128, 0, -92),
+        32,
+        24,
+        9,
+        math.rad(42),
+        Color3.fromRGB(74, 109, 78)
+    )
+    makeBuilding(
+        parent,
+        "MossglenHunterCabin",
+        ZONES.Mossglen + Vector3.new(128, 0, -105),
+        26,
+        20,
+        8,
+        math.rad(-38),
+        Color3.fromRGB(100, 91, 61)
+    )
+    makeBuilding(
+        parent,
+        "MossglenSupplyHouse",
+        ZONES.Mossglen + Vector3.new(-150, 0, 12),
+        24,
+        19,
+        8,
+        math.rad(90),
+        Color3.fromRGB(109, 86, 58)
+    )
+    makeRoadsideShelter(
+        parent,
+        "MossglenRestShelter",
+        ZONES.Mossglen + Vector3.new(148, 0, 55),
+        math.rad(-90)
+    )
+    makeSupplyStack(parent, ZONES.Mossglen + Vector3.new(-112, 0, -64), math.rad(25), 0.9)
+
+    -- Sunmoss is an old highland observation/research site.
+    makeBuilding(
+        parent,
+        "SunmossObservatoryLodge",
+        ZONES.Sunmoss + Vector3.new(-92, 0, -72),
+        30,
+        23,
+        9,
+        math.rad(35),
+        Color3.fromRGB(105, 111, 77)
+    )
+    makeBuilding(
+        parent,
+        "SunmossKeeperHouse",
+        ZONES.Sunmoss + Vector3.new(88, 0, 72),
+        24,
+        19,
+        8,
+        math.rad(-145),
+        Color3.fromRGB(84, 104, 79)
+    )
+    makeStoneShrine(
+        parent,
+        "SunmossHighShrine",
+        ZONES.Sunmoss + Vector3.new(-75, 0, 68),
+        math.rad(30),
+        Color3.fromRGB(207, 217, 113)
+    )
+    makeWatchtower(parent, ZONES.Sunmoss + Vector3.new(112, 0, -62), math.rad(-55))
+
+    -- Veilfall contains a surviving refuge beside older ruined infrastructure.
+    makeBuilding(
+        parent,
+        "VeilfallRefuge",
+        ZONES.Veilfall + Vector3.new(-104, 0, -68),
+        27,
+        21,
+        8,
+        math.rad(45),
+        Color3.fromRGB(69, 98, 92)
+    )
+    makeBuilding(
+        parent,
+        "VeilfallSurveyHut",
+        ZONES.Veilfall + Vector3.new(108, 0, 68),
+        23,
+        18,
+        8,
+        math.rad(-132),
+        Color3.fromRGB(86, 105, 90)
+    )
+    makeRuinedHall(
+        parent,
+        "VeilfallOldSanctuary",
+        ZONES.Veilfall + Vector3.new(100, 0, -65),
+        30,
+        22,
+        math.rad(-38)
+    )
+    makeStoneShrine(
+        parent,
+        "VeilfallLumenShrine",
+        ZONES.Veilfall + Vector3.new(-105, 0, 54),
+        math.rad(58),
+        Color3.fromRGB(114, 222, 226)
+    )
+
+    -- The Shattered Arch is the remains of a true border fortress.
+    makeGatehouse(
+        parent,
+        "ShatteredArchOuterGate",
+        ZONES.Ruins + Vector3.new(-116, 0, -4),
+        math.rad(90),
+        34
+    )
+    makeRuinedHall(
+        parent,
+        "ShatteredArchGuardhouseNorth",
+        ZONES.Ruins + Vector3.new(-90, 0, 92),
+        34,
+        24,
+        math.rad(12)
+    )
+    makeRuinedHall(
+        parent,
+        "ShatteredArchGuardhouseSouth",
+        ZONES.Ruins + Vector3.new(-82, 0, -88),
+        32,
+        23,
+        math.rad(-10)
+    )
+    makeWatchtower(parent, ZONES.Ruins + Vector3.new(-132, 0, 92), math.rad(20))
+    makeWatchtower(parent, ZONES.Ruins + Vector3.new(-130, 0, -94), math.rad(-20))
+    makeStoneShrine(
+        parent,
+        "ShatteredArchThresholdShrine",
+        ZONES.Ruins + Vector3.new(58, 0, -88),
+        math.rad(-12),
+        Color3.fromRGB(96, 229, 193)
+    )
+
+    -- Proving Circle has a mentor compound instead of an isolated ritual ring.
+    makeBuilding(
+        parent,
+        "ProvingMentorLodge",
+        ZONES.Proving + Vector3.new(-72, 0, 58),
+        30,
+        22,
+        9,
+        math.rad(48),
+        Color3.fromRGB(81, 106, 88)
+    )
+    makeRoadsideShelter(
+        parent,
+        "ProvingPreparationShelter",
+        ZONES.Proving + Vector3.new(76, 0, 56),
+        math.rad(-52)
+    )
+    makeStoneShrine(
+        parent,
+        "ProvingOathShrine",
+        ZONES.Proving + Vector3.new(0, 0, 70),
+        math.rad(180),
+        Color3.fromRGB(111, 235, 188)
+    )
+end
+
 local function makeTown(parent)
     local camp = ZONES.Camp
 
@@ -1554,6 +2234,7 @@ local function makeTown(parent)
     top.CanQuery = false
     makeLumenPylon(parent, camp + Vector3.new(116, 0, -19), 9)
     makeLumenPylon(parent, camp + Vector3.new(116, 0, 43), 9)
+    makeTownExpansion(parent)
 end
 
 local function makeStoneCircle(parent, center, radius, count, name)
@@ -2103,6 +2784,121 @@ local function makeNpc(parent, npcId)
     return model
 end
 
+local AMBIENT_RESIDENTS = table.freeze({
+    table.freeze({
+        Name = "Wayfarer Guard",
+        Position = ZONES.Camp + Vector3.new(94, 0, 9),
+        Yaw = math.rad(90),
+        Role = "Guard",
+        HairStyle = "short",
+        Cloth = Color3.fromRGB(61, 91, 72),
+    }),
+    table.freeze({
+        Name = "Wayfarer Smith",
+        Position = ZONES.Camp + Vector3.new(18, 0, 72),
+        Yaw = math.rad(170),
+        Role = "Quartermaster",
+        HairStyle = "short",
+        Cloth = Color3.fromRGB(112, 76, 55),
+    }),
+    table.freeze({
+        Name = "Wayfarer Healer",
+        Position = ZONES.Camp + Vector3.new(-96, 0, -40),
+        Yaw = math.rad(55),
+        Role = "Guide",
+        HairStyle = "bun",
+        Cloth = Color3.fromRGB(87, 118, 97),
+    }),
+    table.freeze({
+        Name = "Wayfarer Traveler",
+        Position = ZONES.Camp + Vector3.new(-18, 0, 31),
+        Yaw = math.rad(-20),
+        Role = "Scout",
+        HairStyle = "ponytail",
+        Cloth = Color3.fromRGB(83, 95, 72),
+    }),
+    table.freeze({
+        Name = "Waystation Courier",
+        Position = ZONES.Crossroads + Vector3.new(-54, 0, -44),
+        Yaw = math.rad(44),
+        Role = "Scout",
+        HairStyle = "short",
+        Cloth = Color3.fromRGB(75, 97, 77),
+    }),
+    table.freeze({
+        Name = "Eastbridge Guard",
+        Position = ZONES.EastLanding + Vector3.new(-56, 0, 8),
+        Yaw = math.rad(90),
+        Role = "Guard",
+        HairStyle = "short",
+        Cloth = Color3.fromRGB(64, 88, 69),
+    }),
+    table.freeze({
+        Name = "Eastbridge Medic",
+        Position = ZONES.EastLanding + Vector3.new(15, 0, -50),
+        Yaw = math.rad(35),
+        Role = "Guide",
+        HairStyle = "bun",
+        Cloth = Color3.fromRGB(92, 116, 96),
+    }),
+    table.freeze({
+        Name = "Mossglen Ranger",
+        Position = ZONES.Mossglen + Vector3.new(-112, 0, -76),
+        Yaw = math.rad(38),
+        Role = "Scout",
+        HairStyle = "ponytail",
+        Cloth = Color3.fromRGB(63, 98, 68),
+    }),
+    table.freeze({
+        Name = "Sunmoss Keeper",
+        Position = ZONES.Sunmoss + Vector3.new(-78, 0, -58),
+        Yaw = math.rad(35),
+        Role = "Archivist",
+        HairStyle = "long",
+        Cloth = Color3.fromRGB(104, 108, 75),
+    }),
+})
+
+local function makeAmbientResident(parent, spec, index)
+    local position = terrainSurfacePosition(spec.Position, 0)
+    local cloth = spec.Cloth
+    local palette = {
+        Cloth = cloth,
+        DarkCloth = cloth:Lerp(Color3.new(0, 0, 0), 0.24),
+        Accent = cloth:Lerp(Color3.fromRGB(117, 235, 192), 0.35),
+        Skin = Color3.fromRGB(211, 176, 143),
+        Leather = Color3.fromRGB(84, 58, 39),
+        Hair = Color3.fromRGB(78, 52, 39),
+        EyeColor = Color3.fromRGB(58, 88, 68),
+        Lumen = Color3.fromRGB(111, 234, 185),
+        Metal = Color3.fromRGB(158, 128, 69),
+    }
+    local model = StylizedNpcFactory.Create(parent, {
+        Name = "AmbientResident" .. index,
+        Position = position,
+        Yaw = spec.Yaw,
+        Role = spec.Role,
+        HairStyle = spec.HairStyle,
+        Build = 0.94 + (index % 3) * 0.03,
+        HeightScale = 0.97 + (index % 2) * 0.04,
+        HeadScale = 0.96,
+        BodyTypeScale = 0.3,
+        ProportionScale = 0.3,
+        Palette = palette,
+    })
+    if model then
+        model:SetAttribute("AmbientResident", true)
+        model:SetAttribute("DisplayRole", spec.Name)
+    end
+    return model
+end
+
+local function makeAmbientPopulation(parent)
+    for index, spec in AMBIENT_RESIDENTS do
+        makeAmbientResident(parent, spec, index)
+    end
+end
+
 local function registerSpawn(parent, name, spawnId, position, yaw)
     local ground = terrainSurfacePosition(position, 0)
     local spawn = Instance.new("SpawnLocation")
@@ -2209,6 +3005,7 @@ end
 
 local function makeZoneContent(parent)
     makeTown(parent)
+    makeWorldSettlements(parent)
 
     makeBuilding(
         parent,
@@ -2467,6 +3264,7 @@ function LumenreachWorldService.Init()
     for npcId in NPC_STYLES do
         makeNpc(world, npcId)
     end
+    makeAmbientPopulation(world)
 
     makeEncounterContent(world)
 end

@@ -5,11 +5,11 @@
 **Detailed tracker:** [`MASTER_CHECKLIST.md`](MASTER_CHECKLIST.md)
 **Architecture:** [`ARCHITECTURE.md`](ARCHITECTURE.md)
 
-## Lumenreach V5 living world — implemented
+## Lumenreach V6 populated world — implemented
 
 - Terrain-first 2350×1800 Level 1–10 topology retained and fully authored as a denser MMORPG region.
 - Wayfarer Camp completed as a real starter town; each field subzone now has a distinct landmark/setpiece language without blocking action-combat space.
-- Continuous woodland belts, route-edge dressing, and biome-specific ground detail now remove the previous dead-space problem while preserving action-combat clearings. Remaining work is live Studio composition/performance QA and iterative art polish, not another layout rewrite.
+- The region now has substantial built content: a nine-building starter settlement, inhabited waystations/outposts, wetland and ranger habitations, ruined settlements, late-zone fortress architecture, a dedicated Proving compound, and ambient residents. Forest/ground dressing remains secondary support. Remaining work is live Studio composition/performance QA and iterative art polish.
 
 ## Development strategy
 

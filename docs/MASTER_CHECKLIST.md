@@ -53,9 +53,10 @@
 
 ### C. Lumenreach environment production pass
 
-- [x] Lumenreach V5 fully replaces the prior map as a 2350×1800 terrain-first Level 1–10 region with a permanent starter town, broad action-combat fields, meaningful elevation, two gorge crossings, branching loops, natural terrain boundaries, and a far-edge regional gate.
-- [x] Lumenreach V5 authored-world pass: Wayfarer social plaza/training/service districts, Greenway roadside ruins, Crossroads wayfinder, Glowmere boardwalk, Eastbridge field outpost, Gravebone watch ruins, Mossglen lookout/rest hub, Sunmoss overlook, Veilfall overlook, and Shattered Arch processional approach.
-- [x] Lumenreach V5 density pass: continuous inter-zone woodland belts, denser zone-edge tree massing, safe route-shoulder dressing, biome-specific understory/deadwood/rock clusters, and explicit protected combat/spawn clearings.
+- [x] Lumenreach V6 fully replaces the prior map as a 2350×1800 terrain-first Level 1–10 region with a permanent starter town, broad action-combat fields, meaningful elevation, two gorge crossings, branching loops, natural terrain boundaries, and a far-edge regional gate.
+- [x] Lumenreach V6 authored-world pass: Wayfarer social plaza/training/service districts, Greenway roadside ruins, Crossroads wayfinder, Glowmere boardwalk, Eastbridge field outpost, Gravebone watch ruins, Mossglen lookout/rest hub, Sunmoss overlook, Veilfall overlook, and Shattered Arch processional approach.
+- [x] Lumenreach V6 density pass: continuous inter-zone woodland belts, denser zone-edge tree massing, safe route-shoulder dressing, biome-specific understory/deadwood/rock clusters, and explicit protected combat/spawn clearings.
+- [x] Lumenreach V6 population pass: Wayfarer Camp expanded to a real multi-building settlement; Greenway/Crossroads/Glowmere/Eastbridge/Mossglen/Sunmoss/Veilfall gained lodges, waystations, shelters, gatehouses and supply areas; Gravebone/Shattered Arch gained large ruin/fortress architecture; Proving gained a mentor compound; major hubs gained ambient residents.
 - [x] Wayfarer Camp, Greenway Fields, Lumenwood Crossroads, Glowmere Wetland, Eastbridge Landing, Gravebone Watch, Mossglen Valley, Sunmoss Ridge, Veilfall Ravine, Shattered Lumen Arch, and the separate Wayfarer Proving Circle are distinct progression spaces.
 - [x] Poly Haven PBR material pipeline is live for forest ground, mossy rock, moss wood, wood-chip path, and wood/stone pathway.
 - [x] Production foliage now prefers approved imported assets only; the visible procedural sphere-tree/bush/rock fallbacks were removed from Lumenreach production placement so missing assets fail closed instead of degrading visual quality.
