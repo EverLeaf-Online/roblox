@@ -4191,6 +4191,67 @@ local function makeTrailThreshold(parent, center, direction, seed, scale)
     )
 end
 
+local function makeCampDepartureFrame(parent)
+    local startPoint = OPENING_ROUTE_POINTS[1]
+    local nextPoint = OPENING_ROUTE_POINTS[2]
+    local direction = nextPoint - startPoint
+    direction = Vector3.new(direction.X, 0, direction.Z)
+    if direction.Magnitude <= 0.001 then
+        return
+    end
+    direction = direction.Unit
+
+    local frame = CFrame.lookAt(startPoint, startPoint + direction)
+    local right = frame.RightVector
+    local yaw = math.atan2(direction.X, direction.Z)
+
+    -- This is intentionally a low departure frame rather than an overhead
+    -- gateway. The road stays completely open while the player gets a strong
+    -- visual beat that says they are leaving the protected Wayfarer basin.
+    local leftStone = startPoint - right * 13.6 - direction * 1.8
+    local rightStone = startPoint + right * 13.8 + direction * 1.4
+    makeWaystone(parent, leftStone, yaw + math.rad(8), 0.72)
+    makeWaystone(parent, rightStone, yaw + math.pi - math.rad(10), 0.68)
+
+    local lanternPosition = startPoint + right * 14.4 - direction * 1.2
+    makeLantern(parent, lanternPosition, yaw + math.pi)
+
+    makeMossyRockSet(parent, startPoint - right * 15.6 + direction * 2.0, yaw + math.rad(28), 0.5)
+    makeFern(parent, startPoint - right * 13.2 + direction * 4.3, 0.72, yaw + math.rad(17))
+    makeFlowerPatch(parent, startPoint + right * 13.5 + direction * 4.0, 0.62, false)
+end
+
+local function makeMosslingHollowFrame(parent)
+    local center = Vector3.new(-226, 1.5, 123)
+    local spurStart = Vector3.new(-241, 1.4, 118)
+    local direction = center - spurStart
+    direction = Vector3.new(direction.X, 0, direction.Z)
+    if direction.Magnitude <= 0.001 then
+        return
+    end
+    direction = direction.Unit
+
+    local frame = CFrame.lookAt(center, center + direction)
+    local right = frame.RightVector
+    local yaw = math.atan2(direction.X, direction.Z)
+
+    -- Keep the authored frame outside the 15.5-stud combat footprint. The
+    -- entrance remains wide enough for dodge movement while the far edge gets
+    -- a stronger forest silhouette behind the first encounter.
+    local entranceBack = center - direction * 17.6
+    makeMossyRockSet(parent, entranceBack - right * 16.2, yaw + math.rad(34), 0.58)
+    makeMossyRockSet(parent, entranceBack + right * 16.4, yaw - math.rad(29), 0.54)
+    makeFern(parent, entranceBack - right * 12.4 + direction * 1.0, 0.76, yaw + math.rad(22))
+    makeFern(parent, entranceBack + right * 12.0 + direction * 0.6, 0.72, yaw - math.rad(31))
+
+    local farEdge = center + direction * 19.5
+    makeCanopyTree(parent, farEdge - right * 15.5, 0.9, yaw + math.rad(21))
+    makeCanopyTree(parent, farEdge + right * 16.0, 0.86, yaw - math.rad(27))
+    makeFallenLog(parent, farEdge + right * 12.8, yaw + math.rad(72), 0.58, 2)
+    makeCrystal(parent, farEdge - right * 10.8)
+    makeMushroomCluster(parent, farEdge + right * 7.8, 0.7, 613)
+end
+
 local function makeRouteThresholds(world)
     local thresholds = {
         {
@@ -4358,6 +4419,8 @@ local function decorate(world)
     -- detail outside the safe lane. This separates Camp, Glowmere, Veilfall,
     -- the Gorge crossing, Ruins/Mossglen, and Sunmoss without adding blockers.
     makeRouteThresholds(world)
+    makeCampDepartureFrame(world)
+    makeMosslingHollowFrame(world)
 
     -- Rock shelves and exposed faces make the new interior ridges legible at
     -- player height. These are deliberately inside the region, not on its border.
