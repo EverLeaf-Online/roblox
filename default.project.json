@@ -38,6 +38,29 @@
         "InteractionEvent": {
           "$className": "RemoteEvent"
         }
+      },
+      "EverLeafSurfaceAppearances": {
+        "$className": "Folder",
+        "PineBark": {
+          "$className": "SurfaceAppearance",
+          "$properties": {
+            "ColorMap": "rbxassetid://77401003804409",
+            "NormalMap": "rbxassetid://79040073771864",
+            "RoughnessMap": "rbxassetid://81879177681425",
+            "MetalnessMap": "",
+            "AlphaMode": "Overlay"
+          }
+        },
+        "PineFoliage": {
+          "$className": "SurfaceAppearance",
+          "$properties": {
+            "ColorMap": "rbxassetid://107051695372257",
+            "NormalMap": "rbxassetid://123643527847304",
+            "RoughnessMap": "rbxassetid://96029717543713",
+            "MetalnessMap": "",
+            "AlphaMode": "Transparency"
+          }
+        }
       }
     },
     "ServerScriptService": {

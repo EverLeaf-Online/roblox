@@ -11,17 +11,27 @@ local EnvironmentAssetRegistry = {
         PolyHavenId = "pine_sapling_small",
         Appearance = table.freeze({
             Bark = table.freeze({
-                ColorMap = 77401003804409,
-                NormalMap = 79040073771864,
-                RoughnessMap = 81879177681425,
+                TemplateName = "PineBark",
+                MaterialVariant = "MossWood",
+                FallbackColor = table.freeze({ 103, 82, 59 }),
+                AuthoredMaps = table.freeze({
+                    ColorMap = 77401003804409,
+                    NormalMap = 79040073771864,
+                    RoughnessMap = 81879177681425,
+                }),
             }),
             Foliage = table.freeze({
-                ColorMap = 107051695372257,
-                NormalMap = 123643527847304,
-                RoughnessMap = 96029717543713,
+                TemplateName = "PineFoliage",
+                FallbackColor = table.freeze({ 53, 92, 58 }),
+                DoubleSided = true,
+                AuthoredMaps = table.freeze({
+                    ColorMap = 107051695372257,
+                    NormalMap = 123643527847304,
+                    RoughnessMap = 96029717543713,
+                }),
             }),
         }),
-        Notes = "Optimized Poly Haven pine with explicit EverLeaf-owned bark/needle SurfaceAppearance maps; embedded/raw material state is normalized during prefab registration.",
+        Notes = "Optimized Poly Haven pine. Bark/needle SurfaceAppearance maps are pre-authored by Rojo and cloned at runtime; imported raw layers are stripped without protected property writes.",
     },
     TreeStump = {
         AssetId = 111453055456477,

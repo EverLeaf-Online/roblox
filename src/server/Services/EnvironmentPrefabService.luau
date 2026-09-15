@@ -1,3 +1,4 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
 
 local EnvironmentPrefabService = {}
@@ -50,19 +51,55 @@ local function setCollision(instance)
     end
 end
 
-local function contentId(assetId)
-    if type(assetId) ~= "number" or assetId <= 0 then
-        return ""
+local FOLIAGE_TOKENS = table.freeze({ "twig", "leaf", "needle", "foliage" })
+
+local function containsFoliageToken(value)
+    local lower = string.lower(tostring(value or ""))
+    for _, token in FOLIAGE_TOKENS do
+        if string.find(lower, token, 1, true) ~= nil then
+            return true
+        end
     end
-    return "rbxassetid://" .. tostring(assetId)
+    return false
 end
 
 local function isFoliagePart(part)
-    local lower = string.lower(part.Name)
-    return string.find(lower, "twig", 1, true) ~= nil
-        or string.find(lower, "leaf", 1, true) ~= nil
-        or string.find(lower, "needle", 1, true) ~= nil
-        or string.find(lower, "foliage", 1, true) ~= nil
+    if containsFoliageToken(part.Name) then
+        return true
+    end
+    -- Roblox commonly splits multi-material GLBs into MeshParts whose part
+    -- names stay generic while their imported SurfaceAppearance keeps the
+    -- material name (for this pine, pine_sapling_small_twig). Inspect that
+    -- name before the raw appearance is removed.
+    for _, child in part:GetChildren() do
+        if child:IsA("SurfaceAppearance") and containsFoliageToken(child.Name) then
+            return true
+        end
+    end
+    return false
+end
+
+local function appearanceTemplate(name)
+    if type(name) ~= "string" or name == "" then
+        return nil
+    end
+    local folder = ReplicatedStorage:FindFirstChild("EverLeafSurfaceAppearances")
+    local template = folder and folder:FindFirstChild(name)
+    if template and template:IsA("SurfaceAppearance") then
+        return template
+    end
+    return nil
+end
+
+local function fallbackColor(config, defaultColor)
+    local rgb = type(config) == "table" and config.FallbackColor or nil
+    if type(rgb) == "table" then
+        local r = math.clamp(tonumber(rgb[1]) or 0, 0, 255)
+        local g = math.clamp(tonumber(rgb[2]) or 0, 0, 255)
+        local b = math.clamp(tonumber(rgb[3]) or 0, 0, 255)
+        return Color3.fromRGB(r, g, b)
+    end
+    return defaultColor
 end
 
 local function applyAppearance(instance, appearance)
@@ -82,12 +119,14 @@ local function applyAppearance(instance, appearance)
 
     for _, part in meshParts do
         local foliage = isFoliagePart(part)
-        local maps = if foliage then appearance.Foliage else appearance.Bark
-        if maps then
-            -- Controlled EverLeaf PBR must replace legacy/raw texture layers,
-            -- never stack on top of whatever the imported GLB happened to keep.
+        local config = if foliage then appearance.Foliage else appearance.Bark
+        if config then
+            -- Never author SurfaceAppearance map properties from a runtime
+            -- server thread. Roblox protects ColorMap/NormalMap/etc. with
+            -- Plugin capability. The maps are authored into the Rojo place and
+            -- runtime only clones that preconfigured instance.
             for _, child in part:GetChildren() do
-                if child:IsA("Texture") or child:IsA("Decal") then
+                if child:IsA("Texture") or child:IsA("Decal") or child:IsA("SurfaceAppearance") then
                     child:Destroy()
                 end
             end
@@ -95,30 +134,28 @@ local function applyAppearance(instance, appearance)
                 part.TextureID = ""
             end)
 
-            local surface = part:FindFirstChildOfClass("SurfaceAppearance")
-            if not surface then
-                surface = Instance.new("SurfaceAppearance")
+            local template = appearanceTemplate(config.TemplateName)
+            if template then
+                local surface = template:Clone()
                 surface.Name = "EverLeafSurfaceAppearance"
                 surface.Parent = part
-            end
-            for _, child in part:GetChildren() do
-                if child:IsA("SurfaceAppearance") and child ~= surface then
-                    child:Destroy()
-                end
-            end
-            surface.Name = "EverLeafSurfaceAppearance"
-            surface.ColorMap = contentId(maps.ColorMap)
-            surface.NormalMap = contentId(maps.NormalMap)
-            surface.RoughnessMap = contentId(maps.RoughnessMap)
-            surface.MetalnessMap = ""
-            if foliage then
-                surface.AlphaMode = Enum.AlphaMode.Transparency
-                part.DoubleSided = true
+                part.Color = Color3.new(1, 1, 1)
             else
-                surface.AlphaMode = Enum.AlphaMode.Overlay
+                part.Color = fallbackColor(
+                    config,
+                    foliage and Color3.fromRGB(53, 92, 58) or Color3.fromRGB(103, 82, 59)
+                )
             end
-            part.Color = Color3.new(1, 1, 1)
+
             part.Material = Enum.Material.SmoothPlastic
+            if config.DoubleSided == true or foliage then
+                part.DoubleSided = true
+            end
+            if type(config.MaterialVariant) == "string" and config.MaterialVariant ~= "" then
+                part:SetAttribute("EverLeafMaterialVariant", config.MaterialVariant)
+            else
+                part:SetAttribute("EverLeafMaterialVariant", nil)
+            end
             part:SetAttribute("EverLeafAppearanceNormalized", true)
         end
     end
