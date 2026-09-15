@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local ActionPayloadRules = require(ReplicatedStorage.Shared.Validation.ActionPayloadRules)
 local ActionService = require(script.Parent.Services.ActionService)
+local AchievementService = require(script.Parent.Services.AchievementService)
 local BelforgeColossusService = require(script.Parent.Services.BelforgeColossusService)
 local BrasshavenWorldService = require(script.Parent.Services.BrasshavenWorldService)
 local CatalogService = require(script.Parent.Services.CatalogService)
@@ -20,6 +21,7 @@ local InteractionService = require(script.Parent.Services.InteractionService)
 local InteractionSessionService = require(script.Parent.Services.InteractionSessionService)
 local LumenreachWorldService = require(script.Parent.Services.LumenreachWorldService)
 local MovementSanityService = require(script.Parent.Services.MovementSanityService)
+local MonetizationService = require(script.Parent.Services.MonetizationService)
 local PartyService = require(script.Parent.Services.PartyService)
 local PBRMaterialService = require(script.Parent.Services.PBRMaterialService)
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -64,6 +66,7 @@ local gameAction = ensureRemote("RemoteFunction", Net.Functions.GameAction)
 local requestCatalog = ensureRemote("RemoteFunction", Net.Functions.RequestCatalog)
 
 PlayerDataService.Init()
+MonetizationService.Init()
 MovementSanityService.Init()
 ResourceService.Init()
 EnemySpawnerService.Init()
@@ -149,6 +152,12 @@ local function onPlayerAdded(player)
         player:Kick("Your EverLeaf data could not be loaded safely. Please rejoin.")
         return
     end
+
+    local achievementChanged = AchievementService.SyncJoin(player, profileOrReason)
+    if achievementChanged then
+        PlayerDataService.NotifyChanged(player)
+    end
+    MonetizationService.OnProfileLoaded(player)
 
     syncPlayerWorld(player, profileOrReason, player.Character ~= nil)
     DeathService.InitPlayer(player)
@@ -300,6 +309,7 @@ gameAction.OnServerInvoke = function(player, actionName, payload)
     end
     local ok, result = ActionService.Handle(player, profile, actionName, payload)
     if ok then
+        AchievementService.SyncProgression(player, profile)
         PlayerDataService.NotifyChanged(player)
     end
     return ok, result

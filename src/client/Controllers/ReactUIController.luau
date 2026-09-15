@@ -21,6 +21,7 @@ local PartyOverlay = require(script.Parent.Parent.UI.Components.PartyOverlay)
 local PlayerDamageFeedback = require(script.Parent.Parent.UI.Components.PlayerDamageFeedback)
 local AdvancementOverlay = require(script.Parent.Parent.UI.Components.AdvancementOverlay)
 local ShopOverlay = require(script.Parent.Parent.UI.Components.ShopOverlay)
+local PremiumShopPanel = require(script.Parent.Parent.UI.Components.PremiumShopPanel)
 local ToastStack = require(script.Parent.Parent.UI.Components.ToastStack)
 local EquipmentEligibilityRules = require(ReplicatedStorage.Shared.Logic.EquipmentEligibilityRules)
 local EquipmentComparisonRules = require(ReplicatedStorage.Shared.Logic.EquipmentComparisonRules)
@@ -70,6 +71,7 @@ local HOTKEYS = table.freeze({
     INVENTORY = "I",
     SKILLS = "K",
     QUESTS = "J",
+    STORE = "O",
     SETTINGS = "M",
 })
 
@@ -103,6 +105,7 @@ local NAV_ICONS = table.freeze({
     INVENTORY = EverLeafIcons.Inventory,
     SKILLS = EverLeafIcons.Skills,
     QUESTS = EverLeafIcons.Quests,
+    STORE = EverLeafIcons.Shard,
     SETTINGS = EverLeafIcons.Settings,
 })
 
@@ -2863,7 +2866,7 @@ local function MainMenu(props)
     local selectedHotbarSlot, setSelectedHotbarSlot = React.useState(1)
     local questFilter, setQuestFilter = React.useState("ACTIVE")
     local catalog = CatalogClient.Get() or {}
-    local tabs = { "CHARACTER", "INVENTORY", "SKILLS", "QUESTS", "SETTINGS" }
+    local tabs = { "CHARACTER", "INVENTORY", "SKILLS", "QUESTS", "STORE", "SETTINGS" }
 
     local function invoke(action, payload, successText)
         local ok, result = ActionClient.Invoke(action, payload)
@@ -2898,6 +2901,8 @@ local function MainMenu(props)
         )
     elseif activeTab == "QUESTS" then
         content = QuestsPanel(profile, catalog, questFilter, setQuestFilter)
+    elseif activeTab == "STORE" then
+        content = React.createElement(PremiumShopPanel)
     else
         content = SettingsPanel(profile, invoke)
     end
@@ -3051,7 +3056,7 @@ local function MainMenu(props)
                 ),
                 Nav = React.createElement("Frame", {
                     Position = UDim2.fromOffset(18, 82),
-                    Size = UDim2.fromOffset(152, 262),
+                    Size = UDim2.fromOffset(152, 316),
                     BackgroundTransparency = 1,
                     ZIndex = 33,
                 }, navChildren),
@@ -3630,7 +3635,7 @@ local function App()
             if
                 menuOpen and (keyCode == Enum.KeyCode.ButtonL1 or keyCode == Enum.KeyCode.ButtonR1)
             then
-                local tabs = { "CHARACTER", "INVENTORY", "SKILLS", "QUESTS", "SETTINGS" }
+                local tabs = { "CHARACTER", "INVENTORY", "SKILLS", "QUESTS", "STORE", "SETTINGS" }
                 local currentIndex = table.find(tabs, menuTab) or 1
                 local direction = keyCode == Enum.KeyCode.ButtonR1 and 1 or -1
                 local nextIndex = ((currentIndex - 1 + direction) % #tabs) + 1
@@ -3659,6 +3664,7 @@ local function App()
                     [Enum.KeyCode.I] = "INVENTORY",
                     [Enum.KeyCode.K] = "SKILLS",
                     [Enum.KeyCode.J] = "QUESTS",
+                    [Enum.KeyCode.O] = "STORE",
                     [Enum.KeyCode.M] = "SETTINGS",
                 }
                 local requestedTab = tabByKey[keyCode]

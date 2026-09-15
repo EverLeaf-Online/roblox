@@ -116,7 +116,10 @@ function EnemyService.Register(enemy, enemyId, onDeath)
                 end
                 local questChanged = QuestService.Record(profile, "Defeat", enemyId, 1)
                 changed = questChanged or changed
-                local achievementChanged = AchievementService.Unlock(profile, "first_victory")
+                local achievementChanged =
+                    AchievementService.UnlockAndAward(recipient, profile, "first_victory")
+                local levelChanged = AchievementService.SyncProgression(recipient, profile)
+                changed = levelChanged or changed
                 changed = achievementChanged or changed
                 if changed then
                     PlayerDataService.NotifyChanged(recipient)
