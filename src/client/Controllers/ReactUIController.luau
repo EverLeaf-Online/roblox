@@ -368,9 +368,17 @@ local function prettyId(value)
     )
 end
 
-local function objectiveText(objective, progress)
+local function regionDisplayName(profile)
+    local world = profile and profile.World or {}
+    local regionId = world.RegionId or "lumenreach"
+    local catalog = CatalogClient.Get()
+    local region = catalog and catalog.Regions and catalog.Regions[regionId]
+    return region and region.DisplayName or prettyId(regionId), regionId
+end
+
+local function objectiveText(objective, progress, fallbackText)
     if not objective then
-        return "Explore Lumenreach"
+        return fallbackText or "Explore"
     end
     local current = math.min(tonumber(progress) or 0, tonumber(objective.Required) or 1)
     local required = tonumber(objective.Required) or 1
@@ -542,11 +550,8 @@ end
 local function Objective(props)
     local profile = props.Profile or {}
     local active = profile.Quests and profile.Quests.Active
-    local world = profile.World or {}
-    local regionId = world.RegionId or "lumenreach"
+    local regionName, regionId = regionDisplayName(profile)
     local catalog = CatalogClient.Get()
-    local region = catalog and catalog.Regions and catalog.Regions[regionId]
-    local regionName = region and region.DisplayName or prettyId(regionId)
     local title = "Explore " .. regionName
     local progressText = if regionId == "lumenreach"
         then "Speak with Ilyra at Wayfarer Camp"
@@ -564,7 +569,7 @@ local function Objective(props)
             else
                 local objective = definition and definition.Objectives and definition.Objectives[1]
                 local progress = state.Progress and state.Progress[1] or 0
-                progressText = objectiveText(objective, progress)
+                progressText = objectiveText(objective, progress, "Explore " .. regionName)
             end
         end
     end
@@ -656,11 +661,7 @@ local function HUD(props)
     local currencies = profile.Currencies or {}
     local currentMP = tonumber(resources.CurrentMP) or 0
     local maxMP = tonumber(derived.MaxMP) or 1
-    local world = profile.World or {}
-    local regionId = world.RegionId or "lumenreach"
-    local catalog = CatalogClient.Get()
-    local region = catalog and catalog.Regions and catalog.Regions[regionId]
-    local regionName = region and region.DisplayName or prettyId(regionId)
+    local regionName = regionDisplayName(profile)
     local compactVisible = not props.UiOpen
 
     return React.createElement(React.Fragment, nil, {
@@ -2514,7 +2515,7 @@ local function MainMenu(props)
     })
 end
 
-local function DeathOverlay()
+local function DeathOverlay(props)
     return React.createElement("Frame", {
         Size = UDim2.fromScale(1, 1),
         BackgroundColor3 = Color3.fromRGB(7, 8, 9),
@@ -2561,7 +2562,10 @@ local function DeathOverlay()
                 Subtitle = React.createElement(Label, {
                     Position = UDim2.fromOffset(22, 111),
                     Size = UDim2.new(1, -44, 0, 38),
-                    Text = "Returning to Lumenreach Wayfarer Camp...",
+                    Text = string.format(
+                        "Returning to %s safe point...",
+                        props.RegionName or "your region"
+                    ),
                     TextSize = 13,
                     Color = COLORS.Muted,
                     Align = Enum.TextXAlignment.Center,
@@ -3158,7 +3162,9 @@ local function App()
         Boss = React.createElement(BossHud, { Hidden = uiOpen or dead }),
         Toasts = React.createElement(ToastStack),
         DamageFeedback = React.createElement(PlayerDamageFeedback, { Event = damageFeedback }),
-        Death = dead and React.createElement(DeathOverlay) or nil,
+        Death = dead and React.createElement(DeathOverlay, {
+            RegionName = regionDisplayName(profile),
+        }) or nil,
     })
 end
 
