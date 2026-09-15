@@ -579,7 +579,8 @@
 - [ ] Environment VFX production pass.
 - [ ] UI iconography.
 - [ ] Original SFX library.
-- [ ] Original music direction/tracks and per-region ambient music routing. No third-party/unknown audio IDs will be wired just to fill this checkbox; add the system when approved EverLeaf-owned tracks are available.
+- [x] Per-region ambient audio routing is live: Lumenreach and Brasshaven crossfade Creator Store BGM/ambience and respect Music/SFX settings; asset provenance is tracked in `docs/AUDIO_ASSETS.md`.
+- [ ] Replace temporary Creator Store BGM with an original EverLeaf soundtrack as original compositions become available.
 - [ ] Replace every remaining prototype/placeholder asset before release.
 
 ## 21. Social / multiplayer
