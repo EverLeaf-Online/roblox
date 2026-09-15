@@ -2,6 +2,34 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local React = require(ReplicatedStorage.Packages.React)
 local StatText = require(script.Parent.Parent.StatText)
 
+local function pretty(value)
+    local text = tostring(value or ""):gsub("_", " ")
+    return (
+        text:gsub("(%a)([%w']*)", function(first, rest)
+            return string.upper(first) .. rest
+        end)
+    )
+end
+
+local function requirementText(definition)
+    if not definition or definition.Type ~= "Equipment" then
+        return ""
+    end
+    local parts = {}
+    local requiredLevel = tonumber(definition.RequiredLevel) or 1
+    local requiredTier = tonumber(definition.RequiredAdvancementTier) or 0
+    if requiredLevel > 1 then
+        table.insert(parts, "Lv " .. tostring(requiredLevel))
+    end
+    if requiredTier > 0 then
+        table.insert(parts, "Tier " .. tostring(requiredTier))
+    end
+    if type(definition.FamilyId) == "string" and definition.FamilyId ~= "" then
+        table.insert(parts, pretty(definition.FamilyId))
+    end
+    return #parts > 0 and ("Requires " .. table.concat(parts, " · ")) or "No equip requirements"
+end
+
 local function statText(definition)
     local parts = {}
     for name, value in definition and definition.Stats or {} do
@@ -80,9 +108,20 @@ local function ItemInfoCard(props)
             TextYAlignment = Enum.TextYAlignment.Top,
             ZIndex = z + 1,
         }),
+        Requirement = React.createElement("TextLabel", {
+            Position = UDim2.fromOffset(12, 90),
+            Size = UDim2.new(1, -24, 0, 17),
+            BackgroundTransparency = 1,
+            Text = requirementText(definition),
+            TextColor3 = Color3.fromRGB(197, 169, 111),
+            TextSize = 8,
+            Font = Enum.Font.GothamMedium,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            ZIndex = z + 1,
+        }),
         Footer = React.createElement("TextLabel", {
-            Position = UDim2.fromOffset(12, 97),
-            Size = UDim2.new(1, -24, 0, 19),
+            Position = UDim2.fromOffset(12, 108),
+            Size = UDim2.new(1, -24, 0, 17),
             BackgroundTransparency = 1,
             Text = footer,
             TextColor3 = Color3.fromRGB(232, 193, 105),

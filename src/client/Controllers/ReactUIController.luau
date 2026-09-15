@@ -21,6 +21,7 @@ local PlayerDamageFeedback = require(script.Parent.Parent.UI.Components.PlayerDa
 local AdvancementOverlay = require(script.Parent.Parent.UI.Components.AdvancementOverlay)
 local ShopOverlay = require(script.Parent.Parent.UI.Components.ShopOverlay)
 local ToastStack = require(script.Parent.Parent.UI.Components.ToastStack)
+local EquipmentEligibilityRules = require(ReplicatedStorage.Shared.Logic.EquipmentEligibilityRules)
 local Net = require(ReplicatedStorage.Shared.Net)
 local ProgressionMath = require(ReplicatedStorage.Shared.Math.ProgressionMath)
 
@@ -1117,6 +1118,33 @@ local function Dialogue(props)
     })
 end
 
+local function equipmentRequirementText(definition, catalog)
+    if not definition or definition.Type ~= "Equipment" then
+        return ""
+    end
+    local parts = {}
+    local requiredLevel = tonumber(definition.RequiredLevel) or 1
+    local requiredTier = tonumber(definition.RequiredAdvancementTier) or 0
+    if requiredLevel > 1 then
+        table.insert(parts, "Level " .. tostring(requiredLevel))
+    end
+    if requiredTier > 0 then
+        table.insert(parts, "Tier " .. tostring(requiredTier))
+    end
+    local familyId = definition.FamilyId
+    if type(familyId) == "string" and familyId ~= "" then
+        local family = catalog and catalog.Families and catalog.Families[familyId]
+        table.insert(parts, family and family.DisplayName or prettyId(familyId))
+    end
+    return #parts > 0 and ("Requires " .. table.concat(parts, " · ")) or "No requirements"
+end
+
+local EQUIPMENT_LOCK_TEXT = table.freeze({
+    wrong_family = "WRONG FAMILY",
+    tier_too_low = "TIER REQUIRED",
+    level_too_low = "LEVEL REQUIRED",
+})
+
 local function itemStatsText(definition)
     if not definition or type(definition.Stats) ~= "table" then
         return ""
@@ -1325,7 +1353,14 @@ local function InventoryPanel(
         local slot = row.Slot
         local definition = catalog.Items and catalog.Items[slot.ItemId]
         local selected = selectedRow and selectedRow.Index == row.Index
+        local itemEligible = true
+        if definition and definition.Type == "Equipment" then
+            itemEligible = EquipmentEligibilityRules.CanEquip(profile, definition)
+        end
         local typeText = definition and definition.Type or "Item"
+        if definition and definition.Type == "Equipment" and not itemEligible then
+            typeText ..= " · LOCKED"
+        end
         listChildren["Item" .. tostring(row.Index)] = React.createElement(
             "TextButton",
             {
@@ -1356,7 +1391,9 @@ local function InventoryPanel(
                     Size = UDim2.new(1, -90, 0, 14),
                     Text = typeText,
                     TextSize = 9,
-                    Color = selected and Color3.fromRGB(181, 224, 202) or COLORS.Faint,
+                    Color = if not itemEligible
+                        then COLORS.Danger
+                        else if selected then Color3.fromRGB(181, 224, 202) else COLORS.Faint,
                     ZIndex = 6,
                 }),
                 Quantity = React.createElement(Label, {
@@ -1431,15 +1468,24 @@ local function InventoryPanel(
 
     local selectedName = selectedDefinition and selectedDefinition.DisplayName or "Select an item"
     local selectedType = selectedDefinition and selectedDefinition.Type or "Inventory"
+    local equipEligible = true
+    local equipReason = nil
+    if selectedDefinition and selectedDefinition.Type == "Equipment" then
+        equipEligible, equipReason = EquipmentEligibilityRules.CanEquip(profile, selectedDefinition)
+    end
+    local requirementText = equipmentRequirementText(selectedDefinition, catalog)
     local details = if selectedDefinition
-        then string.format(
-            "%s%s%s",
-            selectedType,
-            selectedDefinition.EquipmentSlot
-                    and (" · " .. tostring(selectedDefinition.EquipmentSlot))
-                or "",
-            selectedSlot and (" · Quantity " .. tostring(selectedSlot.Quantity or 0)) or ""
-        )
+        then if selectedDefinition.Type == "Equipment"
+            then string.format(
+                "%s · %s",
+                tostring(selectedDefinition.EquipmentSlot or "Equipment"),
+                requirementText
+            )
+            else string.format(
+                "%s%s",
+                selectedType,
+                selectedSlot and (" · Quantity " .. tostring(selectedSlot.Quantity or 0)) or ""
+            )
         else "Choose an inventory item to inspect it."
     local statsText = itemStatsText(selectedDefinition)
 
@@ -1448,9 +1494,10 @@ local function InventoryPanel(
         if selectedDefinition.Type == "Equipment" then
             action = React.createElement(Button, {
                 Position = UDim2.fromOffset(0, 0),
-                Size = UDim2.fromOffset(136, 36),
-                Text = "EQUIP",
-                Tone = "accent",
+                Size = UDim2.fromOffset(136, 30),
+                Text = equipEligible and "EQUIP" or (EQUIPMENT_LOCK_TEXT[equipReason] or "LOCKED"),
+                Tone = equipEligible and "accent" or nil,
+                Active = equipEligible,
                 OnActivated = function()
                     invoke(
                         "equipment.equip",
@@ -1463,7 +1510,7 @@ local function InventoryPanel(
         elseif selectedDefinition.Type == "Consumable" then
             action = React.createElement(Button, {
                 Position = UDim2.fromOffset(0, 0),
-                Size = UDim2.fromOffset(136, 36),
+                Size = UDim2.fromOffset(136, 30),
                 Text = "USE",
                 Tone = "accent",
                 OnActivated = function()
@@ -1509,7 +1556,7 @@ local function InventoryPanel(
         }, withChrome(listChildren, 10, COLORS.Border, 0.55, 1)),
         Details = React.createElement(Panel, {
             Position = UDim2.fromOffset(348, 0),
-            Size = UDim2.fromOffset(250, 148),
+            Size = UDim2.fromOffset(250, 158),
             BackgroundColor3 = COLORS.PanelRaised,
             Children = {
                 Kicker = React.createElement(Label, {
@@ -1531,7 +1578,7 @@ local function InventoryPanel(
                     ZIndex = 6,
                 }),
                 DetailsText = React.createElement(Label, {
-                    Position = UDim2.fromOffset(14, 66),
+                    Position = UDim2.fromOffset(14, 62),
                     Size = UDim2.new(1, -28, 0, 38),
                     Text = details,
                     TextSize = 10,
@@ -1541,7 +1588,7 @@ local function InventoryPanel(
                     ZIndex = 6,
                 }),
                 Stats = React.createElement(Label, {
-                    Position = UDim2.fromOffset(14, 91),
+                    Position = UDim2.fromOffset(14, 100),
                     Size = UDim2.new(1, -28, 0, 22),
                     Text = statsText ~= "" and statsText or "No stat bonuses",
                     TextSize = 9,
@@ -1549,16 +1596,28 @@ local function InventoryPanel(
                     Wrapped = true,
                     ZIndex = 6,
                 }),
+                Requirement = React.createElement(Label, {
+                    Position = UDim2.fromOffset(14, 119),
+                    Size = UDim2.new(1, -28, 0, 16),
+                    Text = selectedDefinition
+                            and selectedDefinition.Type == "Equipment"
+                            and (equipEligible and "Requirements met" or requirementText)
+                        or "",
+                    TextSize = 8,
+                    Bold = selectedDefinition and selectedDefinition.Type == "Equipment",
+                    Color = equipEligible and COLORS.Accent or COLORS.Danger,
+                    ZIndex = 6,
+                }),
                 Action = React.createElement("Frame", {
-                    Position = UDim2.fromOffset(14, 111),
-                    Size = UDim2.fromOffset(136, 36),
+                    Position = UDim2.fromOffset(14, 132),
+                    Size = UDim2.fromOffset(136, 30),
                     BackgroundTransparency = 1,
                     ZIndex = 6,
                 }, { Action = action }),
             },
         }),
         EquippedTitle = React.createElement(Label, {
-            Position = UDim2.fromOffset(348, 158),
+            Position = UDim2.fromOffset(348, 168),
             Size = UDim2.fromOffset(250, 22),
             Text = "EQUIPPED",
             TextSize = 11,
@@ -1567,7 +1626,7 @@ local function InventoryPanel(
             ZIndex = 5,
         }),
         Equipped = React.createElement("Frame", {
-            Position = UDim2.fromOffset(348, 184),
+            Position = UDim2.fromOffset(348, 194),
             Size = UDim2.fromOffset(250, 210),
             BackgroundTransparency = 1,
             ZIndex = 4,

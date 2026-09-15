@@ -410,14 +410,14 @@
 - [x] Equipment slot architecture.
 - [x] Server equip/unequip validation foundation.
 - [x] Equipment stat aggregation feeds AttackPower, core stats, Defense, Crit Chance, and Crit Power.
-- [ ] Level/class requirements.
+- [x] Level/family/advancement-tier equipment requirements are server-enforced and surfaced in inventory/item UI.
 - [ ] Weapon types.
 - [ ] Armor/accessory types.
 - [x] Consumable architecture with HP/MP restoration foundation.
 - [ ] Inventory capacity rules.
-- [ ] Item tooltips.
-- [ ] Inventory UI.
-- [ ] Equipment UI.
+- [x] Item detail cards/tooltips show item type, stats/effects, sell value, and equipment requirements.
+- [x] React inventory UI supports browsing, consumable use, requirement-aware equipment actions, and selected-item details; Studio polish/QA remains.
+- [x] React equipment UI shows equipped slots, supports unequip, and exposes requirement-aware equip flow; Studio polish/QA remains.
 - [ ] Safe deletion/drop behavior.
 
 ## 14. NPC / interaction / quests
