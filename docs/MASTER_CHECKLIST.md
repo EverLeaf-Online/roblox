@@ -173,7 +173,7 @@
 - [x] Mouse/right-stick orbit camera foundation with camera collision.
 - [x] Sprint foundation (`Shift` / L3).
 - [x] Grounded jump foundation (`Space` / A).
-- [x] Dodge foundation (`Q` / B) uses the referenced DevForum roll-script pattern: a real high-priority Animator roll track plus short planar `LinearVelocity`, while preserving server-authoritative direction/cooldown/ground checks and i-frames. The local roll clip is prewarmed/cached per character, uses dense CubicV2 interpolation, and the motion curve eases into and out of the roll instead of snapping between speeds; live Studio feel QA remains.
+- [x] Dodge foundation (`Q` / B) uses a real high-priority Animator roll track plus short planar `LinearVelocity`, with server-authoritative direction/cooldown/ground checks and i-frames. Locomotion tracks remain alive underneath the Action4 roll, roll momentum is explicitly discarded at recovery, and held directional input is handed directly back to normal Humanoid movement so post-roll sliding cannot persist; live Studio feel QA remains.
 - [x] Basic attack moved to left-click / R2.
 - [x] Server targeting converted from X/Y/Z-plane gates to 3D range + facing cone + LOS.
 - [x] Enemy pursuit converted to full XYZ movement.

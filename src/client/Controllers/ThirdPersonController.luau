@@ -215,19 +215,10 @@ local function playRollAnimation()
         return false
     end
 
-    for _, track in animator:GetPlayingAnimationTracks() do
-        if
-            track ~= rollTrack
-            and (
-                track.Priority == Enum.AnimationPriority.Core
-                or track.Priority == Enum.AnimationPriority.Idle
-                or track.Priority == Enum.AnimationPriority.Movement
-            )
-        then
-            track:Stop(0.06)
-        end
-    end
-
+    -- Keep Roblox locomotion tracks alive underneath the Action4 roll.
+    -- Stopping them here leaves Animate in a stale "moving but no run track"
+    -- state when a direction key stays held, which looks like infinite sliding.
+    -- Action4 already overrides Core/Idle/Movement visually during the roll.
     if rollTrack.IsPlaying then
         rollTrack:Stop(0)
     end
@@ -329,6 +320,60 @@ local function rollSpeed(alpha)
     return GameConfig.Movement.DodgeRollPeakSpeed
         + (GameConfig.Movement.DodgeRollEndSpeed - GameConfig.Movement.DodgeRollPeakSpeed)
             * eased
+end
+
+local function currentGroundMoveSpeed()
+    if crouching then
+        return GameConfig.Movement.CrouchSpeed
+    end
+    if sprintHeld then
+        return GameConfig.Movement.SprintSpeed
+    end
+    return GameConfig.Movement.WalkSpeed
+end
+
+local function finishDodge(interrupted)
+    local finishedDirection = dodgeDirection
+    clearDodgeMover()
+    dodgeUntil = 0
+    dodgeStartedAt = -math.huge
+    dodgeDirection = Vector3.zero
+
+    if not humanoid or not root or not root.Parent then
+        return
+    end
+
+    root.AssemblyAngularVelocity = Vector3.zero
+    humanoid.AutoRotate = true
+
+    if finishedDirection.Magnitude > 0.01 then
+        root.CFrame = CFrame.lookAt(root.Position, root.Position + finishedDirection)
+    end
+
+    if interrupted then
+        humanoid.WalkSpeed = 0
+        humanoid:Move(Vector3.zero, false)
+        local velocity = root.AssemblyLinearVelocity
+        root.AssemblyLinearVelocity = Vector3.new(0, math.min(velocity.Y, 0), 0)
+        return
+    end
+
+    local moveDirection = getWorldMoveDirection()
+    local moveSpeed = currentGroundMoveSpeed()
+    humanoid.WalkSpeed = moveSpeed
+    humanoid:Move(moveDirection, false)
+
+    -- Remove dodge momentum immediately. If the player is still holding a
+    -- direction, seed only normal locomotion velocity; otherwise stop cleanly.
+    -- This prevents the LinearVelocity impulse from surviving into normal
+    -- movement and producing the post-roll ice-slide bug.
+    local velocity = root.AssemblyLinearVelocity
+    if moveDirection.Magnitude > 0.01 then
+        local horizontal = moveDirection.Unit * moveSpeed
+        root.AssemblyLinearVelocity = Vector3.new(horizontal.X, velocity.Y, horizontal.Z)
+    else
+        root.AssemblyLinearVelocity = Vector3.new(0, velocity.Y, 0)
+    end
 end
 
 local function sendCrouchState()
@@ -521,14 +566,8 @@ function ThirdPersonController.Start()
             local now = os.clock()
             if player:GetAttribute("EverLeafStaggered") == true then
                 CombatFacing.Reset()
-                local finishedDirection = dodgeDirection
-                clearDodgeMover()
-                dodgeUntil = 0
-                dodgeStartedAt = -math.huge
-                dodgeDirection = Vector3.zero
-                if root and root.Parent and finishedDirection.Magnitude > 0.01 then
-                    root.CFrame = CFrame.lookAt(root.Position, root.Position + finishedDirection)
-                    root.AssemblyAngularVelocity = Vector3.zero
+                if dodgeUntil > 0 then
+                    finishDodge(true)
                 end
                 if crouching then
                     setCrouching(false)
@@ -552,19 +591,10 @@ function ThirdPersonController.Start()
                     return
                 end
 
-                local finishedDirection = dodgeDirection
-                clearDodgeMover()
-                dodgeUntil = 0
-                dodgeStartedAt = -math.huge
-                dodgeDirection = Vector3.zero
-                if root and root.Parent and finishedDirection.Magnitude > 0.01 then
-                    root.CFrame = CFrame.lookAt(root.Position, root.Position + finishedDirection)
-                    root.AssemblyAngularVelocity = Vector3.zero
-                end
+                finishDodge(false)
                 if crouching then
                     setCrouching(false)
                 end
-                humanoid.AutoRotate = true
             end
 
             if root and root.Parent then

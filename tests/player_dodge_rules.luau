@@ -70,6 +70,24 @@ assert(
     "roll movement must smoothly accelerate into and decelerate out of the roll"
 )
 assert(
+    string.find(controller, "local function finishDodge", 1, true)
+        and string.find(
+            controller,
+            "root.AssemblyLinearVelocity = Vector3.new(horizontal.X, velocity.Y, horizontal.Z)",
+            1,
+            true
+        ),
+    "dodge finish must discard roll momentum and hand off to normal locomotion"
+)
+assert(
+    string.find(controller, "track:Stop(0.06)", 1, true) == nil,
+    "roll must not kill underlying locomotion tracks while a movement key is held"
+)
+assert(
+    string.find(config, "DodgeServerGraceSeconds = 0.72", 1, true),
+    "dodge grace must cover the full roll"
+)
+assert(
     string.find(controller, "VelocityConstraintMode.Plane", 1, true),
     "dodge mover must preserve vertical gravity"
 )
