@@ -1431,32 +1431,32 @@ local function makeLantern(parent, position, yaw)
     makePart(
         model,
         "Post",
-        Vector3.new(0.38, 7.1, 0.38),
-        base * CFrame.new(0, 3.55, 0),
+        Vector3.new(0.42, 8.8, 0.42),
+        base * CFrame.new(0, 4.4, 0),
         Enum.Material.Wood,
         wood
     )
     makePart(
         model,
         "Arm",
-        Vector3.new(2.75, 0.3, 0.3),
-        base * CFrame.new(1.18, 6.72, 0),
+        Vector3.new(2.35, 0.3, 0.3),
+        base * CFrame.new(0.98, 8.22, 0),
         Enum.Material.Wood,
         wood
     )
     makePart(
         model,
         "Brace",
-        Vector3.new(1.25, 0.2, 0.2),
-        base * CFrame.new(0.66, 6.2, 0) * CFrame.Angles(0, 0, math.rad(-43)),
+        Vector3.new(1.15, 0.2, 0.2),
+        base * CFrame.new(0.57, 7.7, 0) * CFrame.Angles(0, 0, math.rad(-43)),
         Enum.Material.Wood,
         wood
     )
     makePart(
         model,
         "Hanger",
-        Vector3.new(0.12, 0.78, 0.12),
-        base * CFrame.new(2.42, 6.28, 0),
+        Vector3.new(0.12, 0.72, 0.12),
+        base * CFrame.new(2.02, 7.82, 0),
         Enum.Material.Metal,
         metal
     )
@@ -1465,7 +1465,7 @@ local function makeLantern(parent, position, yaw)
         model,
         "CageTop",
         Vector3.new(0.92, 0.12, 0.92),
-        base * CFrame.new(2.42, 6.12, 0),
+        base * CFrame.new(2.02, 7.65, 0),
         Enum.Material.Metal,
         metal
     ).CanCollide =
@@ -1474,7 +1474,7 @@ local function makeLantern(parent, position, yaw)
         model,
         "CageBottom",
         Vector3.new(0.78, 0.12, 0.78),
-        base * CFrame.new(2.42, 5.16, 0),
+        base * CFrame.new(2.02, 6.63, 0),
         Enum.Material.Metal,
         metal
     ).CanCollide =
@@ -1491,7 +1491,7 @@ local function makeLantern(parent, position, yaw)
             model,
             "CageRail",
             Vector3.new(0.09, 1.02, 0.09),
-            base * CFrame.new(2.42 + corner.X, 5.64, corner.Y),
+            base * CFrame.new(2.02 + corner.X, 7.14, corner.Y),
             Enum.Material.Metal,
             metal
         )
@@ -1502,7 +1502,7 @@ local function makeLantern(parent, position, yaw)
         model,
         "Glow",
         Vector3.new(0.62, 0.62, 0.62),
-        base * CFrame.new(2.42, 5.64, 0),
+        base * CFrame.new(2.02, 7.14, 0),
         Enum.Material.Neon,
         Color3.fromRGB(147, 239, 194)
     )
@@ -2633,9 +2633,9 @@ local function makeLandmarkLabel(parent, position, text)
 
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "LandmarkLabel"
-    billboard.Size = UDim2.fromOffset(340, 38)
+    billboard.Size = UDim2.fromOffset(286, 32)
     billboard.AlwaysOnTop = false
-    billboard.MaxDistance = 90
+    billboard.MaxDistance = 68
     billboard.Parent = anchor
 
     local label = Instance.new("TextLabel")
@@ -2698,6 +2698,16 @@ local function prepareGround(world)
                 return
             end
             local midpoint = (startPoint + endPoint) * 0.5
+            -- A wider, slightly lower mud/leaf-litter verge prevents the hard
+            -- brown-road-to-tall-grass seam visible at player height.
+            terrain:FillBlock(
+                CFrame.lookAt(
+                    midpoint - Vector3.new(0, 0.12, 0),
+                    endPoint - Vector3.new(0, 0.12, 0)
+                ),
+                Vector3.new(width + 6.5, 1.05, length + 4),
+                Enum.Material.Mud
+            )
             terrain:FillBlock(
                 CFrame.lookAt(midpoint, endPoint),
                 Vector3.new(width, 1.25, length + 3),
@@ -3207,13 +3217,13 @@ local function decorate(world)
     makeSupplyStack(world, WORLD_ZONES.Camp + Vector3.new(-43, 0, 3), math.rad(-8))
     makeSupplyStack(world, WORLD_ZONES.Camp + Vector3.new(-21, 0, 43), math.rad(18))
     makeCampBanner(world, WORLD_ZONES.Camp + Vector3.new(-9, 0, 51), math.rad(3))
-    makeSignpost(world, WORLD_ZONES.Camp + Vector3.new(55, 0, -31), math.rad(-56))
+    makeSignpost(world, WORLD_ZONES.Camp + Vector3.new(62, 0, -39), math.rad(-49))
     for _, offset in
         {
-            { Vector3.new(38, 0, -29), math.rad(132) },
-            { Vector3.new(47, 0, 4), math.rad(-52) },
-            { Vector3.new(-9, 0, 43), math.rad(-88) },
-            { Vector3.new(-48, 0, -30), math.rad(38) },
+            { Vector3.new(44, 0, -39), math.rad(126) },
+            { Vector3.new(55, 0, 10), math.rad(-58) },
+            { Vector3.new(-15, 0, 51), math.rad(-82) },
+            { Vector3.new(-57, 0, -38), math.rad(32) },
         }
     do
         makeLantern(world, WORLD_ZONES.Camp + offset[1], offset[2])
@@ -3225,12 +3235,23 @@ local function decorate(world)
     makeMossyRockSet(world, WORLD_ZONES.Camp + Vector3.new(-62, 0, 34), math.rad(18), 0.72)
     makePineRoots(world, WORLD_ZONES.Camp + Vector3.new(61, 0, 36), math.rad(-31), 0.7)
 
+    -- Player-height foreground dressing around the spawn and trail mouth. Keep
+    -- the center lane open while giving the camera layered silhouettes nearby.
+    makeMossyRockSet(world, WORLD_ZONES.Camp + Vector3.new(-59, 0, 19), math.rad(24), 0.58)
+    makeFern(world, WORLD_ZONES.Camp + Vector3.new(-53, 0, 16), 0.88, math.rad(14))
+    makeBush(world, WORLD_ZONES.Camp + Vector3.new(-38, 0, 47), 0.72)
+    makeFlowerPatch(world, WORLD_ZONES.Camp + Vector3.new(-31, 0, 48), 0.72, false)
+    makeStump(world, WORLD_ZONES.Camp + Vector3.new(38, 0, -39), 0.62, 2)
+    makeFern(world, WORLD_ZONES.Camp + Vector3.new(43, 0, -43), 0.82, math.rad(-37))
+    makeRockCluster(world, WORLD_ZONES.Camp + Vector3.new(58, 0, -26), 0.46, 241)
+    makeGrassTuft(world, WORLD_ZONES.Camp + Vector3.new(55, 0, -20), 0.72)
+
     -- Lumenwood Crossroads establishes the main navigation fork.
-    makeSignpost(world, WORLD_ZONES.Crossroads + Vector3.new(-18, 0, -2), math.rad(-82))
+    makeSignpost(world, WORLD_ZONES.Crossroads + Vector3.new(-27, 0, -14), math.rad(-72))
     makeWaystone(world, WORLD_ZONES.Crossroads + Vector3.new(16, 0, -14), math.rad(18), 0.82)
     makeWaystone(world, WORLD_ZONES.Crossroads + Vector3.new(-18, 0, 12), math.rad(-38), 0.74)
-    makeLantern(world, WORLD_ZONES.Crossroads + Vector3.new(-31, 0, -22), math.rad(26))
-    makeLantern(world, WORLD_ZONES.Crossroads + Vector3.new(31, 0, 23), math.rad(-154))
+    makeLantern(world, WORLD_ZONES.Crossroads + Vector3.new(-38, 0, -29), math.rad(32))
+    makeLantern(world, WORLD_ZONES.Crossroads + Vector3.new(39, 0, 30), math.rad(-148))
     makeRockCluster(world, WORLD_ZONES.Crossroads + Vector3.new(31, 0, -26), 0.65, 12)
     makeCampBench(world, WORLD_ZONES.Crossroads + Vector3.new(7, 0, 28), math.rad(9))
     makeSupplyStack(world, WORLD_ZONES.Crossroads + Vector3.new(-34, 0, 25), math.rad(-17))
