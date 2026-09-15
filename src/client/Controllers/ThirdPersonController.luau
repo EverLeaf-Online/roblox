@@ -21,10 +21,30 @@ local movementIntentRemote = nil
 local lastDodgeAt = -math.huge
 local dodgeUntil = 0
 local dodgeDirection = Vector3.zero
+local dodgeStartedAt = -math.huge
 local dodgeAttachment = nil
 local dodgeVelocity = nil
+local rollMotor = nil
+local rollMotorBaseTransform = nil
+local rollPoseMotors = {}
+
+local function restoreRollPose()
+    if rollMotor and rollMotor.Parent and rollMotorBaseTransform then
+        rollMotor.Transform = rollMotorBaseTransform
+    end
+    rollMotor = nil
+    rollMotorBaseTransform = nil
+
+    for motor, baseTransform in rollPoseMotors do
+        if motor and motor.Parent then
+            motor.Transform = baseTransform
+        end
+    end
+    table.clear(rollPoseMotors)
+end
 
 local function clearDodgeMover()
+    restoreRollPose()
     if dodgeVelocity then
         dodgeVelocity:Destroy()
         dodgeVelocity = nil
@@ -45,6 +65,7 @@ local function attachCharacter(character)
     humanoid.JumpPower = GameConfig.Movement.JumpPower
     humanoid.WalkSpeed = GameConfig.Movement.WalkSpeed
     dodgeUntil = 0
+    dodgeStartedAt = -math.huge
     dodgeDirection = Vector3.zero
     crouching = false
     humanoid.CameraOffset = Vector3.zero
@@ -105,6 +126,77 @@ local function getWorldMoveDirection()
     right = right.Unit
     local direction = right * input.X + forward * input.Y
     return if direction.Magnitude > 1 then direction.Unit else direction
+end
+
+local function findCharacterMotor(names)
+    local character = player.Character
+    if not character then
+        return nil
+    end
+    for _, name in names do
+        local motor = character:FindFirstChild(name, true)
+        if motor and motor:IsA("Motor6D") then
+            return motor
+        end
+    end
+    return nil
+end
+
+local function rememberPoseMotor(motor)
+    if motor and rollPoseMotors[motor] == nil then
+        rollPoseMotors[motor] = motor.Transform
+    end
+    return motor
+end
+
+local function beginRollPose()
+    restoreRollPose()
+    rollMotor = findCharacterMotor({ "Root", "RootJoint" })
+    if rollMotor then
+        rollMotorBaseTransform = rollMotor.Transform
+    end
+
+    rememberPoseMotor(findCharacterMotor({ "Waist" }))
+    rememberPoseMotor(findCharacterMotor({ "LeftHip", "Left Hip" }))
+    rememberPoseMotor(findCharacterMotor({ "RightHip", "Right Hip" }))
+    rememberPoseMotor(findCharacterMotor({ "LeftShoulder", "Left Shoulder" }))
+    rememberPoseMotor(findCharacterMotor({ "RightShoulder", "Right Shoulder" }))
+end
+
+local function applyRollPose(alpha)
+    if not rollMotor or not rollMotor.Parent or not rollMotorBaseTransform then
+        return
+    end
+
+    local eased = 0.5 - 0.5 * math.cos(alpha * math.pi)
+    local fullRotation = alpha * math.pi * 2
+    local lift = math.sin(alpha * math.pi) * 0.85
+    rollMotor.Transform = rollMotorBaseTransform
+        * CFrame.new(0, lift, 0)
+        * CFrame.Angles(-fullRotation, 0, 0)
+
+    for motor, baseTransform in rollPoseMotors do
+        local name = motor.Name
+        local tuck = math.sin(alpha * math.pi)
+        if string.find(name, "Hip") then
+            motor.Transform = baseTransform * CFrame.Angles(math.rad(45) * tuck, 0, 0)
+        elseif string.find(name, "Shoulder") then
+            motor.Transform = baseTransform * CFrame.Angles(math.rad(-38) * tuck, 0, 0)
+        elseif name == "Waist" then
+            motor.Transform = baseTransform * CFrame.Angles(math.rad(-18) * tuck, 0, 0)
+        end
+    end
+
+    if eased >= 1 then
+        restoreRollPose()
+    end
+end
+
+local function rollSpeed(alpha)
+    local eased = alpha * alpha * (3 - 2 * alpha)
+    return GameConfig.Movement.DodgeRollStartSpeed
+        + (GameConfig.Movement.DodgeRollEndSpeed - GameConfig.Movement.DodgeRollStartSpeed)
+            * eased
 end
 
 local function sendCrouchState()
@@ -186,6 +278,7 @@ local function tryDodge()
     end
 
     dodgeDirection = direction
+    dodgeStartedAt = now
     dodgeUntil = now + GameConfig.Movement.DodgeDuration
     humanoid.AutoRotate = false
     humanoid.WalkSpeed = 0
@@ -201,6 +294,7 @@ local function tryDodge()
     end
 
     clearDodgeMover()
+    beginRollPose()
     dodgeAttachment = Instance.new("Attachment")
     dodgeAttachment.Name = "EverLeafDodgeAttachment"
     dodgeAttachment.Parent = root
@@ -213,8 +307,8 @@ local function tryDodge()
     dodgeVelocity.PrimaryTangentAxis = Vector3.xAxis
     dodgeVelocity.SecondaryTangentAxis = Vector3.zAxis
     dodgeVelocity.PlaneVelocity = Vector2.new(
-        dodgeDirection.X * GameConfig.Movement.DodgeSpeed,
-        dodgeDirection.Z * GameConfig.Movement.DodgeSpeed
+        dodgeDirection.X * GameConfig.Movement.DodgeRollStartSpeed,
+        dodgeDirection.Z * GameConfig.Movement.DodgeRollStartSpeed
     )
     dodgeVelocity.ForceLimitsEnabled = true
     dodgeVelocity.ForceLimitMode = Enum.ForceLimitMode.PerAxis
@@ -223,9 +317,9 @@ local function tryDodge()
 
     local velocity = root.AssemblyLinearVelocity
     root.AssemblyLinearVelocity = Vector3.new(
-        dodgeDirection.X * GameConfig.Movement.DodgeSpeed,
+        dodgeDirection.X * GameConfig.Movement.DodgeRollStartSpeed,
         velocity.Y,
-        dodgeDirection.Z * GameConfig.Movement.DodgeSpeed
+        dodgeDirection.Z * GameConfig.Movement.DodgeRollStartSpeed
     )
     player:SetAttribute("LastLocalDodgeAt", now)
 end
@@ -289,6 +383,7 @@ function ThirdPersonController.Start()
                 CombatFacing.Reset()
                 clearDodgeMover()
                 dodgeUntil = 0
+                dodgeStartedAt = -math.huge
                 dodgeDirection = Vector3.zero
                 if crouching then
                     setCrouching(false)
@@ -302,11 +397,20 @@ function ThirdPersonController.Start()
                 if now < dodgeUntil and root and root.Parent then
                     humanoid.WalkSpeed = 0
                     humanoid:Move(Vector3.zero, false)
+                    local alpha =
+                        math.clamp((now - dodgeStartedAt) / GameConfig.Movement.DodgeDuration, 0, 1)
+                    applyRollPose(alpha)
+                    if dodgeVelocity and dodgeVelocity.Parent then
+                        local speed = rollSpeed(alpha)
+                        dodgeVelocity.PlaneVelocity =
+                            Vector2.new(dodgeDirection.X * speed, dodgeDirection.Z * speed)
+                    end
                     return
                 end
 
                 clearDodgeMover()
                 dodgeUntil = 0
+                dodgeStartedAt = -math.huge
                 dodgeDirection = Vector3.zero
                 if crouching then
                     setCrouching(false)
