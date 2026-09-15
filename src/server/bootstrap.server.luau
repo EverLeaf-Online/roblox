@@ -23,6 +23,7 @@ local PartyService = require(script.Parent.Services.PartyService)
 local PBRMaterialService = require(script.Parent.Services.PBRMaterialService)
 local Net = require(ReplicatedStorage.Shared.Net)
 local PlayerDataService = require(script.Parent.Services.PlayerDataService)
+local PlayerDamageService = require(script.Parent.Services.PlayerDamageService)
 local RateLimiterService = require(script.Parent.Services.RateLimiterService)
 local ResourceService = require(script.Parent.Services.ResourceService)
 local SnapshotService = require(script.Parent.Services.SnapshotService)
@@ -54,6 +55,7 @@ local profileReady = ensureRemote("RemoteEvent", Net.Events.ProfileReady)
 local profileChanged = ensureRemote("RemoteEvent", Net.Events.ProfileChanged)
 local partyEvent = ensureRemote("RemoteEvent", Net.Events.PartyEvent)
 local interactionEvent = ensureRemote("RemoteEvent", Net.Events.InteractionEvent)
+local playerDamageEvent = ensureRemote("RemoteEvent", Net.Events.PlayerDamageEvent)
 ensureRemote("RemoteEvent", Net.Events.WorldNotice)
 local requestProfile = ensureRemote("RemoteFunction", Net.Functions.RequestProfile)
 local allocateStat = ensureRemote("RemoteFunction", Net.Functions.AllocateStat)
@@ -119,6 +121,12 @@ end)
 InteractionService.Opened:Connect(function(player, description)
     if player.Parent == Players then
         interactionEvent:FireClient(player, "open", description)
+    end
+end)
+
+PlayerDamageService.Event:Connect(function(player, payload)
+    if player.Parent == Players then
+        playerDamageEvent:FireClient(player, payload)
     end
 end)
 

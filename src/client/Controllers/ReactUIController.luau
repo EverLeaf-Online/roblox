@@ -17,6 +17,7 @@ local StatText = require(script.Parent.Parent.UI.StatText)
 local BossHud = require(script.Parent.Parent.UI.Components.BossHud)
 local PartyHud = require(script.Parent.Parent.UI.Components.PartyHud)
 local PartyOverlay = require(script.Parent.Parent.UI.Components.PartyOverlay)
+local PlayerDamageFeedback = require(script.Parent.Parent.UI.Components.PlayerDamageFeedback)
 local AdvancementOverlay = require(script.Parent.Parent.UI.Components.AdvancementOverlay)
 local ShopOverlay = require(script.Parent.Parent.UI.Components.ShopOverlay)
 local ToastStack = require(script.Parent.Parent.UI.Components.ToastStack)
@@ -2676,9 +2677,11 @@ local function App()
     local health, setHealth = React.useState(100)
     local maxHealth, setMaxHealth = React.useState(100)
     local dead, setDead = React.useState(false)
+    local damageFeedback, setDamageFeedback = React.useState(nil)
     local inputMode, setInputMode =
         React.useState(inputModeFromType(UserInputService:GetLastInputType()))
     local previousProfile = React.useRef(profile)
+    local damageFeedbackGeneration = React.useRef(0)
 
     React.useEffect(function()
         local connection = UserInputService.LastInputTypeChanged:Connect(function(inputType)
@@ -2804,6 +2807,8 @@ local function App()
             setAdvancementOpen(false)
             setPartyOpen(false)
             setMenuOpen(false)
+            setDamageFeedback(nil)
+            damageFeedbackGeneration.current += 1
             setDead(false)
             player:SetAttribute("EverLeafUiCapture", false)
 
@@ -2842,6 +2847,34 @@ local function App()
             if maxConnection then
                 maxConnection:Disconnect()
             end
+        end
+    end, {})
+
+    React.useEffect(function()
+        local remotes = ReplicatedStorage:FindFirstChild(Net.RemoteFolderName)
+        local remote = remotes and remotes:FindFirstChild(Net.Events.PlayerDamageEvent)
+        if not remote or not remote:IsA("RemoteEvent") then
+            warn("[ReactUI] PlayerDamageEvent was not found")
+            return nil
+        end
+
+        local connection = remote.OnClientEvent:Connect(function(payload)
+            if type(payload) ~= "table" then
+                return
+            end
+            damageFeedbackGeneration.current += 1
+            local generation = damageFeedbackGeneration.current
+            local nextPayload = table.clone(payload)
+            nextPayload.Id = generation
+            setDamageFeedback(nextPayload)
+            task.delay(0.7, function()
+                if damageFeedbackGeneration.current == generation then
+                    setDamageFeedback(nil)
+                end
+            end)
+        end)
+        return function()
+            connection:Disconnect()
         end
     end, {})
 
@@ -3113,6 +3146,7 @@ local function App()
             or nil,
         Boss = React.createElement(BossHud, { Hidden = uiOpen or dead }),
         Toasts = React.createElement(ToastStack),
+        DamageFeedback = React.createElement(PlayerDamageFeedback, { Event = damageFeedback }),
         Death = dead and React.createElement(DeathOverlay) or nil,
     })
 end

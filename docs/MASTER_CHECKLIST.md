@@ -44,7 +44,7 @@
 - [x] Monster dodge reactions, cooldowns, brief invulnerability, and backward evade movement.
 - [x] Visible world loot drops with ownership, labels, pickup prompts, and despawn timing.
 - [x] Per-monster death VFX/debris/SFX foundation.
-- [x] Monster attacks now apply data-driven player knockback, launch, and short stagger rules with movement-sanity grace; player-side enemy hit-flinch already exists.
+- [x] Monster attacks now apply data-driven player knockback, launch, and short stagger rules with movement-sanity grace; client incoming-hit feedback is source-complete.
 - [ ] Studio-tune pathfinding, dodge rates, attack ranges, and combat feel across all Lumenreach encounters.
 - [ ] Multiplayer threat/target-selection and party-combat QA.
 
@@ -376,12 +376,12 @@
 - [x] Deterministic Defense/damage-taken calculation with diminishing returns and minimum positive-hit floor.
 - [x] Enemy-to-player validated damage path.
 - [x] Prototype 0.15s player damage i-frame exists; tuning remains.
-- [ ] Knockback on player.
+- [x] Monster/boss hits apply player knockback, launch, and short stagger with movement-sanity grace; Studio tuning remains.
 - [x] Death state and timed respawn loop Studio-verified.
 - [x] Safe-spawn respawn flow + death overlay Studio-verified; presentation polish remains.
 - [x] Region-aware safe respawn is assigned server-side for Lumenreach and Brasshaven, including portal/rejoin synchronization.
 - [ ] Death penalties decision.
-- [x] React death overlay appears during the Studio-verified death/respawn flow; damage-feedback polish remains.
+- [x] React death overlay is Studio-verified; incoming hit feedback now shows HP loss, Defense mitigation, source, heavy-hit edge flash, and strong-stagger emphasis.
 
 ## 12. Rewards / currencies / loot
 

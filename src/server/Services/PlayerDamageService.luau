@@ -3,11 +3,14 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local DamageMath = require(ReplicatedStorage.Shared.Math.DamageMath)
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
+local PlayerDamageFeedbackRules = require(ReplicatedStorage.Shared.Logic.PlayerDamageFeedbackRules)
 local DerivedStatsService = require(script.Parent.DerivedStatsService)
 local MovementSanityService = require(script.Parent.MovementSanityService)
 local PlayerDataService = require(script.Parent.PlayerDataService)
 
 local PlayerDamageService = {}
+local damageEvent = Instance.new("BindableEvent")
+PlayerDamageService.Event = damageEvent.Event
 local lastDamageAt = {}
 local staggerGeneration = {}
 
@@ -77,15 +80,23 @@ function PlayerDamageService.Apply(player, amount, sourceId, options)
         derived and derived.Defense or 0,
         GameConfig.Combat.DefenseConstant
     )
-    humanoid:SetAttribute("LastDamageSource", tostring(sourceId or "unknown"))
-    humanoid:SetAttribute("LastDamageRaw", math.floor(amount))
+    options = options or {}
+    local feedback = PlayerDamageFeedbackRules.Build(
+        amount,
+        appliedDamage,
+        humanoid.MaxHealth,
+        options.Stagger,
+        sourceId
+    )
+    humanoid:SetAttribute("LastDamageSource", feedback.SourceId)
+    humanoid:SetAttribute("LastDamageRaw", feedback.RawAmount)
     humanoid:SetAttribute("LastDamageApplied", appliedDamage)
     humanoid:TakeDamage(appliedDamage)
     if humanoid.Health > 0 then
-        options = options or {}
         applyImpulse(player, character, options)
         applyStagger(player, options.Stagger)
     end
+    damageEvent:Fire(player, feedback)
     return true, humanoid.Health
 end
 
