@@ -80,6 +80,7 @@ local SCHEMAS = {
     ["party.kick"] = { TargetUserId = integerField(1, MAX_SAFE_INTEGER) },
     ["party.leave"] = {},
     ["party.ready.respond"] = { Accepted = booleanField() },
+    ["social.inspect"] = { TargetUserId = integerField(1, MAX_SAFE_INTEGER) },
     ["cosmetic.equip"] = {
         Slot = stringField(24, false, COSMETIC_SLOTS),
         CosmeticId = stringField(64, true),
@@ -93,6 +94,23 @@ local SCHEMAS = {
         Value = { Kinds = { number = true, boolean = true } },
     },
 }
+
+local PROFILE_MUTATIONS = table.freeze({
+    ["stat.allocate"] = true,
+    ["inventory.use"] = true,
+    ["equipment.equip"] = true,
+    ["equipment.unequip"] = true,
+    ["skill.learn"] = true,
+    ["skill.hotbar"] = true,
+    ["quest.start"] = true,
+    ["quest.turnin"] = true,
+    ["shop.buy"] = true,
+    ["shop.sell"] = true,
+    ["advancement.first"] = true,
+    ["advancement.second"] = true,
+    ["cosmetic.equip"] = true,
+    ["settings.update"] = true,
+})
 
 local function validateField(value, rule)
     if value == nil then
@@ -179,6 +197,10 @@ function ActionPayloadRules.ValidateMovementIntent(payload)
         end
     end
     return type(payload.Crouching) == "boolean"
+end
+
+function ActionPayloadRules.MutatesProfile(actionName)
+    return PROFILE_MUTATIONS[actionName] == true
 end
 
 function ActionPayloadRules.IsCosmeticSlot(slotName)

@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local React = require(ReplicatedStorage.Packages.React)
 
 local ActionClient = require(script.Parent.Parent.Parent.Services.ActionClient)
+local CatalogClient = require(script.Parent.Parent.Parent.Services.CatalogClient)
 local PartyStore = require(script.Parent.Parent.Parent.State.PartyStore)
 local NotificationStore = require(script.Parent.Parent.NotificationStore)
 
@@ -68,6 +69,7 @@ local function PartyOverlay(props)
     local readyCheck = partyState.ReadyCheck
     local topCardVisible = invite ~= nil or readyCheck ~= nil
     local status, setStatus = React.useState("Party actions are server-authoritative.")
+    local inspected, setInspected = React.useState(nil)
     local candidates, setCandidates = React.useState(onlineCandidates(party))
 
     React.useEffect(function()
@@ -85,6 +87,19 @@ local function PartyOverlay(props)
 
     local isLeader = party and party.LeaderUserId == localPlayer.UserId
     local selfReady = readyStateFor(readyCheck, localPlayer.UserId)
+
+    local function inspectMember(userId)
+        local ok, result = ActionClient.Invoke("social.inspect", { TargetUserId = userId })
+        if not ok then
+            local message = tostring(result or "inspect_failed")
+            setStatus(message)
+            NotificationStore.Push("error", "Profile Inspect Failed", message, 3)
+            return
+        end
+        setInspected(result)
+        setStatus("Viewing " .. tostring(result.DisplayName or result.Name or "Wayfarer") .. ".")
+    end
+
     local memberRows = {}
     for index, member in party and party.Members or {} do
         local memberIsLeader = member.UserId == party.LeaderUserId
@@ -109,7 +124,7 @@ local function PartyOverlay(props)
             }),
             Name = React.createElement("TextLabel", {
                 Position = UDim2.fromOffset(13, 4),
-                Size = UDim2.new(1, -116, 0, 19),
+                Size = UDim2.new(1, -190, 0, 19),
                 BackgroundTransparency = 1,
                 Text = member.DisplayName or member.Name,
                 TextColor3 = Color3.fromRGB(235, 244, 239),
@@ -120,7 +135,7 @@ local function PartyOverlay(props)
             }),
             Role = React.createElement("TextLabel", {
                 Position = UDim2.fromOffset(13, 23),
-                Size = UDim2.new(1, -116, 0, 14),
+                Size = UDim2.new(1, -190, 0, 14),
                 BackgroundTransparency = 1,
                 Text = (
                     memberIsLeader and "PARTY LEADER"
@@ -147,6 +162,26 @@ local function PartyOverlay(props)
                 TextXAlignment = Enum.TextXAlignment.Right,
                 ZIndex = 65,
             }) or nil,
+            Inspect = not readyCheck
+                    and React.createElement("TextButton", {
+                        AnchorPoint = Vector2.new(1, 0.5),
+                        Position = UDim2.new(1, canKick and -90 or -8, 0.5, 0),
+                        Size = UDim2.fromOffset(68, 28),
+                        BackgroundColor3 = Color3.fromRGB(30, 58, 49),
+                        BorderSizePixel = 0,
+                        Text = "INSPECT",
+                        TextColor3 = Color3.fromRGB(185, 229, 207),
+                        TextSize = 8,
+                        Font = Enum.Font.GothamBold,
+                        Selectable = true,
+                        ZIndex = 65,
+                        [React.Event.Activated] = function()
+                            inspectMember(member.UserId)
+                        end,
+                    }, {
+                        Corner = React.createElement("UICorner", { CornerRadius = UDim.new(0, 5) }),
+                    })
+                or nil,
             PartyKick = canKick
                     and React.createElement("TextButton", {
                         AnchorPoint = Vector2.new(1, 0.5),
@@ -230,6 +265,106 @@ local function PartyOverlay(props)
     local listTop = sectionTop + 23
     local listHeight = math.max(120, 438 - listTop)
     local canInvite = isLeader and readyCheck == nil
+
+    local catalog = CatalogClient.Get() or {}
+    local itemCatalog = catalog.Items or {}
+    local inspectedEquipment = {}
+    if inspected then
+        local row = 0
+        for _, slotName in { "Weapon", "Head", "Body", "Legs", "Accessory", "Ring1", "Ring2" } do
+            local itemId = inspected.Equipment and inspected.Equipment[slotName]
+            if type(itemId) == "string" and itemId ~= "" then
+                row += 1
+                local definition = itemCatalog[itemId]
+                inspectedEquipment[slotName] = React.createElement("TextLabel", {
+                    Position = UDim2.fromOffset(14, 154 + (row - 1) * 22),
+                    Size = UDim2.new(1, -28, 0, 20),
+                    BackgroundTransparency = 1,
+                    Text = string.format(
+                        "%s  ·  %s",
+                        string.upper(slotName),
+                        definition and definition.DisplayName or itemId
+                    ),
+                    TextColor3 = Color3.fromRGB(188, 211, 199),
+                    TextSize = 8,
+                    Font = Enum.Font.GothamMedium,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    ZIndex = 64,
+                })
+            end
+        end
+    end
+
+    local profilePanel = inspected
+            and {
+                Back = React.createElement("TextButton", {
+                    Position = UDim2.fromOffset(12, 12),
+                    Size = UDim2.fromOffset(72, 26),
+                    BackgroundColor3 = Color3.fromRGB(34, 47, 43),
+                    BorderSizePixel = 0,
+                    Text = "BACK",
+                    TextColor3 = Color3.fromRGB(196, 220, 207),
+                    TextSize = 8,
+                    Font = Enum.Font.GothamBold,
+                    Selectable = true,
+                    ZIndex = 64,
+                    [React.Event.Activated] = function()
+                        setInspected(nil)
+                    end,
+                }, {
+                    Corner = React.createElement("UICorner", { CornerRadius = UDim.new(0, 5) }),
+                }),
+                Name = React.createElement("TextLabel", {
+                    Position = UDim2.fromOffset(14, 50),
+                    Size = UDim2.new(1, -28, 0, 28),
+                    BackgroundTransparency = 1,
+                    Text = string.upper(inspected.DisplayName or inspected.Name or "WAYFARER"),
+                    TextColor3 = Color3.fromRGB(222, 244, 232),
+                    TextSize = 15,
+                    Font = Enum.Font.GothamBold,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    ZIndex = 64,
+                }),
+                Meta = React.createElement("TextLabel", {
+                    Position = UDim2.fromOffset(14, 80),
+                    Size = UDim2.new(1, -28, 0, 42),
+                    BackgroundTransparency = 1,
+                    Text = string.format(
+                        "LEVEL %d  ·  %s  ·  TIER %d%s",
+                        inspected.Level or 1,
+                        inspected.FamilyId ~= "" and string.upper(inspected.FamilyId) or "WAYFARER",
+                        inspected.AdvancementTier or 0,
+                        inspected.Recognition and ("  ·  " .. inspected.Recognition) or ""
+                    ),
+                    TextColor3 = Color3.fromRGB(139, 169, 154),
+                    TextSize = 9,
+                    Font = Enum.Font.GothamMedium,
+                    TextWrapped = true,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    ZIndex = 64,
+                }),
+                Combat = React.createElement("TextLabel", {
+                    Position = UDim2.fromOffset(14, 122),
+                    Size = UDim2.new(1, -28, 0, 26),
+                    BackgroundTransparency = 1,
+                    Text = string.format(
+                        "ATK %d   DEF %d   CRIT %.1f%%   ACH %d",
+                        math.floor(
+                            tonumber(inspected.Derived and inspected.Derived.AttackPower) or 0
+                        ),
+                        math.floor(tonumber(inspected.Derived and inspected.Derived.Defense) or 0),
+                        tonumber(inspected.Derived and inspected.Derived.CritChance) or 0,
+                        inspected.AchievementCount or 0
+                    ),
+                    TextColor3 = Color3.fromRGB(232, 193, 105),
+                    TextSize = 9,
+                    Font = Enum.Font.GothamBold,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    ZIndex = 64,
+                }),
+                Equipment = React.createElement(React.Fragment, nil, inspectedEquipment),
+            }
+        or nil
 
     return React.createElement(React.Fragment, nil, {
         Backdrop = React.createElement("Frame", {
@@ -527,8 +662,11 @@ local function PartyOverlay(props)
                 Position = UDim2.fromOffset(370, leftTop),
                 Size = UDim2.fromOffset(320, 20),
                 BackgroundTransparency = 1,
-                Text = readyCheck and "ROSTER LOCKED DURING READY CHECK"
-                    or (isLeader and "INVITE ONLINE WAYFARERS" or "PARTY COMMAND"),
+                Text = inspected and "WAYFARER PROFILE"
+                    or (
+                        readyCheck and "ROSTER LOCKED DURING READY CHECK"
+                        or (isLeader and "INVITE ONLINE WAYFARERS" or "PARTY COMMAND")
+                    ),
                 TextColor3 = Color3.fromRGB(232, 193, 105),
                 TextSize = 9,
                 Font = Enum.Font.GothamBold,
@@ -548,7 +686,7 @@ local function PartyOverlay(props)
                 ScrollBarThickness = 4,
                 ScrollBarImageColor3 = Color3.fromRGB(129, 108, 73),
                 ZIndex = 62,
-            }, canInvite and candidateRows or {
+            }, inspected and profilePanel or (canInvite and candidateRows or {
                 Hint = React.createElement("TextLabel", {
                     Position = UDim2.fromOffset(14, 14),
                     Size = UDim2.new(1, -28, 0, 86),
@@ -567,7 +705,7 @@ local function PartyOverlay(props)
                     TextYAlignment = Enum.TextYAlignment.Top,
                     ZIndex = 63,
                 }),
-            }),
+            })),
             Status = React.createElement("TextLabel", {
                 Position = UDim2.fromOffset(22, 478),
                 Size = UDim2.new(1, -44, 0, 26),

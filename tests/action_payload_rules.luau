@@ -21,6 +21,7 @@ local validPayloads = {
     ["party.kick"] = { TargetUserId = 456 },
     ["party.leave"] = {},
     ["party.ready.respond"] = { Accepted = true },
+    ["social.inspect"] = { TargetUserId = 123 },
     ["cosmetic.equip"] = { Slot = "Aura", CosmeticId = "verdant_trail" },
     ["settings.update"] = { Key = "MusicVolume", Value = 0.5 },
 }
@@ -44,6 +45,12 @@ assert(
     "cosmetic unequip accepted"
 )
 
+assert(not Rules.MutatesProfile("social.inspect"), "profile inspection is read-only")
+assert(not Rules.MutatesProfile("party.invite"), "party actions do not dirty persistent profile")
+assert(not Rules.MutatesProfile("skill.use"), "runtime skill use does not dirty persistent profile")
+assert(Rules.MutatesProfile("equipment.equip"), "equipment changes dirty persistent profile")
+assert(Rules.MutatesProfile("quest.turnin"), "quest turn-in dirties persistent profile")
+
 local abuseCases = {
     { "unknown.action", {}, "unknown action" },
     { "party.create", { Extra = true }, "unknown fields rejected" },
@@ -59,6 +66,7 @@ local abuseCases = {
         "oversized buy quantity rejected",
     },
     { "party.invite", { TargetUserId = -1 }, "negative user id rejected" },
+    { "social.inspect", { TargetUserId = -1 }, "negative inspect target rejected" },
     { "party.ready.respond", { Accepted = 1 }, "non-boolean ready response rejected" },
     {
         "cosmetic.equip",

@@ -333,8 +333,8 @@ gameAction.OnServerInvoke = function(player, actionName, payload)
     if not profile then
         return false, "profile_not_loaded"
     end
-    local ok, result = ActionService.Handle(player, profile, actionName, payload)
-    if ok then
+    local ok, result, profileMutated = ActionService.Handle(player, profile, actionName, payload)
+    if ok and profileMutated then
         AchievementService.SyncProgression(player, profile)
         PlayerDataService.NotifyChanged(player)
     end

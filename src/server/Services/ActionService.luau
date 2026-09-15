@@ -11,6 +11,7 @@ local InteractionSessionService = require(script.Parent.InteractionSessionServic
 local PartyService = require(script.Parent.PartyService)
 local PayloadValidationService = require(script.Parent.PayloadValidationService)
 local ShopService = require(script.Parent.ShopService)
+local SocialProfileService = require(script.Parent.SocialProfileService)
 local SkillService = require(script.Parent.SkillService)
 local StatService = require(script.Parent.StatService)
 
@@ -110,6 +111,9 @@ handlers["party.ready.respond"] = function(player, _, payload)
     end
     return BelforgeColossusService.RespondPartyReadyCheck(player, payload.Accepted)
 end
+handlers["social.inspect"] = function(_, _, payload)
+    return SocialProfileService.Inspect(payload.TargetUserId)
+end
 handlers["cosmetic.equip"] = function(_, profile, payload)
     return CosmeticService.Equip(profile, payload.Slot, payload.CosmeticId)
 end
@@ -151,7 +155,8 @@ function ActionService.Handle(player, profile, actionName, payload)
     if not handler then
         return false, "unknown_action"
     end
-    return handler(player, profile, payload)
+    local ok, result = handler(player, profile, payload)
+    return ok, result, ActionPayloadRules.MutatesProfile(actionName)
 end
 
 return ActionService

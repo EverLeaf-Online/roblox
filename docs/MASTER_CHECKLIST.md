@@ -587,7 +587,7 @@
 - [x] Generic same-server party-instance travel foundation: data-driven entry/destination/return spawns, min/max roster rules, assembly radius, ready-check timing, concurrent destination prefetch, group move, and rollback-on-partial-failure; Belforge is the first consumer. Cross-server reserved-place teleporting remains future expansion if needed.
 - [ ] Trading design decision.
 - [ ] Secure trading if approved.
-- [ ] Social/profile inspection.
+- [x] Same-server social/profile inspection is server-curated and available from the party roster, exposing identity, level/family/tier, combat summary, equipped gear, equipped cosmetics, recognition, and achievement count while keeping inventory contents, currencies, quests, settings, secrets, and entitlement internals private.
 - [x] Achievement persistence/service foundation, Roblox badge awarding, join-time repair, Level 10/First Victory hooks, and entitlement-aware player title/nameplate presentation implemented.
 - [x] Multiplayer boss source rules implemented: six-player cap, pull lockout, participant elimination, wipe reset, contributor thresholds, individual boss rewards, and no death-rush re-entry; live multi-client QA remains.
 - [x] Belforge party ready-check implemented: leader-initiated at the physical seal, all members assembled/eligible, per-member confirmation, roster lock, expiry/cancel handling, and all-ready group teleport.
