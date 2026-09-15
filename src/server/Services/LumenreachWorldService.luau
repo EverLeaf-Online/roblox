@@ -53,6 +53,9 @@ local OPENING_ROUTE_POINTS = table.freeze({
 -- Advancement training sits south of Camp in its own wooded pocket instead of
 -- sharing the primary navigation sightline.
 local PROVING_CIRCLE_ORIGIN = WORLD_ZONES.Camp + Vector3.new(10, 0, -92)
+-- Keep the initial player capsule and the full arrival marker out of authored camp props.
+-- The previous (-31, 0, 19) offset overlapped the north-west Wayfarer tent.
+local ARRIVAL_SPAWN_ORIGIN = WORLD_ZONES.Camp + Vector3.new(-14, 0, -4)
 
 -- Decorative generation runs before authored encounters are registered. Keep the
 -- actual combat footprints free of trees, deadfall, roots, and large rocks so
@@ -60,8 +63,8 @@ local PROVING_CIRCLE_ORIGIN = WORLD_ZONES.Camp + Vector3.new(10, 0, -92)
 local PROTECTED_GAMEPLAY_CLEARINGS = table.freeze({
     table.freeze({
         Id = "arrival_spawn",
-        Center = WORLD_ZONES.Camp + Vector3.new(-31, 0, 19),
-        Radius = 9.5,
+        Center = ARRIVAL_SPAWN_ORIGIN,
+        Radius = 11.5,
     }),
     table.freeze({
         Id = "training_dummy",
@@ -5046,7 +5049,7 @@ end
 
 local function makeSpawn(world)
     local yaw = math.rad(128)
-    local groundPosition = terrainSurfacePosition(WORLD_ZONES.Camp + Vector3.new(-31, 0, 19), 0)
+    local groundPosition = terrainSurfacePosition(ARRIVAL_SPAWN_ORIGIN, 0)
     makeWayfarerArrivalMarker(world, groundPosition, yaw)
 
     local spawn = Instance.new("SpawnLocation")
