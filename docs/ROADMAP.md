@@ -71,7 +71,7 @@ Architecture closure completed:
 
 ### Current verified Phase B baseline — 2026-09-15
 
-Studio-verified gameplay foundations remain third-person movement/camera, sprint/jump/dodge, basic combat, hostile enemy damage, React HUD/dialogue, quest accept/progress/turn-in, and Rojo/Wally/React sync. The Lumenreach source world has now been redesigned as a 2200×1700 MMO starter region with a true town hub, Level 1 starter field, large encounter rooms, branching exploration loops, natural terrain boundaries, a central gorge/bridge threshold, and the Brasshaven gate at the far-zone capstone. The redesigned world is source/build-verified; the new full-zone player-height art, collision, multiplayer traversal, and performance pass is the current Studio priority. The canonical world-design contract is maintained in `docs/LUMENREACH_WORLD_LAYOUT.md`.
+Studio-verified gameplay foundations remain third-person movement/camera, sprint/jump/dodge, basic combat, hostile enemy damage, React HUD/dialogue, quest accept/progress/turn-in, and Rojo/Wally/React sync. Lumenreach has now been **fully replaced** by the terrain-first V3 generator: 2350×1800 studs, permanent Wayfarer town, terrain-authored roads, two real gorge bridges, wetland/highland/ravine macro spaces, party-scale encounter floors, natural Terrain boundaries, and the Brasshaven gate at the far-east capstone. The generator clears the previous world before building V3, so future map work must refine this layout instead of stacking scenery over older geometry. Player-height art/collision/multiplayer/performance QA is the current Studio priority. The canonical contract is `docs/LUMENREACH_WORLD_LAYOUT.md`.
 
 ### Phase B — 3D foundation + complete game shell — ACTIVE
 
@@ -103,22 +103,22 @@ Required end-to-end loop:
 1. Spawn safely in the Wayfarer Camp town plaza and orient from the hub landmarks/services.
 2. Move, sprint, jump, dodge, use the third-person camera, and interact with the starter NPC cluster.
 3. Accept the first quest from Ilyra and leave town through the signed Greenway road.
-4. Fight Mosslings in the dedicated Mossling Hollow / Greenway starter field without combat spilling into the road.
+4. Fight Mosslings in the open Greenway starter field without combat spilling into the road.
 5. Return/turn in, use the Quartermaster shop, and verify inventory/equipment/consumable actions.
 6. Reach Lumenwood Crossroads and understand the regional route choices from sightlines/signage alone.
 7. Explore Glowmere Wetland and cross the central gorge/Eastbridge into the mid-zone.
 8. Clear Gravebone Watch, then progress through Mossglen hunts, Brambleback Trail, and the Mosswarden field-boss space before the late-zone loops.
-9. Explore the Sunmoss highland and Veilfall ravine/Whisperroot side route without forced linear backtracking.
+9. Explore the Sunmoss highland and Veilfall ravine late-zone loops without forced linear backtracking.
 10. Complete the Wayfarer Proving Circle / first advancement flow.
 11. Take damage, die if necessary, and respawn cleanly at Camp without losing HUD/menu/hotbar/progression state.
 12. Reach Level 10, complete the Brasshaven passage requirements, and travel through the far-edge Shattered Lumen Arch gate.
-13. Confirm the full 2200×1700 starter region remains readable, traversable, performant, and free of placeholder/broken environment assets.
+13. Confirm the full 2350×1800 starter region remains readable, traversable, performant, and free of placeholder/broken environment assets.
 
 Phase 1 production priorities, in order:
 
 - **P1-A — Stability:** no red errors, no broken respawn/UI state, no invalid material/plugin dependencies, no remote-authority regressions.
 - **P1-B — Combat feel:** hit feedback, damage numbers, enemy telegraphs, leash/reset, knockback/stagger where appropriate, and production attack presentation.
-- **P1-C — MMO starter-zone world:** Studio-validate the new 2200×1700 Lumenreach layout, town hub, natural terrain boundaries, road grades, landmark silhouettes, encounter-room scale, foliage density, and far-edge Brasshaven transition; fix any player-height composition issue before adding more decorative density.
+- **P1-C — MMO starter-zone world:** Studio-validate the terrain-first 2350×1800 Lumenreach V3 layout, town hub, natural terrain boundaries, road grades, landmark silhouettes, encounter-room scale, foliage density, and far-edge Brasshaven transition; fix any player-height composition issue before adding more decorative density.
 - **P1-D — RPG shell:** finish responsive HUD/menu UX, inventory/equipment/skills/quests/settings usability, dedicated shop presentation, and notifications/reward feedback.
 - **P1-E — Content closure:** complete the first quest/reward/shop loop, starter loot, first advancement hook, Brasshaven transition shell, and Belforge entry shell only as far as required for Phase 1 continuity.
 - **P1-F — QA:** repeatable fresh-profile, death/respawn, rejoin, combat, quest, inventory, controller, and performance passes.

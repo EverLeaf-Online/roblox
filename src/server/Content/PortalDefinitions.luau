@@ -7,6 +7,6 @@ return table.freeze({
     brasshaven_to_lumenreach = table.freeze({
         SourceRegionId = "brasshaven",
         TargetRegionId = "lumenreach",
-        TargetSpawnId = "lumenreach_start",
+        TargetSpawnId = "lumenreach_east_gate",
     }),
 })

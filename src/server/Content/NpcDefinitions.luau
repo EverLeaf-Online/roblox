@@ -4,7 +4,7 @@ return table.freeze({
         RegionId = "lumenreach",
         Dialogue = table.freeze({
             "Lumenreach rewards curiosity, but the old paths have teeth. Learn the camp, read the land, and never ignore a trail that suddenly goes quiet.",
-            "The Greenway opens into Lumenwood Crossroads. The north road loops through Glowmere and Mossglen, the southern route drops toward Veilfall, and both eventually meet at the Shattered Arch.",
+            "The Greenway opens into Lumenwood Crossroads. Glowmere loops to Reedbridge, Eastbridge opens the eastern wilds, and the high and low roads both converge on the Shattered Arch.",
             "When the old grove finally stirs, come back to me. The road beyond Lumenreach does not open for untested travelers.",
         }),
         QuestOffers = table.freeze({
@@ -43,7 +43,7 @@ return table.freeze({
         RegionId = "lumenreach",
         Dialogue = table.freeze({
             "The first wayfarers marked their route with Lumen stone, not ink. Their stories are still out there if you know where to look.",
-            "There is a hollow behind Veilfall that does not appear on any camp map. Find it, and you may understand why the old road was abandoned.",
+            "The oldest waymarks survive around Glowmere, Eastbridge, Gravebone Watch, and Mossglen. Read those places together and the abandoned road finally makes sense.",
         }),
         QuestOffers = table.freeze({ "lumen_echoes", "lumen_attunement" }),
         ShopId = "archive_exchange",

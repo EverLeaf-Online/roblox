@@ -53,11 +53,18 @@ print("environment appearance security tests passed")
 local lumenreach = fs.readFile("src/server/Services/LumenreachWorldService.luau")
 assert(
     string.find(lumenreach, '"RockFace"', 1, true) == nil,
-    "player-facing Lumenreach composition must not place the paper-thin imported RockFace prefab"
+    "terrain-first Lumenreach must not place the paper-thin imported RockFace prefab"
 )
 assert(
-    string.find(lumenreach, "local function makeAngularRock", 1, true) ~= nil,
-    "Lumenreach uses angular non-PBR fallback rock formations for player-facing cliffs"
+    string.find(lumenreach, "terrain:Clear()", 1, true) ~= nil
+        and string.find(
+                lumenreach,
+                'world:SetAttribute("TerrainFirstMMOLayout", true)',
+                1,
+                true
+            )
+            ~= nil,
+    "Lumenreach must rebuild its terrain rather than layer scenery over the previous map"
 )
 assert(
     string.find(lumenreach, 'Instance.new("Beam")', 1, true) ~= nil,

@@ -1,60 +1,73 @@
-# Lumenreach MMO World Layout
+# Lumenreach MMO World Layout — Terrain-First V3
 
-**Canonical world-design target:** 2200 × 1700 studs, Level 1–10 starter region.
+**Canonical target:** 2350 × 1800 studs, Level 1–10 starter region.
 
-Lumenreach is a connected MMORPG region, not a collection of showcase clearings. The player should understand where they are, where the next road goes, and what kind of activity a space supports from terrain, silhouette, road language, and landmarks before reading UI text.
+Lumenreach V3 is a full replacement of the earlier showcase/camp composition. The runtime generator clears the previous generated model and Terrain, rebuilds macro topography from scratch, cuts the road network into the land, and only then places the minimum structures, trees, NPCs, bridges, encounter markers, and portal required by gameplay. New work must extend this terrain-first layout; it must not stack scenery over older geometry.
 
 ## Topology
 
 ```text
-                                  GLOWMERE WETLAND
-                                 /                \
+                                        SUNMOSS RIDGE
+                                             \
+                                              \
+GLOWMERE WETLAND -- REEDBRIDGE -- MOSSGLEN VALLEY ------ SHATTERED LUMEN ARCH --> BRASSHAVEN
+       |                              /       \                    /
+       |                             /         \                  /
 WAYFARER CAMP -> GREENWAY -> LUMENWOOD CROSSROADS -> EASTBRIDGE -> EAST LANDING
-      |                                                           /          \
-      |                                             GRAVEBONE WATCH          MOSSGLEN VALLEY
-      |                                                                        /       \
-      v                                                           VEILFALL RAVINE     SUNMOSS RIDGE
-WAYFARER PROVING CIRCLE                                                   \             /
-                                                                          SHATTERED LUMEN ARCH
-                                                                                  |
-                                                                             BRASSHAVEN
+      |                                                           \
+      |                                                            GRAVEBONE WATCH
+      v                                                                  \
+WAYFARER PROVING CIRCLE                                                   VEILFALL RAVINE
+                                                                               \
+                                                                                +----> SHATTERED ARCH
 ```
 
-The main progression route always has at least one readable continuation, while Glowmere, Veilfall, and Sunmoss form optional/alternate loops that reconnect rather than dead-ending. The Proving Circle is deliberately detached from the leveling road so first advancement feels like returning to the starter settlement for a class milestone.
+The starter route is intentionally readable as geography rather than a chain of decorated rooms. The river/gorge cuts the zone into western and eastern halves. Eastbridge is the primary progression threshold; Reedbridge gives Glowmere an alternate northern connection into Mossglen. Sunmoss and Veilfall become high/low late-zone loops that reconnect at the Shattered Arch instead of dead-ending.
 
 ## Zone roles and level bands
 
-| Zone | Levels | MMO role |
+| Zone | Levels | Role |
 | --- | ---: | --- |
-| Wayfarer Camp | 1–10 | Starter town, services, quest hub, social/safe spawn |
-| Greenway Fields | 1–2 | First open field and basic combat/tutorial space |
-| Mossling Hollow | 1–3 | Focused starter hunt pocket off the main road |
-| Lumenwood Crossroads | 2–4 | Navigation hub and first meaningful route choice |
-| Glowmere Wetland | 2–5 | Exploration loop, wetland combat, rare spawn |
-| Gravebone Watch | 3–7 | Ruined combat pocket, early skeleton quest, later elite revisit |
-| Mossglen Valley | 4–7 | Large party-capable field, Brambleback branch, field boss |
-| Sunmoss Ridge | 6–9 | Elevated exploration/highland alternate route |
-| Veilfall Ravine | 7–9 | Lower danger loop, Wisp combat, Whisperroot secret branch |
-| Shattered Lumen Arch | 8–10 | Regional capstone, late combat, Brasshaven transition |
-| Wayfarer Proving Circle | 7–10 | First-advancement/class milestone space |
+| Wayfarer Camp | 1–10 | Starter town, safe spawn, shops, quest services, training |
+| Greenway Fields | 1–3 | First open combat field and movement/combat onboarding |
+| Lumenwood Crossroads | 2–4 | Navigation hub and first major route decision |
+| Glowmere Wetland | 2–5 | Exploration/wetland loop, Slimes, Royal Glowcap |
+| Eastbridge Landing | 3–7 | Field outpost, Scout/Outfitter quest hub for the eastern half |
+| Gravebone Watch | 3–7 | Ruined combat field, Skeletons, Gravebone Captain revisit |
+| Mossglen Valley | 4–7 | Large party-capable field, Brambleback branch, Mosswarden boss |
+| Sunmoss Ridge | 6–9 | Elevated highland loop and long-range landmark space |
+| Veilfall Ravine | 7–9 | Low ravine loop, Wisp combat, waterfall landmark |
+| Shattered Lumen Arch | 8–10 | Regional capstone, late Skeleton field, Brasshaven gate |
+| Wayfarer Proving Circle | 7–10 | First advancement milestone detached from leveling traffic |
 
-## World-design rules
+## Hard layout rules
 
-1. **Town first.** Wayfarer Camp must read as a settlement: safe arrival plaza, central hall, services, NPC clustering, social props, training yard, and obvious exits. Spawn must never overlap lodging, tents, service stalls, or decoration.
-2. **Roads are gameplay space.** Major roads are approximately 13–20 studs wide, re-cut after terrain massing, and protected from procedural foliage/large props. They must support multiple players passing each other without camera snagging.
-3. **Terrain defines boundaries.** Mountain shoulders, ravines, water, ridges, and dense forest communicate the playable edge. Invisible collision is reserved for simple local safety/collision correction, not for drawing the map boundary.
-4. **Combat gets rooms, not corridors.** Monster groups and elites use broad, cleared encounter floors. Boss/elite telegraphs must remain readable and grass/props must not occupy the fighting footprint.
-5. **Landmarks carry navigation.** Eastbridge, Wayfarer Hall, Glowmere water, Sunmoss highland, Veilfall waterfall, and the Shattered Arch should each create a silhouette visible before the player enters the room.
-6. **Loops beat dead ends.** Side exploration should reconnect to the route network wherever practical. Long forced backtracking is reserved for intentional town-return milestones such as first advancement.
-7. **Density stays outside the lane.** Forest/detail density frames roads and encounter rooms instead of filling them. Decorative variety is valuable only when it does not damage movement or combat readability.
-8. **Stable assets only.** Native Terrain/Parts and approved sanitized environment prefabs are preferred. The broken paper-thin RockFace mesh, black blob replacements, raw texture paths, and cyan slab waterfall treatment must not return.
-9. **Progression follows geography.** Early quests stay in Greenway/Crossroads/Glowmere/Gravebone; midgame pushes through Mossglen; late starter content expands into Sunmoss/Veilfall and finally Shattered Arch.
-10. **The next region is earned spatially.** Brasshaven is reached at the far eastern capstone, not from a portal sitting beside spawn.
+1. **Rebuild, never layer.** `LumenreachWorldService.Init()` must clear the previous generated Lumenreach model and `Terrain` before constructing V3.
+2. **Terrain carries the map.** Large-scale boundaries, elevation changes, room separation, the gorge, the wetland, and Sunmoss height come from Terrain—not giant rock meshes or hidden wall rings.
+3. **Town means town.** Wayfarer Camp uses an open stone plaza with four permanent buildings, a training side yard, core NPC services, a proper departure gate, and a separate southern Proving road. Tovin and the Scout Outfitter are deliberately moved to Eastbridge Landing so the eastern half has a field quest hub. Tents are not part of the starter-town composition.
+4. **Combat rooms remain open.** Greenway, Gravebone, Mossglen, Veilfall, and Shattered Arch reserve broad encounter floors. Tree massing frames those spaces rather than filling their center.
+5. **Roads are traversable MMO lanes.** Primary roads are approximately 15–22 studs wide before shoulder treatment and are authored as terrain ribbons. They must support parties and dodge movement without prop collision.
+6. **Crossing water is meaningful.** The gorge is carved after road terrain so paths do not accidentally become land bridges. Only Eastbridge and Reedbridge cross it.
+7. **Elevation has gameplay purpose.** Sunmoss is a real raised Terrain shelf. Veilfall is a real lowered ravine. Neither is simulated by stacking decorative rock objects around a flat floor.
+8. **Stable visual assets only.** The approved primary tree prefab may frame zones. The removed RockFace mesh, black sphere fallback cliffs, raw texture references, and cyan slab waterfall treatment are prohibited.
+9. **Landmarks orient the player.** Wayfarer Camp gate, Eastbridge, Reedbridge, Sunmoss shelf, Veilfall cascade, and Shattered Lumen Arch must be legible before the player reaches the encounter center.
+10. **Progression follows the map.** Level 1–3 stays west of/near the gorge; Level 3–7 crosses Eastbridge; Level 6–9 branches vertically into Sunmoss/Veilfall; Level 8–10 converges on the Shattered Arch and Brasshaven gate.
 
-## Current source contract
+## Source contract
 
-`LumenreachWorldService.luau` owns the canonical `ROAD_NETWORK`, zone origins, protected gameplay clearings, terrain massing, routes, encounter staging, and `MMOZone` metadata. Quest exploration targets are aligned to physical route progression. `tests/lumenreach_layout_rules.luau` guards the scale, route network, town architecture, Gravebone Watch staging, zone metadata, and far-edge Shattered Arch contract.
+`src/server/Services/LumenreachWorldService.luau` is the canonical V3 generator. It owns:
+
+- `WORLD_WIDTH = 2350` and `WORLD_DEPTH = 1800`;
+- zone centers and progression bands;
+- the complete terrain route network;
+- terrain reset/foundation, mountain belts, internal ridges, wetland, gorge, and Sunmoss shelf;
+- Wayfarer Camp architecture and safe spawn;
+- Eastbridge and Reedbridge;
+- zone metadata (`MMOZone`), landmark labels, exploration triggers, encounter triggers;
+- first-advancement space and the Lumenreach → Brasshaven portal.
+
+`tests/lumenreach_layout_rules.luau` guards against reintroducing the previous dimensions, tent-camp composition, RockFace path, duplicate town construction, or scenery-first generation order.
 
 ## Studio validation still required
 
-The source/build contract is complete, but every large world pass still requires a player-height Studio review before the map is considered visually finished. Validate terrain seams and grades, route readability from both directions, bridge approaches, spawn safety, 4+ player traversal, encounter clearance, camera behavior, StreamingEnabled pop-in, foliage/particle cost, and the sightline to each major landmark. Fix geometry/layout problems before adding more decorative density.
+Source/build tests cannot judge visual composition. Player-height Studio QA must verify: terrain seams, road grades, bridge approaches, town doorway/roof clearance, spawn sightline, river bank escape paths, 4+ player encounter spacing, Sunmoss slope readability, Veilfall camera behavior, Shattered Arch silhouette, streaming pop-in, foliage density, and worst-case frame time. Geometry/layout problems should be fixed before any decorative-density pass.

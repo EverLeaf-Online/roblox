@@ -52,23 +52,23 @@
 
 ### C. Lumenreach environment production pass
 
-- [x] Lumenreach rebuilt again as a 2200×1700 MMO-scale Level 1–10 region with a starter town, broad fields/encounter rooms, branching loops, natural terrain boundaries, and a far-edge regional gate.
-- [x] Wayfarer Camp, Greenway Fields, Lumenwood Crossroads, Glowmere Wetland, Mossglen Valley, Sunmoss Ridge, Veilfall Ravine, Shattered Lumen Arch, and the separate Wayfarer Proving Circle established as distinct progression spaces.
+- [x] Lumenreach V3 fully replaces the prior map as a 2350×1800 terrain-first Level 1–10 region with a permanent starter town, broad action-combat fields, meaningful elevation, two gorge crossings, branching loops, natural terrain boundaries, and a far-edge regional gate.
+- [x] Wayfarer Camp, Greenway Fields, Lumenwood Crossroads, Glowmere Wetland, Eastbridge Landing, Gravebone Watch, Mossglen Valley, Sunmoss Ridge, Veilfall Ravine, Shattered Lumen Arch, and the separate Wayfarer Proving Circle are distinct progression spaces.
 - [x] Poly Haven PBR material pipeline is live for forest ground, mossy rock, moss wood, wood-chip path, and wood/stone pathway.
 - [x] Production foliage now prefers approved imported assets only; the visible procedural sphere-tree/bush/rock fallbacks were removed from Lumenreach production placement so missing assets fail closed instead of degrading visual quality.
-- [x] Production-oriented trees, ferns, deadwood, rock faces, mossy rock sets, stumps, roots, logs, mushrooms, cattails, and waystones integrated.
-- [x] Oversized/unintegrated cliff meshes and black stacked-rock formations corrected and blended into terrain.
-- [x] Starter camp rebuilt with larger tents, proper supplies, map table, benches, lanterns, signpost, and custom guide/NPC composition.
+- [x] Terrain and native structures now carry the macro environment; approved TreePrimary instances are used sparingly for zone-edge forest massing, while unstable RockFace and scenery-stack dependencies are excluded from the V3 layout.
+- [x] Oversized/unintegrated cliff meshes and black stacked-rock formations are removed from the canonical map path; cliffs, ridges, gorge walls, highlands, and ravines are Terrain-authored.
+- [x] Wayfarer Camp is rebuilt as a permanent town with an open plaza, Wayfarer Hall, Quartermaster House, Archive Lodge, Wayfarer Inn, training yard, departure gate, and no tent-based town composition.
 - [x] Production NPC grounding is shared and runtime-resolved: Lumenreach R15 NPCs use terrain foot grounding, Brasshaven named NPCs use world-floor grounding, and the old Brasshaven primitive body builders are removed.
 - [x] Static enemy grounding is explicit and build-guarded: the training dummy uses measured model-to-terrain grounding, and `check.sh` rejects new direct enemy spawns that omit terrain grounding.
-- [x] Lumenreach camp NPCs now use grounded R15 humanoid rigs with distinct role silhouettes, clothing layers, face/hair treatment, props, idle animation support, and terrain-only foot grounding; Studio visual QA remains.
+- [x] Lumenreach NPCs use grounded R15 humanoid rigs with distinct role silhouettes and terrain-only foot grounding; Ilyra, Orin, Maela, and Seren remain in Wayfarer Camp while Tovin is staged at the Eastbridge Landing field outpost; Studio visual QA remains.
 - [x] Lumenreach NPC visual overhaul is source-complete: Ilyra, Orin, Tovin, Maela, and Seren now use a reusable stylized-character factory with rounded segmented limbs, unique hair/build silhouettes, layered clothing, and role-specific props; Studio visual QA remains.
-- [x] World density pass added continuous forest bands, roadside clusters, undergrowth, deadwood, rocks, and landmark dressing.
-- [x] Lumenreach macro-layout replacement is source-complete: all major zones were repositioned, Crossroads moved onto a raised west-side saddle, Veilfall moved into a lowered ravine, Sunmoss moved onto an elevated ridge, a carved Lumen Gorge now divides west/east Lumenreach, and a required bridge crossing connects the two halves; fresh Studio visual QA remains.
-- [x] Interior terrain-room rebuild is source-complete: the visible perimeter hill ring was reduced to minor anchors; Camp basin, Crossroads saddle, Glowmere bowl, Veilfall canyon, east forest spine, Ruins shelf, Mossglen amphitheater, and Sunmoss highland now use interior ridge systems, exposed rock shelves, carved road passes, and mixed habitat pockets; Studio visual QA remains.
-- [x] Canonical all-route clearance graph + post-generation scrub removes decorative trees, bushes, grass, rocks, deadfall, roots, ferns, and Wayfarer remnants that overlap protected travel lanes.
+- [x] V3 density is intentionally restrained: route-aware tree massing frames zones and roads while encounter centers, town circulation, and action-combat lanes remain open.
+- [x] Lumenreach V3 macro-layout replacement is source-complete: the generator clears old Terrain/content, rebuilds the region from scratch, carves the gorge after roads, uses Eastbridge as the main threshold and Reedbridge as a secondary loop, raises Sunmoss as a true shelf, lowers Veilfall as a true ravine, and converges late routes at Shattered Lumen Arch; fresh Studio visual QA remains.
+- [x] Terrain-room construction is source-complete for Camp, Greenway, Crossroads, Glowmere, Eastbridge Landing, Gravebone, Mossglen/Bramble, Sunmoss, Veilfall, Ruins, and Proving; mountain belts and internal ridges communicate boundaries without a visible invisible-wall ring.
+- [x] Canonical route-aware placement prevents zone-edge trees from entering road shoulders; the V3 generator does not depend on a post-generation scenery scrub to rescue blocked lanes.
 - [x] Camera collision stabilized so non-solid foliage/decor no longer causes view snapping.
-- [x] Environmental storytelling pass adds old wayfarer remnants and hidden Whisperroot Hollow.
+- [x] Legacy Whisperroot/showcase scenery was intentionally removed with the old map so V3 could be rebuilt cleanly; optional secret-world content will be re-authored only after core traversal QA.
 - [ ] Full player-height visual QA for every imported mesh, rock/cliff, root, log, and path obstruction.
 - [ ] Final lighting/sky/atmosphere art-direction pass for Phase 1. Approved Anime Island Skybox `14753835117` is now loaded visual-only through `WorldVisualService`; final Studio art-direction tuning remains.
 - [ ] Measure frame time, memory, streaming, and foliage-density budgets in Studio.
@@ -100,13 +100,13 @@
 - [x] Visible starter loot drops/pickups implemented.
 - [x] Data-driven drop tables and quantity/chance rules implemented for the current Lumenreach monster set.
 - [x] Starter equipment/reward path added (`Wayfarer Scout Blade`, `Mossguard Charm`, tonics/materials).
-- [x] Three camp NPCs added beyond Ilyra: Orin (quartermaster), Tovin (scout), and Maela (archive keeper).
+- [x] Regional NPC services beyond Ilyra are implemented: Orin and Maela remain in Wayfarer Camp, while Tovin/Scout Outfitter is stationed at Eastbridge Landing as the eastern field quest hub.
 - [x] NPC dialogue now changes with progression and quest availability.
 - [x] Starter/tutorial, hunting, exploration, boss, region-unlock, and first Brasshaven quest chains added.
 - [x] Quest prerequisites, Collect objectives, and Explore objectives implemented.
-- [x] Landmark exploration triggers wired for Crossroads, Glowmere, Shattered Arch, Veilfall, Sunmoss, and Whisperroot Hollow.
+- [x] Landmark exploration triggers are wired to the V3 geography: Crossroads, Glowmere, Eastbridge, Gravebone Watch, Mossglen, Proving Circle, Veilfall, Sunmoss, and Shattered Lumen Arch.
 - [x] Multi-item shops exist for Lumenreach supply/outfitter/archive vendors plus Brasshaven Foundry Supply and Belforge Mark Exchange.
-- [x] Hidden Whisperroot Hollow and persistent one-time Wayfarer cache reward implemented.
+- [ ] Re-author an optional hidden V3 story/cache location after terrain/traversal QA; the legacy Whisperroot placement was deliberately removed with the replaced map.
 - [x] First Lumenreach field boss implemented: Mosswarden, Root of the Old Grove.
 - [x] Lumenreach → Brasshaven progression gate is functional and region unlock rewards are supported.
 - [x] Brasshaven now has a regression-tested Level 10–30 route: Vale carries 10–20, Tamsin carries 20–24, and Rook carries 24–30 through the upper foundry to the Belforge gate.
@@ -455,7 +455,7 @@
 - [x] React dialogue UI with quest/shop actions.
 - [x] Lumenreach starter/tutorial quest chain.
 - [x] Lumenreach hunting quest chain.
-- [x] Lumenreach exploration quest chain including Whisperroot Hollow.
+- [x] Lumenreach exploration quest chain aligned to the V3 route network and its active landmarks.
 - [x] Mosswarden field-boss quest.
 - [x] Brasshaven passage/unlock quest.
 - [ ] Talk-objective type if future quest design needs it.
@@ -479,31 +479,34 @@
 
 ## 16. World — Lumenreach
 
-- [x] Lumenreach source layout redesigned from the former 900×760 showcase into a 2200×1700 MMO starter region built for Level 1–10 progression, exploration, group combat, and repeat traversal.
-- [x] Wayfarer Camp rebuilt as an actual starter settlement: safe arrival plaza, Wayfarer Hall, two service stalls, clustered quest/shop NPCs, social campfire/benches, map table, supplies, training yard, and clearly signed east/south exits.
-- [x] Greenway Fields added as the broad Level-1 starter field between town and Lumenwood, with a dedicated Mossling Hollow side pocket so the first quest no longer begins in a cramped route corridor.
-- [x] Lumenwood Crossroads is the regional navigation hub with long sightlines and three readable route directions: back to Camp, north to Glowmere, and east across the gorge toward Mossglen.
-- [x] The regional progression circuit now has distinct MMO-scale rooms: Wayfarer Camp → Greenway Fields → Lumenwood Crossroads → Glowmere Wetland / Eastbridge → Gravebone Watch / Mossglen Valley → Sunmoss Ridge / Veilfall Ravine → Shattered Lumen Arch.
-- [x] Shattered Lumen Arch moved to the far eastern edge as the Level-10 regional capstone and Brasshaven transition, so reaching the next region feels like completing an actual zone journey.
-- [x] A central gorge/river and required Eastbridge create a strong geographic threshold; Glowmere, Mossglen, Sunmoss, Veilfall, and the Shattered Arch also have alternate loop connections to reduce forced backtracking.
-- [x] Outer playable boundaries are communicated with authored mountain/forest terrain massing instead of relying on a visible ring of arbitrary invisible walls.
-- [x] Major roads are 13–20 studs wide, re-cut after terrain massing, and kept clear of foliage/props by the final route scrub so party movement and camera readability are preserved.
-- [x] Combat spaces are materially larger: Mossling Hollow, Gravebone Watch, Mossglen Valley, Brambleback Trail, Veilfall Wisp pocket, Shattered Arch skeleton field, elite pockets, Mosswarden field-boss arena, and Proving Circle all reserve party-scale clearings.
-- [x] Gravebone Watch added as a Level 3–7 ruined side pocket immediately after Eastbridge, keeping the early skeleton quest and later Gravebone Captain advancement target on the midgame route instead of sending low-level players to the far-east Level-10 capstone.
-- [x] Wayfarer Proving Circle remains a separate advancement destination south of town, connected by its own signed road rather than occupying the main leveling route.
-- [x] Glowmere is now a traversable wetland/lake room with shoreline space and a bridge instead of a decorative puddle inside a generic clearing.
-- [x] Sunmoss is supported by a genuine elevated terrain shelf/highland spine with long views across the mid-zone.
-- [x] Veilfall is a lower late-starter ravine with readable encounter floor, wetland dressing, waterfall Beam ribbons, and a hidden Whisperroot exploration branch.
-- [x] Player-facing cliffs use stable native angular slate formations and simple hidden collision; the paper-thin imported RockFace mesh and temporary black spherical replacements are excluded from Lumenreach composition.
-- [x] Production environment assets retain the sanitized pre-authored SurfaceAppearance pipeline; runtime protected texture-property writes remain forbidden by regression tests.
-- [x] Trees/ferns/deadwood/roots/moss-rocks and camp/route furniture terrain-resolve to the sculpted world; tree visuals remain render-only with predictable trunk collision proxies.
-- [x] Town, roads, NPC clusters, and encounter floors use Ground/Slate/native surfaces to reduce tall-grass clutter where combat telegraphs and interaction prompts need to stay readable.
-- [x] Existing quest IDs and the Lumenreach→Brasshaven portal contract are preserved; early exploration objectives were retargeted to Gravebone Watch, Eastbridge, and Mossglen so Level 3–6 progression follows the actual redesigned route instead of prematurely requiring late-zone landmarks.
-- [x] Landmark labels updated for MMO navigation: Wayfarer Camp, Greenway Fields, Proving Circle, Lumenwood Crossroads, Gravebone Watch, Glowmere Wetland, Mossglen Valley, Sunmoss Ridge, Veilfall Ravine, and Shattered Lumen Arch.
-- [x] Lumenreach layout regression test guards the 2200×1700 scale, starter-field/town-hub architecture, route loop, and far-edge Brasshaven capstone from accidental reversion.
-- [ ] Studio player-height visual QA for the entire redesigned 2200×1700 region, including terrain seams, road grades, sightlines, landmark silhouettes, and prop grounding.
-- [ ] Studio multi-player traversal/combat QA: verify 4+ players can pass roads/bridges, fight in every encounter pocket, and move around field-boss/elite spaces without collision or camera traps.
-- [ ] Studio performance pass at production density: streaming, terrain memory, foliage count, particle budget, and worst-case frame time from Camp, Mossglen, Veilfall, and Shattered Arch.
+- [x] **Terrain-first V3 full replacement complete:** the previous generated Lumenreach model and Terrain are cleared before generation; the map is rebuilt from zero rather than receiving another layer of scenery.
+- [x] Canonical starter-region footprint is now **2350×1800 studs**, sized to fit cleanly before the separate Brasshaven world while supporting Level 1–10 MMO travel distance.
+- [x] Wayfarer Camp rebuilt as a permanent starter **town**, not a tent camp: open stone plaza, Wayfarer Hall, Quartermaster House, Archive Lodge, Wayfarer Inn, training side yard, core NPC services, departure gate, and separate Proving road.
+- [x] Arrival spawn is isolated in the open plaza and no tent/building/decor footprint occupies it.
+- [x] Greenway Fields is the broad Level 1–3 starter combat field between town and Lumenwood Crossroads.
+- [x] Lumenwood Crossroads is the western navigation hub leading toward Glowmere and Eastbridge.
+- [x] A terrain-carved river/gorge divides the western and eastern progression halves; roads are cut first and the gorge is carved afterward so accidental land bridges cannot form.
+- [x] **Eastbridge** is the main progression crossing; **Reedbridge** is the secondary Glowmere→Mossglen loop crossing.
+- [x] **Eastbridge Landing** is a real Level 3–7 field outpost with Tovin/Scout Outfitter, reducing MMO quest backtracking between Camp and the eastern hunt zones.
+- [x] Glowmere is a true Terrain wetland basin with a water body, shoreline combat/exploration space, and alternate northern route into Mossglen.
+- [x] Gravebone Watch is the Level 3–7 ruined-combat branch after Eastbridge, hosting Skeletons and the Gravebone Captain advancement target.
+- [x] Mossglen Valley is the primary Level 4–7 party field with Ridgebeaks, Brambleback side branch, and a dedicated Mosswarden field-boss arena.
+- [x] Sunmoss Ridge is a genuine elevated Terrain shelf rather than decorative rocks stacked around a flat floor.
+- [x] Veilfall Ravine is a genuine lowered Terrain room connected from Gravebone and returning toward the Shattered Arch; the waterfall uses stable Beam ribbons and Terrain cliff shoulders.
+- [x] Shattered Lumen Arch is the far-east Level 8–10 capstone and Lumenreach→Brasshaven portal destination.
+- [x] Brasshaven→Lumenreach return travel now targets a dedicated eastern gate spawn instead of teleporting established players back to the starter plaza.
+- [x] Wayfarer Proving Circle remains detached south of town so first advancement is a deliberate town-return milestone rather than route clutter.
+- [x] Primary roads are terrain-authored MMO lanes approximately 15–22 studs wide with party/dodge clearance; encounter centers are not used as roads.
+- [x] Outer map limits use mountain Terrain belts and internal ridge massing instead of a visible ring of arbitrary invisible walls.
+- [x] Tree placement is authored as perimeter/zone-edge massing; approved tree visuals are render-only with predictable trunk collision and do not randomly fill roads or encounter centers.
+- [x] Paper-thin RockFace meshes, oversized black fallback rocks, tent-camp composition, and scenery-first layering are excluded by regression tests.
+- [x] Existing quest IDs, exploration targets, advancement flow, monster roster, and `lumenreach_to_brasshaven` portal contract remain wired into the replacement world.
+- [x] `docs/LUMENREACH_WORLD_LAYOUT.md` is the canonical V3 map/layout contract.
+- [x] Lumenreach regression tests guard terrain-first generation order, 2350×1800 dimensions, road/bridge topology, permanent town architecture, zone metadata, and removed legacy visual paths.
+- [ ] **Studio player-height V3 visual QA:** terrain seams, road grades, town roofs/doors, bridge approaches, spawn orientation, landmark silhouettes, and prop/tree grounding.
+- [ ] **Studio multiplayer traversal QA:** 4+ players across every road/bridge and inside Greenway, Gravebone, Mossglen, Veilfall, Proving, and Shattered Arch encounter floors.
+- [ ] **Studio combat-layout QA:** confirm enemy spawn radii never place mobs into river water, steep slopes, roads, buildings, or inaccessible terrain shelves.
+- [ ] **Studio streaming/performance pass:** Camp, Glowmere, Mossglen, Sunmoss, Veilfall, and Shattered Arch worst-case streaming, instance count, terrain memory, and frame time.
 - [ ] Fresh-profile Level 1→10 route soak through first advancement and Brasshaven unlock with no developer intervention.
 
 ## 17. World — Brasshaven
@@ -695,7 +698,7 @@
 1. [ ] Full in-Studio walk-through of the rebuilt Lumenreach from player height; fix floating, buried, oversized, incomplete, or obstructive assets.
 2. [ ] Exercise every monster wave/elite/boss trigger in Studio, including emergence height, pathfinding, attack timing, dodge, leash, death, cooldown, and leave/re-enter behavior.
 3. [ ] Complete a fresh-profile Studio run from Lumenreach spawn through first advancement, Brasshaven Level 10–30 progression, Sentinel turn-in, and Belforge antechamber without developer intervention.
-4. [ ] Verify visible loot pickup, Collect objectives, equipment rewards, Lumenreach + Brasshaven shops, Whisperroot cache, and regional/Belforge travel across death/rejoin.
+4. [ ] Verify visible loot pickup, Collect objectives, equipment rewards, Lumenreach + Brasshaven shops, and regional/Belforge travel across death/rejoin.
 5. [ ] Multiplayer smoke test: target selection, damage ownership, loot ownership, simultaneous trigger activation, and party/network behavior.
 6. [x] Dedicated shop UX, item detail cards, reward/quest/level-up notifications, and field-boss HUD implemented; complete Studio UX QA remains.
 7. [x] Five first families, Seren the Pathkeeper, Wayfarer Proving Circle, The Five Paths trial, permanent family selection, and starter-skill grants implemented; Studio UX/progression QA remains.
