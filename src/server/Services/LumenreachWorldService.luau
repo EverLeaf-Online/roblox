@@ -153,6 +153,18 @@ local function makePart(parent, name, size, cframe, material, color)
     return part
 end
 
+local function makeCollisionProxy(parent, name, size, cframe)
+    local proxy =
+        makePart(parent, name, size, cframe, Enum.Material.SmoothPlastic, Color3.new(0, 0, 0))
+    proxy.Transparency = 1
+    proxy.CanCollide = true
+    proxy.CanTouch = false
+    proxy.CanQuery = false
+    proxy.CastShadow = false
+    proxy:SetAttribute("EverLeafCollisionProxy", true)
+    return proxy
+end
+
 local function useMaterialVariant(part, variantName)
     part:SetAttribute("EverLeafMaterialVariant", variantName)
     return part
@@ -229,12 +241,29 @@ local function placeImportedTree(parent, position, scale, variant, targetHeight,
         return nil
     end
 
-    return EnvironmentPrefabService.Place(
+    local placed = EnvironmentPrefabService.Place(
         prefabName,
         parent,
         CFrame.new(position) * CFrame.Angles(0, yaw or 0, 0),
         prefabScaleForHeight(prefabName, targetHeight, scale)
     )
+    if not placed then
+        return nil
+    end
+
+    -- Imported vegetation is normalized primarily for rendering. Give every
+    -- production tree a predictable trunk blocker so source-mesh naming or
+    -- collision metadata cannot make a tree walk-through.
+    local finalHeight = targetHeight * math.max(0.1, tonumber(scale) or 1)
+    local trunkHeight = math.clamp(finalHeight * 0.42, 5.5, 12.5)
+    local trunkRadius = math.clamp(finalHeight * 0.065, 1.25, 2.5)
+    makeCollisionProxy(
+        placed,
+        "EverLeafTrunkCollision",
+        Vector3.new(trunkRadius * 2, trunkHeight, trunkRadius * 2),
+        CFrame.new(position + Vector3.new(0, trunkHeight * 0.5, 0))
+    )
+    return placed
 end
 
 local function makeTree(parent, position, scale, variant)
@@ -1014,8 +1043,16 @@ local function makeTent(parent, position, yaw)
         Enum.Material.Fabric,
         clothDark
     )
-    leftCanvas.CanCollide = false
-    rightCanvas.CanCollide = false
+    -- The visible canvas is the physical tent wall. Keep the front opening
+    -- passable, but do not let players phase through either side or the rear.
+    leftCanvas.CanCollide = true
+    rightCanvas.CanCollide = true
+    makeCollisionProxy(
+        model,
+        "TentBackCollision",
+        Vector3.new(10.8, 5.6, 0.8),
+        base * CFrame.new(0, 2.8, canvasLength * 0.5 - 0.1)
+    )
 
     local ridge = makePart(
         model,
@@ -2191,10 +2228,22 @@ local function prepareGround(world)
         end
     end
 
-    local oldBaseplate = Workspace:FindFirstChild("Baseplate")
-    if oldBaseplate and oldBaseplate:IsA("BasePart") then
-        oldBaseplate.Transparency = 1
-        oldBaseplate.CanCollide = false
+    -- Remove legacy/default place floors completely. The generated world uses
+    -- Terrain plus its own invisible safety foundation, so a Roblox baseplate
+    -- should never be visible beyond the playable region.
+    for _, child in Workspace:GetChildren() do
+        if child:IsA("BasePart") then
+            local lowerName = string.lower(child.Name)
+            local namedBaseplate = lowerName == "baseplate" or lowerName == "base plate"
+            local legacyFloor = child.Size.X >= WORLD_WIDTH
+                and child.Size.Z >= WORLD_DEPTH
+                and child.Size.Y <= 24
+                and child.Position.Y <= 6
+                and child.Material == Enum.Material.Plastic
+            if namedBaseplate or legacyFloor then
+                child:Destroy()
+            end
+        end
     end
 
     local terrain = Workspace:FindFirstChildOfClass("Terrain")
@@ -2202,7 +2251,7 @@ local function prepareGround(world)
         terrain:Clear()
         terrain:FillBlock(
             CFrame.new(0, -5, 0),
-            Vector3.new(WORLD_WIDTH, 10, WORLD_DEPTH),
+            Vector3.new(WORLD_WIDTH + 120, 10, WORLD_DEPTH + 120),
             Enum.Material.Grass
         )
 
@@ -2873,6 +2922,14 @@ local function travelDecorationClearance(instanceName)
         return 11.5
     end
     local clearances = {
+        -- Route furniture belongs beside the lane, never inside it. These are
+        -- scrubbed only when their actual bounds intrude into the walkable
+        -- corridor after all world decoration has been placed.
+        WayfarerSignpost = 5.5,
+        LumenLantern = 4.5,
+        LumenWaystone = 5.5,
+        WayfarerBench = 5.0,
+        WayfarerSupplies = 5.0,
         GrassTuft = 7.5,
         LumenBush = 8.0,
         WildflowerPatch = 6.5,
@@ -2893,18 +2950,33 @@ local function travelDecorationClearance(instanceName)
     return clearances[instanceName]
 end
 
+local function horizontalBounds(instance)
+    if instance:IsA("BasePart") then
+        return instance.Position, math.max(instance.Size.X, instance.Size.Z) * 0.5
+    end
+    if instance:IsA("Model") then
+        local ok, boundsCFrame, boundsSize = pcall(function()
+            local cframe, size = instance:GetBoundingBox()
+            return cframe, size
+        end)
+        if ok and boundsCFrame and boundsSize then
+            return boundsCFrame.Position, math.max(boundsSize.X, boundsSize.Z) * 0.5
+        end
+        return instance:GetPivot().Position, 0
+    end
+    return nil, 0
+end
+
 local function clearTravelLaneDecor(world)
     local removed = 0
     for _, child in world:GetChildren() do
         local clearance = travelDecorationClearance(child.Name)
         if clearance then
-            local position = nil
-            if child:IsA("Model") then
-                position = child:GetPivot().Position
-            elseif child:IsA("BasePart") then
-                position = child.Position
-            end
-            if position and distanceToTravelRoute(position) < clearance then
+            local position, radius = horizontalBounds(child)
+            -- Use the actual horizontal footprint, not just the pivot. Clamp
+            -- giant imported canopies so they do not erase whole forest bands.
+            radius = math.clamp(radius or 0, 0, 8)
+            if position and distanceToTravelRoute(position) < clearance + radius then
                 child:Destroy()
                 removed += 1
             end
