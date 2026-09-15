@@ -88,6 +88,9 @@
 - [x] Dedicated buy/sell shop screen implemented with item selection, quantity controls, pricing, balance display, and server-authoritative transactions.
 - [x] Reusable item detail card implemented for shop/inventory-facing item inspection; hover/pointer refinement remains part of final UI QA.
 - [x] Notification/toast system implemented for level-up, currency/item rewards, quest acceptance/readiness/completion, shop success, and shop errors.
+- [x] Level-up presentation now includes a client-side Lumen particle burst and light flash in addition to the toast.
+- [x] Skill-hit presentation now emits short-lived impact particles for all successful skill-impact styles without affecting server-authoritative combat.
+- [x] Shared day/night cycle is source-complete through `WorldVisualService` with a configurable 48-minute full-day cadence; Studio lighting/readability tuning remains.
 - [x] Server-driven world notices now explain blocked region/Belforge/Colossus travel and encounter lockout/reset reasons through the production toast system.
 - [ ] Split monolithic `ReactUIController` into maintainable components after Phase 1 behavior is locked.
 
@@ -576,7 +579,7 @@
 - [ ] Environment VFX production pass.
 - [ ] UI iconography.
 - [ ] Original SFX library.
-- [ ] Original music direction/tracks.
+- [ ] Original music direction/tracks and per-region ambient music routing. No third-party/unknown audio IDs will be wired just to fill this checkbox; add the system when approved EverLeaf-owned tracks are available.
 - [ ] Replace every remaining prototype/placeholder asset before release.
 
 ## 21. Social / multiplayer

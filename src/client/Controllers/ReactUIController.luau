@@ -9,6 +9,7 @@ local ReactRoblox = require(ReplicatedStorage.Packages.ReactRoblox)
 
 local ActionClient = require(script.Parent.Parent.Services.ActionClient)
 local CatalogClient = require(script.Parent.Parent.Services.CatalogClient)
+local ProgressionPresentation = require(script.Parent.Parent.Presentation.ProgressionPresentation)
 local PartyStore = require(script.Parent.Parent.State.PartyStore)
 local ProfileStore = require(script.Parent.Parent.State.ProfileStore)
 local SkillCooldownStore = require(script.Parent.Parent.State.SkillCooldownStore)
@@ -3310,6 +3311,7 @@ local function emitProfileNotifications(previous, current)
     local oldLevel = tonumber(previous.Level) or 1
     local newLevel = tonumber(current.Level) or oldLevel
     if newLevel > oldLevel then
+        ProgressionPresentation.PlayLevelUp(newLevel)
         NotificationStore.Push(
             "success",
             "Level Up",

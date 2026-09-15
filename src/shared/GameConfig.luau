@@ -189,6 +189,10 @@ GameConfig.Graphics = {
     AtmosphereDensity = 0.2,
     AtmosphereHaze = 1.15,
     AtmosphereGlare = 0.04,
+    DayNightCycle = {
+        Enabled = true,
+        FullDayLengthSeconds = 2880,
+    },
 }
 
 GameConfig.Development = {

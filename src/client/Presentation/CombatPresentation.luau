@@ -475,6 +475,44 @@ local function projectile(startPosition, targetPosition, color, kind, speed)
     Debris:AddItem(shot, 0.45)
 end
 
+local function impactParticleBurst(targetPosition, color, heavy)
+    local anchor = Instance.new("Part")
+    anchor.Name = "EverLeafImpactParticles"
+    anchor.Anchored = true
+    anchor.CanCollide = false
+    anchor.CanTouch = false
+    anchor.CanQuery = false
+    anchor.CastShadow = false
+    anchor.Transparency = 1
+    anchor.Size = Vector3.new(0.1, 0.1, 0.1)
+    anchor.Position = targetPosition + Vector3.new(0, 1.4, 0)
+    anchor.Parent = workspace
+
+    local emitter = Instance.new("ParticleEmitter")
+    emitter.Name = "ImpactSparkBurst"
+    emitter.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+    emitter.Color = ColorSequence.new(color)
+    emitter.LightEmission = 0.7
+    emitter.Rate = 0
+    emitter.Lifetime = NumberRange.new(0.18, heavy and 0.42 or 0.3)
+    emitter.Speed = NumberRange.new(heavy and 8 or 5, heavy and 17 or 11)
+    emitter.Drag = 5
+    emitter.SpreadAngle = Vector2.new(180, 180)
+    emitter.Rotation = NumberRange.new(0, 360)
+    emitter.RotSpeed = NumberRange.new(-180, 180)
+    emitter.Size = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, heavy and 0.3 or 0.2),
+        NumberSequenceKeypoint.new(1, 0),
+    })
+    emitter.Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 0.08),
+        NumberSequenceKeypoint.new(1, 1),
+    })
+    emitter.Parent = anchor
+    emitter:Emit(heavy and 20 or 12)
+    Debris:AddItem(anchor, 0.65)
+end
+
 local function slashImpact(targetPosition, color, dual)
     local count = dual and 2 or 1
     for index = 1, count do
@@ -618,6 +656,8 @@ local function playSkillImpactVisual(familyId, presentation, hit, withCamera)
         end
         CameraImpulse.Punch(impactWeight)
     end
+    local heavy = presentation.ImpactStyle == "heavy_burst" or presentation.ImpactStyle == "pulse"
+    impactParticleBurst(hit.TargetPosition, color, heavy)
     local style = presentation.ImpactStyle or "burst"
     if style == "slash" then
         slashImpact(hit.TargetPosition, color, false)

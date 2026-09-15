@@ -1,11 +1,13 @@
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
 local EnvironmentAssetRegistry = require(script.Parent.Parent.Content.EnvironmentAssetRegistry)
 
 local WorldVisualService = {}
+local dayNightConnection = nil
 
 local function safeSet(instance, propertyName, value)
     local ok, err = pcall(function()
@@ -129,6 +131,24 @@ local function configureCloudsAndWind()
     end
 end
 
+local function configureDayNightCycle(graphics)
+    if dayNightConnection then
+        dayNightConnection:Disconnect()
+        dayNightConnection = nil
+    end
+
+    local cycle = type(graphics.DayNightCycle) == "table" and graphics.DayNightCycle or nil
+    if not cycle or cycle.Enabled ~= true then
+        return
+    end
+
+    local fullDayLength = math.max(60, tonumber(cycle.FullDayLengthSeconds) or 2880)
+    local hoursPerSecond = 24 / fullDayLength
+    dayNightConnection = RunService.Heartbeat:Connect(function(deltaTime)
+        Lighting.ClockTime = (Lighting.ClockTime + deltaTime * hoursPerSecond) % 24
+    end)
+end
+
 function WorldVisualService.Init()
     local graphics = GameConfig.Graphics
 
@@ -153,6 +173,7 @@ function WorldVisualService.Init()
     configureCreatorSkybox()
     configurePostProcessing()
     configureCloudsAndWind()
+    configureDayNightCycle(graphics)
 end
 
 return WorldVisualService

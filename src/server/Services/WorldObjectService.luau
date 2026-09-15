@@ -6,6 +6,11 @@ function WorldObjectService.Register(instance, kind, objectId)
         return false, "invalid_world_object"
     end
     registry[instance] = { Kind = kind, Id = objectId }
+    -- Mirror the authoritative registry entry into attributes so Studio/runtime
+    -- inspection can verify portal/NPC/object wiring without depending on this
+    -- module's private table. Interaction still validates against the registry.
+    instance:SetAttribute("WorldObjectKind", kind)
+    instance:SetAttribute("WorldObjectId", objectId)
     instance.Destroying:Once(function()
         registry[instance] = nil
     end)
