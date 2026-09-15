@@ -1,6 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
 local AdvancementRules = require(ReplicatedStorage.Shared.Logic.AdvancementRules)
+local HotbarRules = require(ReplicatedStorage.Shared.Logic.HotbarRules)
 local ClassFamilyDefinitions = require(script.Parent.Parent.Content.ClassFamilyDefinitions)
 local InventoryService = require(script.Parent.InventoryService)
 
@@ -58,10 +59,14 @@ local function assignStarterSkill(profile, starterSkillId)
     end
     profile.Skills.Learned[starterSkillId] =
         math.max(1, profile.Skills.Learned[starterSkillId] or 0)
+    local existingSlot = HotbarRules.FindSkill(profile.Skills.Hotbar, starterSkillId)
+    if existingSlot then
+        return existingSlot
+    end
     for index = 2, 8 do
         local key = tostring(index)
         if profile.Skills.Hotbar[key] == nil or profile.Skills.Hotbar[key] == "" then
-            profile.Skills.Hotbar[key] = starterSkillId
+            HotbarRules.Assign(profile.Skills.Hotbar, index, starterSkillId)
             return index
         end
     end

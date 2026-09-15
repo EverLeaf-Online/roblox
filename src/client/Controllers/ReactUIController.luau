@@ -1492,8 +1492,18 @@ local function InventoryPanel(
     })
 end
 
-local function SkillsPanel(profile, catalog, invoke, selectedSkillId, setSelectedSkillId)
+local function SkillsPanel(
+    profile,
+    catalog,
+    invoke,
+    selectedSkillId,
+    setSelectedSkillId,
+    selectedHotbarSlot,
+    setSelectedHotbarSlot,
+    inputMode
+)
     local learned = profile.Skills and profile.Skills.Learned or {}
+    local hotbar = profile.Skills and profile.Skills.Hotbar or {}
     local skillRows = {}
     for skillId, definition in catalog.Skills or {} do
         local familyId = definition.FamilyId
@@ -1507,6 +1517,7 @@ local function SkillsPanel(profile, catalog, invoke, selectedSkillId, setSelecte
     table.sort(skillRows, function(a, b)
         return (a.Definition.DisplayName or a.Id) < (b.Definition.DisplayName or b.Id)
     end)
+
     local selected = nil
     for _, row in skillRows do
         if row.Id == selectedSkillId then
@@ -1527,6 +1538,7 @@ local function SkillsPanel(profile, catalog, invoke, selectedSkillId, setSelecte
                 BackgroundColor3 = selectedRow and COLORS.AccentDark or COLORS.PanelRaised,
                 BorderSizePixel = 0,
                 Text = "",
+                Selectable = true,
                 ZIndex = 5,
                 [React.Event.Activated] = function()
                     setSelectedSkillId(row.Id)
@@ -1574,8 +1586,121 @@ local function SkillsPanel(profile, catalog, invoke, selectedSkillId, setSelecte
 
     local selectedDefinition = selected and selected.Definition or nil
     local selectedRank = selected and selected.Rank or 0
-    local hotbar = profile.Skills and profile.Skills.Hotbar or {}
-    local slot1 = hotbar["1"] or hotbar[1]
+    local boundSlot = nil
+    if selected then
+        for index = 1, 8 do
+            if (hotbar[tostring(index)] or hotbar[index]) == selected.Id then
+                boundSlot = index
+                break
+            end
+        end
+    end
+    local selectedSlotSkillId = hotbar[tostring(selectedHotbarSlot)] or hotbar[selectedHotbarSlot]
+    local selectedSlotDefinition = selectedSlotSkillId
+            and catalog.Skills
+            and catalog.Skills[selectedSlotSkillId]
+        or nil
+    local canBind = selected ~= nil
+        and selectedRank > 0
+        and selectedDefinition ~= nil
+        and selectedDefinition.Kind == "Active"
+    local assignEnabled = canBind and boundSlot ~= selectedHotbarSlot
+
+    local bindingText = "Select an active learned skill, then choose a hotbar slot below."
+    if selectedDefinition and selectedDefinition.Kind ~= "Active" then
+        bindingText = "Passive skills are always active and do not occupy a hotbar slot."
+    elseif selected and selectedRank <= 0 then
+        bindingText = "Learn at least one rank before assigning this skill."
+    elseif boundSlot then
+        bindingText = string.format("Currently bound to hotbar slot %d.", boundSlot)
+    elseif canBind then
+        bindingText = string.format("Ready to bind to hotbar slot %d.", selectedHotbarSlot)
+    end
+
+    local hotbarChildren = {}
+    for index = 1, 8 do
+        local skillId = hotbar[tostring(index)] or hotbar[index]
+        local definition = skillId and catalog.Skills and catalog.Skills[skillId]
+        local displayName = if definition
+            then definition.DisplayName
+            else if skillId and skillId ~= "" then prettyId(skillId) else "Empty"
+        local selectedSlot = selectedHotbarSlot == index
+        local selectedSkillBound = selected and skillId == selected.Id
+        local column = (index - 1) % 4
+        local row = math.floor((index - 1) / 4)
+        local keyLabel = inputMode == "GAMEPAD" and GAMEPAD_HOTBAR_LABELS[index] or tostring(index)
+        hotbarChildren["SkillHotbarSlot_" .. tostring(index)] = React.createElement(
+            "TextButton",
+            {
+                Position = UDim2.fromOffset(12 + column * 68, 31 + row * 52),
+                Size = UDim2.fromOffset(62, 46),
+                BackgroundColor3 = selectedSlot and COLORS.AccentDark
+                    or if selectedSkillBound then Color3.fromRGB(47, 68, 52) else COLORS.PanelRaised,
+                BackgroundTransparency = selectedSlot and 0 or 0.08,
+                BorderSizePixel = 0,
+                Text = "",
+                Selectable = true,
+                ZIndex = 7,
+                [React.Event.Activated] = function()
+                    setSelectedHotbarSlot(index)
+                end,
+            },
+            withChrome({
+                Key = React.createElement(Label, {
+                    Position = UDim2.fromOffset(5, 3),
+                    Size = UDim2.fromOffset(18, 14),
+                    Text = keyLabel,
+                    TextSize = 8,
+                    Bold = true,
+                    Align = Enum.TextXAlignment.Center,
+                    Color = selectedSlot and COLORS.LumenPale or COLORS.Accent,
+                    ZIndex = 8,
+                }),
+                Skill = React.createElement(Label, {
+                    Position = UDim2.fromOffset(4, 18),
+                    Size = UDim2.new(1, -8, 0, 24),
+                    Text = displayName,
+                    TextSize = 7,
+                    Bold = skillId ~= nil and skillId ~= "",
+                    Align = Enum.TextXAlignment.Center,
+                    Wrapped = true,
+                    Color = selectedSlot and COLORS.Text
+                        or if skillId and skillId ~= "" then COLORS.Muted else COLORS.Faint,
+                    ZIndex = 8,
+                }),
+            }, 6, selectedSlot and COLORS.Lumen or COLORS.Border, selectedSlot and 0.2 or 0.65, 1)
+        )
+    end
+
+    hotbarChildren.Selected = React.createElement(Label, {
+        Position = UDim2.fromOffset(12, 136),
+        Size = UDim2.fromOffset(142, 22),
+        Text = string.format(
+            "SLOT %d · %s",
+            selectedHotbarSlot,
+            selectedSlotDefinition and selectedSlotDefinition.DisplayName or "Empty"
+        ),
+        TextSize = 8,
+        Bold = true,
+        Color = COLORS.Faint,
+        ZIndex = 7,
+    })
+    hotbarChildren.Clear = React.createElement(Button, {
+        Position = UDim2.fromOffset(162, 133),
+        Size = UDim2.fromOffset(120, 27),
+        Text = "CLEAR SLOT " .. tostring(selectedHotbarSlot),
+        TextSize = 8,
+        Active = selectedSlotSkillId ~= nil and selectedSlotSkillId ~= "",
+        OnActivated = function()
+            invoke(
+                "skill.hotbar",
+                { Index = selectedHotbarSlot, SkillId = "" },
+                string.format("Hotbar slot %d cleared.", selectedHotbarSlot)
+            )
+        end,
+        ZIndex = 8,
+    })
+
     return React.createElement("Frame", {
         Size = UDim2.fromScale(1, 1),
         BackgroundTransparency = 1,
@@ -1603,19 +1728,19 @@ local function SkillsPanel(profile, catalog, invoke, selectedSkillId, setSelecte
         }, withChrome(listChildren, 10, COLORS.Border, 0.55, 1)),
         Detail = React.createElement(Panel, {
             Position = UDim2.fromOffset(302, 0),
-            Size = UDim2.fromOffset(296, 270),
+            Size = UDim2.fromOffset(296, 210),
             BackgroundColor3 = COLORS.PanelRaised,
             Children = {
                 Icon = selected and React.createElement(Icon, {
                     AnchorPoint = Vector2.new(1, 0),
                     Position = UDim2.new(1, -14, 0, 12),
-                    Size = UDim2.fromOffset(58, 58),
+                    Size = UDim2.fromOffset(52, 52),
                     Image = SKILL_ICONS[selected.Id] or EverLeafIcons.Skills,
                     ZIndex = 7,
                 }) or nil,
                 Kicker = React.createElement(Label, {
                     Position = UDim2.fromOffset(16, 12),
-                    Size = UDim2.new(1, -32, 0, 18),
+                    Size = UDim2.new(1, -82, 0, 18),
                     Text = selectedDefinition and string.upper(selectedDefinition.Kind or "SKILL")
                         or "SKILL",
                     TextSize = 9,
@@ -1625,56 +1750,43 @@ local function SkillsPanel(profile, catalog, invoke, selectedSkillId, setSelecte
                 }),
                 Name = React.createElement(Label, {
                     Position = UDim2.fromOffset(16, 34),
-                    Size = UDim2.new(1, -32, 0, 34),
+                    Size = UDim2.new(1, -86, 0, 30),
                     Text = selectedDefinition and selectedDefinition.DisplayName
                         or "Select a skill",
-                    TextSize = 19,
+                    TextSize = 17,
                     Bold = true,
                     Wrapped = true,
                     ZIndex = 6,
                 }),
                 Rank = React.createElement(Label, {
-                    Position = UDim2.fromOffset(16, 76),
-                    Size = UDim2.new(1, -32, 0, 24),
-                    Text = selectedDefinition and string.format(
-                        "Rank %d / %d",
-                        selectedRank,
-                        selectedDefinition.MaxRank or 1
-                    ) or "",
-                    TextSize = 12,
+                    Position = UDim2.fromOffset(16, 70),
+                    Size = UDim2.new(1, -32, 0, 20),
+                    Text = selectedDefinition
+                            and string.format(
+                                "Rank %d/%d  ·  Level %d  ·  Tier %d",
+                                selectedRank,
+                                selectedDefinition.MaxRank or 1,
+                                selectedDefinition.RequiredLevel or 1,
+                                selectedDefinition.RequiredTier or 0
+                            )
+                        or "",
+                    TextSize = 10,
                     Color = COLORS.Gold,
                     ZIndex = 6,
                 }),
-                Requirements = React.createElement(Label, {
-                    Position = UDim2.fromOffset(16, 108),
-                    Size = UDim2.new(1, -32, 0, 46),
-                    Text = selectedDefinition and string.format(
-                        "Requires Level %d · Tier %d",
-                        selectedDefinition.RequiredLevel or 1,
-                        selectedDefinition.RequiredTier or 0
-                    ) or "",
-                    TextSize = 11,
+                Binding = React.createElement(Label, {
+                    Position = UDim2.fromOffset(16, 96),
+                    Size = UDim2.new(1, -32, 0, 48),
+                    Text = bindingText,
+                    TextSize = 9,
                     Color = COLORS.Muted,
                     Wrapped = true,
                     VerticalAlign = Enum.TextYAlignment.Top,
                     ZIndex = 6,
                 }),
-                Slot = React.createElement(Label, {
-                    Position = UDim2.fromOffset(16, 158),
-                    Size = UDim2.new(1, -32, 0, 22),
-                    Text = string.format(
-                        "Hotbar Slot 1: %s",
-                        slot1
-                                and (catalog.Skills[slot1] and catalog.Skills[slot1].DisplayName or slot1)
-                            or "Empty"
-                    ),
-                    TextSize = 10,
-                    Color = COLORS.Faint,
-                    ZIndex = 6,
-                }),
                 RankUp = selected
                         and React.createElement(Button, {
-                            Position = UDim2.fromOffset(16, 198),
+                            Position = UDim2.fromOffset(16, 158),
                             Size = UDim2.fromOffset(126, 38),
                             Text = "RANK UP",
                             Tone = "accent",
@@ -1690,46 +1802,51 @@ local function SkillsPanel(profile, catalog, invoke, selectedSkillId, setSelecte
                             ZIndex = 7,
                         })
                     or nil,
-                Assign = selected and selectedRank > 0 and React.createElement(Button, {
-                    Position = UDim2.fromOffset(152, 198),
-                    Size = UDim2.fromOffset(126, 38),
-                    Text = "ASSIGN SLOT 1",
-                    OnActivated = function()
-                        invoke(
-                            "skill.hotbar",
-                            { Index = 1, SkillId = selected.Id },
-                            "Assigned to hotbar slot 1."
-                        )
-                    end,
-                    ZIndex = 7,
-                }) or nil,
+                Assign = selected
+                        and React.createElement(Button, {
+                            Position = UDim2.fromOffset(152, 158),
+                            Size = UDim2.fromOffset(126, 38),
+                            Text = if selectedDefinition.Kind ~= "Active"
+                                then "PASSIVE SKILL"
+                                else if selectedRank <= 0
+                                    then "LEARN FIRST"
+                                    else if boundSlot == selectedHotbarSlot
+                                        then "SLOT " .. tostring(selectedHotbarSlot) .. " BOUND"
+                                        else "ASSIGN SLOT " .. tostring(selectedHotbarSlot),
+                            Tone = assignEnabled and "accent" or nil,
+                            Active = assignEnabled,
+                            OnActivated = function()
+                                invoke(
+                                    "skill.hotbar",
+                                    { Index = selectedHotbarSlot, SkillId = selected.Id },
+                                    string.format("Assigned to hotbar slot %d.", selectedHotbarSlot)
+                                )
+                            end,
+                            ZIndex = 7,
+                        })
+                    or nil,
             },
         }),
-        Tip = React.createElement(Panel, {
-            Position = UDim2.fromOffset(302, 288),
-            Size = UDim2.fromOffset(296, 98),
+        HotbarEditor = React.createElement(Panel, {
+            Position = UDim2.fromOffset(302, 218),
+            Size = UDim2.fromOffset(296, 168),
             BackgroundColor3 = COLORS.PanelDeep,
-            StrokeTransparency = 0.62,
+            StrokeTransparency = 0.58,
             Children = {
                 Title = React.createElement(Label, {
-                    Position = UDim2.fromOffset(14, 10),
-                    Size = UDim2.new(1, -28, 0, 20),
-                    Text = "HOTBAR",
-                    TextSize = 10,
+                    Position = UDim2.fromOffset(12, 8),
+                    Size = UDim2.new(1, -24, 0, 18),
+                    Text = "HOTBAR · SELECT A SLOT",
+                    TextSize = 9,
                     Bold = true,
                     Color = COLORS.Muted,
-                    ZIndex = 6,
+                    ZIndex = 7,
                 }),
-                Body = React.createElement(Label, {
-                    Position = UDim2.fromOffset(14, 32),
-                    Size = UDim2.new(1, -28, 0, 48),
-                    Text = "Press 1–8 during gameplay to activate assigned skills. K opens this panel directly.",
-                    TextSize = 10,
-                    Wrapped = true,
-                    Color = COLORS.Faint,
-                    VerticalAlign = Enum.TextYAlignment.Top,
+                Slots = React.createElement("Frame", {
+                    Size = UDim2.fromScale(1, 1),
+                    BackgroundTransparency = 1,
                     ZIndex = 6,
-                }),
+                }, hotbarChildren),
             },
         }),
     })
@@ -2054,6 +2171,7 @@ local function MainMenu(props)
     local status, setStatus = React.useState("Ready")
     local selectedInventoryIndex, setSelectedInventoryIndex = React.useState(1)
     local selectedSkillId, setSelectedSkillId = React.useState("beginner_strike")
+    local selectedHotbarSlot, setSelectedHotbarSlot = React.useState(1)
     local catalog = CatalogClient.Get() or {}
     local tabs = { "CHARACTER", "INVENTORY", "SKILLS", "QUESTS", "SETTINGS" }
 
@@ -2078,7 +2196,16 @@ local function MainMenu(props)
             setSelectedInventoryIndex
         )
     elseif activeTab == "SKILLS" then
-        content = SkillsPanel(profile, catalog, invoke, selectedSkillId, setSelectedSkillId)
+        content = SkillsPanel(
+            profile,
+            catalog,
+            invoke,
+            selectedSkillId,
+            setSelectedSkillId,
+            selectedHotbarSlot,
+            setSelectedHotbarSlot,
+            props.InputMode
+        )
     elseif activeTab == "QUESTS" then
         content = QuestsPanel(profile, catalog)
     else

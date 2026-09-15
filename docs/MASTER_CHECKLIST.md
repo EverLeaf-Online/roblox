@@ -342,8 +342,8 @@
 - [x] Server skill cooldown foundation.
 - [ ] Targeting shapes/ranges.
 - [ ] Skill animation/VFX/SFX hooks.
-- [x] Persistent 8-slot skill hotbar data/service foundation with React hotbar shell; binding/use UX remains pending.
-- [ ] **PARTIAL:** Keyboard hotbar 1–8 skill-use bindings are source-complete and slot 1 Beginner Strike is Studio-verified; controller bindings remain pending.
+- [x] Persistent 8-slot skill hotbar data/service foundation with React hotbar shell and full slot-select/assign/move/clear UX.
+- [x] Keyboard and controller hotbar 1–8 skill-use bindings are source-complete; slot 1 Beginner Strike remains Studio-verified.
 - [ ] Skill tree UI.
 
 ## 10. Enemies

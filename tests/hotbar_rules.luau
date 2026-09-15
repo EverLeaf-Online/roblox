@@ -1,0 +1,26 @@
+local HotbarRules = require("../src/shared/Logic/HotbarRules")
+
+local ok, reason = HotbarRules.CanAssign(1, "beginner_strike", true, "Active", 1)
+assert(ok and reason == nil, "learned active skill can be assigned")
+ok, reason = HotbarRules.CanAssign(0, "beginner_strike", true, "Active", 1)
+assert(not ok and reason == "invalid_hotbar_slot", "slot zero rejected")
+ok, reason = HotbarRules.CanAssign(9, "beginner_strike", true, "Active", 1)
+assert(not ok and reason == "invalid_hotbar_slot", "slot nine rejected")
+ok, reason = HotbarRules.CanAssign(2, "steady_footing", true, "Passive", 1)
+assert(not ok and reason == "skill_not_active", "passive skill cannot be bound")
+ok, reason = HotbarRules.CanAssign(2, "missing", false, nil, 1)
+assert(not ok and reason == "unknown_skill", "unknown skill rejected")
+ok, reason = HotbarRules.CanAssign(2, "beginner_strike", true, "Active", 0)
+assert(not ok and reason == "skill_not_learned", "unlearned skill rejected")
+ok, reason = HotbarRules.CanAssign(8, "", false, nil, 0)
+assert(ok and reason == nil, "empty string can clear a valid slot")
+
+local hotbar = { ["1"] = "beginner_strike", ["2"] = "ironbloom_sunder" }
+assert(HotbarRules.Assign(hotbar, 3, "beginner_strike"), "assignment succeeds")
+assert(hotbar["1"] == "", "moving a skill clears its prior slot")
+assert(hotbar["3"] == "beginner_strike", "moving a skill binds target slot")
+assert(HotbarRules.FindSkill(hotbar, "beginner_strike") == 3, "skill lookup returns current slot")
+assert(HotbarRules.Assign(hotbar, 3, ""), "clear succeeds")
+assert(hotbar["3"] == "", "clear empties target slot")
+
+print("hotbar rules tests passed")

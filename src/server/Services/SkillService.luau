@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SkillDefinitions = require(script.Parent.Parent.Content.SkillDefinitions)
 local ResourceService = require(script.Parent.ResourceService)
 local SkillUseRules = require(ReplicatedStorage.Shared.Logic.SkillUseRules)
+local HotbarRules = require(ReplicatedStorage.Shared.Logic.HotbarRules)
 local AdvancementRules = require(ReplicatedStorage.Shared.Logic.AdvancementRules)
 local SkillEffectService = require(script.Parent.SkillEffectService)
 
@@ -38,19 +39,20 @@ function SkillService.Learn(profile, skillId)
 end
 
 function SkillService.AssignHotbar(profile, hotbarIndex, skillId)
-    if
-        type(hotbarIndex) ~= "number"
-        or hotbarIndex % 1 ~= 0
-        or hotbarIndex < 1
-        or hotbarIndex > 8
-    then
-        return false, "invalid_hotbar_slot"
+    local definition = type(skillId) == "string" and skillId ~= "" and SkillDefinitions[skillId]
+        or nil
+    local allowed, reason = HotbarRules.CanAssign(
+        hotbarIndex,
+        skillId,
+        skillId == "" or definition ~= nil,
+        definition and definition.Kind or nil,
+        skillId == "" and 1 or profile.Skills.Learned[skillId]
+    )
+    if not allowed then
+        return false, reason
     end
-    if skillId ~= "" and not profile.Skills.Learned[skillId] then
-        return false, "skill_not_learned"
-    end
-    profile.Skills.Hotbar[tostring(hotbarIndex)] = skillId
-    return true
+    HotbarRules.Assign(profile.Skills.Hotbar, hotbarIndex, skillId)
+    return true, { Index = hotbarIndex, SkillId = skillId }
 end
 
 function SkillService.TryBeginUse(player, profile, skillId)
