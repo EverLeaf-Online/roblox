@@ -1682,6 +1682,164 @@ local function makeFireflyCluster(parent, center)
     return model
 end
 
+local function makeAmbientParticleAnchor(parent, name, position, profile)
+    local anchor = makePart(
+        parent,
+        name,
+        Vector3.new(0.4, 0.4, 0.4),
+        CFrame.new(position),
+        Enum.Material.SmoothPlastic,
+        Color3.new(0, 0, 0)
+    )
+    anchor.Transparency = 1
+    anchor.CanCollide = false
+    anchor.CanTouch = false
+    anchor.CanQuery = false
+    anchor.CastShadow = false
+
+    local emitter = Instance.new("ParticleEmitter")
+    emitter.Name = name .. "Emitter"
+    emitter.Texture = profile.Texture
+    emitter.Rate = profile.Rate
+    emitter.Lifetime = profile.Lifetime
+    emitter.Speed = profile.Speed
+    emitter.SpreadAngle = profile.SpreadAngle or Vector2.new(30, 30)
+    emitter.Color = ColorSequence.new(profile.Color)
+    emitter.Transparency = profile.Transparency
+    emitter.Size = profile.Size
+    emitter.LightEmission = profile.LightEmission or 0
+    emitter.LockedToPart = false
+    emitter.Rotation = NumberRange.new(0, 360)
+    emitter.RotSpeed = profile.RotSpeed or NumberRange.new(-8, 8)
+    emitter.Acceleration = profile.Acceleration or Vector3.zero
+    emitter.Parent = anchor
+    return anchor
+end
+
+local function makeLocalAtmosphere(world)
+    local mistProfile = {
+        Texture = "rbxasset://textures/particles/smoke_main.dds",
+        Rate = 1.4,
+        Lifetime = NumberRange.new(3.8, 5.8),
+        Speed = NumberRange.new(0.45, 0.9),
+        SpreadAngle = Vector2.new(42, 42),
+        Color = Color3.fromRGB(194, 226, 219),
+        Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 0.82),
+            NumberSequenceKeypoint.new(0.35, 0.7),
+            NumberSequenceKeypoint.new(1, 1),
+        }),
+        Size = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 2.8),
+            NumberSequenceKeypoint.new(1, 6.5),
+        }),
+        LightEmission = 0.08,
+        Acceleration = Vector3.new(0.18, 0.22, 0.06),
+        RotSpeed = NumberRange.new(-3, 3),
+    }
+    local moteProfile = {
+        Texture = "rbxasset://textures/particles/sparkles_main.dds",
+        Rate = 0.8,
+        Lifetime = NumberRange.new(4.5, 7.0),
+        Speed = NumberRange.new(0.15, 0.45),
+        SpreadAngle = Vector2.new(55, 55),
+        Color = Color3.fromRGB(152, 235, 190),
+        Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 0.35),
+            NumberSequenceKeypoint.new(0.7, 0.5),
+            NumberSequenceKeypoint.new(1, 1),
+        }),
+        Size = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 0.09),
+            NumberSequenceKeypoint.new(0.6, 0.14),
+            NumberSequenceKeypoint.new(1, 0.05),
+        }),
+        LightEmission = 0.35,
+        Acceleration = Vector3.new(0.12, 0.1, 0.04),
+        RotSpeed = NumberRange.new(-18, 18),
+    }
+    local highlandProfile = {
+        Texture = "rbxasset://textures/particles/sparkles_main.dds",
+        Rate = 0.55,
+        Lifetime = NumberRange.new(3.5, 5.5),
+        Speed = NumberRange.new(0.35, 0.75),
+        SpreadAngle = Vector2.new(65, 35),
+        Color = Color3.fromRGB(226, 232, 187),
+        Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 0.55),
+            NumberSequenceKeypoint.new(1, 1),
+        }),
+        Size = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 0.08),
+            NumberSequenceKeypoint.new(1, 0.04),
+        }),
+        LightEmission = 0.18,
+        Acceleration = Vector3.new(0.5, 0.05, 0.16),
+        RotSpeed = NumberRange.new(-24, 24),
+    }
+
+    for index, offset in
+        {
+            Vector3.new(-14, 2.0, 17),
+            Vector3.new(13, 1.8, 24),
+            Vector3.new(2, 3.0, 8),
+        }
+    do
+        makeAmbientParticleAnchor(
+            world,
+            "VeilfallMist" .. index,
+            WORLD_ZONES.Waterfall + offset,
+            mistProfile
+        )
+    end
+
+    for index, offset in
+        {
+            Vector3.new(-24, 1.2, 9),
+            Vector3.new(22, 1.1, -10),
+        }
+    do
+        makeAmbientParticleAnchor(
+            world,
+            "GlowmereMist" .. index,
+            WORLD_ZONES.Glowmere + offset,
+            mistProfile
+        )
+    end
+
+    for index, offset in
+        {
+            Vector3.new(-30, 3.2, -12),
+            Vector3.new(18, 3.8, 21),
+            Vector3.new(-10, 4.5, 30),
+        }
+    do
+        makeAmbientParticleAnchor(
+            world,
+            "LumenMotes" .. index,
+            WORLD_ZONES.Glowmere + offset,
+            moteProfile
+        )
+    end
+
+    for index, offset in
+        {
+            Vector3.new(-24, 7.0, 8),
+            Vector3.new(18, 8.5, -4),
+        }
+    do
+        makeAmbientParticleAnchor(
+            world,
+            "SunmossAir" .. index,
+            WORLD_ZONES.Overlook + offset,
+            highlandProfile
+        )
+    end
+
+    makeFireflyCluster(world, WORLD_ZONES.Camp + Vector3.new(-42, 0, 31))
+    makeFireflyCluster(world, WORLD_ZONES.Glowmere + Vector3.new(4, 0, -38))
+end
+
 local function makeRockSpire(parent, position, scale)
     local model = Instance.new("Model")
     model.Name = "LumenRockSpire"
@@ -3391,6 +3549,11 @@ local function decorate(world)
     dressZoneEdge(world, WORLD_ZONES.Waterfall, 61, 48, 17, 23)
     dressZoneEdge(world, WORLD_ZONES.Overlook, 60, 44, 14, 29)
 
+    -- Localized ambience gives Lumenreach its own atmosphere without changing
+    -- global Lighting shared by Brasshaven. Particle budgets stay deliberately
+    -- low until the in-Studio performance profile is complete.
+    makeLocalAtmosphere(world)
+
     -- Fill the spaces between destinations with continuous forest instead of open grass fields.
     local forestPatches = {
         -- West basin / outer forest.
@@ -3824,17 +3987,81 @@ local function makeMonsterSpawnTrigger(world, name, position, config)
     return trigger
 end
 
+local function makeWayfarerArrivalMarker(world, groundPosition, yaw)
+    local model = Instance.new("Model")
+    model.Name = "WayfarerArrivalMarker"
+    model.Parent = world
+    local base = CFrame.new(groundPosition) * CFrame.Angles(0, yaw, 0)
+
+    local disc = makePart(
+        model,
+        "ArrivalRuneBase",
+        Vector3.new(0.16, 5.6, 5.6),
+        base * CFrame.new(0, 0.08, 0) * CFrame.Angles(0, 0, math.rad(90)),
+        Enum.Material.Slate,
+        Color3.fromRGB(61, 77, 69)
+    )
+    disc.Shape = Enum.PartType.Cylinder
+    disc.CanCollide = false
+    disc.CanTouch = false
+    disc.CanQuery = false
+
+    local rune = makePart(
+        model,
+        "ArrivalLumenRune",
+        Vector3.new(0.08, 3.25, 0.42),
+        base * CFrame.new(0, 0.18, 0) * CFrame.Angles(0, 0, math.rad(90)),
+        Enum.Material.Neon,
+        Color3.fromRGB(104, 221, 181)
+    )
+    rune.CanCollide = false
+    rune.CanTouch = false
+    rune.CanQuery = false
+    rune.Transparency = 0.16
+
+    for index = 1, 8 do
+        local angle = (index - 1) * math.pi * 0.25
+        local localOffset = Vector3.new(math.cos(angle) * 3.5, 0, math.sin(angle) * 3.5)
+        local stone = makePart(
+            model,
+            "ArrivalStone" .. index,
+            Vector3.new(1.2, 0.34, 0.78),
+            base
+                * CFrame.new(localOffset + Vector3.new(0, 0.14, 0))
+                * CFrame.Angles(0, -angle + math.rad(90), math.rad((index % 3 - 1) * 3)),
+            Enum.Material.Slate,
+            if index % 2 == 0 then Color3.fromRGB(82, 94, 86) else Color3.fromRGB(70, 84, 77)
+        )
+        stone.CanCollide = false
+        stone.CanTouch = false
+        stone.CanQuery = false
+    end
+
+    local glow = Instance.new("PointLight")
+    glow.Color = Color3.fromRGB(104, 221, 181)
+    glow.Brightness = 0.32
+    glow.Range = 8
+    glow.Shadows = false
+    glow.Parent = rune
+    return model
+end
+
 local function makeSpawn(world)
+    local yaw = math.rad(128)
+    local groundPosition = terrainSurfacePosition(WORLD_ZONES.Camp + Vector3.new(-31, 0, 19), 0)
+    makeWayfarerArrivalMarker(world, groundPosition, yaw)
+
     local spawn = Instance.new("SpawnLocation")
     spawn.Name = "LumenreachSpawn"
-    spawn.Size = Vector3.new(8, 1, 8)
-    spawn.CFrame = CFrame.new(WORLD_ZONES.Camp + Vector3.new(-31, 4, 19))
-        * CFrame.Angles(0, math.rad(128), 0)
+    spawn.Size = Vector3.new(6, 0.5, 6)
+    spawn.CFrame = CFrame.new(groundPosition + Vector3.new(0, 0.25, 0)) * CFrame.Angles(0, yaw, 0)
     spawn.Anchored = true
     spawn.Neutral = true
-    spawn.Material = Enum.Material.Slate
-    spawn.Color = Color3.fromRGB(77, 96, 87)
-    spawn.Transparency = 0.15
+    spawn.CanCollide = false
+    spawn.CanTouch = false
+    spawn.CanQuery = false
+    spawn.Transparency = 1
+    spawn.Duration = 0
     spawn.Parent = world
     WorldTravelService.RegisterSpawn("lumenreach_start", spawn)
     return spawn
