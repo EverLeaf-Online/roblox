@@ -1,67 +1,10 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
 local ProfileMigration = require(ReplicatedStorage.Shared.Logic.ProfileMigration)
+local ProfileTemplate = require(ReplicatedStorage.Shared.Logic.ProfileTemplate)
 
 local ProfileSchema = {}
-
-local TEMPLATE = {
-    Meta = {
-        SchemaVersion = GameConfig.DataStore.SchemaVersion,
-        ActiveSession = nil,
-        CreatedAt = 0,
-        LastSeenAt = 0,
-    },
-    Level = 1,
-    Exp = 0,
-    AP = 0,
-    SP = 0,
-    AdvancementTier = 0,
-    FamilyId = "",
-    Stats = {
-        Might = 4,
-        Finesse = 4,
-        Insight = 4,
-        Fortune = 4,
-    },
-    Currencies = {
-        Shards = 0,
-        Marks = 0,
-    },
-    Inventory = {
-        Capacity = 48,
-        Slots = {},
-    },
-    Equipment = {
-        Weapon = "",
-        Head = "",
-        Body = "",
-        Legs = "",
-        Accessory = "",
-        Ring1 = "",
-        Ring2 = "",
-    },
-    Skills = {
-        Learned = { beginner_strike = 1 },
-        Hotbar = { ["1"] = "beginner_strike" },
-    },
-    Quests = {
-        Active = {},
-        Completed = {},
-    },
-    World = {
-        RegionId = "lumenreach",
-        SpawnId = "lumenreach_start",
-        UnlockedRegions = { lumenreach = true },
-        Secrets = {},
-    },
-    Achievements = { Unlocked = {} },
-    Cosmetics = { Owned = {}, Equipped = {} },
-    Settings = {
-        MusicVolume = 1,
-        SfxVolume = 1,
-        ShowDamageNumbers = true,
-    },
-}
+local TEMPLATE = ProfileTemplate.Build(GameConfig.DataStore.SchemaVersion)
 
 function ProfileSchema.DeepCopy(value)
     return ProfileMigration.DeepCopy(value)

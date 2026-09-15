@@ -29,7 +29,7 @@
 - [x] Poly Haven PBR texture assets uploaded to Roblox and all 15 maps approved.
 - [x] Five EverLeaf MaterialVariants can now be authored/refreshed successfully by the Studio plugin.
 - [ ] No red Output errors across a complete fresh-player Phase 1 run.
-- [ ] Fresh-profile/rejoin regression pass.
+- [ ] Fresh-profile/rejoin live Studio regression pass; canonical fresh-template defaults and full persisted-domain save→rejoin round trip are regression-tested in source.
 - [ ] DataStore failure/session-lock stress pass.
 
 ### B. Combat / enemy feel
@@ -122,7 +122,7 @@
 
 - [ ] Fresh player can complete the full starter loop with no manual developer intervention.
 - [ ] Death and respawn do not break UI, controls, quest progress, resources, or hotbar state.
-- [ ] Rejoin preserves expected profile/inventory/equipment/quest state.
+- [x] Deterministic save→rejoin migration regression preserves progression, stats, currencies, inventory/equipment, skills/hotbar, active/completed quests, region/spawn/unlocks/secrets, achievements, cosmetics, and settings; live rejoin soak remains open.
 - [ ] Keyboard/mouse full pass.
 - [ ] Gamepad/controller blocking-flow live Studio pass; source support is now implemented for movement, camera, attack, jump, sprint, dodge, all 8 skill slots, menu open/back/tab cycling, device-aware hotbar labels, and initial UI focus.
 - [ ] Multi-client basic party/network smoke test; party UI, ready checks, group boss entry, and contributor rewards are source-complete but still need live multi-client verification.
@@ -597,7 +597,7 @@
 - [x] Cosmetic-only monetization rule documented.
 - [x] No Robux power purchases rule documented.
 - [ ] Cosmetic catalog design.
-- [ ] Cosmetic ownership/equip persistence.
+- [x] Cosmetic ownership/equip persistence is schema-backed and included in full save→rejoin regression coverage.
 - [ ] Cosmetic preview UX.
 - [ ] Emotes if desired.
 - [ ] Cosmetic effects if desired.
