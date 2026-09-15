@@ -38,6 +38,19 @@ for shopId, shop in Shops do
 end
 
 for enemyId, monster in MonsterConfig.All() do
+    for _, fieldName in { "AttackWidth", "AttackVerticalRange" } do
+        local value = monster[fieldName]
+        assert(
+            value == nil or (type(value) == "number" and value > 0),
+            string.format("enemy %s %s must be positive when set", enemyId, fieldName)
+        )
+    end
+    local depthSlack = monster.AttackDepthSlack
+    assert(
+        depthSlack == nil or (type(depthSlack) == "number" and depthSlack >= 0),
+        string.format("enemy %s AttackDepthSlack must be non-negative when set", enemyId)
+    )
+
     local reward = monster.Reward
     if reward then
         assert(

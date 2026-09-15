@@ -3,6 +3,7 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
 local MonsterAnimationService = require(script.Parent.MonsterAnimationService)
+local MonsterAttackHitboxService = require(script.Parent.MonsterAttackHitboxService)
 local MonsterCombat = require(script.Parent.MonsterCombat)
 
 local MonsterAI = {}
@@ -138,10 +139,9 @@ local function beginAttack(monster, controller, target, targetRoot, now)
         if not humanoid or humanoid.Health <= 0 or not currentRoot then
             return
         end
-        if
-            (currentRoot.Position - controller.Root.Position).Magnitude
-            <= (controller.Definition.AttackRange or 5) + 1
-        then
+        local canHit =
+            MonsterAttackHitboxService.CanHitPlayer(monster, target, controller.Definition)
+        if canHit then
             MonsterCombat.DamagePlayer(monster, target, controller.Definition)
         end
     end)

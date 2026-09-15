@@ -152,6 +152,12 @@ GameConfig.Combat = {
     BasicProjectileRadius = 0.4,
     ProjectileStepCap = 60,
     RequireLineOfSight = true,
+    MonsterAttackHitboxWidthMultiplier = 1.15,
+    MonsterAttackHitboxMinWidth = 4,
+    MonsterAttackHitboxMaxWidth = 10,
+    MonsterAttackVerticalRange = 5.5,
+    MonsterAttackDepthSlack = 1,
+    MonsterAttackRequireLineOfSight = true,
     PlayerDamageIFrames = 0.15,
     DefenseConstant = 100,
 }

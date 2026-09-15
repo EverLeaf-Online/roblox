@@ -39,6 +39,7 @@
 - [x] Monster floating damage numbers.
 - [x] Monster hit-confirm VFX/SFX and hit-flinch presentation.
 - [x] Enemy attack windup with damage applied at the impact moment.
+- [x] Normal monster melee impacts now revalidate a server-owned forward hurtbox volume + vertical reach + LOS at the impact frame, so sidesteps/behind-target movement/cover can evade telegraphed swings.
 - [x] Aggro leash/reset and return-to-home behavior.
 - [x] PathfindingService pursuit foundation around obstacles.
 - [x] Monster dodge reactions, cooldowns, brief invulnerability, and backward evade movement.
