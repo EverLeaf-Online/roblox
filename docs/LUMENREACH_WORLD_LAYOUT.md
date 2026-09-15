@@ -1,8 +1,8 @@
-# Lumenreach MMO World Layout — Authored MMO V4
+# Lumenreach MMO World Layout — Living World V5
 
 **Canonical target:** 2350 × 1800 studs, Level 1–10 starter region.
 
-Lumenreach V4 is a full replacement of the earlier showcase/camp composition. The runtime generator clears the previous generated model and Terrain, rebuilds macro topography from scratch, cuts the road network into the land, and only then places the authored structures, trees, NPCs, bridges, encounter spaces, landmarks, and portal required by gameplay. New work must extend this terrain-first layout; it must not stack scenery over older geometry.
+Lumenreach V5 is a full replacement of the earlier showcase/camp composition. The runtime generator clears the previous generated model and Terrain, rebuilds macro topography from scratch, cuts the road network into the land, and only then places the authored structures, trees, NPCs, bridges, encounter spaces, landmarks, and portal required by gameplay. New work must extend this terrain-first layout; it must not stack scenery over older geometry.
 
 ## Topology
 
@@ -40,9 +40,9 @@ The starter route is intentionally readable as geography rather than a chain of 
 | Shattered Lumen Arch | 8–10 | Regional capstone, late Skeleton field, Brasshaven gate |
 | Wayfarer Proving Circle | 7–10 | First advancement milestone detached from leveling traffic |
 
-## V4 authored world identity
+## V5 living-world identity
 
-V4 keeps the terrain-first macro layout but finishes the region as a designed MMORPG space rather than a sparse navigation prototype. Every major subzone now has an authored silhouette, rest/observation point, or ruin language placed around — never through — its combat and traversal center.
+V5 keeps the terrain-first macro layout and removes the remaining dead-space feeling. Dense but controlled woodland belts now connect the authored subzones, route shoulders receive low-profile environmental rhythm, and each biome gets distinct forest-floor dressing while protected combat/spawn/advancement pockets stay open. Every major subzone still has an authored silhouette, rest/observation point, or ruin language placed around — never through — its combat and traversal center.
 
 - **Wayfarer Camp** is a permanent starter town with a social hearth plaza, four service buildings, quartermaster/archive stalls, benches, training yard, arrival signage, Lumen gate pylons, and a wide party-safe departure gate.
 - **Greenway Fields** reads as the first reclaimed road outside town, with roadside ruins and a safe rest edge framing the starter combat meadow.
@@ -55,7 +55,15 @@ V4 keeps the terrain-first macro layout but finishes the region as a designed MM
 - **Veilfall Ravine** uses a dedicated overlook, ruin fragment, and wayfinding pylons around the cascade and Wisp field.
 - **Shattered Lumen Arch** now has a processional pylon avenue and broken side walls so the Level 8–10 capstone reads as a regional threshold before the portal itself.
 
-All V4 architecture is native Roblox geometry or approved environment prefabs. No RockFace mesh, giant fallback boulders, tent-town regression, or scenery layering is allowed. The generator still clears and rebuilds the complete region on initialization.
+All V5 architecture is native Roblox geometry or approved environment prefabs. No RockFace mesh, giant fallback boulders, tent-town regression, or scenery layering is allowed. The generator still clears and rebuilds the complete region on initialization.
+
+### V5 density rules
+
+- Continuous forest belts occupy the negative space between quest/combat rooms so the 2350×1800 region no longer reads as isolated clearings in an empty field.
+- Route-edge dressing uses ferns, mossy rock sets, roots, stumps, dry branches, fallen logs, and occasional trees outside the party-width travel lane.
+- Spawn, training, boss, monster, bridge, and advancement spaces are explicit dressing exclusions. Density must never reduce action-combat readability.
+- The biome mix changes by area: Glowmere/Veilfall favor wet understory, Gravebone/Shattered Arch favor dry deadwood/stone, and Greenway/Mossglen/Sunmoss use living forest floor.
+- Streaming remains enabled; density is authored with optimized approved prefabs rather than expensive ad-hoc mesh spam.
 
 ## Hard layout rules
 
@@ -72,7 +80,7 @@ All V4 architecture is native Roblox geometry or approved environment prefabs. N
 
 ## Source contract
 
-`src/server/Services/LumenreachWorldService.luau` is the canonical V4 generator. It owns:
+`src/server/Services/LumenreachWorldService.luau` is the canonical V5 generator. It owns:
 
 - `WORLD_WIDTH = 2350` and `WORLD_DEPTH = 1800`;
 - zone centers and progression bands;

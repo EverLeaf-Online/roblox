@@ -16,7 +16,7 @@ local LumenreachWorldService = {}
 local GENERATED_NAME = "EverLeafGeneratedWorld"
 local WORLD_WIDTH = 2350
 local WORLD_DEPTH = 1800
-local WORLD_DESIGN_VERSION = 4
+local WORLD_DESIGN_VERSION = 5
 
 -- Lumenreach is authored as a terrain-first MMORPG region. The generator below
 -- replaces the previous showcase composition completely: terrain is cleared,
@@ -206,6 +206,25 @@ local GORGE_POINTS = table.freeze({
     ZONES.Veilfall + Vector3.new(-20, 0, -5),
 })
 
+-- Environment density is authored around gameplay rather than sprayed uniformly.
+-- These pockets remain deliberately open for spawn safety, readable combat, bosses,
+-- bridges, and the advancement trial.
+local DRESSING_EXCLUSIONS = table.freeze({
+    table.freeze({ Center = ARRIVAL_ORIGIN, Radius = 54 }),
+    table.freeze({ Center = TRAINING_ORIGIN, Radius = 34 }),
+    table.freeze({ Center = ZONES.Proving, Radius = 42 }),
+    table.freeze({ Center = ZONES.Greenway + Vector3.new(0, 0, 72), Radius = 48 }),
+    table.freeze({ Center = ZONES.Glowmere + Vector3.new(-90, 0, 70), Radius = 50 }),
+    table.freeze({ Center = ZONES.Glowmere + Vector3.new(-62, 0, 48), Radius = 24 }),
+    table.freeze({ Center = ZONES.Gravebone + Vector3.new(70, 0, 70), Radius = 48 }),
+    table.freeze({ Center = ZONES.Gravebone + Vector3.new(-60, 0, -60), Radius = 28 }),
+    table.freeze({ Center = ZONES.Mossglen + Vector3.new(-20, 0, -90), Radius = 54 }),
+    table.freeze({ Center = BRAMBLE_ORIGIN, Radius = 48 }),
+    table.freeze({ Center = ZONES.Mossglen + Vector3.new(-10, 0, 100), Radius = 58 }),
+    table.freeze({ Center = ZONES.Veilfall + Vector3.new(0, 0, -80), Radius = 52 }),
+    table.freeze({ Center = ZONES.Ruins + Vector3.new(88, 0, 55), Radius = 56 }),
+})
+
 local function makePart(parent, name, size, cframe, material, color)
     local part = Instance.new("Part")
     part.Name = name
@@ -281,6 +300,18 @@ local function clearOfTravelLanes(position, padding)
             then
                 return false
             end
+        end
+    end
+    return true
+end
+
+local function clearOfDressingExclusions(position, padding)
+    padding = padding or 0
+    local point = Vector2.new(position.X, position.Z)
+    for _, exclusion in DRESSING_EXCLUSIONS do
+        local center = Vector2.new(exclusion.Center.X, exclusion.Center.Z)
+        if (point - center).Magnitude < exclusion.Radius + padding then
+            return false
         end
     end
     return true
@@ -647,6 +678,185 @@ local function placeTreeArc(parent, center, radiusX, radiusZ, count, startDeg, e
         if clearOfTravelLanes(position, 10) then
             local height = 24 + ((index * 13 + seed * 7) % 9)
             placeTree(parent, position, height, math.rad((index * 53 + seed * 31) % 360))
+        end
+    end
+end
+
+local function prefabScaleForLongest(prefabName, targetLongest)
+    local prefab = EnvironmentPrefabService.Get(prefabName)
+    if not prefab then
+        return 1
+    end
+    local size = if prefab:IsA("Model") then prefab:GetExtentsSize() else prefab.Size
+    local longest = math.max(size.X, size.Y, size.Z)
+    if longest <= 0.01 then
+        return 1
+    end
+    return targetLongest / longest
+end
+
+local function placeDressingPrefab(parent, prefabName, position, yaw, targetLongest)
+    if not EnvironmentPrefabService.Get(prefabName) then
+        return nil
+    end
+    local ground = terrainSurfacePosition(position, 0.02)
+    local placed = EnvironmentPrefabService.Place(
+        prefabName,
+        parent,
+        CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0),
+        prefabScaleForLongest(prefabName, targetLongest)
+    )
+    if placed then
+        setRenderOnly(placed)
+        placed:SetAttribute("LumenreachDressing", true)
+    end
+    return placed
+end
+
+local function makeFernDressing(parent, position, yaw, scale)
+    return placeDressingPrefab(parent, "FernPrimary", position, yaw, 4.2 * (scale or 1))
+end
+
+local function makeMossyRockDressing(parent, position, yaw, scale)
+    return placeDressingPrefab(parent, "MossyRockSet", position, yaw, 7.2 * (scale or 1))
+end
+
+local function makeRootsDressing(parent, position, yaw, scale)
+    return placeDressingPrefab(parent, "PineRoots", position, yaw, 6.5 * (scale or 1))
+end
+
+local function makeStumpDressing(parent, position, yaw, scale, variant)
+    local prefabName = if variant == 2 then "TreeStump2" else "TreeStump"
+    return placeDressingPrefab(parent, prefabName, position, yaw, 4.6 * (scale or 1))
+end
+
+local function makeFallenLogDressing(parent, position, yaw, scale, variant)
+    local prefabName = if variant == 2 then "FallenTreeTrunk2" else "FallenTreeTrunk"
+    return placeDressingPrefab(parent, prefabName, position, yaw, 11.5 * (scale or 1))
+end
+
+local function makeDryBranchesDressing(parent, position, yaw, scale)
+    return placeDressingPrefab(parent, "DryBranches", position, yaw, 5.0 * (scale or 1))
+end
+
+local function placeGroundDetail(parent, position, seed, theme)
+    if not clearOfTravelLanes(position, 6) or not clearOfDressingExclusions(position, 4) then
+        return
+    end
+
+    local yaw = math.rad((seed * 71 + 19) % 360)
+    local scale = 0.72 + ((seed * 17) % 28) / 100
+    local choice = seed % 6
+
+    if theme == "dry" then
+        if choice <= 1 then
+            makeDryBranchesDressing(parent, position, yaw, scale)
+        elseif choice == 2 then
+            makeStumpDressing(parent, position, yaw, scale, (seed % 2) + 1)
+        elseif choice <= 4 then
+            makeMossyRockDressing(parent, position, yaw, scale * 0.9)
+        else
+            makeRootsDressing(parent, position, yaw, scale * 0.85)
+        end
+    elseif theme == "wet" then
+        if choice <= 2 then
+            makeFernDressing(parent, position, yaw, scale)
+        elseif choice == 3 then
+            makeRootsDressing(parent, position, yaw, scale * 0.85)
+        else
+            makeMossyRockDressing(parent, position, yaw, scale * 0.8)
+        end
+    else
+        if choice <= 2 then
+            makeFernDressing(parent, position, yaw, scale)
+        elseif choice == 3 then
+            makeMossyRockDressing(parent, position, yaw, scale * 0.8)
+        elseif choice == 4 then
+            makeStumpDressing(parent, position, yaw, scale, (seed % 2) + 1)
+        else
+            makeRootsDressing(parent, position, yaw, scale * 0.8)
+        end
+    end
+end
+
+local function scatterForestBand(parent, center, radiusX, radiusZ, count, seed, theme)
+    for index = 1, count do
+        local angle = (index * 2.3999632297 + seed * 0.613) % (math.pi * 2)
+        local radial = 0.68 + ((index * 29 + seed * 13) % 33) / 100
+        local jitterX = ((index * 43 + seed * 17) % 19 - 9) * 1.3
+        local jitterZ = ((index * 31 + seed * 23) % 17 - 8) * 1.15
+        local position = center
+            + Vector3.new(
+                math.cos(angle) * radiusX * radial + jitterX,
+                0,
+                math.sin(angle) * radiusZ * radial + jitterZ
+            )
+
+        if clearOfTravelLanes(position, 8) and clearOfDressingExclusions(position, 7) then
+            local height = 21 + ((index * 11 + seed * 5) % 13)
+            placeTree(parent, position, height, math.rad((index * 47 + seed * 37) % 360))
+
+            if index % 2 == 0 then
+                local offsetAngle = angle + math.rad(35 + (index % 5) * 9)
+                local detailPosition = position
+                    + Vector3.new(math.cos(offsetAngle) * 6.5, 0, math.sin(offsetAngle) * 6.5)
+                placeGroundDetail(parent, detailPosition, seed * 100 + index, theme)
+            end
+            if index % 7 == 0 then
+                local logPosition = position
+                    + Vector3.new(math.cos(angle + 1.2) * 9, 0, math.sin(angle + 1.2) * 9)
+                if
+                    clearOfTravelLanes(logPosition, 7) and clearOfDressingExclusions(logPosition, 5)
+                then
+                    makeFallenLogDressing(
+                        parent,
+                        logPosition,
+                        angle + math.rad(58),
+                        0.82,
+                        (index % 2) + 1
+                    )
+                end
+            end
+        end
+    end
+end
+
+local function dressRouteEdges(parent, route, seed)
+    for segmentIndex = 1, #route.Points - 1 do
+        local a = route.Points[segmentIndex]
+        local b = route.Points[segmentIndex + 1]
+        local delta = b - a
+        local horizontal = Vector3.new(delta.X, 0, delta.Z)
+        local length = horizontal.Magnitude
+        if length > 1 then
+            local direction = horizontal.Unit
+            local right = Vector3.new(-direction.Z, 0, direction.X)
+            local samples = math.max(1, math.floor(length / 58))
+            for sample = 1, samples do
+                local alpha = sample / (samples + 1)
+                local center = a:Lerp(b, alpha)
+                local side = if (sample + segmentIndex + seed) % 2 == 0 then -1 else 1
+                local edgeDistance = route.Width * 0.5 + 13 + ((sample * 7 + seed) % 8)
+                local position = center + right * side * edgeDistance
+                placeGroundDetail(
+                    parent,
+                    position,
+                    seed * 1000 + segmentIndex * 41 + sample,
+                    "forest"
+                )
+
+                if sample % 3 == 0 and clearOfTravelLanes(position, 9) then
+                    local treePosition = position + right * side * 8
+                    if clearOfDressingExclusions(treePosition, 8) then
+                        placeTree(
+                            parent,
+                            treePosition,
+                            20 + ((sample * 5 + seed) % 8),
+                            math.rad((sample * 67 + seed * 19) % 360)
+                        )
+                    end
+                end
+            end
         end
     end
 end
@@ -1923,17 +2133,45 @@ local function makeSpawns(parent)
 end
 
 local function decorateWorld(parent)
-    -- Tree massing frames zone edges; roads and encounter centers stay open.
-    placeTreeArc(parent, ZONES.Camp, 175, 145, 18, 28, 332, 1)
-    placeTreeArc(parent, ZONES.Greenway, 145, 110, 16, 15, 345, 2)
-    placeTreeArc(parent, ZONES.Crossroads, 118, 95, 14, 25, 335, 3)
-    placeTreeArc(parent, ZONES.Glowmere, 165, 140, 18, 5, 350, 4)
-    placeTreeArc(parent, ZONES.Gravebone, 135, 110, 15, 10, 350, 5)
-    placeTreeArc(parent, ZONES.Mossglen, 205, 160, 22, 10, 350, 6)
-    placeTreeArc(parent, ZONES.Sunmoss, 155, 125, 16, 15, 345, 7)
-    placeTreeArc(parent, ZONES.Veilfall, 160, 135, 18, 30, 330, 8)
-    placeTreeArc(parent, ZONES.Ruins, 175, 140, 18, 35, 325, 9)
-    placeTreeArc(parent, ZONES.Proving, 125, 112, 14, 20, 340, 10)
+    -- V5 density pass: tree massing now reads as continuous woodland rather than
+    -- isolated rings around empty fields. Combat centers and authored roads stay open.
+    placeTreeArc(parent, ZONES.Camp, 175, 145, 28, 28, 332, 1)
+    placeTreeArc(parent, ZONES.Greenway, 150, 116, 26, 15, 345, 2)
+    placeTreeArc(parent, ZONES.Crossroads, 124, 102, 22, 25, 335, 3)
+    placeTreeArc(parent, ZONES.Glowmere, 172, 148, 30, 5, 350, 4)
+    placeTreeArc(parent, ZONES.Gravebone, 142, 118, 26, 10, 350, 5)
+    placeTreeArc(parent, ZONES.Mossglen, 215, 170, 36, 10, 350, 6)
+    placeTreeArc(parent, ZONES.Sunmoss, 165, 134, 26, 15, 345, 7)
+    placeTreeArc(parent, ZONES.Veilfall, 170, 145, 28, 30, 330, 8)
+    placeTreeArc(parent, ZONES.Ruins, 185, 150, 28, 35, 325, 9)
+    placeTreeArc(parent, ZONES.Proving, 132, 118, 22, 20, 340, 10)
+
+    -- Fill the large negative-space belts between progression rooms. These are
+    -- part of the generated V5 map itself, not objects layered onto an old map.
+    scatterForestBand(parent, Vector3.new(-790, 0, 430), 205, 150, 28, 21, "wet")
+    scatterForestBand(parent, Vector3.new(-720, 0, -410), 230, 155, 26, 22, "forest")
+    scatterForestBand(parent, Vector3.new(-135, 0, 590), 235, 145, 30, 23, "wet")
+    scatterForestBand(parent, Vector3.new(260, 0, 650), 250, 150, 32, 24, "forest")
+    scatterForestBand(parent, Vector3.new(680, 0, 610), 235, 155, 30, 25, "forest")
+    scatterForestBand(parent, Vector3.new(670, 0, -585), 245, 165, 32, 26, "dry")
+    scatterForestBand(parent, Vector3.new(940, 0, -390), 190, 155, 24, 27, "dry")
+    scatterForestBand(parent, Vector3.new(965, 0, 390), 180, 145, 22, 28, "forest")
+
+    -- Roads receive low-profile edge dressing so travel has visual rhythm every
+    -- few seconds without narrowing the dodge/sprint lane.
+    for index, route in ROUTES do
+        dressRouteEdges(parent, route, 40 + index)
+    end
+
+    -- Zone-specific ground detail makes each biome feel inhabited and materially
+    -- different while keeping the encounter floor readable.
+    scatterForestBand(parent, ZONES.Greenway, 118, 92, 18, 61, "forest")
+    scatterForestBand(parent, ZONES.Glowmere, 135, 112, 22, 62, "wet")
+    scatterForestBand(parent, ZONES.Gravebone, 112, 94, 18, 63, "dry")
+    scatterForestBand(parent, ZONES.Mossglen, 175, 132, 28, 64, "forest")
+    scatterForestBand(parent, ZONES.Sunmoss, 132, 104, 18, 65, "forest")
+    scatterForestBand(parent, ZONES.Veilfall, 138, 116, 20, 66, "wet")
+    scatterForestBand(parent, ZONES.Ruins, 145, 118, 20, 67, "dry")
 
     makeWaystone(parent, ZONES.Greenway + Vector3.new(-72, 0, -46), math.rad(70), 0.78)
     makeWaystone(parent, ZONES.Crossroads + Vector3.new(42, 0, -36), math.rad(-60), 0.82)

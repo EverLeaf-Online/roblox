@@ -6,7 +6,7 @@ for _, required in
     {
         "local WORLD_WIDTH = 2350",
         "local WORLD_DEPTH = 1800",
-        "local WORLD_DESIGN_VERSION = 4",
+        "local WORLD_DESIGN_VERSION = 5",
         'world:SetAttribute("WorldDesignVersion", WORLD_DESIGN_VERSION)',
         'world:SetAttribute("TerrainFirstMMOLayout", true)',
         "terrain:Clear()",
@@ -40,6 +40,14 @@ for _, required in
         '"WayfarerRuinWall"',
         '"WayfarerOverlook"',
         '"LumenPylon"',
+        "local DRESSING_EXCLUSIONS = table.freeze",
+        "local function scatterForestBand",
+        "local function dressRouteEdges",
+        '"FernPrimary"',
+        '"MossyRockSet"',
+        '"PineRoots"',
+        '"FallenTreeTrunk"',
+        '"DryBranches"',
         "makeGreenwaySetpiece(parent)",
         "makeCrossroadsSetpiece(parent)",
         "makeGlowmereSetpiece(parent)",
@@ -149,6 +157,22 @@ do
         "action-combat pocket drifted back onto a through-road: " .. combatPocket
     )
 end
+
+assert(
+    string.find(source, "scatterForestBand(parent, Vector3.new(-790, 0, 430)", 1, true) ~= nil
+        and string.find(source, "scatterForestBand(parent, Vector3.new(670, 0, -585)", 1, true)
+            ~= nil,
+    "V5 must fill the large dead-space woodland belts between progression rooms"
+)
+assert(
+    string.find(source, "for index, route in ROUTES do", 1, true) ~= nil
+        and string.find(source, "dressRouteEdges(parent, route, 40 + index)", 1, true) ~= nil,
+    "V5 must give travel routes safe edge dressing instead of leaving long empty corridors"
+)
+assert(
+    string.find(source, "clearOfDressingExclusions", 1, true) ~= nil,
+    "dense environment dressing must preserve combat/spawn/advancement clearings"
+)
 
 local townCalls = 0
 for _ in string.gmatch(source, "makeTown%(%w+%)") do
