@@ -564,9 +564,11 @@ local function addClothingLayers(model, spec, palette)
 end
 
 local function groundModel(model, requestedPosition, yaw)
-    local pivot = CFrame.new(requestedPosition + Vector3.new(0, 8, 0))
-        * CFrame.Angles(0, yaw or 0, 0)
-    model:PivotTo(pivot)
+    local root = bodyPart(model, "HumanoidRootPart")
+    local humanoid = model:FindFirstChildOfClass("Humanoid")
+    if not root or not humanoid then
+        return false
+    end
 
     local rayParams = RaycastParams.new()
     local terrain = Workspace:FindFirstChildOfClass("Terrain")
@@ -578,25 +580,28 @@ local function groundModel(model, requestedPosition, yaw)
         rayParams.FilterDescendantsInstances = { model }
     end
     rayParams.IgnoreWater = false
-    local origin = Vector3.new(requestedPosition.X, requestedPosition.Y + 80, requestedPosition.Z)
-    local result = Workspace:Raycast(origin, Vector3.new(0, -180, 0), rayParams)
-    local targetY = if result then result.Position.Y else requestedPosition.Y
 
-    local leftFoot = bodyPart(model, "LeftFoot")
-    local rightFoot = bodyPart(model, "RightFoot")
-    local footBottom = math.huge
-    for _, foot in { leftFoot, rightFoot } do
-        if foot then
-            footBottom = math.min(footBottom, foot.Position.Y - foot.Size.Y * 0.5)
-        end
-    end
-    if footBottom == math.huge then
-        local boundsCFrame, boundsSize = model:GetBoundingBox()
-        footBottom = boundsCFrame.Position.Y - boundsSize.Y * 0.5
-    end
+    local rayOrigin =
+        Vector3.new(requestedPosition.X, requestedPosition.Y + 100, requestedPosition.Z)
+    local result = Workspace:Raycast(rayOrigin, Vector3.new(0, -220, 0), rayParams)
+    local groundY = if result then result.Position.Y else requestedPosition.Y
 
-    local deltaY = targetY + 0.045 - footBottom
-    model:PivotTo(CFrame.new(0, deltaY, 0) * model:GetPivot())
+    -- R15 standing height is defined by Humanoid.HipHeight plus half of the
+    -- HumanoidRootPart height. Ground from that invariant instead of trying to
+    -- infer a floor from foot/accessory bounding boxes on scaled avatar rigs.
+    local clearance = 0.08
+    local rootY = groundY + humanoid.HipHeight + root.Size.Y * 0.5 + clearance
+    local desiredRoot = CFrame.new(requestedPosition.X, rootY, requestedPosition.Z)
+        * CFrame.Angles(0, yaw or 0, 0)
+
+    local transform = desiredRoot * root.CFrame:Inverse()
+    model:PivotTo(transform * model:GetPivot())
+
+    model:SetAttribute("EverLeafGroundY", groundY)
+    model:SetAttribute("EverLeafRootY", rootY)
+    model:SetAttribute("EverLeafHipHeight", humanoid.HipHeight)
+    model:SetAttribute("EverLeafGroundClearance", clearance)
+    return true
 end
 
 function StylizedNpcFactory.Create(parent, spec)
