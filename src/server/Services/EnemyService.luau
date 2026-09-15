@@ -1,6 +1,8 @@
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local BossRewardRules = require(ReplicatedStorage.Shared.Logic.BossRewardRules)
 local EnemyDefinitions = require(script.Parent.Parent.Content.EnemyDefinitions)
 local AchievementService = require(script.Parent.AchievementService)
 local EnemyAIService = require(script.Parent.EnemyAIService)
@@ -30,6 +32,36 @@ local function chooseWinner(state)
         end
     end
     return winner
+end
+
+local function rewardRecipients(state, humanoid)
+    local config = state.Definition.MonsterConfig
+    if not config or config.Boss ~= true then
+        local winner = chooseWinner(state)
+        return winner and { winner } or {}
+    end
+
+    local eligible = {}
+    for player, damage in state.DamageByPlayer do
+        if
+            player.Parent == Players
+            and BossRewardRules.IsEligible(
+                damage,
+                humanoid.MaxHealth,
+                config.MinimumRewardContribution
+            )
+        then
+            table.insert(eligible, player)
+        end
+    end
+
+    if #eligible == 0 then
+        local winner = chooseWinner(state)
+        if winner then
+            table.insert(eligible, winner)
+        end
+    end
+    return eligible
 end
 
 function EnemyService.Register(enemy, enemyId, onDeath)
@@ -62,8 +94,9 @@ function EnemyService.Register(enemy, enemyId, onDeath)
         state.Dead = true
 
         local winner = chooseWinner(state)
-        if winner then
-            local profile = PlayerDataService.Get(winner)
+        local recipients = rewardRecipients(state, humanoid)
+        for _, recipient in recipients do
+            local profile = PlayerDataService.Get(recipient)
             if profile then
                 local changed = false
                 if definition.Reward then
@@ -75,13 +108,10 @@ function EnemyService.Register(enemy, enemyId, onDeath)
                 local achievementChanged = AchievementService.Unlock(profile, "first_victory")
                 changed = achievementChanged or changed
                 if changed then
-                    PlayerDataService.NotifyChanged(winner)
+                    PlayerDataService.NotifyChanged(recipient)
                 end
+                LootDropService.RollAndSpawn(enemyId, enemy:GetPivot().Position, recipient)
             end
-        end
-
-        if winner then
-            LootDropService.RollAndSpawn(enemyId, enemy:GetPivot().Position, winner)
         end
 
         states[enemy] = nil

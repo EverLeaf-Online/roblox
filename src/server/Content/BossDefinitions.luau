@@ -13,5 +13,6 @@ return table.freeze({
         RecommendedLevel = 30,
         MaxPlayers = 6,
         StateMachine = "BelforgeColossus",
+        MonsterId = "belforge_colossus",
     }),
 })

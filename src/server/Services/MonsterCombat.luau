@@ -73,6 +73,8 @@ local function effectColor(monsterId)
         return Color3.fromRGB(243, 79, 32)
     elseif monsterId == "belforge_sentinel" then
         return Color3.fromRGB(224, 151, 64)
+    elseif monsterId == "belforge_colossus" then
+        return Color3.fromRGB(255, 83, 34)
     end
     return Color3.fromRGB(219, 211, 172)
 end
@@ -363,8 +365,8 @@ function MonsterCombat.PlayDeath(monster)
         playSound(
             root,
             deathSound,
-            monsterId == "mosswarden" and 0.55 or 0.32,
-            monsterId == "mosswarden" and 0.7 or 0.82
+            (monsterId == "mosswarden" or monsterId == "belforge_colossus") and 0.55 or 0.32,
+            (monsterId == "mosswarden" or monsterId == "belforge_colossus") and 0.7 or 0.82
         )
 
         local burst = Instance.new("ParticleEmitter")
@@ -376,7 +378,9 @@ function MonsterCombat.PlayDeath(monster)
         burst.Rate = 0
         burst.SpreadAngle = Vector2.new(180, 180)
         burst.Parent = root
-        burst:Emit(if monsterId == "slime" then 26 else 18)
+        burst:Emit(
+            if monsterId == "belforge_colossus" then 42 else if monsterId == "slime" then 26 else 18
+        )
         Debris:AddItem(burst, 1)
 
         local debrisCount = if monsterId == "skeleton"

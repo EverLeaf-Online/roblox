@@ -98,6 +98,11 @@ return table.freeze({
         table.freeze({ ItemId = "enforcer_badge", Chance = 1, Min = 2, Max = 4 }),
         table.freeze({ ItemId = "specter_residue", Chance = 0.7, Min = 1, Max = 2 }),
     }),
+    belforge_colossus = table.freeze({
+        table.freeze({ ItemId = "belforge_colossus_core", Chance = 1, Min = 1, Max = 1 }),
+        table.freeze({ ItemId = "furnace_plate", Chance = 1, Min = 4, Max = 7 }),
+        table.freeze({ ItemId = "arc_cell", Chance = 0.8, Min = 2, Max = 4 }),
+    }),
     mosswarden = table.freeze({
         table.freeze({ ItemId = "mosswarden_core", Chance = 1, Min = 1, Max = 1 }),
         table.freeze({ ItemId = "lumen_fragment", Chance = 1, Min = 5, Max = 8 }),

@@ -1705,6 +1705,140 @@ local function buildBelforgeSentinel()
     return model
 end
 
+local function buildBelforgeColossus()
+    local definition = MonsterConfig.Get("belforge_colossus")
+    local model = buildFoundryReaver()
+    model.Name = definition.TemplateName
+    model:ScaleTo(2.05)
+    model:SetAttribute("AgentRadius", 4.5)
+    model:SetAttribute("AgentHeight", 10)
+    local humanoid = model:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid.DisplayName = definition.DisplayName
+    end
+    local root = model:FindFirstChild("HumanoidRootPart")
+    if root then
+        local oldBlade = model:FindFirstChild("ReaverBlade")
+        if oldBlade then
+            oldBlade:Destroy()
+        end
+        local oldWeaponJoint = root:FindFirstChild("WeaponJoint")
+        if oldWeaponJoint then
+            oldWeaponJoint:Destroy()
+        end
+
+        local furnace = makePart(
+            model,
+            "ColossusFurnace",
+            Vector3.new(4.4, 4.6, 1.2),
+            Color3.fromRGB(255, 82, 30),
+            Enum.Material.Neon
+        )
+        makeMotor(root, furnace, "ColossusFurnaceJoint", Vector3.new(0, 1.25, -3.0))
+        local furnaceLight = Instance.new("PointLight")
+        furnaceLight.Color = furnace.Color
+        furnaceLight.Brightness = 2.3
+        furnaceLight.Range = 22
+        furnaceLight.Parent = furnace
+
+        for _, side in { -1, 1 } do
+            local shoulder = makePart(
+                model,
+                side < 0 and "LeftPistonShoulder" or "RightPistonShoulder",
+                Vector3.new(3.0, 2.5, 3.1),
+                Color3.fromRGB(68, 66, 62),
+                Enum.Material.DiamondPlate
+            )
+            makeMotor(
+                root,
+                shoulder,
+                side < 0 and "LeftPistonShoulderJoint" or "RightPistonShoulderJoint",
+                Vector3.new(side * 4.0, 1.4, 0)
+            )
+            local stack = makePart(
+                model,
+                side < 0 and "LeftExhaust" or "RightExhaust",
+                Vector3.new(1.2, 5.2, 1.2),
+                Color3.fromRGB(61, 59, 56),
+                Enum.Material.Metal
+            )
+            makeMotor(
+                root,
+                stack,
+                side < 0 and "LeftExhaustJoint" or "RightExhaustJoint",
+                Vector3.new(side * 2.65, 4.15, 1.0)
+            )
+            local smoke = Instance.new("Smoke")
+            smoke.Color = Color3.fromRGB(91, 78, 69)
+            smoke.Opacity = 0.22
+            smoke.RiseVelocity = 5
+            smoke.Size = 5
+            smoke.Parent = stack
+        end
+
+        local hammer = makePart(
+            model,
+            "ColossusHammer",
+            Vector3.new(1.5, 8.0, 1.5),
+            Color3.fromRGB(91, 76, 61),
+            Enum.Material.Metal
+        )
+        makeMotor(
+            root,
+            hammer,
+            "WeaponJoint",
+            Vector3.new(4.6, -0.4, -0.2),
+            CFrame.Angles(0, 0, math.rad(-10))
+        )
+        local hammerHead = makePart(
+            model,
+            "HammerHead",
+            Vector3.new(5.2, 2.8, 2.8),
+            Color3.fromRGB(58, 58, 56),
+            Enum.Material.DiamondPlate
+        )
+        makeMotor(
+            root,
+            hammerHead,
+            "HammerHeadJoint",
+            Vector3.new(5.25, 3.45, -0.2),
+            CFrame.Angles(0, 0, math.rad(-10))
+        )
+        local hammerGlow = makePart(
+            model,
+            "HammerHeat",
+            Vector3.new(4.6, 0.5, 2.3),
+            Color3.fromRGB(245, 102, 39),
+            Enum.Material.Neon
+        )
+        makeMotor(
+            root,
+            hammerGlow,
+            "HammerHeatJoint",
+            Vector3.new(5.35, 3.5, -0.25),
+            CFrame.Angles(0, 0, math.rad(-10))
+        )
+
+        local helm = makePart(
+            model,
+            "ColossusHelm",
+            Vector3.new(3.6, 1.6, 3.3),
+            Color3.fromRGB(53, 55, 54),
+            Enum.Material.DiamondPlate
+        )
+        makeMotor(root, helm, "ColossusHelmJoint", Vector3.new(0, 5.0, 0))
+        local crest = makePart(
+            model,
+            "ColossusCrest",
+            Vector3.new(0.7, 3.2, 1.3),
+            Color3.fromRGB(178, 111, 48),
+            Enum.Material.Metal
+        )
+        makeMotor(root, crest, "ColossusCrestJoint", Vector3.new(0, 7.0, 0.3))
+    end
+    return model
+end
+
 local function buildMosswarden()
     local definition = MonsterConfig.Get("mosswarden")
     local model = buildBrambleback()
@@ -1778,6 +1912,7 @@ local builders = {
     molten_drake = buildMoltenDrake,
     bellows_titan = buildBellowsTitan,
     belforge_sentinel = buildBelforgeSentinel,
+    belforge_colossus = buildBelforgeColossus,
     mosswarden = buildMosswarden,
 }
 

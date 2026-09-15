@@ -42,6 +42,8 @@ local function snapshotNearbyBoss()
                         RecommendedLevel = definition.RecommendedLevel,
                         Health = humanoid.Health,
                         MaxHealth = humanoid.MaxHealth,
+                        Phase = enemy:GetAttribute("BelforgePhase"),
+                        PhaseName = enemy:GetAttribute("BelforgePhaseName"),
                     }
                 end
             end
@@ -99,11 +101,15 @@ local function BossHud(props)
         Meta = React.createElement("TextLabel", {
             AnchorPoint = Vector2.new(1, 0),
             Position = UDim2.new(1, -16, 0, 10),
-            Size = UDim2.fromOffset(130, 20),
+            Size = UDim2.fromOffset(250, 20),
             BackgroundTransparency = 1,
-            Text = boss.RecommendedLevel
-                    and string.format("Recommended Lv. %d", boss.RecommendedLevel)
-                or "FIELD BOSS",
+            Text = boss.Phase and string.format(
+                "PHASE %d · %s",
+                tonumber(boss.Phase) or 1,
+                boss.PhaseName or "Belforge"
+            ) or if boss.RecommendedLevel
+                then string.format("Recommended Lv. %d", boss.RecommendedLevel)
+                else "FIELD BOSS",
             TextColor3 = Color3.fromRGB(181, 151, 117),
             TextSize = 9,
             Font = Enum.Font.GothamMedium,

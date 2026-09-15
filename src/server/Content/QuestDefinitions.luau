@@ -450,4 +450,20 @@ return table.freeze({
             Currencies = table.freeze({ Shards = 200, Marks = 2 }),
         }),
     }),
+    belforge_colossus_trial = table.freeze({
+        DisplayName = "The Belforge Colossus",
+        MinimumLevel = 30,
+        MinimumAdvancementTier = 2,
+        StartNpcId = "belforge_oathkeeper",
+        PrerequisiteQuests = table.freeze({ "belforge_gate_sentinel" }),
+        Objectives = table.freeze({
+            table.freeze({ Type = "Defeat", Target = "belforge_colossus", Required = 1 }),
+            table.freeze({ Type = "Collect", Target = "belforge_colossus_core", Required = 1 }),
+        }),
+        Reward = table.freeze({
+            Exp = 2500,
+            Currencies = table.freeze({ Shards = 250, Marks = 3 }),
+            Items = table.freeze({ colossus_emblem = 1 }),
+        }),
+    }),
 })

@@ -299,6 +299,23 @@ return table.freeze({
         Type = "Quest",
         StackLimit = 20,
     }),
+    belforge_colossus_core = table.freeze({
+        DisplayName = "Belforge Colossus Core",
+        Description = "The stabilized furnace-heart of the Belforge Colossus.",
+        Type = "Quest",
+        StackLimit = 10,
+    }),
+    colossus_emblem = table.freeze({
+        DisplayName = "Colossus Emblem",
+        Description = "A forged ring-seal awarded for surviving the Belforge Colossus encounter.",
+        Type = "Equipment",
+        EquipmentSlot = "Ring2",
+        RequiredAdvancementTier = 2,
+        RequiredLevel = 30,
+        StackLimit = 1,
+        Stats = table.freeze({ AttackPower = 4, Might = 1, Finesse = 1, Insight = 1, Fortune = 1 }),
+        SellPrice = table.freeze({ Currency = "Shards", Amount = 50 }),
+    }),
     mosswarden_core = table.freeze({
         DisplayName = "Mosswarden Core",
         Type = "Quest",

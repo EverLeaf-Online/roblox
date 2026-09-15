@@ -14,6 +14,7 @@ local BrasshavenWorldService = {}
 local GENERATED_NAME = "EverLeafGeneratedBrasshaven"
 local ORIGIN = Vector3.new(1450, 0, 40)
 local BELFORGE_ANTECHAMBER_ORIGIN = ORIGIN + Vector3.new(430, 0, 395)
+local BELFORGE_ARENA_ORIGIN = ORIGIN + Vector3.new(650, 0, 395)
 
 local function makePart(parent, name, size, cframe, material, color)
     local part = Instance.new("Part")
@@ -909,18 +910,35 @@ local function makeBelforgeAntechamber(parent)
     sealLight.Range = 15
     sealLight.Parent = sealGlow
 
-    local spawnMarker = makePart(
-        model,
-        "BelforgeAntechamberSpawn",
-        Vector3.new(4, 1, 4),
-        CFrame.new(origin + Vector3.new(-38, 0.5, 0)),
-        Enum.Material.SmoothPlastic,
-        Color3.new(0, 0, 0)
-    )
+    local arenaPrompt = Instance.new("ProximityPrompt")
+    arenaPrompt.Name = "ColossusArenaPrompt"
+    arenaPrompt.ActionText = "Enter Arena"
+    arenaPrompt.ObjectText = "Belforge Colossus · Tier 2"
+    arenaPrompt.KeyboardKeyCode = Enum.KeyCode.E
+    arenaPrompt.MaxActivationDistance = 11
+    arenaPrompt.RequiresLineOfSight = false
+    arenaPrompt.Parent = innerDoor
+    arenaPrompt.Triggered:Connect(function(player)
+        local profile = PlayerDataService.Get(player)
+        local allowed = BelforgeAccessRules.CanEnterColossus(profile)
+        if not allowed then
+            return
+        end
+        WorldTravelService.SetRespawn(player, "belforge_antechamber")
+        WorldTravelService.Teleport(player, "belforge_colossus_arena")
+    end)
+
+    local spawnMarker = Instance.new("SpawnLocation")
+    spawnMarker.Name = "BelforgeAntechamberSpawn"
+    spawnMarker.Size = Vector3.new(4, 1, 4)
+    spawnMarker.CFrame = CFrame.new(origin + Vector3.new(-38, 0.5, 0))
+    spawnMarker.Anchored = true
+    spawnMarker.Neutral = true
     spawnMarker.Transparency = 1
     spawnMarker.CanCollide = false
     spawnMarker.CanTouch = false
     spawnMarker.CanQuery = false
+    spawnMarker.Parent = model
     WorldTravelService.RegisterSpawn("belforge_antechamber", spawnMarker)
 
     local returnPad = makePart(
@@ -940,12 +958,13 @@ local function makeBelforgeAntechamber(parent)
     returnPrompt.RequiresLineOfSight = false
     returnPrompt.Parent = returnPad
     returnPrompt.Triggered:Connect(function(player)
+        WorldTravelService.SetRespawn(player, "brasshaven_start")
         WorldTravelService.Teleport(player, "belforge_threshold_return")
     end)
 
     makeBelforgeOathkeeper(model, origin + Vector3.new(-8, 0, 17))
     makeLabel(model, origin + Vector3.new(4, 22, 0), "BELFORGE ANTECHAMBER · COLOSSUS SEAL")
-    makeLabel(model, origin + Vector3.new(45, 15, 0), "BELFORGE COLOSSUS · ENCOUNTER NOT YET OPEN")
+    makeLabel(model, origin + Vector3.new(45, 15, 0), "BELFORGE COLOSSUS · TIER 2 ARENA")
     return model
 end
 
@@ -970,6 +989,164 @@ local function makeMonsterSpawnTrigger(parent, name, position, config)
     trigger.Parent = parent
     CollectionService:AddTag(trigger, "MonsterSpawnTrigger")
     return trigger
+end
+
+local function makeBelforgeArena(parent)
+    local model = Instance.new("Model")
+    model.Name = "BelforgeColossusArena"
+    model.Parent = parent
+    local origin = BELFORGE_ARENA_ORIGIN
+    local stone = Color3.fromRGB(48, 46, 44)
+    local iron = Color3.fromRGB(61, 59, 56)
+    local brass = Color3.fromRGB(147, 96, 45)
+
+    makePart(
+        model,
+        "ArenaFloor",
+        Vector3.new(210, 7, 170),
+        CFrame.new(origin + Vector3.new(0, -3.5, 0)),
+        Enum.Material.Basalt,
+        stone
+    )
+    makePart(
+        model,
+        "NorthWall",
+        Vector3.new(210, 30, 6),
+        CFrame.new(origin + Vector3.new(0, 15, -82)),
+        Enum.Material.Brick,
+        stone
+    )
+    makePart(
+        model,
+        "SouthWall",
+        Vector3.new(210, 30, 6),
+        CFrame.new(origin + Vector3.new(0, 15, 82)),
+        Enum.Material.Brick,
+        stone
+    )
+    makePart(
+        model,
+        "EastWall",
+        Vector3.new(6, 30, 170),
+        CFrame.new(origin + Vector3.new(102, 15, 0)),
+        Enum.Material.Brick,
+        stone
+    )
+    makePart(
+        model,
+        "WestWall",
+        Vector3.new(6, 30, 170),
+        CFrame.new(origin + Vector3.new(-102, 15, 0)),
+        Enum.Material.Brick,
+        stone
+    )
+
+    for index = -3, 3 do
+        if index ~= 0 then
+            local column = makePart(
+                model,
+                "ArenaColumn" .. tostring(index + 4),
+                Vector3.new(5.5, 18, 5.5),
+                CFrame.new(origin + Vector3.new(index * 24, 9, if index % 2 == 0 then -58 else 58)),
+                Enum.Material.Metal,
+                iron
+            )
+            column.CanCollide = true
+            local band = makePart(
+                model,
+                "ArenaColumnBand" .. tostring(index + 4),
+                Vector3.new(6.0, 0.8, 6.0),
+                CFrame.new(origin + Vector3.new(index * 24, 12, if index % 2 == 0 then -58 else 58)),
+                Enum.Material.Metal,
+                brass
+            )
+            band.CanCollide = false
+        end
+    end
+
+    for _, spec in
+        {
+            { Vector3.new(-72, 0, -55), 0.92 },
+            { Vector3.new(-72, 0, 55), 0.92 },
+            { Vector3.new(72, 0, -55), 1.05 },
+            { Vector3.new(72, 0, 55), 1.05 },
+        }
+    do
+        local vent = makePart(
+            model,
+            "ArenaVent",
+            Vector3.new(7, 0.7, 7) * spec[2],
+            CFrame.new(origin + spec[1] + Vector3.new(0, 0.35, 0)),
+            Enum.Material.Basalt,
+            stone
+        )
+        vent.Shape = Enum.PartType.Cylinder
+        vent.Orientation = Vector3.new(0, 0, 90)
+        vent.CanCollide = false
+        local glow = makePart(
+            model,
+            "ArenaVentHeat",
+            Vector3.new(4.8, 0.24, 4.8) * spec[2],
+            CFrame.new(origin + spec[1] + Vector3.new(0, 0.76, 0)),
+            Enum.Material.Neon,
+            Color3.fromRGB(238, 87, 31)
+        )
+        glow.Shape = Enum.PartType.Cylinder
+        glow.Orientation = Vector3.new(0, 0, 90)
+        glow.CanCollide = false
+        glow.CanTouch = false
+        local light = Instance.new("PointLight")
+        light.Color = glow.Color
+        light.Brightness = 1.2
+        light.Range = 12
+        light.Parent = glow
+    end
+
+    local arenaSpawn = makePart(
+        model,
+        "ColossusArenaSpawn",
+        Vector3.new(4, 1, 4),
+        CFrame.new(origin + Vector3.new(-78, 0.5, 0)),
+        Enum.Material.SmoothPlastic,
+        Color3.new(0, 0, 0)
+    )
+    arenaSpawn.Transparency = 1
+    arenaSpawn.CanCollide = false
+    arenaSpawn.CanTouch = false
+    arenaSpawn.CanQuery = false
+    WorldTravelService.RegisterSpawn("belforge_colossus_arena", arenaSpawn)
+
+    local returnPad = makePart(
+        model,
+        "ArenaReturnPad",
+        Vector3.new(9, 0.7, 9),
+        CFrame.new(origin + Vector3.new(-88, 0.35, 0)),
+        Enum.Material.Metal,
+        brass
+    )
+    returnPad.CanCollide = false
+    local returnPrompt = Instance.new("ProximityPrompt")
+    returnPrompt.ActionText = "Leave Arena"
+    returnPrompt.ObjectText = "Belforge Antechamber"
+    returnPrompt.KeyboardKeyCode = Enum.KeyCode.E
+    returnPrompt.MaxActivationDistance = 10
+    returnPrompt.RequiresLineOfSight = false
+    returnPrompt.Parent = returnPad
+    returnPrompt.Triggered:Connect(function(player)
+        WorldTravelService.Teleport(player, "belforge_antechamber")
+    end)
+
+    makeLabel(model, origin + Vector3.new(0, 28, 0), "BELFORGE COLOSSUS ARENA")
+    makeMonsterSpawnTrigger(model, "BelforgeColossusEncounter", origin + Vector3.new(28, 0, 0), {
+        MonsterType = "BelforgeColossus",
+        SpawnAmount = 1,
+        TriggerRadius = 58,
+        SpawnRadius = 4,
+        MaxAliveMonster = 1,
+        SpawnDelay = 0,
+        RespawnTime = 600,
+    })
+    return model
 end
 
 local function makeScrapPile(parent, position, yaw, scale)
@@ -1607,6 +1784,7 @@ function BrasshavenWorldService.Init()
     makeEastworksEngineer(world, ORIGIN + Vector3.new(92, 0, 112))
     makeBelforgeMarshal(world, ORIGIN + Vector3.new(0, 0, 276))
     makeBelforgeAntechamber(world)
+    makeBelforgeArena(world)
     makeFoundryVendor(
         world,
         "foundry_quartermaster",

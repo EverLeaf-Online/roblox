@@ -114,7 +114,7 @@
 - [ ] Rejoin preserves expected profile/inventory/equipment/quest state.
 - [ ] Keyboard/mouse full pass.
 - [ ] Gamepad/controller blocking-flow pass.
-- [ ] Multi-client basic party/network smoke test.
+- [ ] Multi-client basic party/network smoke test; boss contributor rewards are source-complete but still need live multi-client verification.
 - [ ] Full `./check.sh` gate passes at final Phase 1 checkpoint.
 - [ ] Studio Output contains no red errors during the canonical Phase 1 run.
 
@@ -503,19 +503,19 @@
 
 ## 18. Boss — Belforge Colossus
 
-- [ ] Encounter concept lock.
-- [ ] Arena.
-- [ ] Boss model/art.
-- [ ] Boss state machine.
-- [ ] Attack patterns.
-- [ ] Telegraphs.
-- [ ] Phases.
-- [ ] Enrage/failure conditions if used.
-- [ ] Party scaling rules if used.
-- [ ] Rewards/drop table.
-- [ ] Death/respawn/re-entry rules.
-- [ ] VFX/SFX/music.
-- [ ] Balance/playtest pass.
+- [x] Encounter concept locked around a Level-30 Tier-2 Belforge arena fight.
+- [x] Dedicated arena and gated antechamber entry implemented.
+- [x] Procedural Colossus model/rig implemented in the authoritative enemy pipeline.
+- [x] Boss phase runtime implemented on top of normal enemy AI/combat.
+- [x] Telegraph-based Steam Burst and Hammerfall special attacks implemented.
+- [x] Floor telegraphs and server-authoritative AoE damage/knockback implemented.
+- [x] Three phases implemented: Pressure Rising, Furnace Breach, Critical Overheat.
+- [ ] Full encounter failure/wipe/active-fight lockout rules.
+- [x] Boss contributor rewards now grant qualifying participants individual reward/quest credit and owner-locked loot.
+- [x] Reward/drop path implemented: Colossus Core, Shards, Marks, EXP, Colossus Emblem quest reward.
+- [x] Arena death returns players to the Belforge antechamber; leaving Belforge restores Brasshaven respawn.
+- [ ] Final VFX/SFX/music pass.
+- [ ] Studio balance/playtest pass.
 
 ## 19. UI / HUD / UX
 

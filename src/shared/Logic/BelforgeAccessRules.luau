@@ -18,4 +18,15 @@ function BelforgeAccessRules.CanEnter(profile)
     return true
 end
 
+function BelforgeAccessRules.CanEnterColossus(profile)
+    local allowed, reason = BelforgeAccessRules.CanEnter(profile)
+    if not allowed then
+        return false, reason
+    end
+    if (tonumber(profile.AdvancementTier) or 0) < 2 then
+        return false, "second_advancement_required"
+    end
+    return true
+end
+
 return BelforgeAccessRules

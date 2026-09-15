@@ -32,6 +32,7 @@ local RIG_BY_MONSTER = table.freeze({
     molten_drake = "quadruped",
     bellows_titan = "slime",
     belforge_sentinel = "skeleton",
+    belforge_colossus = "skeleton",
     lumen_wisp = "wisp",
 })
 

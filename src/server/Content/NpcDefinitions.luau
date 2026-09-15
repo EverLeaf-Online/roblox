@@ -104,9 +104,9 @@ return table.freeze({
         AdvancementTargetTier = 2,
         Dialogue = table.freeze({
             "The first path named what you were willing to become. The second names what you can carry. If you reached this chamber at Level 30, your family is ready to deepen its oath.",
-            "Your second oath is sealed. The Belforge does not care about titles, but the techniques you carry beyond this point will.",
+            "Your second oath is sealed. The Colossus waits beyond the inner seal. Take its core and prove this path can survive the Belforge itself.",
         }),
-        QuestOffers = table.freeze({}),
+        QuestOffers = table.freeze({ "belforge_colossus_trial" }),
     }),
     belforge_marshal = table.freeze({
         DisplayName = "Rook · Belforge Marshal",
