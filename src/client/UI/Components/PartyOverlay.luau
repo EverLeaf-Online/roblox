@@ -322,65 +322,57 @@ local function PartyOverlay(props)
                             TextXAlignment = Enum.TextXAlignment.Left,
                             ZIndex = 63,
                         }),
-                        PartyAccept = React.createElement(
-                            "TextButton",
-                            {
-                                AnchorPoint = Vector2.new(1, 0.5),
-                                Position = UDim2.new(1, -102, 0.5, 0),
-                                Size = UDim2.fromOffset(88, 34),
-                                BackgroundColor3 = Color3.fromRGB(39, 88, 65),
-                                BorderSizePixel = 0,
-                                Text = "ACCEPT",
-                                TextColor3 = Color3.fromRGB(205, 255, 229),
-                                TextSize = 9,
-                                Font = Enum.Font.GothamBold,
-                                Selectable = true,
-                                ZIndex = 64,
-                                [React.Event.Activated] = function()
-                                    runPartyAction("party.accept", {}, "Party joined.", setStatus)
-                                end,
-                            },
-                            {
-                                Corner = React.createElement(
-                                    "UICorner",
-                                    { CornerRadius = UDim.new(0, 5) }
-                                ),
-                            }
-                        ),
-                        PartyDecline = React.createElement(
-                            "TextButton",
-                            {
-                                AnchorPoint = Vector2.new(1, 0.5),
-                                Position = UDim2.new(1, -10, 0.5, 0),
-                                Size = UDim2.fromOffset(82, 34),
-                                BackgroundColor3 = Color3.fromRGB(55, 47, 43),
-                                BorderSizePixel = 0,
-                                Text = "DECLINE",
-                                TextColor3 = Color3.fromRGB(207, 190, 175),
-                                TextSize = 9,
-                                Font = Enum.Font.GothamBold,
-                                Selectable = true,
-                                ZIndex = 64,
-                                [React.Event.Activated] = function()
-                                    if
-                                        runPartyAction(
-                                            "party.decline",
-                                            {},
-                                            "Invite declined.",
-                                            setStatus
-                                        )
-                                    then
-                                        PartyStore.Push({ Type = "InviteCleared" })
-                                    end
-                                end,
-                            },
-                            {
-                                Corner = React.createElement(
-                                    "UICorner",
-                                    { CornerRadius = UDim.new(0, 5) }
-                                ),
-                            }
-                        ),
+                        PartyAccept = React.createElement("TextButton", {
+                            AnchorPoint = Vector2.new(1, 0.5),
+                            Position = UDim2.new(1, -102, 0.5, 0),
+                            Size = UDim2.fromOffset(88, 34),
+                            BackgroundColor3 = Color3.fromRGB(39, 88, 65),
+                            BorderSizePixel = 0,
+                            Text = "ACCEPT",
+                            TextColor3 = Color3.fromRGB(205, 255, 229),
+                            TextSize = 9,
+                            Font = Enum.Font.GothamBold,
+                            Selectable = true,
+                            ZIndex = 64,
+                            [React.Event.Activated] = function()
+                                runPartyAction("party.accept", {}, "Party joined.", setStatus)
+                            end,
+                        }, {
+                            Corner = React.createElement(
+                                "UICorner",
+                                { CornerRadius = UDim.new(0, 5) }
+                            ),
+                        }),
+                        PartyDecline = React.createElement("TextButton", {
+                            AnchorPoint = Vector2.new(1, 0.5),
+                            Position = UDim2.new(1, -10, 0.5, 0),
+                            Size = UDim2.fromOffset(82, 34),
+                            BackgroundColor3 = Color3.fromRGB(55, 47, 43),
+                            BorderSizePixel = 0,
+                            Text = "DECLINE",
+                            TextColor3 = Color3.fromRGB(207, 190, 175),
+                            TextSize = 9,
+                            Font = Enum.Font.GothamBold,
+                            Selectable = true,
+                            ZIndex = 64,
+                            [React.Event.Activated] = function()
+                                if
+                                    runPartyAction(
+                                        "party.decline",
+                                        {},
+                                        "Invite declined.",
+                                        setStatus
+                                    )
+                                then
+                                    PartyStore.Push({ Type = "InviteCleared" })
+                                end
+                            end,
+                        }, {
+                            Corner = React.createElement(
+                                "UICorner",
+                                { CornerRadius = UDim.new(0, 5) }
+                            ),
+                        }),
                         Corner = React.createElement("UICorner", { CornerRadius = UDim.new(0, 7) }),
                         Stroke = React.createElement("UIStroke", {
                             Color = Color3.fromRGB(102, 155, 130),
@@ -424,62 +416,54 @@ local function PartyOverlay(props)
                             TextXAlignment = Enum.TextXAlignment.Left,
                             ZIndex = 63,
                         }),
-                        PartyReady = React.createElement(
-                            "TextButton",
-                            {
-                                AnchorPoint = Vector2.new(1, 0.5),
-                                Position = UDim2.new(1, -102, 0.5, 0),
-                                Size = UDim2.fromOffset(88, 34),
-                                BackgroundColor3 = selfReady and Color3.fromRGB(39, 57, 48)
-                                    or Color3.fromRGB(39, 88, 65),
-                                BorderSizePixel = 0,
-                                Text = selfReady and "READY" or "I'M READY",
-                                TextColor3 = selfReady and Color3.fromRGB(121, 184, 151)
-                                    or Color3.fromRGB(205, 255, 229),
-                                TextSize = 9,
-                                Font = Enum.Font.GothamBold,
-                                Active = not selfReady,
-                                AutoButtonColor = not selfReady,
-                                Selectable = not selfReady,
-                                ZIndex = 64,
-                                [React.Event.Activated] = if selfReady
-                                    then nil
-                                    else function()
-                                        respondReady(true)
-                                    end,
-                            },
-                            {
-                                Corner = React.createElement(
-                                    "UICorner",
-                                    { CornerRadius = UDim.new(0, 5) }
-                                ),
-                            }
-                        ),
-                        PartyReadyDecline = React.createElement(
-                            "TextButton",
-                            {
-                                AnchorPoint = Vector2.new(1, 0.5),
-                                Position = UDim2.new(1, -10, 0.5, 0),
-                                Size = UDim2.fromOffset(82, 34),
-                                BackgroundColor3 = Color3.fromRGB(79, 48, 43),
-                                BorderSizePixel = 0,
-                                Text = selfReady and "CANCEL" or "DECLINE",
-                                TextColor3 = Color3.fromRGB(235, 190, 173),
-                                TextSize = 9,
-                                Font = Enum.Font.GothamBold,
-                                Selectable = true,
-                                ZIndex = 64,
-                                [React.Event.Activated] = function()
-                                    respondReady(false)
+                        PartyReady = React.createElement("TextButton", {
+                            AnchorPoint = Vector2.new(1, 0.5),
+                            Position = UDim2.new(1, -102, 0.5, 0),
+                            Size = UDim2.fromOffset(88, 34),
+                            BackgroundColor3 = selfReady and Color3.fromRGB(39, 57, 48)
+                                or Color3.fromRGB(39, 88, 65),
+                            BorderSizePixel = 0,
+                            Text = selfReady and "READY" or "I'M READY",
+                            TextColor3 = selfReady and Color3.fromRGB(121, 184, 151)
+                                or Color3.fromRGB(205, 255, 229),
+                            TextSize = 9,
+                            Font = Enum.Font.GothamBold,
+                            Active = not selfReady,
+                            AutoButtonColor = not selfReady,
+                            Selectable = not selfReady,
+                            ZIndex = 64,
+                            [React.Event.Activated] = if selfReady
+                                then nil
+                                else function()
+                                    respondReady(true)
                                 end,
-                            },
-                            {
-                                Corner = React.createElement(
-                                    "UICorner",
-                                    { CornerRadius = UDim.new(0, 5) }
-                                ),
-                            }
-                        ),
+                        }, {
+                            Corner = React.createElement(
+                                "UICorner",
+                                { CornerRadius = UDim.new(0, 5) }
+                            ),
+                        }),
+                        PartyReadyDecline = React.createElement("TextButton", {
+                            AnchorPoint = Vector2.new(1, 0.5),
+                            Position = UDim2.new(1, -10, 0.5, 0),
+                            Size = UDim2.fromOffset(82, 34),
+                            BackgroundColor3 = Color3.fromRGB(79, 48, 43),
+                            BorderSizePixel = 0,
+                            Text = selfReady and "CANCEL" or "DECLINE",
+                            TextColor3 = Color3.fromRGB(235, 190, 173),
+                            TextSize = 9,
+                            Font = Enum.Font.GothamBold,
+                            Selectable = true,
+                            ZIndex = 64,
+                            [React.Event.Activated] = function()
+                                respondReady(false)
+                            end,
+                        }, {
+                            Corner = React.createElement(
+                                "UICorner",
+                                { CornerRadius = UDim.new(0, 5) }
+                            ),
+                        }),
                         Corner = React.createElement("UICorner", { CornerRadius = UDim.new(0, 7) }),
                         Stroke = React.createElement("UIStroke", {
                             Color = Color3.fromRGB(183, 126, 69),
