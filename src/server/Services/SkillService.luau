@@ -99,7 +99,13 @@ function SkillService.Use(player, profile, skillId)
 
     local effectOk, result = SkillEffectService.Execute(player, profile, definitionOrReason)
     if effectOk then
-        return true, result
+        local response = if type(result) == "table"
+            then table.clone(result)
+            else { Result = result }
+        response.SkillId = skillId
+        response.Cooldown = tonumber(definitionOrReason.Cooldown) or 0
+        response.MPCost = transaction.MPCost
+        return true, response
     end
 
     local state = cooldowns[player]

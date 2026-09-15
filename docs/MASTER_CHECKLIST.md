@@ -342,7 +342,7 @@
 - [x] Server skill cooldown foundation.
 - [ ] Targeting shapes/ranges.
 - [ ] Skill animation/VFX/SFX hooks.
-- [x] Persistent 8-slot skill hotbar data/service foundation with React hotbar shell and full slot-select/assign/move/clear UX.
+- [x] Persistent 8-slot skill hotbar data/service foundation with React hotbar shell, full slot-select/assign/move/clear UX, MP-cost display, low-MP state, and cooldown countdown feedback.
 - [x] Keyboard and controller hotbar 1–8 skill-use bindings are source-complete; slot 1 Beginner Strike remains Studio-verified.
 - [ ] Skill tree UI.
 
@@ -540,7 +540,7 @@
 - [x] React NPC dialogue with clickable quest/shop actions verified in Studio; visual polish remains.
 - [ ] **PARTIAL:** Shop action is exposed through the React dialogue shell; dedicated shop screen pending.
 - [x] Field-boss HUD implemented for nearby catalogued bosses with name, recommended level, HP, and percentage.
-- [ ] Notifications/toasts.
+- [ ] **PARTIAL:** Toast framework is live for world denials, party events, rewards/quests, and skill-use failures; broader notification coverage/polish remains.
 - [x] React settings controls mutate music/SFX/damage-number preferences server-side; menu action shell is Studio-verified, visual polish remains.
 - [ ] Responsive layout testing.
 

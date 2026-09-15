@@ -10,6 +10,7 @@ local ActionClient = require(script.Parent.Parent.Services.ActionClient)
 local CatalogClient = require(script.Parent.Parent.Services.CatalogClient)
 local PartyStore = require(script.Parent.Parent.State.PartyStore)
 local ProfileStore = require(script.Parent.Parent.State.ProfileStore)
+local SkillCooldownStore = require(script.Parent.Parent.State.SkillCooldownStore)
 local EverLeafIcons = require(script.Parent.Parent.UI.EverLeafIcons)
 local NotificationStore = require(script.Parent.Parent.UI.NotificationStore)
 local StatText = require(script.Parent.Parent.UI.StatText)
@@ -389,9 +390,27 @@ local function objectiveText(objective, progress)
 end
 
 local function Hotbar(props)
+    local now, setNow = React.useState(os.clock())
+    React.useEffect(function()
+        local active = true
+        task.spawn(function()
+            while active do
+                task.wait(0.1)
+                if active then
+                    setNow(os.clock())
+                end
+            end
+        end)
+        return function()
+            active = false
+        end
+    end, {})
+
     local catalog = CatalogClient.Get()
     local profile = props.Profile or {}
     local hotbar = profile.Skills and profile.Skills.Hotbar or {}
+    local resources = profile.Resources or {}
+    local currentMP = tonumber(resources.CurrentMP) or 0
     local children = {}
 
     for index = 1, 8 do
@@ -401,6 +420,17 @@ local function Hotbar(props)
             then definition.DisplayName
             else if skillId then tostring(skillId) else "Empty"
         local occupied = skillId ~= nil and skillId ~= ""
+        local mpCost = definition and (tonumber(definition.MPCost) or 0) or 0
+        local cooldownDuration = definition and (tonumber(definition.Cooldown) or 0) or 0
+        local cooldownRemaining = occupied and SkillCooldownStore.Remaining(skillId, now) or 0
+        local cooldownFraction = if cooldownDuration > 0
+            then math.clamp(cooldownRemaining / cooldownDuration, 0, 1)
+            else 0
+        local lowMP = occupied and mpCost > currentMP
+        local strokeColor = if lowMP
+            then COLORS.Danger
+            else if occupied then COLORS.BorderStrong else COLORS.Border
+
         children["Slot" .. index] = React.createElement(
             "Frame",
             {
@@ -409,6 +439,7 @@ local function Hotbar(props)
                 BackgroundColor3 = occupied and COLORS.PanelRaised or COLORS.PanelDeep,
                 BackgroundTransparency = occupied and 0.02 or 0.2,
                 BorderSizePixel = 0,
+                ClipsDescendants = true,
                 ZIndex = 3,
             },
             withChrome({
@@ -419,7 +450,7 @@ local function Hotbar(props)
                         Size = UDim2.fromOffset(20, 18),
                         BackgroundColor3 = occupied and COLORS.AccentDark or COLORS.Surface,
                         BorderSizePixel = 0,
-                        ZIndex = 4,
+                        ZIndex = 6,
                     },
                     withChrome({
                         Text = React.createElement(Label, {
@@ -429,17 +460,55 @@ local function Hotbar(props)
                             TextSize = 10,
                             Bold = true,
                             Align = Enum.TextXAlignment.Center,
-                            Color = occupied and COLORS.Accent or COLORS.Muted,
-                            ZIndex = 5,
+                            Color = lowMP and Color3.fromRGB(255, 182, 182)
+                                or if occupied then COLORS.Accent else COLORS.Muted,
+                            ZIndex = 7,
                         }),
                     }, 5)
                 ),
-                SkillIcon = occupied and React.createElement(Icon, {
-                    Position = UDim2.new(0.5, 0, 0, 8),
+                Cost = occupied and mpCost > 0 and React.createElement(Label, {
+                    AnchorPoint = Vector2.new(1, 0),
+                    Position = UDim2.new(1, -4, 0, 4),
+                    Size = UDim2.fromOffset(34, 14),
+                    Text = tostring(mpCost) .. " MP",
+                    TextSize = 7,
+                    Bold = true,
+                    Align = Enum.TextXAlignment.Right,
+                    Color = lowMP and Color3.fromRGB(255, 151, 151) or COLORS.Mana,
+                    ZIndex = 7,
+                }) or nil,
+                SkillIcon = occupied
+                        and React.createElement(Icon, {
+                            Position = UDim2.new(0.5, 0, 0, 8),
+                            AnchorPoint = Vector2.new(0.5, 0),
+                            Size = UDim2.fromOffset(30, 30),
+                            Image = SKILL_ICONS[skillId] or EverLeafIcons.Skills,
+                            ImageTransparency = cooldownRemaining > 0 and 0.42
+                                or if lowMP then 0.28 else 0,
+                            ZIndex = 4,
+                        })
+                    or nil,
+                CooldownBack = cooldownRemaining > 0 and React.createElement("Frame", {
                     AnchorPoint = Vector2.new(0.5, 0),
-                    Size = UDim2.fromOffset(30, 30),
-                    Image = SKILL_ICONS[skillId] or EverLeafIcons.Skills,
-                    ZIndex = 4,
+                    Position = UDim2.new(0.5, 0, 0, 7),
+                    Size = UDim2.fromOffset(36, 34),
+                    BackgroundColor3 = COLORS.Backdrop,
+                    BackgroundTransparency = 0.12 + (1 - cooldownFraction) * 0.28,
+                    BorderSizePixel = 0,
+                    ZIndex = 5,
+                }, withChrome(nil, 6, COLORS.Border, 0.7, 1)) or nil,
+                Cooldown = cooldownRemaining > 0 and React.createElement(Label, {
+                    AnchorPoint = Vector2.new(0.5, 0),
+                    Position = UDim2.new(0.5, 0, 0, 12),
+                    Size = UDim2.fromOffset(44, 24),
+                    Text = if cooldownRemaining >= 10
+                        then string.format("%.0f", cooldownRemaining)
+                        else string.format("%.1f", cooldownRemaining),
+                    TextSize = 11,
+                    Bold = true,
+                    Align = Enum.TextXAlignment.Center,
+                    Color = COLORS.Text,
+                    ZIndex = 8,
                 }) or nil,
                 Skill = React.createElement(Label, {
                     Position = UDim2.fromOffset(4, 38),
@@ -448,10 +517,11 @@ local function Hotbar(props)
                     TextSize = 8,
                     Align = Enum.TextXAlignment.Center,
                     Wrapped = true,
-                    Color = occupied and COLORS.Text or COLORS.Faint,
-                    ZIndex = 4,
+                    Color = lowMP and Color3.fromRGB(225, 151, 151)
+                        or if occupied then COLORS.Text else COLORS.Faint,
+                    ZIndex = 7,
                 }),
-            }, 9, occupied and COLORS.BorderStrong or COLORS.Border, occupied and 0.34 or 0.65, 1)
+            }, 9, strokeColor, occupied and 0.34 or 0.65, 1)
         )
     end
 

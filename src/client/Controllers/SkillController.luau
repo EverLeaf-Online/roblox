@@ -4,9 +4,34 @@ local UserInputService = game:GetService("UserInputService")
 
 local ActionClient = require(script.Parent.Parent.Services.ActionClient)
 local ProfileStore = require(script.Parent.Parent.State.ProfileStore)
+local SkillCooldownStore = require(script.Parent.Parent.State.SkillCooldownStore)
+local NotificationStore = require(script.Parent.Parent.UI.NotificationStore)
 
 local SkillController = {}
 local player = Players.LocalPlayer
+local lastFailureAt = {}
+
+local FAILURE_TEXT = table.freeze({
+    no_target = "No valid target is in range.",
+    cooldown = "That skill is still cooling down.",
+    insufficient_mp = "You do not have enough MP.",
+    skill_not_learned = "That skill has not been learned.",
+    invalid_skill = "That hotbar skill is unavailable.",
+})
+
+local function showFailure(reason)
+    local text = FAILURE_TEXT[reason]
+    if not text then
+        warn(string.format("[SkillController] skill use failed: %s", tostring(reason)))
+        return
+    end
+    local now = os.clock()
+    if now - (lastFailureAt[reason] or -math.huge) < 0.75 then
+        return
+    end
+    lastFailureAt[reason] = now
+    NotificationStore.Push("warning", "Skill Unavailable", text, 1.6)
+end
 
 local keyToSlot = {
     [Enum.KeyCode.One] = 1,
@@ -52,8 +77,12 @@ local function useSlot(slotIndex)
 
     task.spawn(function()
         local ok, result = ActionClient.Invoke("skill.use", { SkillId = skillId })
-        if not ok and result ~= "no_target" and result ~= "cooldown" then
-            warn(string.format("[SkillController] %s failed: %s", skillId, tostring(result)))
+        if not ok then
+            showFailure(result)
+            return
+        end
+        if type(result) == "table" then
+            SkillCooldownStore.Start(skillId, result.Cooldown)
         end
     end)
 end
