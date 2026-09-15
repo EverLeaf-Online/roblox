@@ -7,6 +7,7 @@ local PlayerDamageFeedbackRules = require(ReplicatedStorage.Shared.Logic.PlayerD
 local DerivedStatsService = require(script.Parent.DerivedStatsService)
 local MovementSanityService = require(script.Parent.MovementSanityService)
 local PlayerDataService = require(script.Parent.PlayerDataService)
+local StatusEffectService = require(script.Parent.StatusEffectService)
 
 local PlayerDamageService = {}
 local damageEvent = Instance.new("BindableEvent")
@@ -22,6 +23,7 @@ local function applyStagger(player, duration)
     local generation = (staggerGeneration[player] or 0) + 1
     staggerGeneration[player] = generation
     player:SetAttribute("EverLeafStaggered", true)
+    StatusEffectService.Apply(player, "staggered", duration, { Source = "incoming_damage" })
     task.delay(duration, function()
         if player.Parent == Players and staggerGeneration[player] == generation then
             player:SetAttribute("EverLeafStaggered", false)

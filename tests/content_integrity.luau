@@ -12,7 +12,14 @@ local Families = require("../src/server/Content/ClassFamilyDefinitions")
 local MonsterConfig = require("../src/server/Content/MonsterConfig")
 local EquipmentTypeRules = require("../src/shared/Logic/EquipmentTypeRules")
 local WeaponCombatProfiles = require("../src/shared/WeaponCombatProfiles")
+local StatusEffectDefinitions = require("../src/shared/StatusEffectDefinitions")
+local StatusEffectRules = require("../src/shared/Logic/StatusEffectRules")
 local currencies = { Shards = true, Marks = true }
+
+for effectId, definition in StatusEffectDefinitions do
+    local ok, reason = StatusEffectRules.ValidateDefinition(effectId, definition)
+    assert(ok, string.format("status effect %s valid: %s", effectId, tostring(reason)))
+end
 
 for itemId, definition in Items do
     assert(
@@ -275,6 +282,12 @@ for skillId, skill in Skills do
             "skill prerequisite rank valid: " .. skillId
         )
         assert(requirement.SkillId ~= skillId, "skill cannot require itself: " .. skillId)
+    end
+    if skill.Effect and skill.Effect.Type == "SelfStatus" then
+        assert(
+            StatusEffectDefinitions[skill.Effect.StatusId] ~= nil,
+            "status skill references known status: " .. skillId
+        )
     end
     if skill.Effect and skill.Effect.Type == "DamageAttack" then
         assert(

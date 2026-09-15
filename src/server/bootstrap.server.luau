@@ -99,19 +99,24 @@ local function syncPlayerWorld(player, profile, moveCharacter)
     end
 end
 
+local function replicateSnapshot(player)
+    local snapshot = SnapshotService.Build(player)
+    if snapshot and player.Parent == Players then
+        profileChanged:FireClient(player, snapshot)
+    end
+end
+
 local function replicateProfile(player)
     CharacterStatsService.Apply(player, false)
     local profile = PlayerDataService.Get(player)
     if profile then
         EquipmentVisualService.Apply(player, profile)
     end
-    local snapshot = SnapshotService.Build(player)
-    if snapshot then
-        profileChanged:FireClient(player, snapshot)
-    end
+    replicateSnapshot(player)
 end
 
 PlayerDataService.Changed:Connect(replicateProfile)
+StatusEffectService.Changed:Connect(replicateSnapshot)
 PartyService.Event:Connect(function(player, eventData)
     if player.Parent == Players then
         partyEvent:FireClient(player, eventData)
@@ -150,6 +155,7 @@ local function onPlayerAdded(player)
 
     player.CharacterAdded:Connect(function()
         player:SetAttribute("EverLeafCrouching", false)
+        StatusEffectService.Clear(player)
         task.defer(function()
             local profile = PlayerDataService.Get(player)
             if profile then

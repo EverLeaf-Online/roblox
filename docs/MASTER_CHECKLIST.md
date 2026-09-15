@@ -554,7 +554,7 @@
 - [x] React level display verified in Studio; polish/scalability remains.
 - [x] React currency display verified in Studio; polish/scalability remains.
 - [x] Persistent 8-slot skill hotbar data/service foundation with full React slot-select/assign/move/clear editor, MP-cost/low-MP state, and live cooldown countdown feedback.
-- [ ] Buff/debuff display.
+- [x] Live buff/debuff strip is wired to server status snapshots with local duration countdown, buff/debuff visual tone, status metadata validation, respawn clearing, and incoming stagger represented as a real timed debuff; Studio visual QA remains.
 - [x] React character/stat menu supports server-authoritative AP allocation and now surfaces Max HP/MP, Defense, Crit Chance, and Crit Damage; polish remains.
 - [x] React inventory/equipment menu exposes a 48-capacity visual grid, use/equip/unequip actions, level/tier/family lock states, and candidate-vs-equipped stat deltas; Studio polish/QA remains.
 - [ ] **PARTIAL:** React quest menu shell is source-complete; further filtering/polish pending.

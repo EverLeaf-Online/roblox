@@ -59,6 +59,9 @@ task.spawn(function()
     end
 
     local function setProfileSnapshot(snapshot)
+        if snapshot then
+            snapshot.StatusEffectsLocalReceivedAt = os.clock()
+        end
         ProfileStore.Set(snapshot)
         if snapshot then
             PartyStore.Seed(snapshot.Party)

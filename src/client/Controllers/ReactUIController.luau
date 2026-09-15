@@ -27,6 +27,7 @@ local EquipmentComparisonRules = require(ReplicatedStorage.Shared.Logic.Equipmen
 local SkillProgressionRules = require(ReplicatedStorage.Shared.Logic.SkillProgressionRules)
 local Net = require(ReplicatedStorage.Shared.Net)
 local ProgressionMath = require(ReplicatedStorage.Shared.Math.ProgressionMath)
+local StatusEffectDefinitions = require(ReplicatedStorage.Shared.StatusEffectDefinitions)
 
 local ReactUIController = {}
 local player = Players.LocalPlayer
@@ -659,6 +660,103 @@ local function Objective(props)
     })
 end
 
+local function StatusStrip(props)
+    local now, setNow = React.useState(os.clock())
+    React.useEffect(function()
+        local active = true
+        task.spawn(function()
+            while active do
+                task.wait(0.1)
+                if active then
+                    setNow(os.clock())
+                end
+            end
+        end)
+        return function()
+            active = false
+        end
+    end, {})
+
+    local profile = props.Profile or {}
+    local receivedAt = tonumber(profile.StatusEffectsLocalReceivedAt) or now
+    local elapsed = math.max(0, now - receivedAt)
+    local entries = {}
+    for effectId, snapshotRemaining in profile.StatusEffects or {} do
+        local remaining = math.max(0, (tonumber(snapshotRemaining) or 0) - elapsed)
+        if remaining > 0 then
+            local definition = StatusEffectDefinitions[effectId] or {}
+            table.insert(entries, {
+                Id = effectId,
+                Name = definition.ShortName or definition.DisplayName or prettyId(effectId),
+                Kind = definition.Kind or "Debuff",
+                Remaining = remaining,
+            })
+        end
+    end
+    table.sort(entries, function(a, b)
+        if a.Kind ~= b.Kind then
+            return a.Kind == "Debuff"
+        end
+        return a.Id < b.Id
+    end)
+
+    if #entries == 0 or props.Hidden then
+        return nil
+    end
+
+    local children = {}
+    for index = 1, math.min(3, #entries) do
+        local entry = entries[index]
+        local debuff = entry.Kind == "Debuff"
+        local accent = debuff and Color3.fromRGB(220, 103, 92) or COLORS.Lumen
+        children[entry.Id] = React.createElement(
+            "Frame",
+            {
+                Position = UDim2.fromOffset((index - 1) * 108, 0),
+                Size = UDim2.fromOffset(102, 32),
+                BackgroundColor3 = COLORS.PanelDeep,
+                BackgroundTransparency = 0.08,
+                BorderSizePixel = 0,
+                ZIndex = 4,
+            },
+            withChrome({
+                Rail = React.createElement("Frame", {
+                    Size = UDim2.fromOffset(3, 32),
+                    BackgroundColor3 = accent,
+                    BorderSizePixel = 0,
+                    ZIndex = 5,
+                }),
+                Name = React.createElement(Label, {
+                    Position = UDim2.fromOffset(9, 3),
+                    Size = UDim2.new(1, -14, 0, 13),
+                    Text = string.upper(entry.Name),
+                    TextSize = 7,
+                    Bold = true,
+                    Color = accent,
+                    ZIndex = 6,
+                }),
+                Time = React.createElement(Label, {
+                    Position = UDim2.fromOffset(9, 15),
+                    Size = UDim2.new(1, -14, 0, 13),
+                    Text = if entry.Remaining < 1
+                        then string.format("%.1fs", entry.Remaining)
+                        else string.format("%ds", math.ceil(entry.Remaining)),
+                    TextSize = 8,
+                    Color = COLORS.Muted,
+                    ZIndex = 6,
+                }),
+            }, 6, accent, 0.5, 1)
+        )
+    end
+
+    return React.createElement("Frame", {
+        Position = UDim2.fromOffset(24, 236),
+        Size = UDim2.fromOffset(326, 32),
+        BackgroundTransparency = 1,
+        ZIndex = 4,
+    }, children)
+end
+
 local function HUD(props)
     local profile = props.Profile or {}
     local level = tonumber(profile.Level) or 1
@@ -737,6 +835,10 @@ local function HUD(props)
                     ZIndex = 4,
                 }),
             },
+        }),
+        StatusEffects = React.createElement(StatusStrip, {
+            Profile = profile,
+            Hidden = props.UiOpen,
         }),
         Currency = React.createElement(Panel, {
             AnchorPoint = Vector2.new(1, 0),
