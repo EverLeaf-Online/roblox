@@ -5,11 +5,11 @@
 **Detailed tracker:** [`MASTER_CHECKLIST.md`](MASTER_CHECKLIST.md)
 **Architecture:** [`ARCHITECTURE.md`](ARCHITECTURE.md)
 
-## Lumenreach V6 populated world — implemented
+## Lumenreach V7 bespoke MMORPG world — implemented
 
 - Terrain-first 2350×1800 Level 1–10 topology retained and fully authored as a denser MMORPG region.
 - Wayfarer Camp completed as a real starter town; each field subzone now has a distinct landmark/setpiece language without blocking action-combat space.
-- The region now has substantial built content: a nine-building starter settlement, inhabited waystations/outposts, wetland and ranger habitations, ruined settlements, late-zone fortress architecture, a dedicated Proving compound, and ambient residents. Forest/ground dressing remains secondary support. Remaining work is live Studio composition/performance QA and iterative art polish.
+- The region now has substantial built content plus a bespoke EverLeaf architecture language: custom civic objects, arches, banners, wagons, working yards, Glowmere stilt habitation/docks, Gravebone mausoleums, Mossglen ranger facilities, a Sunmoss observatory, Veilfall sanctuary, Shattered fortress towers, a complete Five-Path Proving venue, named route-side POIs, and a larger ambient population. Generic Toolbox/Creator Store architecture is prohibited; approved external nature assets remain scenery only. Remaining work is live Studio composition/performance QA and iterative art polish.
 
 ## Development strategy
 

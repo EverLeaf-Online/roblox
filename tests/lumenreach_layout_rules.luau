@@ -6,7 +6,7 @@ for _, required in
     {
         "local WORLD_WIDTH = 2350",
         "local WORLD_DEPTH = 1800",
-        "local WORLD_DESIGN_VERSION = 6",
+        "local WORLD_DESIGN_VERSION = 7",
         'world:SetAttribute("WorldDesignVersion", WORLD_DESIGN_VERSION)',
         'world:SetAttribute("TerrainFirstMMOLayout", true)',
         "terrain:Clear()",
@@ -62,6 +62,35 @@ for _, required in
         '"ProvingMentorLodge"',
         "local AMBIENT_RESIDENTS = table.freeze",
         "makeAmbientPopulation(world)",
+        'world:SetAttribute("BespokeLumenreachArchitecture", true)',
+        "local SIGNATURE = table.freeze",
+        "local function makeWayfarerBanner",
+        "local function makeWayfarerStreetArch",
+        "local function makeWayfarerCart",
+        "local function makeForgeYard",
+        "local function makeLumenWell",
+        "local function makeTrainingGround",
+        "local function makeGlowmereStiltHouse",
+        "local function makeReedDock",
+        "local function makeGraveboneMausoleum",
+        "local function makeMossglenRangerHall",
+        "local function makeSunmossObservatory",
+        "local function makeVeilfallSanctuary",
+        "local function makeShatteredFortressTower",
+        "local function makeProvingGrandstand",
+        "local function makeFivePathMonument",
+        "makeSignatureWorldContent(parent)",
+        '"WayfarerLumenWell"',
+        '"GreenwayOldMileArch"',
+        '"GlowmereStiltHouseA"',
+        '"EastbridgeFieldForge"',
+        '"GraveboneMausoleumA"',
+        '"MossglenRangerHall"',
+        '"SunmossLumenObservatory"',
+        '"VeilfallSanctuary"',
+        '"ShatteredNorthTower"',
+        '"FivePathMonument"',
+        '"ProvingGrandEntrance"',
         "makeGreenwaySetpiece(parent)",
         "makeCrossroadsSetpiece(parent)",
         "makeGlowmereSetpiece(parent)",
@@ -176,12 +205,12 @@ assert(
     string.find(source, "scatterForestBand(parent, Vector3.new(-790, 0, 430)", 1, true) ~= nil
         and string.find(source, "scatterForestBand(parent, Vector3.new(670, 0, -585)", 1, true)
             ~= nil,
-    "V6 must fill the large dead-space woodland belts between progression rooms"
+    "V7 must fill the large dead-space woodland belts between progression rooms"
 )
 assert(
     string.find(source, "for index, route in ROUTES do", 1, true) ~= nil
         and string.find(source, "dressRouteEdges(parent, route, 40 + index)", 1, true) ~= nil,
-    "V6 must give travel routes safe edge dressing instead of leaving long empty corridors"
+    "V7 must give travel routes safe edge dressing instead of leaving long empty corridors"
 )
 assert(
     string.find(source, "clearOfDressingExclusions", 1, true) ~= nil,
@@ -191,7 +220,7 @@ assert(
 assert(
     string.find(source, "makeTownExpansion(parent)", 1, true) ~= nil
         and string.find(source, "makeWorldSettlements(parent)", 1, true) ~= nil,
-    "V6 must populate the region with actual settlements and structures, not only foliage dressing"
+    "V7 must populate the region with actual settlements and structures, not only foliage dressing"
 )
 assert(
     string.find(source, '"ShatteredArchOuterGate"', 1, true) ~= nil
@@ -200,7 +229,65 @@ assert(
 )
 assert(
     string.find(source, "AmbientResident", 1, true) ~= nil,
-    "V6 settlements must include non-interactive ambient residents so inhabited spaces do not feel abandoned"
+    "V7 settlements must include non-interactive ambient residents so inhabited spaces do not feel abandoned"
+)
+
+assert(
+    string.find(source, "makeSignatureWorldContent(parent)", 1, true) ~= nil
+        and string.find(
+                source,
+                'world:SetAttribute("BespokeLumenreachArchitecture", true)',
+                1,
+                true
+            )
+            ~= nil,
+    "V7 must wire the bespoke EverLeaf architecture pass into the generated world"
+)
+
+for _, signatureName in
+    {
+        "WayfarerLumenWell",
+        "WayfarerForgeYard",
+        "GreenwayOldMileArch",
+        "GlowmereStiltHouseA",
+        "GlowmereWestDock",
+        "EastbridgeFieldForge",
+        "GraveboneMausoleumA",
+        "MossglenRangerHall",
+        "SunmossLumenObservatory",
+        "VeilfallSanctuary",
+        "ShatteredNorthTower",
+        "ProvingGrandEntrance",
+        "FivePathMonument",
+        "RuinsReturnWatchtower",
+    }
+do
+    assert(
+        string.find(source, '"' .. signatureName .. '"', 1, true) ~= nil,
+        "missing bespoke Lumenreach signature asset: " .. signatureName
+    )
+end
+
+local bespokeFunctionCount = 0
+for _ in string.gmatch(source, "local function make[%w]+") do
+    bespokeFunctionCount += 1
+end
+assert(bespokeFunctionCount >= 35, "V7 should retain a broad custom world-construction kit")
+
+local ambientResidentCount = 0
+local ambientStart = string.find(source, "local AMBIENT_RESIDENTS = table.freeze", 1, true)
+local ambientEnd = string.find(source, "local function makeAmbientResident", ambientStart, true)
+assert(ambientStart ~= nil and ambientEnd ~= nil, "ambient resident table must exist")
+local ambientBlock = string.sub(source, ambientStart, ambientEnd)
+for _ in string.gmatch(ambientBlock, 'Name%s*=%s*"') do
+    ambientResidentCount += 1
+end
+assert(ambientResidentCount >= 25, "V7 must visibly populate safe hubs with a larger ambient cast")
+
+assert(
+    string.find(source, "MarketplaceService", 1, true) == nil
+        and string.find(source, "InsertService", 1, true) == nil,
+    "Lumenreach architecture must not depend on generic Marketplace/Toolbox assets"
 )
 
 local townCalls = 0

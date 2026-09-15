@@ -1,8 +1,8 @@
-# Lumenreach MMO World Layout — Populated World V6
+# Lumenreach MMO World Layout — Bespoke MMORPG World V7
 
 **Canonical target:** 2350 × 1800 studs, Level 1–10 starter region.
 
-Lumenreach V6 is a full replacement of the earlier showcase/camp composition. The runtime generator clears the previous generated model and Terrain, rebuilds macro topography from scratch, cuts the road network into the land, and only then places the authored structures, trees, NPCs, bridges, encounter spaces, landmarks, and portal required by gameplay. New work must extend this terrain-first layout; it must not stack scenery over older geometry.
+Lumenreach V7 is a full replacement of the earlier showcase/camp composition. The runtime generator clears the previous generated model and Terrain, rebuilds macro topography from scratch, cuts the road network into the land, and only then places the authored structures, trees, NPCs, bridges, encounter spaces, landmarks, and portal required by gameplay. New work must extend this terrain-first layout; it must not stack scenery over older geometry.
 
 ## Topology
 
@@ -40,9 +40,9 @@ The starter route is intentionally readable as geography rather than a chain of 
 | Shattered Lumen Arch | 8–10 | Regional capstone, late Skeleton field, Brasshaven gate |
 | Wayfarer Proving Circle | 7–10 | First advancement milestone detached from leveling traffic |
 
-## V6 populated-world identity
+## V7 bespoke-world identity
 
-V6 addresses the larger problem behind the “empty world” feedback: Lumenreach now contains actual built places and inhabitants across the whole Level 1–10 journey. The forest/terrain pass remains, but it is no longer being treated as a substitute for world content. Wayfarer Camp expands into a small settlement, frontier zones gain lodges/outposts/waystations, and the late game transitions through ruined settlements and a border fortress.
+V7 treats the whole Level 1–10 region as an authored MMORPG world rather than a terrain field decorated with props. The V6 settlement layer remains, but V7 adds a bespoke EverLeaf architecture kit, signature skyline pieces, route-side points of interest, working yards/docks/carts, advancement architecture, and a much larger visible population. The forest/terrain layer is support scenery only; it is never counted as world content.
 
 - **Wayfarer Camp** is a permanent starter town with a social hearth plaza, four service buildings, quartermaster/archive stalls, benches, training yard, arrival signage, Lumen gate pylons, and a wide party-safe departure gate.
 - **Greenway Fields** reads as the first reclaimed road outside town, with roadside ruins and a safe rest edge framing the starter combat meadow.
@@ -55,9 +55,16 @@ V6 addresses the larger problem behind the “empty world” feedback: Lumenreac
 - **Veilfall Ravine** uses a dedicated overlook, ruin fragment, and wayfinding pylons around the cascade and Wisp field.
 - **Shattered Lumen Arch** now has a processional pylon avenue and broken side walls so the Level 8–10 capstone reads as a regional threshold before the portal itself.
 
-All V6 architecture is native Roblox geometry or approved environment prefabs. No RockFace mesh, giant fallback boulders, tent-town regression, or scenery layering is allowed. The generator still clears and rebuilds the complete region on initialization.
+All V7 architecture is native Roblox geometry or approved environment prefabs. No RockFace mesh, giant fallback boulders, tent-town regression, or scenery layering is allowed. The generator still clears and rebuilds the complete region on initialization.
 
-### V6 population and density rules
+### V7 bespoke population and density rules
+
+- **No generic architecture assets.** Settlement buildings, arches, banners, carts, forges, wells, training yards, stilt houses, docks, mausoleums, ranger halls, observatories, sanctuaries, fortress towers, proving stands, and the Five-Path Monument are authored EverLeaf assemblies built in Luau/native Roblox geometry. Do not replace them with Toolbox/Creator Store building packs or anonymous kitbash prefabs.
+- Existing approved Poly Haven assets remain limited to natural environment dressing such as trees, ferns, roots, deadwood and mossy rocks; those are scenery, not architectural content.
+- Wayfarer Camp now has a recognizable bespoke civic core: Lumen well, forge yard, guarded street arches, training ground, wagons, banners, service buildings, and resident population.
+- Every progression zone has at least one signature built landmark that is visually different from every other zone: Glowmere stilt hamlet/docks, Gravebone mausoleums, Mossglen ranger hall/range, Sunmoss observatory, Veilfall sanctuary, Shattered fortress towers, and the Five-Path Proving complex.
+- Travel routes use named authored POIs—shrines, carts, gates, shelters, memorials, ferries and watchtowers—so a player does not spend long stretches seeing only dirt road, grass and trees.
+- Major safe hubs and advancement spaces use ambient residents to read as inhabited even when quest NPCs are not nearby.
 
 - Wayfarer Camp now contains nine permanent buildings plus watchtowers, palisades, supply areas, service stalls, and a real arrival/departure street.
 - Greenway, Crossroads, Glowmere, Eastbridge, Mossglen, Sunmoss, and Veilfall each contain built habitation or staffed travel infrastructure, not just landmarks.
@@ -86,7 +93,7 @@ All V6 architecture is native Roblox geometry or approved environment prefabs. N
 
 ## Source contract
 
-`src/server/Services/LumenreachWorldService.luau` is the canonical V6 generator. It owns:
+`src/server/Services/LumenreachWorldService.luau` is the canonical V7 generator. It owns:
 
 - `WORLD_WIDTH = 2350` and `WORLD_DEPTH = 1800`;
 - zone centers and progression bands;

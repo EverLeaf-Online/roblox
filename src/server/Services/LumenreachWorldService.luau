@@ -16,7 +16,7 @@ local LumenreachWorldService = {}
 local GENERATED_NAME = "EverLeafGeneratedWorld"
 local WORLD_WIDTH = 2350
 local WORLD_DEPTH = 1800
-local WORLD_DESIGN_VERSION = 6
+local WORLD_DESIGN_VERSION = 7
 
 -- Lumenreach is authored as a terrain-first MMORPG region. The generator below
 -- replaces the previous showcase composition completely: terrain is cleared,
@@ -1664,6 +1664,1333 @@ local function makeGatehouse(parent, name, position, yaw, width)
     return model
 end
 
+local SIGNATURE = table.freeze({
+    Timber = Color3.fromRGB(68, 50, 36),
+    TimberLight = Color3.fromRGB(103, 76, 51),
+    Slate = Color3.fromRGB(70, 82, 79),
+    SlateDark = Color3.fromRGB(53, 65, 62),
+    Plaster = Color3.fromRGB(120, 132, 111),
+    Bronze = Color3.fromRGB(151, 112, 62),
+    Lumen = Color3.fromRGB(100, 236, 194),
+    Cloth = Color3.fromRGB(56, 101, 82),
+    ClothGold = Color3.fromRGB(166, 123, 62),
+})
+
+local function makeSignatureCrystal(parent, name, base, height, color)
+    local crystal = makePart(
+        parent,
+        name,
+        Vector3.new(1.2, height, 1.2),
+        base * CFrame.new(0, height * 0.5, 0) * CFrame.Angles(0, math.rad(45), math.rad(7)),
+        Enum.Material.Neon,
+        color or SIGNATURE.Lumen
+    )
+    crystal.CanCollide = false
+    crystal.CanTouch = false
+    crystal.CanQuery = false
+    local light = Instance.new("PointLight")
+    light.Color = crystal.Color
+    light.Brightness = 0.8
+    light.Range = 12
+    light.Shadows = false
+    light.Parent = crystal
+    return crystal
+end
+
+local function makeWayfarerBanner(parent, name, position, yaw, accent)
+    local ground = terrainSurfacePosition(position, 0)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+    local pole = makePart(
+        model,
+        "BannerPole",
+        Vector3.new(0.45, 10.5, 0.45),
+        base * CFrame.new(0, 5.25, 0),
+        Enum.Material.Wood,
+        SIGNATURE.Timber
+    )
+    pole.CanCollide = false
+    local cross = makePart(
+        model,
+        "BannerCrossbar",
+        Vector3.new(5.2, 0.4, 0.4),
+        base * CFrame.new(2.25, 9.2, 0),
+        Enum.Material.Wood,
+        SIGNATURE.Timber
+    )
+    cross.CanCollide = false
+    local cloth = makePart(
+        model,
+        "BannerCloth",
+        Vector3.new(4.4, 5.8, 0.18),
+        base * CFrame.new(2.25, 6.25, -0.2),
+        Enum.Material.Fabric,
+        accent or SIGNATURE.Cloth
+    )
+    cloth.CanCollide = false
+    cloth.CanTouch = false
+    cloth.CanQuery = false
+    local sigil = makePart(
+        model,
+        "BannerLumenSigil",
+        Vector3.new(0.55, 3.0, 0.12),
+        base * CFrame.new(2.25, 6.45, -0.34) * CFrame.Angles(0, 0, math.rad(25)),
+        Enum.Material.Neon,
+        SIGNATURE.Lumen
+    )
+    sigil.CanCollide = false
+    sigil.CanTouch = false
+    sigil.CanQuery = false
+    return model
+end
+
+local function makeWayfarerStreetArch(parent, name, position, yaw, width, accent)
+    local ground = terrainSurfacePosition(position, 0)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+    width = width or 24
+    accent = accent or SIGNATURE.Lumen
+    for _, side in { -1, 1 } do
+        local post = makePart(
+            model,
+            "ArchPost",
+            Vector3.new(2.2, 12, 2.2),
+            base * CFrame.new(side * width * 0.5, 6, 0),
+            Enum.Material.Slate,
+            SIGNATURE.Slate
+        )
+        post.CanCollide = false
+        local timber = makePart(
+            model,
+            "ArchTimber",
+            Vector3.new(0.65, 13, 2.7),
+            base * CFrame.new(side * width * 0.5, 6.4, -0.15),
+            Enum.Material.Wood,
+            SIGNATURE.Timber
+        )
+        timber.CanCollide = false
+        makeSignatureCrystal(
+            model,
+            "ArchCrystal",
+            base * CFrame.new(side * width * 0.5, 10.8, -1.25),
+            2.7,
+            accent
+        )
+    end
+    local beam = makePart(
+        model,
+        "ArchBeam",
+        Vector3.new(width + 3, 2.1, 3.1),
+        base * CFrame.new(0, 11.8, 0),
+        Enum.Material.WoodPlanks,
+        SIGNATURE.Timber
+    )
+    beam.CanCollide = false
+    beam.CanTouch = false
+    beam.CanQuery = false
+    for _, side in { -1, 1 } do
+        local eave = makeWedge(
+            model,
+            "ArchEave",
+            Vector3.new(width * 0.55, 2.4, 5.2),
+            base
+                * CFrame.new(side * width * 0.23, 13.1, 0)
+                * CFrame.Angles(0, math.rad(90), math.rad(side * 7)),
+            Enum.Material.WoodPlanks,
+            SIGNATURE.SlateDark
+        )
+        eave.CanCollide = false
+        eave.CanTouch = false
+        eave.CanQuery = false
+    end
+    return model
+end
+
+local function makeWayfarerCart(parent, name, position, yaw, loaded)
+    local ground = terrainSurfacePosition(position, 0)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+    local bed = makePart(
+        model,
+        "CartBed",
+        Vector3.new(8.5, 1.2, 5.2),
+        base * CFrame.new(0, 2.9, 0),
+        Enum.Material.WoodPlanks,
+        SIGNATURE.TimberLight
+    )
+    bed.CanCollide = false
+    for _, x in { -4.4, 4.4 } do
+        local side = makePart(
+            model,
+            "CartSide",
+            Vector3.new(0.6, 3.1, 5.4),
+            base * CFrame.new(x, 4.1, 0),
+            Enum.Material.Wood,
+            SIGNATURE.Timber
+        )
+        side.CanCollide = false
+    end
+    for _, z in { -2.9, 2.9 } do
+        for _, x in { -3.25, 3.25 } do
+            local wheel = makePart(
+                model,
+                "CartWheel",
+                Vector3.new(0.7, 4.2, 4.2),
+                base * CFrame.new(x, 2.0, z) * CFrame.Angles(0, 0, math.rad(90)),
+                Enum.Material.Wood,
+                SIGNATURE.Timber
+            )
+            wheel.Shape = Enum.PartType.Cylinder
+            wheel.CanCollide = false
+        end
+    end
+    for _, x in { -1.6, 1.6 } do
+        local shaft = makePart(
+            model,
+            "CartShaft",
+            Vector3.new(0.45, 0.45, 10),
+            base * CFrame.new(x, 2.2, -7.0),
+            Enum.Material.Wood,
+            SIGNATURE.Timber
+        )
+        shaft.CanCollide = false
+    end
+    if loaded ~= false then
+        for index, spec in
+            {
+                { -1.9, 3.9, -0.8, 2.4, 1.8, 2.3 },
+                { 1.2, 3.8, 0.8, 2.1, 1.6, 2.0 },
+                { 0.1, 5.1, -0.2, 2.0, 1.5, 1.8 },
+            }
+        do
+            local cargo = makePart(
+                model,
+                "CartCargo" .. index,
+                Vector3.new(spec[4], spec[5], spec[6]),
+                base * CFrame.new(spec[1], spec[2], spec[3]),
+                Enum.Material.WoodPlanks,
+                Color3.fromRGB(111, 82, 52)
+            )
+            cargo.CanCollide = false
+            cargo.CanTouch = false
+            cargo.CanQuery = false
+        end
+    end
+    return model
+end
+
+local function makeForgeYard(parent, name, position, yaw)
+    local ground = terrainSurfacePosition(position, 0)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+    local pad = makePart(
+        model,
+        "ForgePad",
+        Vector3.new(22, 0.8, 17),
+        base * CFrame.new(0, 0.4, 0),
+        Enum.Material.Slate,
+        SIGNATURE.SlateDark
+    )
+    pad.CanCollide = false
+    local forge = makePart(
+        model,
+        "ForgeBody",
+        Vector3.new(7, 5, 6),
+        base * CFrame.new(-4.5, 2.8, 1.2),
+        Enum.Material.Brick,
+        Color3.fromRGB(74, 68, 61)
+    )
+    forge.CanCollide = false
+    local mouth = makePart(
+        model,
+        "ForgeMouth",
+        Vector3.new(3.4, 2.2, 0.5),
+        base * CFrame.new(-4.5, 2.6, -1.9),
+        Enum.Material.Neon,
+        Color3.fromRGB(255, 147, 66)
+    )
+    mouth.CanCollide = false
+    mouth.CanTouch = false
+    mouth.CanQuery = false
+    local chimney = makePart(
+        model,
+        "ForgeChimney",
+        Vector3.new(2.8, 10, 2.8),
+        base * CFrame.new(-4.5, 8.0, 1.2),
+        Enum.Material.Brick,
+        Color3.fromRGB(65, 62, 58)
+    )
+    chimney.CanCollide = false
+    local anvil = makePart(
+        model,
+        "ForgeAnvil",
+        Vector3.new(4.2, 1.2, 2.0),
+        base * CFrame.new(4.8, 3.0, -1.0),
+        Enum.Material.Metal,
+        Color3.fromRGB(84, 91, 91)
+    )
+    anvil.CanCollide = false
+    local stand = makePart(
+        model,
+        "AnvilStand",
+        Vector3.new(1.8, 2.4, 1.8),
+        base * CFrame.new(4.8, 1.2, -1.0),
+        Enum.Material.Wood,
+        SIGNATURE.Timber
+    )
+    stand.CanCollide = false
+    for _, x in { -8.5, 8.5 } do
+        local post = makePart(
+            model,
+            "ForgeAwningPost",
+            Vector3.new(0.6, 7.2, 0.6),
+            base * CFrame.new(x, 3.6, 6.1),
+            Enum.Material.Wood,
+            SIGNATURE.Timber
+        )
+        post.CanCollide = false
+    end
+    local awning = makePart(
+        model,
+        "ForgeAwning",
+        Vector3.new(19, 0.5, 6.5),
+        base * CFrame.new(0, 7.0, 5.7) * CFrame.Angles(math.rad(-7), 0, 0),
+        Enum.Material.Fabric,
+        Color3.fromRGB(124, 83, 57)
+    )
+    awning.CanCollide = false
+    awning.CanTouch = false
+    awning.CanQuery = false
+    return model
+end
+
+local function makeLumenWell(parent, name, position, accent)
+    local ground = terrainSurfacePosition(position, 0)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    local base = CFrame.new(ground)
+    for index = 1, 12 do
+        local angle = (index - 1) * math.pi * 2 / 12
+        local stone = makePart(
+            model,
+            "WellStone",
+            Vector3.new(3.2, 1.4, 1.7),
+            base
+                * CFrame.new(math.cos(angle) * 5.2, 0.7, math.sin(angle) * 5.2)
+                * CFrame.Angles(0, -angle, 0),
+            Enum.Material.Slate,
+            SIGNATURE.Slate
+        )
+        stone.CanCollide = false
+    end
+    local water = makePart(
+        model,
+        "WellLumenWater",
+        Vector3.new(8.5, 0.28, 8.5),
+        base * CFrame.new(0, 0.72, 0),
+        Enum.Material.Glass,
+        accent or SIGNATURE.Lumen
+    )
+    water.Shape = Enum.PartType.Cylinder
+    water.Transparency = 0.25
+    water.CanCollide = false
+    water.CanTouch = false
+    water.CanQuery = false
+    makeSignatureCrystal(
+        model,
+        "WellHeart",
+        base * CFrame.new(0, 0.8, 0),
+        4.2,
+        accent or SIGNATURE.Lumen
+    )
+    return model
+end
+
+local function makeTrainingGround(parent, name, position, yaw)
+    local ground = terrainSurfacePosition(position, 0)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+    for index, x in { -10, 0, 10 } do
+        local post = makePart(
+            model,
+            "TrainingPost" .. index,
+            Vector3.new(1.4, 7.2, 1.4),
+            base * CFrame.new(x, 3.6, 0),
+            Enum.Material.Wood,
+            SIGNATURE.Timber
+        )
+        post.CanCollide = false
+        local arm = makePart(
+            model,
+            "TrainingArm" .. index,
+            Vector3.new(5.0, 0.8, 0.8),
+            base * CFrame.new(x, 5.1, 0) * CFrame.Angles(0, math.rad(18 * index), 0),
+            Enum.Material.Wood,
+            SIGNATURE.TimberLight
+        )
+        arm.CanCollide = false
+        local core = makePart(
+            model,
+            "TrainingLumen" .. index,
+            Vector3.new(1.8, 1.8, 0.4),
+            base * CFrame.new(x, 4.1, -0.9),
+            Enum.Material.Neon,
+            SIGNATURE.Lumen
+        )
+        core.CanCollide = false
+        core.CanTouch = false
+        core.CanQuery = false
+    end
+    for _, z in { -9, 9 } do
+        makeFenceLine(
+            model,
+            "TrainingRail",
+            position + base.RightVector * -16 + base.LookVector * z,
+            position + base.RightVector * 16 + base.LookVector * z,
+            8,
+            3.4
+        )
+    end
+    return model
+end
+
+local function makeGlowmereStiltHouse(parent, name, position, yaw, accent)
+    local ground = terrainSurfacePosition(position, 0)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+    local floorY = 5.6
+    for _, x in { -6.5, 6.5 } do
+        for _, z in { -5.0, 5.0 } do
+            local stilt = makePart(
+                model,
+                "Stilt",
+                Vector3.new(0.9, 8.0, 0.9),
+                base * CFrame.new(x, 4.0, z),
+                Enum.Material.Wood,
+                SIGNATURE.Timber
+            )
+            stilt.CanCollide = false
+        end
+    end
+    makePart(
+        model,
+        "StiltFloor",
+        Vector3.new(15.5, 0.8, 12.5),
+        base * CFrame.new(0, floorY, 0),
+        Enum.Material.WoodPlanks,
+        SIGNATURE.TimberLight
+    )
+    makePart(
+        model,
+        "StiltBackWall",
+        Vector3.new(15.5, 7.0, 0.8),
+        base * CFrame.new(0, floorY + 3.5, 5.8),
+        Enum.Material.WoodPlanks,
+        Color3.fromRGB(86, 112, 92)
+    )
+    for _, x in { -7.0, 7.0 } do
+        makePart(
+            model,
+            "StiltSideWall",
+            Vector3.new(0.8, 7.0, 12.0),
+            base * CFrame.new(x, floorY + 3.5, 0),
+            Enum.Material.WoodPlanks,
+            Color3.fromRGB(86, 112, 92)
+        )
+    end
+    for _, side in { -1, 1 } do
+        local roof = makePart(
+            model,
+            "StiltRoof",
+            Vector3.new(9.0, 0.65, 14.5),
+            base
+                * CFrame.new(side * 3.9, floorY + 8.7, 0)
+                * CFrame.Angles(0, 0, math.rad(-side * 20)),
+            Enum.Material.WoodPlanks,
+            Color3.fromRGB(44, 67, 59)
+        )
+        roof.CanCollide = false
+    end
+    local porch = makePart(
+        model,
+        "StiltPorch",
+        Vector3.new(10, 0.7, 5.5),
+        base * CFrame.new(0, floorY, -8.3),
+        Enum.Material.WoodPlanks,
+        SIGNATURE.TimberLight
+    )
+    porch.CanCollide = false
+    makeSignatureCrystal(
+        model,
+        "WetlandLantern",
+        base * CFrame.new(0, floorY + 0.4, -10.1),
+        2.2,
+        accent or Color3.fromRGB(112, 226, 211)
+    )
+    return model
+end
+
+local function makeReedDock(parent, name, position, yaw, length)
+    local ground = terrainSurfacePosition(position, 0)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+    length = length or 24
+    for index = 0, math.floor(length / 3) do
+        local plank = makePart(
+            model,
+            "DockPlank",
+            Vector3.new(8, 0.45, 2.7),
+            base * CFrame.new(0, 1.0, -index * 3),
+            Enum.Material.WoodPlanks,
+            SIGNATURE.TimberLight
+        )
+        plank.CanCollide = false
+    end
+    for _, side in { -3.6, 3.6 } do
+        for index = 0, math.floor(length / 9) do
+            local post = makePart(
+                model,
+                "DockPost",
+                Vector3.new(0.55, 4.0, 0.55),
+                base * CFrame.new(side, 0.1, -index * 9),
+                Enum.Material.Wood,
+                SIGNATURE.Timber
+            )
+            post.CanCollide = false
+        end
+    end
+    local skiff = makePart(
+        model,
+        "WayfarerSkiff",
+        Vector3.new(5.2, 1.2, 13.0),
+        base * CFrame.new(8.2, 0.7, -length * 0.55) * CFrame.Angles(math.rad(4), 0, 0),
+        Enum.Material.WoodPlanks,
+        Color3.fromRGB(92, 68, 45)
+    )
+    skiff.CanCollide = false
+    return model
+end
+
+local function makeGraveboneMausoleum(parent, name, position, yaw)
+    local ground = terrainSurfacePosition(position, 0)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+    makePart(
+        model,
+        "MausoleumBase",
+        Vector3.new(18, 1.4, 16),
+        base * CFrame.new(0, 0.7, 0),
+        Enum.Material.Slate,
+        SIGNATURE.SlateDark
+    )
+    for _, x in { -7, 7 } do
+        makePart(
+            model,
+            "MausoleumPillar",
+            Vector3.new(3.2, 11, 3.2),
+            base * CFrame.new(x, 6.1, -5.5),
+            Enum.Material.Slate,
+            SIGNATURE.Slate
+        )
+    end
+    makePart(
+        model,
+        "MausoleumBack",
+        Vector3.new(17, 11, 2.2),
+        base * CFrame.new(0, 6.1, 6.2),
+        Enum.Material.Slate,
+        SIGNATURE.Slate
+    )
+    local cap = makeWedge(
+        model,
+        "MausoleumCrown",
+        Vector3.new(20, 5.0, 17.5),
+        base * CFrame.new(0, 13.2, 0) * CFrame.Angles(0, math.rad(90), 0),
+        Enum.Material.Slate,
+        Color3.fromRGB(58, 67, 65)
+    )
+    cap.CanCollide = false
+    makeSignatureCrystal(
+        model,
+        "MemorialLumen",
+        base * CFrame.new(0, 2.2, -6.6),
+        4.6,
+        Color3.fromRGB(128, 196, 170)
+    )
+    return model
+end
+
+local function makeMossglenRangerHall(parent, name, position, yaw)
+    local ground = terrainSurfacePosition(position, 0)
+    local model = makeBuilding(parent, name, position, 40, 28, 10, yaw, Color3.fromRGB(73, 108, 78))
+    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+    local porch = makePart(
+        model,
+        "RangerPorch",
+        Vector3.new(28, 0.7, 8),
+        base * CFrame.new(0, 0.8, -18),
+        Enum.Material.WoodPlanks,
+        SIGNATURE.TimberLight
+    )
+    porch.CanCollide = false
+    for _, x in { -10, 0, 10 } do
+        local rack = makePart(
+            model,
+            "RangerRack",
+            Vector3.new(0.6, 6.0, 0.6),
+            base * CFrame.new(x, 3.0, -21),
+            Enum.Material.Wood,
+            SIGNATURE.Timber
+        )
+        rack.CanCollide = false
+        local bow = makePart(
+            model,
+            "RangerBow",
+            Vector3.new(0.28, 4.8, 0.28),
+            base * CFrame.new(x + 0.6, 3.3, -21.4) * CFrame.Angles(0, 0, math.rad(18)),
+            Enum.Material.Wood,
+            Color3.fromRGB(117, 82, 48)
+        )
+        bow.CanCollide = false
+    end
+    return model
+end
+
+local function makeSunmossObservatory(parent, name, position, yaw)
+    local ground = terrainSurfacePosition(position, 0)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+    makePart(
+        model,
+        "ObservatoryBase",
+        Vector3.new(24, 1.2, 24),
+        base * CFrame.new(0, 0.6, 0),
+        Enum.Material.Slate,
+        SIGNATURE.SlateDark
+    )
+    for _, x in { -8, 8 } do
+        for _, z in { -8, 8 } do
+            makePart(
+                model,
+                "ObservatoryPillar",
+                Vector3.new(2.0, 15, 2.0),
+                base * CFrame.new(x, 7.5, z),
+                Enum.Material.Slate,
+                SIGNATURE.Slate
+            )
+        end
+    end
+    makePart(
+        model,
+        "ObservatoryDeck",
+        Vector3.new(26, 1.0, 26),
+        base * CFrame.new(0, 15.2, 0),
+        Enum.Material.WoodPlanks,
+        SIGNATURE.TimberLight
+    )
+    local axis = makePart(
+        model,
+        "LumenScopeAxis",
+        Vector3.new(2.0, 9.0, 2.0),
+        base * CFrame.new(0, 20.1, 0) * CFrame.Angles(math.rad(58), 0, 0),
+        Enum.Material.Metal,
+        SIGNATURE.Bronze
+    )
+    axis.CanCollide = false
+    local scope = makePart(
+        model,
+        "LumenScope",
+        Vector3.new(5.0, 5.0, 14.0),
+        base * CFrame.new(0, 24.0, -2.8) * CFrame.Angles(math.rad(-32), 0, 0),
+        Enum.Material.Metal,
+        Color3.fromRGB(95, 105, 103)
+    )
+    scope.Shape = Enum.PartType.Cylinder
+    scope.CanCollide = false
+    makeSignatureCrystal(
+        model,
+        "ScopeLens",
+        base * CFrame.new(0, 27.4, -8.2),
+        3.4,
+        Color3.fromRGB(207, 225, 112)
+    )
+    return model
+end
+
+local function makeVeilfallSanctuary(parent, name, position, yaw)
+    local ground = terrainSurfacePosition(position, 0)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+    makePart(
+        model,
+        "SanctuaryFloor",
+        Vector3.new(32, 1.0, 26),
+        base * CFrame.new(0, 0.5, 0),
+        Enum.Material.Slate,
+        Color3.fromRGB(67, 80, 78)
+    )
+    for _, x in { -12, 0, 12 } do
+        for _, z in { -9, 9 } do
+            local pillar = makePart(
+                model,
+                "SanctuaryPillar",
+                Vector3.new(2.2, 13, 2.2),
+                base * CFrame.new(x, 6.5, z),
+                Enum.Material.Slate,
+                SIGNATURE.Slate
+            )
+            pillar.CanCollide = false
+        end
+    end
+    makePart(
+        model,
+        "SanctuaryBridgeBeam",
+        Vector3.new(31, 2.0, 3.0),
+        base * CFrame.new(0, 12.0, 9),
+        Enum.Material.Slate,
+        SIGNATURE.SlateDark
+    ).CanCollide =
+        false
+    for _, x in { -8, 0, 8 } do
+        makeSignatureCrystal(
+            model,
+            "SanctuaryLumen",
+            base * CFrame.new(x, 1.0, 0),
+            7.5 - math.abs(x) * 0.2,
+            Color3.fromRGB(115, 226, 225)
+        )
+    end
+    return model
+end
+
+local function makeShatteredFortressTower(parent, name, position, yaw, brokenSide)
+    local ground = terrainSurfacePosition(position, 0)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+    makePart(
+        model,
+        "FortressTowerCore",
+        Vector3.new(18, 28, 18),
+        base * CFrame.new(0, 14, 0),
+        Enum.Material.Slate,
+        Color3.fromRGB(68, 77, 75)
+    )
+    makePart(
+        model,
+        "FortressTowerBand",
+        Vector3.new(20, 2.0, 20),
+        base * CFrame.new(0, 20, 0),
+        Enum.Material.Slate,
+        Color3.fromRGB(54, 63, 61)
+    )
+    for _, x in { -7, 0, 7 } do
+        for _, z in { -8.5, 8.5 } do
+            if not (brokenSide and x == 7 and z > 0) then
+                makePart(
+                    model,
+                    "FortressMerlon",
+                    Vector3.new(4.0, 5.0, 2.5),
+                    base * CFrame.new(x, 30.5, z),
+                    Enum.Material.Slate,
+                    SIGNATURE.SlateDark
+                )
+            end
+        end
+    end
+    for _, z in { -7, 0, 7 } do
+        for _, x in { -8.5, 8.5 } do
+            if not (brokenSide and z == -7 and x < 0) then
+                makePart(
+                    model,
+                    "FortressMerlon",
+                    Vector3.new(2.5, 5.0, 4.0),
+                    base * CFrame.new(x, 30.5, z),
+                    Enum.Material.Slate,
+                    SIGNATURE.SlateDark
+                )
+            end
+        end
+    end
+    return model
+end
+
+local function makeProvingGrandstand(parent, name, position, yaw, width)
+    local ground = terrainSurfacePosition(position, 0)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+    width = width or 28
+    for tier = 0, 3 do
+        local bench = makePart(
+            model,
+            "StandTier",
+            Vector3.new(width, 1.2, 4.5),
+            base * CFrame.new(0, 0.6 + tier * 1.5, tier * 3.7),
+            Enum.Material.WoodPlanks,
+            SIGNATURE.TimberLight
+        )
+        bench.CanCollide = false
+    end
+    for _, x in { -width * 0.46, width * 0.46 } do
+        local support = makePart(
+            model,
+            "StandSupport",
+            Vector3.new(0.8, 7.2, 0.8),
+            base * CFrame.new(x, 3.6, 5.2),
+            Enum.Material.Wood,
+            SIGNATURE.Timber
+        )
+        support.CanCollide = false
+    end
+    return model
+end
+
+local function makeFivePathMonument(parent, position)
+    local ground = terrainSurfacePosition(position, 0)
+    local model = Instance.new("Model")
+    model.Name = "FivePathMonument"
+    model.Parent = parent
+    local colors = {
+        Color3.fromRGB(121, 244, 183),
+        Color3.fromRGB(230, 170, 82),
+        Color3.fromRGB(99, 236, 209),
+        Color3.fromRGB(187, 145, 229),
+        Color3.fromRGB(241, 187, 82),
+    }
+    makePart(
+        model,
+        "MonumentDais",
+        Vector3.new(26, 1.2, 26),
+        CFrame.new(ground + Vector3.new(0, 0.6, 0)),
+        Enum.Material.Slate,
+        SIGNATURE.SlateDark
+    )
+    for index = 1, 5 do
+        local angle = math.rad(-90 + (index - 1) * 72)
+        local offset = Vector3.new(math.cos(angle) * 8.2, 0, math.sin(angle) * 8.2)
+        local base = CFrame.new(ground + offset)
+        makeSignatureCrystal(model, "PathCrystal" .. index, base, 8.5, colors[index])
+    end
+    makeSignatureCrystal(model, "ConvergenceCrystal", CFrame.new(ground), 12.0, SIGNATURE.Lumen)
+    return model
+end
+
+local function makeSignatureWorldContent(parent)
+    local camp = ZONES.Camp
+
+    -- Wayfarer Camp: a bespoke settlement core, not a row of generic houses.
+    makeLumenWell(parent, "WayfarerLumenWell", camp + Vector3.new(-4, 0, -19), SIGNATURE.Lumen)
+    makeForgeYard(parent, "WayfarerForgeYard", camp + Vector3.new(38, 0, 84), math.rad(178))
+    makeTrainingGround(
+        parent,
+        "WayfarerTrainingGround",
+        TRAINING_ORIGIN + Vector3.new(2, 0, 5),
+        math.rad(90)
+    )
+    makeWayfarerStreetArch(
+        parent,
+        "WayfarerArrivalArch",
+        camp + Vector3.new(-116, 0, 12),
+        math.rad(90),
+        26
+    )
+    makeWayfarerStreetArch(
+        parent,
+        "WayfarerGreenwayArch",
+        camp + Vector3.new(126, 0, 12),
+        math.rad(90),
+        28
+    )
+    makeWayfarerStreetArch(parent, "WayfarerProvingArch", camp + Vector3.new(4, 0, -120), 0, 22)
+    makeWayfarerCart(
+        parent,
+        "QuartermasterWagon",
+        camp + Vector3.new(-88, 0, 54),
+        math.rad(112),
+        true
+    )
+    makeWayfarerCart(parent, "CraftsmanWagon", camp + Vector3.new(75, 0, 76), math.rad(-156), true)
+    makeWayfarerCart(parent, "TravelerWagon", camp + Vector3.new(-72, 0, -72), math.rad(35), false)
+    for index, spec in
+        {
+            { Vector3.new(-90, 0, -8), math.rad(88), SIGNATURE.Cloth },
+            { Vector3.new(88, 0, -8), math.rad(-88), SIGNATURE.ClothGold },
+            { Vector3.new(-34, 0, 67), math.rad(180), Color3.fromRGB(98, 86, 137) },
+            { Vector3.new(36, 0, 67), math.rad(180), Color3.fromRGB(120, 79, 58) },
+        }
+    do
+        makeWayfarerBanner(parent, "WayfarerTownBanner" .. index, camp + spec[1], spec[2], spec[3])
+    end
+
+    -- Greenway: road culture and farming infrastructure.
+    makeWayfarerStreetArch(
+        parent,
+        "GreenwayOldMileArch",
+        ZONES.Greenway + Vector3.new(-118, 0, 22),
+        math.rad(78),
+        20
+    )
+    makeWayfarerCart(
+        parent,
+        "GreenwayProduceCart",
+        ZONES.Greenway + Vector3.new(-82, 0, -44),
+        math.rad(56),
+        true
+    )
+    makeTrainingGround(
+        parent,
+        "GreenwayMilitiaYard",
+        ZONES.Greenway + Vector3.new(88, 0, 48),
+        math.rad(-32)
+    )
+    makeWayfarerBanner(
+        parent,
+        "GreenwayBanner",
+        ZONES.Greenway + Vector3.new(-18, 0, -88),
+        math.rad(5),
+        Color3.fromRGB(87, 123, 74)
+    )
+
+    -- Crossroads: recognizable travel hub visible from all branches.
+    makeWayfarerStreetArch(
+        parent,
+        "CrossroadsNorthArch",
+        ZONES.Crossroads + Vector3.new(6, 0, 84),
+        math.rad(180),
+        20
+    )
+    makeWayfarerStreetArch(
+        parent,
+        "CrossroadsEastArch",
+        ZONES.Crossroads + Vector3.new(92, 0, 4),
+        math.rad(90),
+        20
+    )
+    makeWayfarerCart(
+        parent,
+        "CrossroadsCourierCart",
+        ZONES.Crossroads + Vector3.new(56, 0, -54),
+        math.rad(-128),
+        true
+    )
+    makeLumenWell(
+        parent,
+        "CrossroadsTravelWell",
+        ZONES.Crossroads + Vector3.new(-24, 0, -48),
+        SIGNATURE.Lumen
+    )
+
+    -- Glowmere: a bespoke stilt hamlet and working dock line.
+    makeGlowmereStiltHouse(
+        parent,
+        "GlowmereStiltHouseA",
+        ZONES.Glowmere + Vector3.new(-126, 0, -34),
+        math.rad(32),
+        Color3.fromRGB(102, 230, 216)
+    )
+    makeGlowmereStiltHouse(
+        parent,
+        "GlowmereStiltHouseB",
+        ZONES.Glowmere + Vector3.new(118, 0, 10),
+        math.rad(-52),
+        Color3.fromRGB(102, 230, 216)
+    )
+    makeGlowmereStiltHouse(
+        parent,
+        "GlowmereStiltHouseC",
+        ZONES.Glowmere + Vector3.new(70, 0, 104),
+        math.rad(-138),
+        Color3.fromRGB(102, 230, 216)
+    )
+    makeReedDock(
+        parent,
+        "GlowmereWestDock",
+        ZONES.Glowmere + Vector3.new(-108, 0, 32),
+        math.rad(18),
+        28
+    )
+    makeReedDock(
+        parent,
+        "GlowmereEastDock",
+        ZONES.Glowmere + Vector3.new(98, 0, 48),
+        math.rad(-32),
+        24
+    )
+    makeWayfarerBanner(
+        parent,
+        "GlowmereKeeperBanner",
+        ZONES.Glowmere + Vector3.new(-82, 0, -72),
+        math.rad(28),
+        Color3.fromRGB(70, 118, 110)
+    )
+
+    -- Eastbridge: real defended frontier crossing.
+    makeWayfarerStreetArch(
+        parent,
+        "EastbridgeInnerArch",
+        ZONES.EastLanding + Vector3.new(-92, 0, 4),
+        math.rad(90),
+        22,
+        Color3.fromRGB(121, 224, 173)
+    )
+    makeForgeYard(
+        parent,
+        "EastbridgeFieldForge",
+        ZONES.EastLanding + Vector3.new(72, 0, 34),
+        math.rad(-90)
+    )
+    makeWayfarerCart(
+        parent,
+        "EastbridgeSupplyWagon",
+        ZONES.EastLanding + Vector3.new(40, 0, 58),
+        math.rad(-128),
+        true
+    )
+    makeTrainingGround(
+        parent,
+        "EastbridgeGuardDrill",
+        ZONES.EastLanding + Vector3.new(-16, 0, -62),
+        math.rad(180)
+    )
+
+    -- Gravebone: dense cemetery architecture rather than an open brown field.
+    makeGraveboneMausoleum(
+        parent,
+        "GraveboneMausoleumA",
+        ZONES.Gravebone + Vector3.new(-105, 0, 36),
+        math.rad(72)
+    )
+    makeGraveboneMausoleum(
+        parent,
+        "GraveboneMausoleumB",
+        ZONES.Gravebone + Vector3.new(102, 0, 34),
+        math.rad(-68)
+    )
+    makeGraveboneMausoleum(
+        parent,
+        "GraveboneMausoleumC",
+        ZONES.Gravebone + Vector3.new(15, 0, -112),
+        math.rad(4)
+    )
+    makeWayfarerStreetArch(
+        parent,
+        "GraveboneFuneraryArch",
+        ZONES.Gravebone + Vector3.new(-5, 0, 104),
+        math.rad(180),
+        24,
+        Color3.fromRGB(128, 190, 167)
+    )
+    makeWayfarerCart(
+        parent,
+        "GraveboneAbandonedCart",
+        ZONES.Gravebone + Vector3.new(88, 0, 92),
+        math.rad(-54),
+        false
+    )
+
+    -- Mossglen: dedicated ranger settlement and field infrastructure.
+    makeMossglenRangerHall(
+        parent,
+        "MossglenRangerHall",
+        ZONES.Mossglen + Vector3.new(-136, 0, -74),
+        math.rad(40)
+    )
+    makeTrainingGround(
+        parent,
+        "MossglenRangerRange",
+        ZONES.Mossglen + Vector3.new(142, 0, -18),
+        math.rad(-90)
+    )
+    makeWayfarerStreetArch(
+        parent,
+        "MossglenEnclaveArch",
+        ZONES.Mossglen + Vector3.new(-74, 0, -122),
+        math.rad(25),
+        22,
+        Color3.fromRGB(116, 220, 146)
+    )
+    makeWayfarerCart(
+        parent,
+        "MossglenGameCart",
+        ZONES.Mossglen + Vector3.new(-104, 0, -36),
+        math.rad(48),
+        true
+    )
+
+    -- Sunmoss: a visible vertical landmark, not another tree ring.
+    makeSunmossObservatory(
+        parent,
+        "SunmossLumenObservatory",
+        ZONES.Sunmoss + Vector3.new(-10, 0, 86),
+        math.rad(16)
+    )
+    makeWayfarerStreetArch(
+        parent,
+        "SunmossAscendingArch",
+        ZONES.Sunmoss + Vector3.new(-88, 0, -54),
+        math.rad(40),
+        20,
+        Color3.fromRGB(207, 225, 112)
+    )
+    makeWayfarerBanner(
+        parent,
+        "SunmossResearchBanner",
+        ZONES.Sunmoss + Vector3.new(72, 0, -48),
+        math.rad(-72),
+        Color3.fromRGB(141, 132, 69)
+    )
+
+    -- Veilfall: bespoke sanctuary skyline around the ravine refuge.
+    makeVeilfallSanctuary(
+        parent,
+        "VeilfallSanctuary",
+        ZONES.Veilfall + Vector3.new(86, 0, 12),
+        math.rad(-24)
+    )
+    makeWayfarerStreetArch(
+        parent,
+        "VeilfallRefugeArch",
+        ZONES.Veilfall + Vector3.new(-88, 0, -46),
+        math.rad(52),
+        20,
+        Color3.fromRGB(114, 222, 226)
+    )
+    makeWayfarerBanner(
+        parent,
+        "VeilfallRefugeBanner",
+        ZONES.Veilfall + Vector3.new(-70, 0, 36),
+        math.rad(48),
+        Color3.fromRGB(69, 105, 104)
+    )
+
+    -- Shattered Arch: a regional fortress silhouette visible before the portal.
+    makeShatteredFortressTower(
+        parent,
+        "ShatteredNorthTower",
+        ZONES.Ruins + Vector3.new(-148, 0, 102),
+        math.rad(8),
+        true
+    )
+    makeShatteredFortressTower(
+        parent,
+        "ShatteredSouthTower",
+        ZONES.Ruins + Vector3.new(-146, 0, -106),
+        math.rad(-8),
+        true
+    )
+    makeShatteredFortressTower(
+        parent,
+        "ShatteredInnerTower",
+        ZONES.Ruins + Vector3.new(92, 0, 105),
+        math.rad(12),
+        false
+    )
+    makeWayfarerStreetArch(
+        parent,
+        "ShatteredProcessionalArch",
+        ZONES.Ruins + Vector3.new(-188, 0, -2),
+        math.rad(90),
+        30,
+        Color3.fromRGB(95, 231, 194)
+    )
+    makeWayfarerBanner(
+        parent,
+        "ShatteredWarBannerA",
+        ZONES.Ruins + Vector3.new(-102, 0, 58),
+        math.rad(90),
+        Color3.fromRGB(63, 86, 76)
+    )
+    makeWayfarerBanner(
+        parent,
+        "ShatteredWarBannerB",
+        ZONES.Ruins + Vector3.new(-102, 0, -58),
+        math.rad(90),
+        Color3.fromRGB(63, 86, 76)
+    )
+
+    -- Proving Circle: full advancement venue with monument, stands and entrance.
+    makeFivePathMonument(parent, ZONES.Proving)
+    makeProvingGrandstand(
+        parent,
+        "ProvingNorthStand",
+        ZONES.Proving + Vector3.new(0, 0, 58),
+        math.rad(180),
+        34
+    )
+    makeProvingGrandstand(
+        parent,
+        "ProvingWestStand",
+        ZONES.Proving + Vector3.new(-58, 0, -2),
+        math.rad(90),
+        28
+    )
+    makeProvingGrandstand(
+        parent,
+        "ProvingEastStand",
+        ZONES.Proving + Vector3.new(58, 0, -2),
+        math.rad(-90),
+        28
+    )
+    makeWayfarerStreetArch(
+        parent,
+        "ProvingGrandEntrance",
+        ZONES.Proving + Vector3.new(0, 0, -88),
+        0,
+        28
+    )
+    for index, spec in
+        {
+            { Vector3.new(-44, 0, -58), math.rad(20), Color3.fromRGB(121, 244, 183) },
+            { Vector3.new(-22, 0, -68), math.rad(10), Color3.fromRGB(230, 170, 82) },
+            { Vector3.new(0, 0, -72), 0, Color3.fromRGB(99, 236, 209) },
+            { Vector3.new(22, 0, -68), math.rad(-10), Color3.fromRGB(187, 145, 229) },
+            { Vector3.new(44, 0, -58), math.rad(-20), Color3.fromRGB(241, 187, 82) },
+        }
+    do
+        makeWayfarerBanner(
+            parent,
+            "ProvingPathBanner" .. index,
+            ZONES.Proving + spec[1],
+            spec[2],
+            spec[3]
+        )
+    end
+
+    -- Route-side authored landmarks. Each one has a named purpose/silhouette;
+    -- none are random Marketplace prop dumps.
+    makeWayfarerCart(parent, "GreenwayBrokenCourier", Vector3.new(-610, 0, 82), math.rad(64), false)
+    makeStoneShrine(
+        parent,
+        "CrossroadsPilgrimShrine",
+        Vector3.new(-380, 0, 142),
+        math.rad(-22),
+        SIGNATURE.Lumen
+    )
+    makeWayfarerStreetArch(
+        parent,
+        "EastbridgeTollArch",
+        Vector3.new(-330, 0, 118),
+        math.rad(90),
+        18
+    )
+    makeReedDock(parent, "ReedbridgeFerryLanding", Vector3.new(-325, 0, 392), math.rad(18), 18)
+    makeWayfarerCart(parent, "MossglenHunterLayby", Vector3.new(22, 0, 205), math.rad(42), true)
+    makeStoneShrine(
+        parent,
+        "SunmossPilgrimMarker",
+        Vector3.new(352, 0, 370),
+        math.rad(-20),
+        Color3.fromRGB(207, 225, 112)
+    )
+    makeWayfarerStreetArch(
+        parent,
+        "VeilfallDescentArch",
+        Vector3.new(262, 0, -298),
+        math.rad(56),
+        18,
+        Color3.fromRGB(114, 222, 226)
+    )
+    makeGraveboneMausoleum(parent, "OldRoadMemorial", Vector3.new(698, 0, -120), math.rad(-18))
+    makeRoadsideShelter(
+        parent,
+        "ProvingRoadAspirantShelter",
+        Vector3.new(-947, 0, -232),
+        math.rad(6)
+    )
+    makeWayfarerBanner(
+        parent,
+        "ProvingRoadStandard",
+        Vector3.new(-932, 0, -266),
+        math.rad(175),
+        SIGNATURE.Cloth
+    )
+    makeWayfarerCart(parent, "EastbridgePatrolCart", Vector3.new(-180, 0, 68), math.rad(-72), true)
+    makeStoneShrine(
+        parent,
+        "GraveboneRoadMemorial",
+        Vector3.new(42, 0, -108),
+        math.rad(24),
+        Color3.fromRGB(133, 195, 169)
+    )
+    makeWayfarerStreetArch(
+        parent,
+        "GraveboneRoadBrokenArch",
+        Vector3.new(176, 0, -244),
+        math.rad(72),
+        17,
+        Color3.fromRGB(127, 186, 161)
+    )
+    makeRoadsideShelter(parent, "MossglenRoadRest", Vector3.new(-4, 0, 174), math.rad(18))
+    makeWayfarerBanner(
+        parent,
+        "MossglenRoadRangerStandard",
+        Vector3.new(70, 0, 246),
+        math.rad(-25),
+        Color3.fromRGB(77, 119, 74)
+    )
+    makeWayfarerCart(
+        parent,
+        "BrambleGathererCart",
+        BRAMBLE_ORIGIN + Vector3.new(-20, 0, 26),
+        math.rad(55),
+        true
+    )
+    makeStoneShrine(
+        parent,
+        "SunmossAscentShrine",
+        Vector3.new(444, 0, 414),
+        math.rad(-38),
+        Color3.fromRGB(207, 225, 112)
+    )
+    makeRoadsideShelter(parent, "RuinsRoadPatrolShelter", Vector3.new(510, 0, 185), math.rad(-82))
+    makeWayfarerStreetArch(
+        parent,
+        "RuinsRoadFallenGate",
+        Vector3.new(735, 0, 112),
+        math.rad(82),
+        21,
+        Color3.fromRGB(95, 205, 173)
+    )
+    makeShatteredFortressTower(
+        parent,
+        "RuinsReturnWatchtower",
+        Vector3.new(748, 0, 260),
+        math.rad(-18),
+        true
+    )
+    makeStoneShrine(
+        parent,
+        "VeilfallReturnShrine",
+        Vector3.new(690, 0, -184),
+        math.rad(30),
+        Color3.fromRGB(114, 222, 226)
+    )
+end
+
 local function makeTownExpansion(parent)
     local camp = ZONES.Camp
     makeBuilding(
@@ -2857,6 +4184,166 @@ local AMBIENT_RESIDENTS = table.freeze({
         HairStyle = "long",
         Cloth = Color3.fromRGB(104, 108, 75),
     }),
+    table.freeze({
+        Name = "Wayfarer Apprentice",
+        Position = ZONES.Camp + Vector3.new(47, 0, -12),
+        Yaw = math.rad(-70),
+        Role = "Scout",
+        HairStyle = "short",
+        Cloth = Color3.fromRGB(70, 96, 78),
+    }),
+    table.freeze({
+        Name = "Wayfarer Cook",
+        Position = ZONES.Camp + Vector3.new(48, 0, 54),
+        Yaw = math.rad(-150),
+        Role = "Quartermaster",
+        HairStyle = "bun",
+        Cloth = Color3.fromRGB(112, 83, 58),
+    }),
+    table.freeze({
+        Name = "Wayfarer Stablehand",
+        Position = ZONES.Camp + Vector3.new(94, 0, 62),
+        Yaw = math.rad(-145),
+        Role = "Scout",
+        HairStyle = "ponytail",
+        Cloth = Color3.fromRGB(92, 82, 59),
+    }),
+    table.freeze({
+        Name = "Greenway Farmer",
+        Position = ZONES.Greenway + Vector3.new(-70, 0, -56),
+        Yaw = math.rad(42),
+        Role = "Quartermaster",
+        HairStyle = "short",
+        Cloth = Color3.fromRGB(92, 105, 69),
+    }),
+    table.freeze({
+        Name = "Greenway Militia",
+        Position = ZONES.Greenway + Vector3.new(80, 0, 42),
+        Yaw = math.rad(-32),
+        Role = "Guard",
+        HairStyle = "short",
+        Cloth = Color3.fromRGB(68, 91, 67),
+    }),
+    table.freeze({
+        Name = "Crossroads Merchant",
+        Position = ZONES.Crossroads + Vector3.new(48, 0, -46),
+        Yaw = math.rad(-120),
+        Role = "Quartermaster",
+        HairStyle = "bun",
+        Cloth = Color3.fromRGB(108, 82, 59),
+    }),
+    table.freeze({
+        Name = "Crossroads Traveler",
+        Position = ZONES.Crossroads + Vector3.new(-15, 0, 42),
+        Yaw = math.rad(15),
+        Role = "Scout",
+        HairStyle = "long",
+        Cloth = Color3.fromRGB(77, 96, 75),
+    }),
+    table.freeze({
+        Name = "Glowmere Keeper",
+        Position = ZONES.Glowmere + Vector3.new(-103, 0, -50),
+        Yaw = math.rad(35),
+        Role = "Archivist",
+        HairStyle = "long",
+        Cloth = Color3.fromRGB(67, 101, 93),
+    }),
+    table.freeze({
+        Name = "Glowmere Fisher",
+        Position = ZONES.Glowmere + Vector3.new(92, 0, 46),
+        Yaw = math.rad(-35),
+        Role = "Scout",
+        HairStyle = "short",
+        Cloth = Color3.fromRGB(73, 103, 94),
+    }),
+    table.freeze({
+        Name = "Eastbridge Quartermaster",
+        Position = ZONES.EastLanding + Vector3.new(48, 0, 45),
+        Yaw = math.rad(-130),
+        Role = "Quartermaster",
+        HairStyle = "short",
+        Cloth = Color3.fromRGB(105, 82, 58),
+    }),
+    table.freeze({
+        Name = "Eastbridge Patrol",
+        Position = ZONES.EastLanding + Vector3.new(-18, 0, -48),
+        Yaw = math.rad(180),
+        Role = "Guard",
+        HairStyle = "ponytail",
+        Cloth = Color3.fromRGB(61, 88, 71),
+    }),
+    table.freeze({
+        Name = "Mossglen Hunter",
+        Position = ZONES.Mossglen + Vector3.new(118, 0, -88),
+        Yaw = math.rad(-44),
+        Role = "Scout",
+        HairStyle = "short",
+        Cloth = Color3.fromRGB(77, 102, 67),
+    }),
+    table.freeze({
+        Name = "Mossglen Fletcher",
+        Position = ZONES.Mossglen + Vector3.new(-126, 0, -54),
+        Yaw = math.rad(38),
+        Role = "Quartermaster",
+        HairStyle = "bun",
+        Cloth = Color3.fromRGB(92, 83, 58),
+    }),
+    table.freeze({
+        Name = "Sunmoss Researcher",
+        Position = ZONES.Sunmoss + Vector3.new(-15, 0, 72),
+        Yaw = math.rad(16),
+        Role = "Archivist",
+        HairStyle = "bun",
+        Cloth = Color3.fromRGB(106, 108, 73),
+    }),
+    table.freeze({
+        Name = "Sunmoss Surveyor",
+        Position = ZONES.Sunmoss + Vector3.new(70, 0, -32),
+        Yaw = math.rad(-70),
+        Role = "Scout",
+        HairStyle = "short",
+        Cloth = Color3.fromRGB(93, 101, 71),
+    }),
+    table.freeze({
+        Name = "Veilfall Refugee",
+        Position = ZONES.Veilfall + Vector3.new(-84, 0, -56),
+        Yaw = math.rad(48),
+        Role = "Guide",
+        HairStyle = "long",
+        Cloth = Color3.fromRGB(70, 99, 94),
+    }),
+    table.freeze({
+        Name = "Veilfall Watcher",
+        Position = ZONES.Veilfall + Vector3.new(76, 0, 20),
+        Yaw = math.rad(-24),
+        Role = "Guard",
+        HairStyle = "short",
+        Cloth = Color3.fromRGB(60, 87, 84),
+    }),
+    table.freeze({
+        Name = "Proving Attendant",
+        Position = ZONES.Proving + Vector3.new(-42, 0, 44),
+        Yaw = math.rad(145),
+        Role = "Mentor",
+        HairStyle = "long",
+        Cloth = Color3.fromRGB(71, 96, 81),
+    }),
+    table.freeze({
+        Name = "Proving Aspirant",
+        Position = ZONES.Proving + Vector3.new(42, 0, 44),
+        Yaw = math.rad(-145),
+        Role = "Scout",
+        HairStyle = "ponytail",
+        Cloth = Color3.fromRGB(85, 94, 72),
+    }),
+    table.freeze({
+        Name = "Proving Spectator",
+        Position = ZONES.Proving + Vector3.new(0, 0, 62),
+        Yaw = math.rad(180),
+        Role = "Guide",
+        HairStyle = "short",
+        Cloth = Color3.fromRGB(81, 91, 77),
+    }),
 })
 
 local function makeAmbientResident(parent, spec, index)
@@ -3006,6 +4493,7 @@ end
 local function makeZoneContent(parent)
     makeTown(parent)
     makeWorldSettlements(parent)
+    makeSignatureWorldContent(parent)
 
     makeBuilding(
         parent,
@@ -3253,6 +4741,7 @@ function LumenreachWorldService.Init()
     world:SetAttribute("RegionId", "lumenreach")
     world:SetAttribute("WorldDesignVersion", WORLD_DESIGN_VERSION)
     world:SetAttribute("TerrainFirstMMOLayout", true)
+    world:SetAttribute("BespokeLumenreachArchitecture", true)
     world.Parent = Workspace
 
     makeZoneContent(world)
