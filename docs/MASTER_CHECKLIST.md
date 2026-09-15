@@ -58,7 +58,7 @@
 - [x] Oversized/unintegrated cliff meshes and black stacked-rock formations corrected and blended into terrain.
 - [x] Starter camp rebuilt with larger tents, proper supplies, map table, benches, lanterns, signpost, and custom guide/NPC composition.
 - [x] World density pass added continuous forest bands, roadside clusters, undergrowth, deadwood, rocks, and landmark dressing.
-- [x] Wayfarer Camp → Lumenwood Crossroads opening-route redesign is source-complete: oversized flat dirt clearings reduced, terrain banks/grass intrusions added, forest framing densified, sign arms realigned, lanterns rebuilt/repositioned to path shoulders, and rectangular trail blocks replaced with natural pebble clusters; fresh Studio visual QA remains.
+- [x] Lumenreach macro-layout replacement is source-complete: all major zones were repositioned, Crossroads moved onto a raised west-side saddle, Veilfall moved into a lowered ravine, Sunmoss moved onto an elevated ridge, a carved Lumen Gorge now divides west/east Lumenreach, and a required bridge crossing connects the two halves; fresh Studio visual QA remains.
 - [x] Camera collision stabilized so non-solid foliage/decor no longer causes view snapping.
 - [x] Environmental storytelling pass adds old wayfarer remnants and hidden Whisperroot Hollow.
 - [ ] Full player-height visual QA for every imported mesh, rock/cliff, root, log, and path obstruction.
@@ -474,8 +474,8 @@
 - [x] Sunmoss Overlook northern loop destination.
 - [x] Connected trail network and route beacons/waystones.
 - [x] Forest-density and roadside environmental dressing pass.
-- [x] Opening topology redesigned: compact Camp basin, separate Proving Circle side spur, curved woodland reveal, smaller Crossroads fork, curved downstream branches, location-specific signs, and larger canopy silhouettes; Studio visual QA remains.
-- [x] Opening-route composition pass rebuilt Camp/Crossroads signs, path lantern scale/placement, natural trail pebbles, irregular clearing edges, low terrain banks, and denser authored woodland clusters; Studio player-height review remains open.
+- [x] Region topology rebuilt around distinct macro geography: compact west-basin Camp, separate Proving Circle pocket, climbing approach to raised Crossroads, central gorge/river, bridge transition to east-side Ruins/Mossglen, north Glowmere loop, lowered Veilfall route, and ascending Sunmoss highland loop; Studio visual QA remains.
+- [x] Opening-route composition pass rebuilt Camp/Crossroads signs, path lantern scale/placement, clearing edges, terrain banks, and authored woodland framing; the obsolete repeated trail-pebble system was removed; Studio player-height review remains open.
 - [x] Approved imported environment assets integrated with runtime sanitization and procedural fallbacks.
 - [x] Bad oversized cliff/rock placements corrected and terrain-supported.
 - [x] Camera obstruction issue from foliage/decor corrected.

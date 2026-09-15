@@ -21,37 +21,55 @@ local WORLD_DEPTH = 760
 local FOLIAGE_MATERIAL = Enum.Material.SmoothPlastic
 
 local WORLD_ZONES = table.freeze({
-    Camp = Vector3.new(-250, 0, 120),
-    Crossroads = Vector3.new(-80, 0, 28),
-    Ruins = Vector3.new(78, 0, -92),
-    CombatGrove = Vector3.new(220, 0, 82),
-    Waterfall = Vector3.new(-255, 0, -178),
-    Glowmere = Vector3.new(22, 0, 176),
-    Overlook = Vector3.new(155, 0, -225),
+    -- West basin / opening chapter.
+    Camp = Vector3.new(-325, 0, 190),
+    Crossroads = Vector3.new(-175, 4, 78),
+    Waterfall = Vector3.new(-305, -4, -165),
+    Glowmere = Vector3.new(-62, 0, 270),
+
+    -- East side, reached across the Lumen Gorge bridge.
+    Ruins = Vector3.new(125, 3, -72),
+    CombatGrove = Vector3.new(270, 1, 128),
+    Overlook = Vector3.new(285, 12, -238),
 })
 
--- The opening is intentionally authored as a curved reveal rather than a
--- straight road into a giant dirt junction. All terrain, clearance, and
--- navigation dressing reference the same points so the route cannot drift.
+-- Opening progression is now a west-basin climb into a raised saddle. It is
+-- deliberately not aligned with the old flat west->east road.
 local OPENING_ROUTE_POINTS = table.freeze({
-    WORLD_ZONES.Camp + Vector3.new(42, 0, -4),
-    Vector3.new(-207, 0, 109),
-    Vector3.new(-190, 0, 91),
-    Vector3.new(-178, 0, 65),
-    Vector3.new(-151, 0, 50),
-    Vector3.new(-124, 0, 65),
-    Vector3.new(-101, 0, 52),
-    WORLD_ZONES.Crossroads + Vector3.new(-9, 0, 7),
+    WORLD_ZONES.Camp + Vector3.new(38, 0, -5),
+    Vector3.new(-281, 0.5, 169),
+    Vector3.new(-260, 1.0, 146),
+    Vector3.new(-241, 1.4, 118),
+    Vector3.new(-219, 2.0, 97),
+    Vector3.new(-198, 3.0, 85),
+    WORLD_ZONES.Crossroads + Vector3.new(-8, 0, 4),
     WORLD_ZONES.Crossroads,
 })
 
-local PROVING_CIRCLE_ORIGIN = WORLD_ZONES.Camp + Vector3.new(8, 0, -78)
+-- Advancement training sits south of Camp in its own wooded pocket instead of
+-- sharing the primary navigation sightline.
+local PROVING_CIRCLE_ORIGIN = WORLD_ZONES.Camp + Vector3.new(10, 0, -92)
 local PROVING_SPUR_POINTS = table.freeze({
-    WORLD_ZONES.Camp + Vector3.new(5, 0, -34),
-    WORLD_ZONES.Camp + Vector3.new(1, 0, -50),
-    PROVING_CIRCLE_ORIGIN + Vector3.new(0, 0, 17),
+    WORLD_ZONES.Camp + Vector3.new(2, 0, -31),
+    WORLD_ZONES.Camp + Vector3.new(-3, 0, -54),
+    PROVING_CIRCLE_ORIGIN + Vector3.new(0, 0, 20),
     PROVING_CIRCLE_ORIGIN,
 })
+
+local GORGE_POINTS = table.freeze({
+    WORLD_ZONES.Glowmere + Vector3.new(20, 0, -20),
+    Vector3.new(-35, 0, 205),
+    Vector3.new(-24, 0, 142),
+    Vector3.new(-13, 0, 84),
+    Vector3.new(-6, 0, 46),
+    Vector3.new(-18, 0, -12),
+    Vector3.new(-70, 0, -76),
+    Vector3.new(-154, -1, -124),
+    WORLD_ZONES.Waterfall + Vector3.new(28, 0, 30),
+})
+
+local BRIDGE_WEST = Vector3.new(-45, 3.3, 57)
+local BRIDGE_EAST = Vector3.new(26, 2.8, 50)
 
 local function makePart(parent, name, size, cframe, material, color)
     local part = Instance.new("Part")
@@ -2737,8 +2755,8 @@ local function prepareGround(world)
         end
 
         local function fillTrail(a, b, width)
-            local startPoint = Vector3.new(a.X, 0.28, a.Z)
-            local endPoint = Vector3.new(b.X, 0.28, b.Z)
+            local startPoint = Vector3.new(a.X, a.Y + 0.28, a.Z)
+            local endPoint = Vector3.new(b.X, b.Y + 0.28, b.Z)
             local delta = endPoint - startPoint
             local length = delta.Magnitude
             if length < 0.1 then
@@ -2762,28 +2780,68 @@ local function prepareGround(world)
             )
         end
 
-        -- Camp is a compact basin. The Proving Circle is a separate side spur,
-        -- and Crossroads is a small fork rather than another rectangular plaza.
-        fillClearing(WORLD_ZONES.Camp, Vector3.new(98, 0, 66), Enum.Material.Ground)
-        fillClearing(WORLD_ZONES.Ruins, Vector3.new(132, 0, 106), Enum.Material.Grass)
-        fillClearing(WORLD_ZONES.CombatGrove, Vector3.new(170, 0, 138), Enum.Material.Grass)
-        fillClearing(WORLD_ZONES.Glowmere, Vector3.new(148, 0, 120), Enum.Material.Grass)
-        fillClearing(WORLD_ZONES.Waterfall, Vector3.new(126, 0, 104), Enum.Material.Grass)
-        fillClearing(WORLD_ZONES.Overlook, Vector3.new(132, 0, 94), Enum.Material.Grass)
+        -- New macro layout: west-basin Camp, raised Crossroads saddle, a
+        -- central Lumen Gorge, and the east-side ruins/combat/highland chapter.
+        fillClearing(WORLD_ZONES.Camp, Vector3.new(88, 0, 60), Enum.Material.Ground)
+        fillClearing(WORLD_ZONES.Ruins, Vector3.new(96, 0, 76), Enum.Material.Grass)
+        fillClearing(WORLD_ZONES.CombatGrove, Vector3.new(140, 0, 108), Enum.Material.Grass)
+        fillClearing(WORLD_ZONES.Glowmere, Vector3.new(116, 0, 88), Enum.Material.Grass)
+
+        -- Veilfall is a genuinely lower ravine floor; clear the original ground
+        -- volume before laying its lower basin.
+        terrain:FillBlock(
+            CFrame.new(WORLD_ZONES.Waterfall + Vector3.new(0, 3.0, 0)),
+            Vector3.new(118, 14, 98),
+            Enum.Material.Air
+        )
+        fillClearing(WORLD_ZONES.Waterfall, Vector3.new(104, 0, 82), Enum.Material.Grass)
 
         terrain:FillBall(
-            WORLD_ZONES.Crossroads + Vector3.new(0, -16.8, 0),
-            17.4,
+            WORLD_ZONES.Crossroads + Vector3.new(0, -19.6, 0),
+            20.2,
             Enum.Material.Ground
         )
         terrain:FillBall(
-            PROVING_CIRCLE_ORIGIN + Vector3.new(0, -16.2, 0),
-            16.8,
+            PROVING_CIRCLE_ORIGIN + Vector3.new(0, -16.0, 0),
+            17.0,
             Enum.Material.Ground
         )
 
-        -- Main opening route: narrow, curved, and revealed in stages.
-        local openingWidths = { 12.5, 11.5, 11, 11, 11.5, 11, 10.5, 10.5 }
+        -- Carve the Lumen Gorge through the middle of the region. This is the
+        -- map's primary macro landmark and permanently breaks the old flat-lawn
+        -- silhouette. The channel deepens as it runs south toward Veilfall.
+        local function carveGorgeSegment(a, b, width)
+            local delta = b - a
+            local length = delta.Magnitude
+            if length < 0.1 then
+                return
+            end
+            local midpoint = (a + b) * 0.5
+            local carveCenter = midpoint - Vector3.new(0, 5.3, 0)
+            local carveTarget = b - Vector3.new(0, 5.3, 0)
+            terrain:FillBlock(
+                CFrame.lookAt(carveCenter, carveTarget),
+                Vector3.new(width, 11.5, length + 5),
+                Enum.Material.Air
+            )
+            terrain:FillBlock(
+                CFrame.lookAt(midpoint - Vector3.new(0, 9.0, 0), b - Vector3.new(0, 9.0, 0)),
+                Vector3.new(width - 2.5, 2.6, length + 3),
+                Enum.Material.Rock
+            )
+            terrain:FillBlock(
+                CFrame.lookAt(midpoint - Vector3.new(0, 5.6, 0), b - Vector3.new(0, 5.6, 0)),
+                Vector3.new(width - 5.0, 3.2, length + 2),
+                Enum.Material.Water
+            )
+        end
+        for index = 1, #GORGE_POINTS - 1 do
+            local width = 30 + math.min(index, 4) * 2.5
+            carveGorgeSegment(GORGE_POINTS[index], GORGE_POINTS[index + 1], width)
+        end
+
+        -- Main opening route climbs out of Camp into Crossroads.
+        local openingWidths = { 12.5, 11.5, 11, 10.5, 10.5, 10.5, 10.5 }
         for index = 1, #OPENING_ROUTE_POINTS - 1 do
             fillTrail(
                 OPENING_ROUTE_POINTS[index],
@@ -2792,50 +2850,62 @@ local function prepareGround(world)
             )
         end
 
-        -- Advancement training is deliberately off the main road so the
-        -- opening sightline is not overloaded with unrelated landmarks.
+        -- Advancement training is a separate wooded spur south of Camp.
         for index = 1, #PROVING_SPUR_POINTS - 1 do
-            fillTrail(PROVING_SPUR_POINTS[index], PROVING_SPUR_POINTS[index + 1], 9.5)
+            fillTrail(PROVING_SPUR_POINTS[index], PROVING_SPUR_POINTS[index + 1], 9.0)
         end
 
-        -- Three readable branches leave Lumenwood Crossroads. Each bends out of
-        -- view instead of exposing the entire map from one giant intersection.
+        -- A small starter-combat pocket sits off the main climb rather than
+        -- spawning enemies in the navigation saddle itself.
+        local mosslingHollow = Vector3.new(-226, 1.5, 123)
+        fillClearing(mosslingHollow, Vector3.new(30, 0, 24), Enum.Material.Grass)
+        fillTrail(Vector3.new(-241, 1.4, 118), mosslingHollow, 7.5)
+
         local trails = {
-            -- Shattered Lumen Arch / Brasshaven gate route.
-            { WORLD_ZONES.Crossroads, Vector3.new(-58, 0, 14), 10.5 },
-            { Vector3.new(-58, 0, 14), Vector3.new(-36, 0, -7), 10.5 },
-            { Vector3.new(-36, 0, -7), Vector3.new(-9, 0, -31), 10.5 },
-            { Vector3.new(-9, 0, -31), Vector3.new(22, 0, -52), 10.5 },
-            { Vector3.new(22, 0, -52), WORLD_ZONES.Ruins + Vector3.new(-34, 0, 18), 11 },
+            -- Raised Crossroads -> mandatory gorge bridge -> east landing.
+            { WORLD_ZONES.Crossroads, Vector3.new(-145, 4.0, 70), 11 },
+            { Vector3.new(-145, 4.0, 70), Vector3.new(-112, 3.8, 64), 10.5 },
+            { Vector3.new(-112, 3.8, 64), BRIDGE_WEST, 10.0 },
+            { BRIDGE_EAST, Vector3.new(58, 2.8, 38), 10.0 },
 
-            -- Mossglen / northern loop route.
-            { WORLD_ZONES.Crossroads, Vector3.new(-62, 0, 47), 11 },
-            { Vector3.new(-62, 0, 47), Vector3.new(-28, 0, 64), 11 },
-            { Vector3.new(-28, 0, 64), Vector3.new(24, 0, 73), 11.5 },
-            { Vector3.new(24, 0, 73), Vector3.new(82, 0, 77), 12 },
-            { Vector3.new(82, 0, 77), Vector3.new(125, 0, 79), 12 },
-            { Vector3.new(125, 0, 79), WORLD_ZONES.CombatGrove + Vector3.new(-47, 0, -3), 13 },
+            -- East landing -> Shattered Lumen Arch.
+            { Vector3.new(58, 2.8, 38), Vector3.new(82, 3.0, 5), 10.5 },
+            { Vector3.new(82, 3.0, 5), WORLD_ZONES.Ruins + Vector3.new(-30, 0, 18), 11 },
 
-            -- Veilfall / western lower route.
-            { WORLD_ZONES.Crossroads, Vector3.new(-98, 0, 7), 10 },
-            { Vector3.new(-98, 0, 7), Vector3.new(-126, 0, -22), 10 },
-            { Vector3.new(-126, 0, -22), Vector3.new(-158, 0, -57), 10 },
-            { Vector3.new(-158, 0, -57), Vector3.new(-192, 0, -94), 10 },
-            { Vector3.new(-192, 0, -94), WORLD_ZONES.Waterfall + Vector3.new(24, 0, 28), 10 },
+            -- East landing -> Mossglen Combat Grove.
+            { Vector3.new(58, 2.8, 38), Vector3.new(105, 2.0, 78), 11 },
+            { Vector3.new(105, 2.0, 78), Vector3.new(168, 1.5, 112), 11.5 },
+            { Vector3.new(168, 1.5, 112), WORLD_ZONES.CombatGrove + Vector3.new(-45, 0, -5), 12.5 },
 
-            -- Scenic north loop out of Camp toward Glowmere.
-            { WORLD_ZONES.Camp + Vector3.new(27, 0, 30), Vector3.new(-181, 0, 151), 10.5 },
-            { Vector3.new(-181, 0, 151), Vector3.new(-131, 0, 166), 10.5 },
-            { Vector3.new(-131, 0, 166), Vector3.new(-70, 0, 176), 10.5 },
-            { Vector3.new(-70, 0, 176), WORLD_ZONES.Glowmere + Vector3.new(-50, 0, 0), 10.5 },
-            { WORLD_ZONES.Glowmere + Vector3.new(45, 0, -14), Vector3.new(122, 0, 143), 11 },
-            { Vector3.new(122, 0, 143), WORLD_ZONES.CombatGrove + Vector3.new(-28, 0, 36), 12 },
+            -- Crossroads -> Glowmere north basin.
+            { WORLD_ZONES.Crossroads + Vector3.new(0, 0, 15), Vector3.new(-157, 3.4, 128), 10.5 },
+            { Vector3.new(-157, 3.4, 128), Vector3.new(-132, 2.5, 174), 10.5 },
+            { Vector3.new(-132, 2.5, 174), Vector3.new(-103, 1.4, 220), 10.5 },
+            { Vector3.new(-103, 1.4, 220), WORLD_ZONES.Glowmere + Vector3.new(-22, 0, -7), 11 },
 
-            -- Shattered Arch to Sunmoss and back toward Mossglen.
-            { WORLD_ZONES.Ruins + Vector3.new(25, 0, -28), Vector3.new(112, 0, -160), 10 },
-            { Vector3.new(112, 0, -160), WORLD_ZONES.Overlook + Vector3.new(-20, 0, 23), 10 },
-            { WORLD_ZONES.Overlook + Vector3.new(36, 0, 18), Vector3.new(245, 0, -132), 10 },
-            { Vector3.new(245, 0, -132), WORLD_ZONES.CombatGrove + Vector3.new(35, 0, -43), 10.5 },
+            -- Crossroads -> Veilfall lower ravine.
+            { WORLD_ZONES.Crossroads + Vector3.new(-12, 0, -12), Vector3.new(-208, 3.0, 42), 10 },
+            { Vector3.new(-208, 3.0, 42), Vector3.new(-239, 1.5, 5), 10 },
+            { Vector3.new(-239, 1.5, 5), Vector3.new(-273, -0.5, -55), 10 },
+            { Vector3.new(-273, -0.5, -55), Vector3.new(-292, -2.3, -111), 10 },
+            { Vector3.new(-292, -2.3, -111), WORLD_ZONES.Waterfall + Vector3.new(24, 0, 30), 10 },
+
+            -- Glowmere ridge -> Mossglen, completing the northern loop.
+            { WORLD_ZONES.Glowmere + Vector3.new(48, 0, -2), Vector3.new(38, 0.5, 252), 10.5 },
+            { Vector3.new(38, 0.5, 252), Vector3.new(112, 0.8, 220), 10.5 },
+            { Vector3.new(112, 0.8, 220), Vector3.new(185, 1.0, 178), 11 },
+            { Vector3.new(185, 1.0, 178), WORLD_ZONES.CombatGrove + Vector3.new(-38, 0, 32), 11.5 },
+
+            -- Ruins -> genuinely elevated Sunmoss ridge.
+            { WORLD_ZONES.Ruins + Vector3.new(20, 0, -25), Vector3.new(178, 5.2, -132), 10 },
+            { Vector3.new(178, 5.2, -132), Vector3.new(219, 7.8, -174), 10 },
+            { Vector3.new(219, 7.8, -174), Vector3.new(257, 10.0, -210), 10 },
+            { Vector3.new(257, 10.0, -210), WORLD_ZONES.Overlook + Vector3.new(-20, 0, 15), 10 },
+
+            -- Overlook returns north toward Mossglen on a high forest shelf.
+            { WORLD_ZONES.Overlook + Vector3.new(28, 0, 22), Vector3.new(327, 8.0, -168), 9.5 },
+            { Vector3.new(327, 8.0, -168), Vector3.new(330, 4.0, -70), 10 },
+            { Vector3.new(330, 4.0, -70), WORLD_ZONES.CombatGrove + Vector3.new(42, 0, -45), 10.5 },
         }
         for _, trail in trails do
             fillTrail(trail[1], trail[2], trail[3])
@@ -2845,47 +2915,70 @@ local function prepareGround(world)
         -- low banks sit outside the main travel lanes and make paths feel cut
         -- through a forest rather than painted across a flat baseplate.
         local lowBanks = {
-            -- Camp basin framing.
-            { WORLD_ZONES.Camp + Vector3.new(-58, -9.0, -38), 13, Enum.Material.Grass },
-            { WORLD_ZONES.Camp + Vector3.new(-55, -9.5, 39), 14, Enum.Material.Grass },
-            { WORLD_ZONES.Camp + Vector3.new(3, -10.0, -48), 13, Enum.Material.Grass },
-            { WORLD_ZONES.Camp + Vector3.new(43, -9.5, 42), 14, Enum.Material.Grass },
-            { WORLD_ZONES.Camp + Vector3.new(55, -10.0, 15), 12, Enum.Material.Grass },
+            -- Camp basin rim.
+            { WORLD_ZONES.Camp + Vector3.new(-52, -9.0, -36), 13, Enum.Material.Grass },
+            { WORLD_ZONES.Camp + Vector3.new(-50, -9.5, 36), 14, Enum.Material.Grass },
+            { WORLD_ZONES.Camp + Vector3.new(2, -10.0, -45), 13, Enum.Material.Grass },
+            { WORLD_ZONES.Camp + Vector3.new(40, -9.5, 38), 13, Enum.Material.Grass },
 
-            -- Curved main-route banks: alternate sides at bends so the road
-            -- feels enclosed without creating collision humps in the lane.
-            { Vector3.new(-205, -10.0, 132), 12, Enum.Material.Grass },
-            { Vector3.new(-216, -10.0, 78), 11, Enum.Material.Grass },
-            { Vector3.new(-171, -10.0, 101), 12, Enum.Material.Grass },
-            { Vector3.new(-165, -10.0, 32), 11, Enum.Material.Grass },
-            { Vector3.new(-132, -10.0, 88), 11, Enum.Material.Grass },
-            { Vector3.new(-119, -10.0, 31), 11, Enum.Material.Grass },
-            { Vector3.new(-93, -10.0, 73), 10, Enum.Material.Grass },
-            { Vector3.new(-101, -10.0, 16), 10, Enum.Material.Grass },
+            -- Opening climb banks around the new switchback road.
+            { Vector3.new(-286, -9.5, 148), 12, Enum.Material.Grass },
+            { Vector3.new(-260, -9.0, 170), 12, Enum.Material.Grass },
+            { Vector3.new(-248, -9.0, 111), 11, Enum.Material.Grass },
+            { Vector3.new(-219, -8.5, 124), 11, Enum.Material.Grass },
+            { Vector3.new(-211, -8.0, 72), 10, Enum.Material.Grass },
+            { Vector3.new(-184, -7.5, 99), 10, Enum.Material.Grass },
 
-            -- Small Crossroads bowl, not a wide open plain.
-            { WORLD_ZONES.Crossroads + Vector3.new(-31, -10.0, -24), 10, Enum.Material.Grass },
-            { WORLD_ZONES.Crossroads + Vector3.new(-29, -10.0, 27), 10, Enum.Material.Grass },
-            { WORLD_ZONES.Crossroads + Vector3.new(30, -10.0, -23), 10, Enum.Material.Grass },
-            { WORLD_ZONES.Crossroads + Vector3.new(31, -10.0, 25), 10, Enum.Material.Grass },
+            -- Raised Crossroads saddle.
+            { WORLD_ZONES.Crossroads + Vector3.new(-28, -8.0, -24), 11, Enum.Material.Grass },
+            { WORLD_ZONES.Crossroads + Vector3.new(-27, -8.0, 25), 11, Enum.Material.Grass },
+            { WORLD_ZONES.Crossroads + Vector3.new(29, -8.0, -22), 11, Enum.Material.Grass },
+            { WORLD_ZONES.Crossroads + Vector3.new(28, -8.0, 24), 11, Enum.Material.Grass },
 
-            -- Proving-circle pocket framing.
+            -- Proving-circle pocket.
             { PROVING_CIRCLE_ORIGIN + Vector3.new(-22, -10.0, -12), 10, Enum.Material.Grass },
             { PROVING_CIRCLE_ORIGIN + Vector3.new(22, -10.0, -10), 10, Enum.Material.Grass },
             { PROVING_CIRCLE_ORIGIN + Vector3.new(0, -10.0, -25), 11, Enum.Material.Grass },
+
+            -- Bridge approach shelves.
+            { BRIDGE_WEST + Vector3.new(-22, -7.0, 17), 11, Enum.Material.Grass },
+            { BRIDGE_WEST + Vector3.new(-18, -7.0, -18), 11, Enum.Material.Grass },
+            { BRIDGE_EAST + Vector3.new(22, -7.0, 18), 11, Enum.Material.Grass },
+            { BRIDGE_EAST + Vector3.new(20, -7.0, -18), 11, Enum.Material.Grass },
         }
         for _, bank in lowBanks do
             terrain:FillBall(bank[1], bank[2], bank[3])
         end
 
+        -- Rock shoulders make the central gorge read like an actual landform,
+        -- not a water stripe painted into flat grass.
+        local gorgeBanks = {
+            { Vector3.new(-63, -5.0, 224), 13 },
+            { Vector3.new(-10, -5.0, 218), 12 },
+            { Vector3.new(-49, -5.0, 163), 12 },
+            { Vector3.new(4, -5.0, 157), 12 },
+            { Vector3.new(-39, -5.0, 103), 11 },
+            { Vector3.new(14, -5.0, 99), 11 },
+            { BRIDGE_WEST + Vector3.new(5, -5.5, -17), 10 },
+            { BRIDGE_EAST + Vector3.new(-5, -5.5, 16), 10 },
+            { Vector3.new(-43, -6.0, -32), 11 },
+            { Vector3.new(7, -6.0, -16), 11 },
+            { Vector3.new(-103, -6.0, -91), 12 },
+            { Vector3.new(-63, -6.0, -61), 12 },
+            { Vector3.new(-184, -6.0, -142), 13 },
+            { Vector3.new(-147, -6.0, -111), 13 },
+        }
+        for _, bank in gorgeBanks do
+            terrain:FillBall(bank[1], bank[2], Enum.Material.Basalt)
+        end
+
         local edgeRock = {
-            { WORLD_ZONES.Camp + Vector3.new(-61, -5.8, 4), 9 },
-            { WORLD_ZONES.Camp + Vector3.new(51, -6.0, -37), 8 },
-            { Vector3.new(-197, -6.2, 127), 8 },
-            { Vector3.new(-160, -6.2, 95), 7 },
-            { Vector3.new(-126, -6.2, 86), 7 },
-            { WORLD_ZONES.Crossroads + Vector3.new(-34, -6.2, 18), 8 },
-            { WORLD_ZONES.Crossroads + Vector3.new(34, -6.2, -16), 8 },
+            { WORLD_ZONES.Camp + Vector3.new(-58, -5.8, 4), 9 },
+            { WORLD_ZONES.Camp + Vector3.new(47, -6.0, -34), 8 },
+            { Vector3.new(-270, -5.8, 137), 8 },
+            { Vector3.new(-229, -5.8, 93), 7 },
+            { WORLD_ZONES.Crossroads + Vector3.new(-31, -4.5, 17), 8 },
+            { WORLD_ZONES.Crossroads + Vector3.new(32, -4.5, -15), 8 },
             { PROVING_CIRCLE_ORIGIN + Vector3.new(-20, -6.2, 8), 7 },
         }
         for _, rock in edgeRock do
@@ -2893,14 +2986,14 @@ local function prepareGround(world)
         end
 
         local grassIntrusions = {
-            WORLD_ZONES.Camp + Vector3.new(-45, -6.0, -29),
-            WORLD_ZONES.Camp + Vector3.new(-42, -6.0, 31),
-            WORLD_ZONES.Camp + Vector3.new(14, -6.0, -35),
-            WORLD_ZONES.Camp + Vector3.new(39, -6.0, 28),
-            WORLD_ZONES.Crossroads + Vector3.new(-22, -6.0, -18),
-            WORLD_ZONES.Crossroads + Vector3.new(-20, -6.0, 19),
-            WORLD_ZONES.Crossroads + Vector3.new(22, -6.0, -17),
-            WORLD_ZONES.Crossroads + Vector3.new(23, -6.0, 18),
+            WORLD_ZONES.Camp + Vector3.new(-43, -6.0, -27),
+            WORLD_ZONES.Camp + Vector3.new(-40, -6.0, 29),
+            WORLD_ZONES.Camp + Vector3.new(13, -6.0, -33),
+            WORLD_ZONES.Camp + Vector3.new(36, -6.0, 26),
+            WORLD_ZONES.Crossroads + Vector3.new(-20, -4.5, -18),
+            WORLD_ZONES.Crossroads + Vector3.new(-18, -4.5, 18),
+            WORLD_ZONES.Crossroads + Vector3.new(20, -4.5, -17),
+            WORLD_ZONES.Crossroads + Vector3.new(21, -4.5, 17),
             PROVING_CIRCLE_ORIGIN + Vector3.new(-15, -6.0, 13),
             PROVING_CIRCLE_ORIGIN + Vector3.new(16, -6.0, 12),
         }
@@ -2932,19 +3025,27 @@ local function prepareGround(world)
         end
 
         local interiorMasses = {
-            { Vector3.new(-337, -22, 42), 32, Enum.Material.Grass },
-            { Vector3.new(-338, -22, -72), 29, Enum.Material.Basalt },
-            { Vector3.new(-330, -23, 244), 33, Enum.Material.Grass },
-            { Vector3.new(-175, -22, 256), 31, Enum.Material.Grass },
-            { Vector3.new(-55, -22, 270), 30, Enum.Material.Basalt },
-            { Vector3.new(115, -22, 260), 32, Enum.Material.Grass },
-            { Vector3.new(287, -22, 235), 34, Enum.Material.Grass },
-            { Vector3.new(330, -22, 118), 30, Enum.Material.Basalt },
-            { Vector3.new(330, -22, -42), 34, Enum.Material.Basalt },
-            { Vector3.new(292, -22, -204), 31, Enum.Material.Grass },
-            { Vector3.new(30, -22, -275), 32, Enum.Material.Basalt },
-            { Vector3.new(-135, -22, -265), 31, Enum.Material.Grass },
-            { Vector3.new(-320, -22, -212), 34, Enum.Material.Basalt },
+            -- West-basin containment and Glowmere ridge.
+            { Vector3.new(-382, -22, 92), 34, Enum.Material.Grass },
+            { Vector3.new(-355, -22, -35), 31, Enum.Material.Basalt },
+            { Vector3.new(-292, -22, 302), 34, Enum.Material.Grass },
+            { Vector3.new(-185, -22, 318), 31, Enum.Material.Grass },
+            { Vector3.new(-72, -22, 328), 30, Enum.Material.Basalt },
+
+            -- East-side forest masses around Mossglen and the ruins.
+            { Vector3.new(88, -22, 312), 32, Enum.Material.Grass },
+            { Vector3.new(228, -22, 286), 34, Enum.Material.Grass },
+            { Vector3.new(352, -22, 220), 34, Enum.Material.Basalt },
+            { Vector3.new(374, -22, 78), 31, Enum.Material.Basalt },
+            { Vector3.new(355, -21, -72), 34, Enum.Material.Basalt },
+
+            -- Southern highland / Veilfall containment.
+            { Vector3.new(332, -16, -250), 38, Enum.Material.Grass },
+            { Vector3.new(190, -20, -314), 34, Enum.Material.Basalt },
+            { Vector3.new(48, -22, -320), 32, Enum.Material.Grass },
+            { Vector3.new(-112, -22, -305), 32, Enum.Material.Grass },
+            { Vector3.new(-263, -22, -280), 35, Enum.Material.Basalt },
+            { Vector3.new(-365, -22, -228), 34, Enum.Material.Basalt },
         }
         for _, mound in interiorMasses do
             terrain:FillBall(mound[1], mound[2], mound[3])
@@ -2976,25 +3077,15 @@ local function prepareGround(world)
             Vector3.new(66, 3.2, 46),
             Enum.Material.Water
         )
-        local streamPoints = {
-            fallPool + Vector3.new(28, 0, 16),
-            Vector3.new(-192, 0, -116),
-            Vector3.new(-157, 0, -91),
-        }
-        for index = 1, #streamPoints - 1 do
-            local a = streamPoints[index]
-            local b = streamPoints[index + 1]
-            local startPoint = Vector3.new(a.X, -1.2, a.Z)
-            local endPoint = Vector3.new(b.X, -1.2, b.Z)
-            local length = (endPoint - startPoint).Magnitude
-            terrain:FillBlock(
-                CFrame.lookAt((startPoint + endPoint) * 0.5, endPoint),
-                Vector3.new(9, 2.2, length + 2),
-                Enum.Material.Water
-            )
-        end
+        -- The central Lumen Gorge now feeds this basin directly; the old
+        -- duplicate flat stream was removed as part of the macro redesign.
 
-        -- The overlook rises gently in walkable terraces rather than a single inaccessible hill.
+        -- Sunmoss is a real highland ridge, not a flat clearing with raised props.
+        terrain:FillBall(WORLD_ZONES.Overlook + Vector3.new(-28, -25, 18), 39, Enum.Material.Grass)
+        terrain:FillBall(WORLD_ZONES.Overlook + Vector3.new(24, -24, 8), 37, Enum.Material.Grass)
+        terrain:FillBall(WORLD_ZONES.Overlook + Vector3.new(0, -27, -24), 40, Enum.Material.Basalt)
+
+        -- The overlook rises in walkable terraces along the supported ridge.
         for step = 1, 5 do
             local offset = Vector3.new((step - 3) * 7, (step - 1) * 0.45 - 0.5, (step - 3) * -5)
             terrain:FillBlock(
@@ -3258,75 +3349,78 @@ local function decorate(world)
 
     -- Fill the spaces between destinations with continuous forest instead of open grass fields.
     local forestPatches = {
-        { Vector3.new(-365, 0, 140), 45, 38, 12, 41 },
-        { Vector3.new(-350, 0, 15), 48, 42, 12, 43 },
-        { Vector3.new(-335, 0, -110), 48, 40, 11, 47 },
-        { Vector3.new(-310, 0, 245), 50, 42, 12, 53 },
-        { Vector3.new(-215, 0, 250), 52, 42, 13, 59 },
-        { Vector3.new(-115, 0, 255), 50, 40, 12, 61 },
-        { Vector3.new(75, 0, 275), 55, 42, 13, 67 },
-        { Vector3.new(205, 0, 250), 50, 40, 12, 71 },
-        { Vector3.new(325, 0, 210), 48, 42, 12, 73 },
-        { Vector3.new(345, 0, 85), 46, 38, 11, 79 },
-        { Vector3.new(335, 0, -65), 48, 40, 12, 83 },
-        { Vector3.new(300, 0, -210), 54, 42, 13, 89 },
-        { Vector3.new(205, 0, -300), 50, 40, 12, 97 },
-        { Vector3.new(70, 0, -305), 52, 42, 13, 101 },
-        { Vector3.new(-70, 0, -300), 52, 44, 13, 103 },
-        { Vector3.new(-205, 0, -285), 52, 42, 13, 107 },
-        { Vector3.new(-330, 0, -225), 50, 42, 12, 109 },
-        { Vector3.new(-178, 0, -22), 34, 28, 9, 113 },
-        { Vector3.new(-18, 0, -108), 36, 30, 10, 127 },
-        { Vector3.new(112, 0, 20), 34, 28, 9, 131 },
-        { Vector3.new(112, 0, 174), 36, 30, 10, 137 },
+        -- West basin / outer forest.
+        { Vector3.new(-405, 0, 245), 38, 34, 11, 41 },
+        { Vector3.new(-402, 0, 118), 40, 36, 11, 43 },
+        { Vector3.new(-382, 0, -18), 42, 36, 11, 47 },
+        { Vector3.new(-360, 0, -155), 44, 38, 12, 53 },
+        { Vector3.new(-332, 0, 315), 44, 36, 11, 59 },
+        { Vector3.new(-236, 0, 330), 48, 38, 12, 61 },
+        { Vector3.new(-140, 0, 330), 44, 36, 11, 67 },
+
+        -- North bank and east-side forests.
+        { Vector3.new(18, 0, 326), 42, 36, 11, 71 },
+        { Vector3.new(122, 0, 306), 45, 38, 12, 73 },
+        { Vector3.new(232, 1, 282), 46, 38, 12, 79 },
+        { Vector3.new(338, 0, 238), 44, 38, 11, 83 },
+        { Vector3.new(392, 0, 132), 40, 36, 11, 89 },
+        { Vector3.new(388, 0, 8), 42, 38, 11, 97 },
+        { Vector3.new(370, 0, -132), 46, 40, 12, 101 },
+
+        -- Southern highlands and Veilfall forest.
+        { Vector3.new(318, 9, -306), 44, 36, 11, 103 },
+        { Vector3.new(202, 2, -326), 46, 38, 12, 107 },
+        { Vector3.new(82, 0, -330), 46, 40, 12, 109 },
+        { Vector3.new(-54, 0, -326), 46, 40, 12, 113 },
+        { Vector3.new(-190, 0, -310), 48, 40, 12, 127 },
+        { Vector3.new(-310, -2, -270), 46, 38, 12, 131 },
+
+        -- Interior forest rooms, kept away from roads/gorge.
+        { Vector3.new(-285, 0, 250), 30, 26, 8, 137 },
+        { Vector3.new(-272, 0, 56), 32, 28, 9, 139 },
+        { Vector3.new(-246, -1, -84), 34, 28, 9, 149 },
+        { Vector3.new(66, 0, 190), 34, 30, 9, 151 },
+        { Vector3.new(150, 1, 246), 34, 30, 9, 157 },
+        { Vector3.new(210, 2, 48), 34, 28, 9, 163 },
+        { Vector3.new(236, 3, -54), 34, 28, 9, 167 },
     }
     for _, patch in forestPatches do
         scatterForestPatch(world, patch[1], patch[2], patch[3], patch[4], patch[5])
     end
 
-    -- Dense, authored clumps frame the opening route and create alternating
-    -- compression/release instead of a uniformly sparse grass field.
+    -- Dense authored clumps frame the west-basin climb without defining the
+    -- layout themselves; geography and elevation now do that job.
     local openingClusters = {
-        -- Camp rim.
-        { WORLD_ZONES.Camp + Vector3.new(-58, 0, -30), 201, 1.02 },
-        { WORLD_ZONES.Camp + Vector3.new(-55, 0, 40), 203, 0.96 },
-        { WORLD_ZONES.Camp + Vector3.new(-10, 0, -54), 205, 0.92 },
-        { WORLD_ZONES.Camp + Vector3.new(25, 0, 49), 207, 0.9 },
-
-        -- Alternating outside bends along the curved woodland road.
-        { Vector3.new(-218, 0, 132), 211, 0.94 },
-        { Vector3.new(-220, 0, 75), 213, 0.9 },
-        { Vector3.new(-172, 0, 108), 215, 0.92 },
-        { Vector3.new(-167, 0, 30), 217, 0.9 },
-        { Vector3.new(-134, 0, 94), 219, 0.92 },
-        { Vector3.new(-126, 0, 27), 221, 0.9 },
-        { Vector3.new(-94, 0, 82), 223, 0.88 },
-        { Vector3.new(-105, 0, 13), 225, 0.9 },
-
-        -- Small crossroads frame.
-        { WORLD_ZONES.Crossroads + Vector3.new(-36, 0, 31), 227, 0.9 },
-        { WORLD_ZONES.Crossroads + Vector3.new(-35, 0, -31), 229, 0.92 },
-        { WORLD_ZONES.Crossroads + Vector3.new(35, 0, -29), 231, 0.9 },
-        { WORLD_ZONES.Crossroads + Vector3.new(37, 0, 29), 233, 0.92 },
+        { WORLD_ZONES.Camp + Vector3.new(-50, 0, -31), 201, 1.0 },
+        { WORLD_ZONES.Camp + Vector3.new(-48, 0, 39), 203, 0.94 },
+        { WORLD_ZONES.Camp + Vector3.new(-7, 0, -50), 205, 0.9 },
+        { WORLD_ZONES.Camp + Vector3.new(24, 0, 45), 207, 0.9 },
+        { Vector3.new(-296, 0, 145), 211, 0.9 },
+        { Vector3.new(-269, 1, 178), 213, 0.9 },
+        { Vector3.new(-252, 1, 112), 215, 0.9 },
+        { Vector3.new(-226, 2, 136), 217, 0.88 },
+        { Vector3.new(-216, 2, 74), 219, 0.88 },
+        { Vector3.new(-191, 3, 108), 221, 0.9 },
+        { WORLD_ZONES.Crossroads + Vector3.new(-32, 0, 28), 223, 0.9 },
+        { WORLD_ZONES.Crossroads + Vector3.new(-31, 0, -28), 225, 0.9 },
+        { WORLD_ZONES.Crossroads + Vector3.new(31, 0, -26), 227, 0.9 },
+        { WORLD_ZONES.Crossroads + Vector3.new(32, 0, 27), 229, 0.9 },
     }
     for _, cluster in openingClusters do
         makeWoodlandCluster(world, cluster[1], cluster[2], cluster[3], true)
     end
 
-    -- Larger canopy silhouettes create actual forest walls and hide the round
-    -- perimeter terrain from normal player-height sightlines.
     local openingCanopyTrees = {
-        { WORLD_ZONES.Camp + Vector3.new(-52, 0, -43), 0.92, math.rad(15) },
-        { WORLD_ZONES.Camp + Vector3.new(-47, 0, 43), 1.0, math.rad(-28) },
-        { Vector3.new(-221, 0, 130), 0.96, math.rad(31) },
-        { Vector3.new(-218, 0, 73), 0.9, math.rad(-12) },
-        { Vector3.new(-169, 0, 109), 1.02, math.rad(24) },
-        { Vector3.new(-166, 0, 27), 0.94, math.rad(-37) },
-        { Vector3.new(-131, 0, 94), 1.0, math.rad(42) },
-        { Vector3.new(-124, 0, 25), 0.9, math.rad(-22) },
-        { Vector3.new(-92, 0, 80), 0.92, math.rad(18) },
-        { WORLD_ZONES.Crossroads + Vector3.new(38, 0, 31), 0.98, math.rad(-26) },
-        { WORLD_ZONES.Crossroads + Vector3.new(-37, 0, -31), 0.94, math.rad(33) },
+        { WORLD_ZONES.Camp + Vector3.new(-47, 0, -42), 0.94, math.rad(15) },
+        { WORLD_ZONES.Camp + Vector3.new(-45, 0, 42), 1.0, math.rad(-28) },
+        { Vector3.new(-299, 0, 143), 0.96, math.rad(31) },
+        { Vector3.new(-266, 1, 180), 0.94, math.rad(-12) },
+        { Vector3.new(-251, 1, 109), 1.0, math.rad(24) },
+        { Vector3.new(-225, 2, 139), 0.96, math.rad(-37) },
+        { Vector3.new(-214, 2, 72), 0.98, math.rad(42) },
+        { Vector3.new(-189, 3, 110), 0.94, math.rad(-22) },
+        { WORLD_ZONES.Crossroads + Vector3.new(33, 0, 29), 0.98, math.rad(-26) },
+        { WORLD_ZONES.Crossroads + Vector3.new(-34, 0, -29), 0.94, math.rad(33) },
     }
     for _, tree in openingCanopyTrees do
         if isOpeningRouteClear(tree[1], 15.5) then
@@ -3334,45 +3428,52 @@ local function decorate(world)
         end
     end
 
+    -- Purposeful roadside clusters on the new regional routes.
     local trailClusters = {
-        { Vector3.new(-207, 0, 69), math.rad(25), 11 },
-        { Vector3.new(-169, 0, 113), math.rad(-31), 12 },
-        { Vector3.new(-126, 0, 32), math.rad(54), 13 },
-        { Vector3.new(-51, 0, 11), math.rad(-12), 14 },
-        { Vector3.new(-17, 0, 8), math.rad(61), 15 },
-        { Vector3.new(22, 0, -23), math.rad(-46), 16 },
-        { Vector3.new(55, 0, -59), math.rad(24), 17 },
-        { Vector3.new(116, 0, -70), math.rad(-68), 18 },
-        { Vector3.new(151, 0, 55), math.rad(37), 19 },
-        { Vector3.new(182, 0, 117), math.rad(-28), 20 },
-        { Vector3.new(120, 0, 133), math.rad(48), 21 },
-        { Vector3.new(72, 0, 158), math.rad(-53), 22 },
-        { Vector3.new(-47, 0, 148), math.rad(17), 23 },
-        { Vector3.new(-113, 0, 132), math.rad(-36), 24 },
-        { Vector3.new(-151, 0, -49), math.rad(62), 25 },
-        { Vector3.new(-191, 0, -96), math.rad(-41), 26 },
-        { Vector3.new(-231, 0, -132), math.rad(26), 27 },
-        { Vector3.new(116, 0, -144), math.rad(-52), 28 },
-        { Vector3.new(148, 0, -181), math.rad(31), 29 },
-        { Vector3.new(207, 0, -160), math.rad(-22), 30 },
-        { Vector3.new(252, 0, -94), math.rad(57), 31 },
-        { Vector3.new(268, 0, 18), math.rad(-33), 32 },
+        { Vector3.new(-160, 4, 139), math.rad(28), 11 },
+        { Vector3.new(-126, 2.5, 198), math.rad(-32), 12 },
+        { Vector3.new(-93, 1, 239), math.rad(54), 13 },
+        { Vector3.new(-218, 2.5, 26), math.rad(-12), 14 },
+        { Vector3.new(-255, 0, -27), math.rad(61), 15 },
+        { Vector3.new(-286, -2, -92), math.rad(-46), 16 },
+        { Vector3.new(-121, 4, 54), math.rad(24), 17 },
+        { Vector3.new(68, 3, 56), math.rad(-68), 18 },
+        { Vector3.new(132, 2, 93), math.rad(37), 19 },
+        { Vector3.new(204, 1, 123), math.rad(-28), 20 },
+        { Vector3.new(48, 0, 246), math.rad(48), 21 },
+        { Vector3.new(133, 1, 211), math.rad(-53), 22 },
+        { Vector3.new(207, 1, 168), math.rad(17), 23 },
+        { Vector3.new(164, 5, -119), math.rad(-36), 24 },
+        { Vector3.new(211, 8, -170), math.rad(62), 25 },
+        { Vector3.new(256, 10, -209), math.rad(-41), 26 },
     }
     for _, cluster in trailClusters do
         makeTrailsideCluster(world, cluster[1], cluster[2], cluster[3])
     end
 
+    -- The bridge is the hard geographic transition between the west and east
+    -- halves of Lumenreach.
+    local bridgeDelta = BRIDGE_EAST - BRIDGE_WEST
+    local bridgeFlat = Vector3.new(bridgeDelta.X, 0, bridgeDelta.Z)
+    local bridgeMid = (BRIDGE_WEST + BRIDGE_EAST) * 0.5
+    local bridgeYaw = math.atan2(bridgeFlat.X, bridgeFlat.Z)
+    makeBridge(world, bridgeMid - Vector3.new(0, 0.72, 0), bridgeYaw, bridgeFlat.Magnitude + 5, 7.4)
+    makeMossyRockSet(world, BRIDGE_WEST + Vector3.new(-7, -0.2, 6), bridgeYaw, 0.72)
+    makeMossyRockSet(world, BRIDGE_EAST + Vector3.new(7, -0.2, -6), bridgeYaw, 0.72)
+    makeLantern(world, BRIDGE_WEST + Vector3.new(-8, 0, -8), bridgeYaw + math.pi)
+    makeLantern(world, BRIDGE_EAST + Vector3.new(8, 0, 8), bridgeYaw)
+    makeWaystone(world, BRIDGE_WEST + Vector3.new(-10, 0, 8), bridgeYaw, 0.7)
+    makeWaystone(world, BRIDGE_EAST + Vector3.new(10, 0, -8), bridgeYaw + math.pi, 0.7)
+
     local routeBeacons = {
-        -- Opening bends.
-        { Vector3.new(-190, 0, 91), math.rad(25), 0.58, 1 },
-        { Vector3.new(-151, 0, 50), math.rad(62), 0.6, -1 },
-        { Vector3.new(-101, 0, 52), math.rad(145), 0.58, 1 },
-        -- Later-region wayfinding anchors.
-        { Vector3.new(53, 0, 66), math.rad(-78), 0.6, -1 },
-        { Vector3.new(139, 0, 79), math.rad(-84), 0.64, 1 },
-        { Vector3.new(-171, 0, -88), math.rad(44), 0.58, -1 },
-        { Vector3.new(-85, 0, 169), math.rad(-88), 0.56, 1 },
-        { Vector3.new(126, 0, -166), math.rad(26), 0.62, -1 },
+        { Vector3.new(-260, 1, 146), math.rad(40), 0.58, 1 },
+        { Vector3.new(-219, 2, 97), math.rad(62), 0.6, -1 },
+        { Vector3.new(-112, 3.8, 64), math.rad(88), 0.58, 1 },
+        { Vector3.new(58, 2.8, 38), math.rad(-88), 0.6, -1 },
+        { Vector3.new(-132, 2.5, 174), math.rad(18), 0.58, -1 },
+        { Vector3.new(-239, 1.5, 5), math.rad(42), 0.58, 1 },
+        { Vector3.new(168, 1.5, 112), math.rad(-74), 0.62, 1 },
+        { Vector3.new(219, 7.8, -174), math.rad(34), 0.62, -1 },
     }
     for index, beacon in routeBeacons do
         local localFrame = CFrame.new(beacon[1]) * CFrame.Angles(0, beacon[2], 0)
@@ -3386,66 +3487,63 @@ local function decorate(world)
         end
     end
 
-    -- Wayfarer Camp is now one district in the world, not the world itself.
-    makeCampfire(world, WORLD_ZONES.Camp + Vector3.new(10, 0, -3))
-    makeTent(world, WORLD_ZONES.Camp + Vector3.new(-28, 0.2, -23), math.rad(25))
-    makeTent(world, WORLD_ZONES.Camp + Vector3.new(-31, 0.2, 28), math.rad(-20))
-    makeCampBench(world, WORLD_ZONES.Camp + Vector3.new(12, 0, -14), math.rad(7))
-    makeCampBench(world, WORLD_ZONES.Camp + Vector3.new(24, 0, 8), math.rad(78))
-    makeMapTable(world, WORLD_ZONES.Camp + Vector3.new(-10, 0, 9), math.rad(10))
-    makeSupplyStack(world, WORLD_ZONES.Camp + Vector3.new(-43, 0, 3), math.rad(-8))
-    makeSupplyStack(world, WORLD_ZONES.Camp + Vector3.new(-21, 0, 43), math.rad(18))
-    makeCampBanner(world, WORLD_ZONES.Camp + Vector3.new(-9, 0, 51), math.rad(3))
+    -- Wayfarer Camp is a compact west-basin camp, with the main road leaving
+    -- east and the Proving Circle spur peeling south.
+    makeCampfire(world, WORLD_ZONES.Camp + Vector3.new(8, 0, -2))
+    makeTent(world, WORLD_ZONES.Camp + Vector3.new(-24, 0.2, -20), math.rad(25))
+    makeTent(world, WORLD_ZONES.Camp + Vector3.new(-27, 0.2, 22), math.rad(-20))
+    makeTent(world, WORLD_ZONES.Camp + Vector3.new(-37, 0.2, 1), math.rad(69))
+    makeCampBench(world, WORLD_ZONES.Camp + Vector3.new(10, 0, -13), math.rad(7))
+    makeCampBench(world, WORLD_ZONES.Camp + Vector3.new(20, 0, 7), math.rad(78))
+    makeMapTable(world, WORLD_ZONES.Camp + Vector3.new(-8, 0, 8), math.rad(10))
+    makeSupplyStack(world, WORLD_ZONES.Camp + Vector3.new(-34, 0, 3), math.rad(-8))
+    makeSupplyStack(world, WORLD_ZONES.Camp + Vector3.new(-19, 0, 27), math.rad(18))
+    makeCampBanner(world, WORLD_ZONES.Camp + Vector3.new(-7, 0, 27), math.rad(3))
     makeSignpost(
         world,
-        WORLD_ZONES.Camp + Vector3.new(47, 0, -31),
-        math.rad(-38),
+        WORLD_ZONES.Camp + Vector3.new(33, 0, -15),
+        math.rad(-30),
         "LUMENWOOD",
         "PROVING CIRCLE"
     )
     for _, offset in
         {
-            { Vector3.new(44, 0, -39), math.rad(126) },
-            { Vector3.new(55, 0, 10), math.rad(-58) },
-            { Vector3.new(-15, 0, 51), math.rad(-82) },
-            { Vector3.new(-57, 0, -38), math.rad(32) },
+            { Vector3.new(29, 0, -23), math.rad(126) },
+            { Vector3.new(34, 0, 10), math.rad(-58) },
+            { Vector3.new(-10, 0, 26), math.rad(-82) },
+            { Vector3.new(-36, 0, -22), math.rad(32) },
         }
     do
         makeLantern(world, WORLD_ZONES.Camp + offset[1], offset[2])
     end
-    makeTent(world, WORLD_ZONES.Camp + Vector3.new(-55, 0.2, 3), math.rad(69))
-    makeCampBench(world, WORLD_ZONES.Camp + Vector3.new(47, 0, -18), math.rad(-18))
-    makeWaystone(world, WORLD_ZONES.Camp + Vector3.new(51, 0, 32), math.rad(33), 0.68)
-    makeFallenLog(world, WORLD_ZONES.Camp + Vector3.new(51, 0.2, 45), math.rad(-29), 0.66, 1)
-    makeMossyRockSet(world, WORLD_ZONES.Camp + Vector3.new(-62, 0, 34), math.rad(18), 0.72)
-    makePineRoots(world, WORLD_ZONES.Camp + Vector3.new(61, 0, 36), math.rad(-31), 0.7)
+    makeWaystone(world, WORLD_ZONES.Camp + Vector3.new(32, 0, 20), math.rad(33), 0.68)
+    makeFallenLog(world, WORLD_ZONES.Camp + Vector3.new(38, 0.2, 27), math.rad(-29), 0.62, 1)
+    makeMossyRockSet(world, WORLD_ZONES.Camp + Vector3.new(-39, 0, 24), math.rad(18), 0.66)
+    makePineRoots(world, WORLD_ZONES.Camp + Vector3.new(39, 0, 23), math.rad(-31), 0.64)
 
-    -- Player-height foreground dressing around the spawn and trail mouth. Keep
-    -- the center lane open while giving the camera layered silhouettes nearby.
-    makeMossyRockSet(world, WORLD_ZONES.Camp + Vector3.new(-59, 0, 19), math.rad(24), 0.58)
-    makeFern(world, WORLD_ZONES.Camp + Vector3.new(-53, 0, 16), 0.88, math.rad(14))
-    makeBush(world, WORLD_ZONES.Camp + Vector3.new(-38, 0, 47), 0.72)
-    makeFlowerPatch(world, WORLD_ZONES.Camp + Vector3.new(-31, 0, 48), 0.72, false)
-    makeStump(world, WORLD_ZONES.Camp + Vector3.new(43, 0, -46), 0.62, 2)
-    makeFern(world, WORLD_ZONES.Camp + Vector3.new(48, 0, -50), 0.82, math.rad(-37))
-    makeRockCluster(world, WORLD_ZONES.Camp + Vector3.new(58, 0, -26), 0.46, 241)
-    makeGrassTuft(world, WORLD_ZONES.Camp + Vector3.new(55, 0, -20), 0.72)
+    -- Player-height foreground dressing stays on the basin rim, not in the road.
+    makeMossyRockSet(world, WORLD_ZONES.Camp + Vector3.new(-40, 0, 15), math.rad(24), 0.52)
+    makeFern(world, WORLD_ZONES.Camp + Vector3.new(-35, 0, 13), 0.78, math.rad(14))
+    makeBush(world, WORLD_ZONES.Camp + Vector3.new(-29, 0, 28), 0.65)
+    makeFlowerPatch(world, WORLD_ZONES.Camp + Vector3.new(-23, 0, 27), 0.65, false)
+    makeStump(world, WORLD_ZONES.Camp + Vector3.new(29, 0, -27), 0.58, 2)
+    makeFern(world, WORLD_ZONES.Camp + Vector3.new(34, 0, -29), 0.74, math.rad(-37))
+    makeRockCluster(world, WORLD_ZONES.Camp + Vector3.new(39, 0, -15), 0.42, 241)
 
-    -- Lumenwood Crossroads is a compact navigation landmark, not a second camp.
+    -- Lumenwood Crossroads sits on a raised saddle overlooking the gorge.
     makeSignpost(
         world,
-        WORLD_ZONES.Crossroads + Vector3.new(-22, 0, 18),
-        math.rad(-54),
-        "WAYFARER CAMP",
-        "LUMEN ARCH"
+        WORLD_ZONES.Crossroads + Vector3.new(-14, 0, 10),
+        math.rad(-48),
+        "LUMEN GORGE",
+        "GLOWMERE"
     )
-    makeWaystone(world, WORLD_ZONES.Crossroads + Vector3.new(17, 0, 12), math.rad(-24), 0.88)
-    makeLantern(world, WORLD_ZONES.Crossroads + Vector3.new(-31, 0, -25), math.rad(38))
-    makeRockCluster(world, WORLD_ZONES.Crossroads + Vector3.new(26, 0, -21), 0.58, 12)
-    makeMossyRockSet(world, WORLD_ZONES.Crossroads + Vector3.new(-33, 0, 30), math.rad(-18), 0.62)
-    makeStump(world, WORLD_ZONES.Crossroads + Vector3.new(31, 0, 27), 0.58, 2)
-    makeFlowerPatch(world, WORLD_ZONES.Crossroads + Vector3.new(24, 0, 22), 0.72, true)
-    makeFern(world, WORLD_ZONES.Crossroads + Vector3.new(20, 0, 18), 0.75, math.rad(31))
+    makeWaystone(world, WORLD_ZONES.Crossroads + Vector3.new(12, 0, 9), math.rad(-24), 0.86)
+    makeLantern(world, WORLD_ZONES.Crossroads + Vector3.new(-20, 0, -17), math.rad(38))
+    makeRockCluster(world, WORLD_ZONES.Crossroads + Vector3.new(18, 0, -15), 0.52, 12)
+    makeMossyRockSet(world, WORLD_ZONES.Crossroads + Vector3.new(-20, 0, 18), math.rad(-18), 0.56)
+    makeStump(world, WORLD_ZONES.Crossroads + Vector3.new(20, 0, 17), 0.54, 2)
+    makeFlowerPatch(world, WORLD_ZONES.Crossroads + Vector3.new(15, 0, 13), 0.65, true)
 
     -- Veilfall is a rocky wet forest with a basin, stream, deadwood, and cliff dressing.
     makeWaterfall(world, WORLD_ZONES.Waterfall)
@@ -3617,7 +3715,7 @@ local function makeSpawn(world)
     local spawn = Instance.new("SpawnLocation")
     spawn.Name = "LumenreachSpawn"
     spawn.Size = Vector3.new(8, 1, 8)
-    spawn.CFrame = CFrame.new(WORLD_ZONES.Camp + Vector3.new(-48, 4, 31))
+    spawn.CFrame = CFrame.new(WORLD_ZONES.Camp + Vector3.new(-31, 4, 19))
         * CFrame.Angles(0, math.rad(128), 0)
     spawn.Anchored = true
     spawn.Neutral = true
@@ -3657,7 +3755,7 @@ function LumenreachWorldService.Init()
         world,
         "moss_scout",
         "Tovin · Mossglen Scout",
-        WORLD_ZONES.Camp + Vector3.new(48, 0, 31),
+        WORLD_ZONES.Camp + Vector3.new(29, 0, 19),
         math.rad(-128),
         { Cloth = Color3.fromRGB(56, 84, 65), Accent = Color3.fromRGB(86, 126, 79) },
         "Scout"
@@ -3682,7 +3780,7 @@ function LumenreachWorldService.Init()
     )
     local provingCircleOrigin = makeProvingCircle(world)
 
-    makeStoryRemnant(world, WORLD_ZONES.Crossroads + Vector3.new(28, 0, -26), math.rad(26))
+    makeStoryRemnant(world, WORLD_ZONES.Crossroads + Vector3.new(17, 0, -16), math.rad(26))
     makeStoryRemnant(world, WORLD_ZONES.Ruins + Vector3.new(-34, 0, -42), math.rad(-41))
     makeStoryRemnant(world, WORLD_ZONES.Overlook + Vector3.new(46, 2.0, 12), math.rad(79))
     makeWhisperrootHollow(world)
@@ -3712,22 +3810,17 @@ function LumenreachWorldService.Init()
     )
     makeExplorationTrigger(world, "sunmoss_overlook", WORLD_ZONES.Overlook, 20)
 
-    EnemySpawnerService.Spawn("training_dummy", WORLD_ZONES.Camp + Vector3.new(51, 4, -7), world)
+    EnemySpawnerService.Spawn("training_dummy", WORLD_ZONES.Camp + Vector3.new(31, 4, -5), world)
 
-    makeMonsterSpawnTrigger(
-        world,
-        "LumenwoodMosslings",
-        WORLD_ZONES.Crossroads + Vector3.new(-27, 0, -21),
-        {
-            MonsterType = "LumenMossling",
-            SpawnAmount = 4,
-            TriggerRadius = 25,
-            SpawnRadius = 12,
-            MaxAliveMonster = 4,
-            SpawnDelay = 0.34,
-            RespawnTime = 18,
-        }
-    )
+    makeMonsterSpawnTrigger(world, "LumenwoodMosslings", Vector3.new(-226, 1.5, 123), {
+        MonsterType = "LumenMossling",
+        SpawnAmount = 4,
+        TriggerRadius = 25,
+        SpawnRadius = 12,
+        MaxAliveMonster = 4,
+        SpawnDelay = 0.34,
+        RespawnTime = 18,
+    })
     makeMonsterSpawnTrigger(
         world,
         "ShatteredArchSkeletons",
