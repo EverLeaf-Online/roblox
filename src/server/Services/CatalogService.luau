@@ -34,6 +34,8 @@ function CatalogService.Build()
             "Type",
             "EquipmentSlot",
             "WeaponType",
+            "ArmorType",
+            "AccessoryType",
             "FamilyId",
             "RequiredAdvancementTier",
             "RequiredLevel",

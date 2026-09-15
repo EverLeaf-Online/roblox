@@ -11,6 +11,11 @@ local function pretty(value)
     )
 end
 
+local function equipmentSubtype(definition)
+    return definition
+        and (definition.WeaponType or definition.ArmorType or definition.AccessoryType)
+end
+
 local function requirementText(definition)
     if not definition or definition.Type ~= "Equipment" then
         return ""
@@ -78,11 +83,11 @@ local function ItemInfoCard(props)
             Size = UDim2.new(1, -24, 0, 16),
             BackgroundTransparency = 1,
             Text = string.upper(
-                if definition.WeaponType
+                if equipmentSubtype(definition)
                     then string.format(
                         "%s · %s",
                         definition.Type or "ITEM",
-                        pretty(definition.WeaponType)
+                        pretty(equipmentSubtype(definition))
                     )
                     else definition.Type or "ITEM"
             ),

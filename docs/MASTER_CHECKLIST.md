@@ -429,7 +429,7 @@
 - [x] Equipment stat aggregation feeds AttackPower, core stats, Defense, Crit Chance, and Crit Power.
 - [x] Level/family/advancement-tier equipment requirements are server-enforced and surfaced in inventory/item UI.
 - [x] Weapon types are explicit data (`Blade`, `Bow`, `Focus`, `TwinBlades`, `Maul`) with shared combat profiles, catalog exposure, item-card display, and starter-family consistency validation.
-- [ ] Armor/accessory types.
+- [x] Armor/accessory taxonomy is explicit and validated: `LightArmor`/`HeavyArmor` for armor slots and `Charm`/`Ring` for accessory slots, with catalog/UI exposure and cross-category misuse tests.
 - [x] Consumable architecture with HP/MP restoration foundation.
 - [x] Inventory capacity rules are server-enforced through stack/capacity validation and regression-tested.
 - [x] Item detail cards/tooltips show item type, stats/effects, sell value, and equipment requirements.

@@ -10,6 +10,7 @@ local Bosses = require("../src/server/Content/BossDefinitions")
 local Skills = require("../src/server/Content/SkillDefinitions")
 local Families = require("../src/server/Content/ClassFamilyDefinitions")
 local MonsterConfig = require("../src/server/Content/MonsterConfig")
+local EquipmentTypeRules = require("../src/shared/Logic/EquipmentTypeRules")
 local WeaponCombatProfiles = require("../src/shared/WeaponCombatProfiles")
 local currencies = { Shards = true, Marks = true }
 
@@ -18,6 +19,13 @@ for itemId, definition in Items do
         type(definition.DisplayName) == "string" and definition.DisplayName ~= "",
         "item display name: " .. itemId
     )
+    if definition.Type == "Equipment" then
+        local typeOk, typeReason = EquipmentTypeRules.Validate(definition)
+        assert(
+            typeOk,
+            string.format("equipment taxonomy valid: %s (%s)", itemId, tostring(typeReason))
+        )
+    end
     if definition.EquipmentSlot == "Weapon" then
         assert(
             type(definition.WeaponType) == "string" and WeaponCombatProfiles[definition.WeaponType],
