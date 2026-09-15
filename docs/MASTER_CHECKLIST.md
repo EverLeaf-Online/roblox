@@ -515,7 +515,7 @@
 - [x] Primary Lumenreach pine bark/foliage maps are pre-authored as Rojo `SurfaceAppearance` templates and cloned at runtime; imported raw layers are stripped without protected `ColorMap`/`NormalMap`/`RoughnessMap` writes.
 - [x] Camp departure, protected opening-route clusters, and the first Mossling hollow now use approved imported fern/deadwood/root/moss-rock dressing instead of prototype bush/grass/flower/mushroom props.
 - [x] Imported first-area environment assets strip raw `Texture`/`Decal` layers during sanitization; controlled PBR overrides replace legacy MeshPart texture state instead of stacking on top of it.
-- [x] Bad oversized cliff/rock placements corrected and terrain-supported.
+- [x] Bad oversized cliff/rock placements corrected and terrain-supported; the paper-thin imported RockFace mesh was removed from player-facing Lumenreach composition, including Veilfall cliffs, Sunmoss spires, Proving Circle path stones, Whisperroot crown pieces, and interior cliff dressing, which now use stable rounded rock masses plus simple hidden collision.
 - [x] Final Lumenreach route/protected-area scrub resolves renamed imported props by preserved source-prefab metadata, with explicit wrapper clearance for integrated rock faces.
 - [x] Camera obstruction issue from foliage/decor corrected.
 - [x] Lumenreach collision cleanup now gives imported production trees predictable invisible trunk blockers, makes tent side/rear walls physically solid while preserving entrances, removes legacy/default baseplates, and expands the Terrain safety foundation beyond playable bounds.

@@ -618,75 +618,71 @@ local function makeMossyRockSet(parent, position, yaw, scale)
 end
 
 local function makeRockFace(parent, position, yaw, scale)
+    scale = scale or 1
+    local ground = terrainSurfacePosition(position, -0.12)
     local model = Instance.new("Model")
     model.Name = "IntegratedRockFace"
     model:SetAttribute("EverLeafTravelClearance", 9.0)
     model.Parent = parent
 
-    local base = CFrame.new(position) * CFrame.Angles(0, yaw, 0)
-    local prefab = EnvironmentPrefabService.Place(
-        "RockFace",
-        model,
-        CFrame.new(position - Vector3.new(0, 2.15 * scale, 0)) * CFrame.Angles(0, yaw, 0),
-        prefabScaleForLongest("RockFace", 16, scale)
-    )
-    if prefab then
-        setInstanceCollision(prefab, false)
-        for _, descendant in prefab:GetDescendants() do
-            if descendant:IsA("BasePart") then
-                descendant.CanQuery = false
-            end
-        end
-    end
-
-    local supportSpecs = {
-        { Vector3.new(-5.2, 2.6, 2.7), Vector3.new(9.4, 5.8, 8.0), Vector3.new(0.05, -0.18, 0.08) },
-        { Vector3.new(4.8, 2.2, 3.2), Vector3.new(8.0, 4.8, 7.0), Vector3.new(-0.08, 0.24, -0.04) },
+    local base = CFrame.new(ground) * CFrame.Angles(0, yaw, 0)
+    local specs = {
         {
-            Vector3.new(-1.0, 1.5, -2.8),
-            Vector3.new(10.5, 3.8, 6.8),
-            Vector3.new(0.12, 0.08, 0.06),
+            Offset = Vector3.new(-4.4, 2.0, 0.5),
+            Size = Vector3.new(8.8, 4.8, 6.4),
+            Rot = Vector3.new(4, -8, 9),
         },
-        { Vector3.new(0.8, 4.6, 3.8), Vector3.new(7.0, 5.6, 6.2), Vector3.new(-0.12, -0.12, 0.08) },
+        {
+            Offset = Vector3.new(3.9, 1.8, 0.8),
+            Size = Vector3.new(7.6, 4.4, 6.0),
+            Rot = Vector3.new(-5, 13, -7),
+        },
+        {
+            Offset = Vector3.new(-0.8, 4.3, -0.5),
+            Size = Vector3.new(9.2, 5.0, 5.8),
+            Rot = Vector3.new(7, 5, 5),
+        },
+        {
+            Offset = Vector3.new(4.6, 5.1, 0.2),
+            Size = Vector3.new(6.4, 4.2, 5.2),
+            Rot = Vector3.new(-8, -11, 11),
+        },
+        {
+            Offset = Vector3.new(-4.7, 6.0, 0.0),
+            Size = Vector3.new(6.5, 4.5, 5.0),
+            Rot = Vector3.new(6, 16, -10),
+        },
     }
-    for index, spec in supportSpecs do
-        local worldPosition = (base * CFrame.new(spec[1] * scale)).Position
+    for index, spec in specs do
+        local worldPosition = (base * CFrame.new(spec.Offset * scale)).Position
         local rock = makeRock(
             model,
             worldPosition,
-            spec[2] * scale,
-            Vector3.new(spec[3].X, spec[3].Y + yaw, spec[3].Z)
+            spec.Size * scale,
+            Vector3.new(math.rad(spec.Rot.X), yaw + math.rad(spec.Rot.Y), math.rad(spec.Rot.Z))
         )
+        rock.Name = "RockFaceChunk" .. index
         rock.Color = if index % 2 == 0
-            then Color3.fromRGB(98, 105, 101)
-            else Color3.fromRGB(88, 97, 94)
+            then Color3.fromRGB(91, 101, 95)
+            else Color3.fromRGB(80, 92, 86)
         rock.CanCollide = false
         rock.CanTouch = false
         rock.CanQuery = false
     end
 
-    -- The authored silhouette stays visual-only while one broad hidden blocker
-    -- provides predictable cliff collision. This mirrors the landmark-specific
-    -- collision policy used by Veilfall, Sunmoss, and the Shattered Arch.
     makeCollisionProxy(
         model,
         "IntegratedRockFaceCollision",
-        Vector3.new(13.5, 8.0, 8.0) * scale,
-        base * CFrame.new(0, 3.8 * scale, 1.2 * scale)
+        Vector3.new(13.2, 8.2, 7.2) * scale,
+        base * CFrame.new(0, 3.9 * scale, 0.7 * scale)
     )
 
-    local mossShelf = makeBall(
+    makeMossyRockSet(
         model,
-        "MossShelf",
-        Vector3.new(9.2, 0.85, 6.4) * scale,
-        base * CFrame.new(-1.4 * scale, 5.55 * scale, 3.0 * scale),
-        FOLIAGE_MATERIAL,
-        Color3.fromRGB(69, 105, 61)
+        ground + (base.RightVector * -5.4 + base.LookVector * 2.1) * scale,
+        yaw + 0.3,
+        0.42 * scale
     )
-    mossShelf.CanCollide = false
-    mossShelf.CanTouch = false
-    mossShelf.CanQuery = false
-
     return model
 end
 
@@ -1879,23 +1875,52 @@ local function makeWaterfall(parent, position)
     model.Parent = parent
     local ground = terrainSurfacePosition(position, -0.25)
 
-    local cliffFaces = {
-        { Offset = Vector3.new(-10.5, 6.0, -1.8), Yaw = math.rad(12), Longest = 22, Scale = 1.0 },
-        { Offset = Vector3.new(10.2, 5.0, -1.0), Yaw = math.rad(-18), Longest = 20, Scale = 0.96 },
-        { Offset = Vector3.new(-4.0, 15.5, -3.0), Yaw = math.rad(48), Longest = 17, Scale = 0.82 },
-        { Offset = Vector3.new(5.4, 14.5, -2.7), Yaw = math.rad(-52), Longest = 16, Scale = 0.78 },
+    local cliffRocks = {
+        {
+            Offset = Vector3.new(-11.0, 3.2, -2.2),
+            Size = Vector3.new(13.5, 8.0, 9.5),
+            Rot = Vector3.new(4, 10, 7),
+        },
+        {
+            Offset = Vector3.new(10.8, 3.0, -2.0),
+            Size = Vector3.new(13.0, 7.6, 9.0),
+            Rot = Vector3.new(-5, -12, -6),
+        },
+        {
+            Offset = Vector3.new(-8.0, 9.0, -2.8),
+            Size = Vector3.new(10.8, 8.0, 8.0),
+            Rot = Vector3.new(8, 21, -8),
+        },
+        {
+            Offset = Vector3.new(7.8, 8.5, -2.6),
+            Size = Vector3.new(10.4, 7.5, 7.8),
+            Rot = Vector3.new(-7, -24, 9),
+        },
+        {
+            Offset = Vector3.new(-3.5, 14.6, -3.2),
+            Size = Vector3.new(8.6, 6.8, 7.0),
+            Rot = Vector3.new(6, 34, 4),
+        },
+        {
+            Offset = Vector3.new(3.9, 14.0, -3.1),
+            Size = Vector3.new(8.2, 6.4, 6.8),
+            Rot = Vector3.new(-5, -37, -5),
+        },
     }
-    for index, spec in cliffFaces do
-        local placed = EnvironmentPrefabService.Place(
-            "RockFace",
+    for index, spec in cliffRocks do
+        local rock = makeRock(
             model,
-            CFrame.new(ground + spec.Offset) * CFrame.Angles(0, spec.Yaw, 0),
-            prefabScaleForLongest("RockFace", spec.Longest, spec.Scale)
+            ground + spec.Offset,
+            spec.Size,
+            Vector3.new(math.rad(spec.Rot.X), math.rad(spec.Rot.Y), math.rad(spec.Rot.Z))
         )
-        if placed then
-            placed.Name = "VeilfallRockFace" .. index
-            setInstanceCollision(placed, false)
-        end
+        rock.Name = "VeilfallCliffRock" .. index
+        rock.Color = if index % 2 == 0
+            then Color3.fromRGB(79, 91, 86)
+            else Color3.fromRGB(88, 99, 93)
+        rock.CanCollide = false
+        rock.CanTouch = false
+        rock.CanQuery = false
     end
 
     makeMossyRockSet(model, ground + Vector3.new(-13.5, 0, 3.2), math.rad(24), 1.0)
@@ -1918,11 +1943,13 @@ local function makeWaterfall(parent, position)
         CFrame.new(ground + Vector3.new(10, 10, -1.2)) * CFrame.Angles(0, math.rad(-10), 0)
     )
 
-    -- Three narrow ribbons break the old flat rectangular waterfall silhouette.
+    -- Five narrow translucent ribbons break the old flat rectangular waterfall silhouette.
     local ribbonSpecs = {
-        { X = -2.35, Width = 2.45, Height = 18.4, Z = 7.65, Transparency = 0.34 },
-        { X = 0.15, Width = 3.2, Height = 20.0, Z = 7.8, Transparency = 0.25 },
-        { X = 2.75, Width = 1.85, Height = 17.0, Z = 7.7, Transparency = 0.38 },
+        { X = -3.15, Width = 1.35, Height = 17.2, Z = 7.65, Transparency = 0.66 },
+        { X = -1.55, Width = 1.8, Height = 19.0, Z = 7.78, Transparency = 0.61 },
+        { X = 0.15, Width = 2.05, Height = 20.0, Z = 7.84, Transparency = 0.58 },
+        { X = 1.95, Width = 1.55, Height = 18.3, Z = 7.74, Transparency = 0.64 },
+        { X = 3.35, Width = 1.0, Height = 15.8, Z = 7.62, Transparency = 0.70 },
     }
     for index, spec in ribbonSpecs do
         local water = makePart(
@@ -2223,23 +2250,42 @@ local function makeRockSpire(parent, position, scale)
     model.Name = "LumenRockSpire"
     model.Parent = parent
 
-    local faceSpecs = {
-        { Offset = Vector3.new(-2.8, 0, 0.4), Yaw = math.rad(12), Size = 18.5, Scale = 0.95 },
-        { Offset = Vector3.new(3.4, 1.4, 1.6), Yaw = math.rad(-34), Size = 15.5, Scale = 0.82 },
-        { Offset = Vector3.new(0.6, 5.0, -1.8), Yaw = math.rad(67), Size = 12.5, Scale = 0.72 },
+    local spireRocks = {
+        {
+            Offset = Vector3.new(-2.5, 2.2, 0.4),
+            Size = Vector3.new(7.5, 8.2, 6.4),
+            Rot = Vector3.new(5, 12, 8),
+        },
+        {
+            Offset = Vector3.new(2.8, 3.1, 1.1),
+            Size = Vector3.new(6.8, 9.4, 5.8),
+            Rot = Vector3.new(-4, -31, -7),
+        },
+        {
+            Offset = Vector3.new(0.4, 7.2, -1.0),
+            Size = Vector3.new(5.8, 8.0, 5.1),
+            Rot = Vector3.new(7, 51, 6),
+        },
+        {
+            Offset = Vector3.new(-1.3, 10.2, 0.2),
+            Size = Vector3.new(4.8, 6.2, 4.5),
+            Rot = Vector3.new(-6, -15, -8),
+        },
     }
-    for index, spec in faceSpecs do
-        local prefabName = "RockFace"
-        local placed = EnvironmentPrefabService.Place(
-            prefabName,
+    for index, spec in spireRocks do
+        local rock = makeRock(
             model,
-            CFrame.new(ground + spec.Offset * scale) * CFrame.Angles(0, spec.Yaw, 0),
-            prefabScaleForLongest(prefabName, spec.Size, scale * spec.Scale)
+            ground + spec.Offset * scale,
+            spec.Size * scale,
+            Vector3.new(math.rad(spec.Rot.X), math.rad(spec.Rot.Y), math.rad(spec.Rot.Z))
         )
-        if placed then
-            placed.Name = "SpireRockFace" .. index
-            setInstanceCollision(placed, false)
-        end
+        rock.Name = "SpireRock" .. index
+        rock.Color = if index % 2 == 0
+            then Color3.fromRGB(90, 101, 94)
+            else Color3.fromRGB(80, 92, 86)
+        rock.CanCollide = false
+        rock.CanTouch = false
+        rock.CanQuery = false
     end
 
     makeMossyRockSet(model, ground + Vector3.new(-3.8, 0, 3.4) * scale, math.rad(21), 0.9 * scale)
@@ -2847,22 +2893,21 @@ local function makeProvingCircle(parent)
         pathStone.Name = "PathStone" .. index
         pathStone.Parent = model
 
-        local placed = EnvironmentPrefabService.Place(
-            "RockFace",
+        local markerRock = makeRock(
             pathStone,
-            markerBase
-                * CFrame.new(0, 2.8, 0.15)
-                * CFrame.Angles(
-                    math.rad((index % 3 - 1) * 3),
-                    0,
-                    math.rad((index % 2 == 0) and 6 or -6)
-                ),
-            prefabScaleForLongest("RockFace", 8.4, 0.5)
+            (markerBase * CFrame.new(0, 2.55, 0.1)).Position,
+            Vector3.new(3.9, 5.4, 2.8),
+            Vector3.new(
+                math.rad((index % 3 - 1) * 4),
+                markerYaw + math.rad((index % 2 == 0) and 7 or -7),
+                math.rad((index % 2 == 0) and 5 or -5)
+            )
         )
-        if placed then
-            placed.Name = "PathRock"
-            setRenderOnly(placed)
-        end
+        markerRock.Name = "PathRock"
+        markerRock.Color = Color3.fromRGB(86, 99, 91)
+        markerRock.CanCollide = false
+        markerRock.CanTouch = false
+        markerRock.CanQuery = false
 
         makeMossyRockSet(
             pathStone,
@@ -2958,37 +3003,35 @@ local function makeWhisperrootHollow(parent)
     local crownSpecs = {
         {
             Name = "WhisperrootCrownLeft",
-            Offset = Vector3.new(-6.0, 6.2, 1.2),
-            Rotation = CFrame.Angles(math.rad(4), math.rad(28), math.rad(-23)),
-            Longest = 14.5,
-            Scale = 0.76,
+            Offset = Vector3.new(-6.2, 5.4, 1.4),
+            Size = Vector3.new(7.6, 10.0, 7.0),
+            Rot = Vector3.new(4, 28, -13),
         },
         {
             Name = "WhisperrootCrownRight",
-            Offset = Vector3.new(6.0, 6.0, 1.4),
-            Rotation = CFrame.Angles(math.rad(-3), math.rad(-31), math.rad(24)),
-            Longest = 14.0,
-            Scale = 0.74,
+            Offset = Vector3.new(6.1, 5.2, 1.5),
+            Size = Vector3.new(7.4, 9.6, 6.8),
+            Rot = Vector3.new(-3, -31, 14),
         },
         {
             Name = "WhisperrootCrownTop",
-            Offset = Vector3.new(0.2, 9.5, 2.0),
-            Rotation = CFrame.Angles(math.rad(8), math.rad(83), math.rad(6)),
-            Longest = 12.0,
-            Scale = 0.62,
+            Offset = Vector3.new(0.1, 9.2, 1.8),
+            Size = Vector3.new(10.8, 5.2, 6.2),
+            Rot = Vector3.new(7, 4, 2),
         },
     }
     for _, spec in crownSpecs do
-        local placed = EnvironmentPrefabService.Place(
-            "RockFace",
+        local rock = makeRock(
             model,
-            CFrame.new(ground + spec.Offset) * spec.Rotation,
-            prefabScaleForLongest("RockFace", spec.Longest, spec.Scale)
+            ground + spec.Offset,
+            spec.Size,
+            Vector3.new(math.rad(spec.Rot.X), math.rad(spec.Rot.Y), math.rad(spec.Rot.Z))
         )
-        if placed then
-            placed.Name = spec.Name
-            setRenderOnly(placed)
-        end
+        rock.Name = spec.Name
+        rock.Color = Color3.fromRGB(82, 95, 88)
+        rock.CanCollide = false
+        rock.CanTouch = false
+        rock.CanQuery = false
     end
 
     -- Smooth side blockers define the hollow without letting imported rock hulls

@@ -49,3 +49,9 @@ do
 end
 
 print("environment appearance security tests passed")
+
+local lumenreach = fs.readFile("src/server/Services/LumenreachWorldService.luau")
+assert(
+    string.find(lumenreach, '"RockFace"', 1, true) == nil,
+    "player-facing Lumenreach composition must not place the paper-thin imported RockFace prefab"
+)
