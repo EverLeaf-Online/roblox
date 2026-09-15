@@ -132,6 +132,64 @@ return table.freeze({
             Currencies = table.freeze({ Shards = 18 }),
         }),
     }),
+    lumen_fieldcraft = table.freeze({
+        DisplayName = "Fieldcraft: Lumenleaf",
+        MinimumLevel = 1,
+        StartNpcId = "camp_healer",
+        PrerequisiteQuests = table.freeze({ "lumen_first_steps" }),
+        Objectives = table.freeze({
+            table.freeze({ Type = "Collect", Target = "lumenleaf", Required = 4 }),
+        }),
+        Reward = table.freeze({
+            Exp = 55,
+            Currencies = table.freeze({ Shards = 5 }),
+            Items = table.freeze({ small_tonic = 2 }),
+        }),
+    }),
+    glowmere_reedwork = table.freeze({
+        DisplayName = "Reeds of Glowmere",
+        MinimumLevel = 2,
+        StartNpcId = "glowmere_keeper",
+        PrerequisiteQuests = table.freeze({ "lumen_trail_watch" }),
+        Objectives = table.freeze({
+            table.freeze({ Type = "Collect", Target = "glowreed", Required = 4 }),
+            table.freeze({ Type = "Explore", Target = "glowmere_pool", Required = 1 }),
+        }),
+        Reward = table.freeze({
+            Exp = 95,
+            Currencies = table.freeze({ Shards = 8 }),
+            Items = table.freeze({ field_tonic = 1 }),
+        }),
+    }),
+    sunmoss_observations = table.freeze({
+        DisplayName = "Light Above the Ridge",
+        MinimumLevel = 7,
+        StartNpcId = "sunmoss_researcher",
+        PrerequisiteQuests = table.freeze({ "old_grove_stirs" }),
+        Objectives = table.freeze({
+            table.freeze({ Type = "Collect", Target = "sunmoss_bloom", Required = 3 }),
+            table.freeze({ Type = "Explore", Target = "sunmoss_overlook", Required = 1 }),
+        }),
+        Reward = table.freeze({
+            Exp = 220,
+            Currencies = table.freeze({ Shards = 14 }),
+        }),
+    }),
+    veilfall_resonance = table.freeze({
+        DisplayName = "Resonance Below Veilfall",
+        MinimumLevel = 8,
+        StartNpcId = "veilfall_warden",
+        PrerequisiteQuests = table.freeze({ "first_advancement_trial" }),
+        Objectives = table.freeze({
+            table.freeze({ Type = "Collect", Target = "veilwater_crystal", Required = 3 }),
+            table.freeze({ Type = "Explore", Target = "veilfall_cascade", Required = 1 }),
+        }),
+        Reward = table.freeze({
+            Exp = 280,
+            Currencies = table.freeze({ Shards = 16 }),
+            Items = table.freeze({ field_tonic = 1 }),
+        }),
+    }),
     brasshaven_passage = table.freeze({
         DisplayName = "The Road Beyond Lumenreach",
         MinimumLevel = 10,

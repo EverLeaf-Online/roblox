@@ -5,11 +5,11 @@
 **Detailed tracker:** [`MASTER_CHECKLIST.md`](MASTER_CHECKLIST.md)
 **Architecture:** [`ARCHITECTURE.md`](ARCHITECTURE.md)
 
-## Lumenreach V7 bespoke MMORPG world — implemented
+## Lumenreach starter region — SOURCE BUILT / STUDIO ACCEPTANCE NOT PASSED
 
-- Terrain-first 2350×1800 Level 1–10 topology retained and fully authored as a denser MMORPG region.
-- Wayfarer Camp completed as a real starter town; each field subzone now has a distinct landmark/setpiece language without blocking action-combat space.
-- The region now has substantial built content plus a bespoke EverLeaf architecture language: custom civic objects, arches, banners, wagons, working yards, Glowmere stilt habitation/docks, Gravebone mausoleums, Mossglen ranger facilities, a Sunmoss observatory, Veilfall sanctuary, Shattered fortress towers, a complete Five-Path Proving venue, named route-side POIs, and a larger ambient population. Generic Toolbox/Creator Store architecture is prohibited; approved external nature assets remain scenery only. Remaining work is live Studio composition/performance QA and iterative art polish.
+- The 2350×1800 Level 1–10 topology, combat spaces, settlements, crossings, quest route, and custom EverLeaf structure set exist in source, but **the current Studio world is not accepted as production-quality**. It still requires a player-height environment rebuild/QA pass and must not be described as finished merely because the generator/tests pass.
+- Generic Toolbox/Creator Store architecture remains prohibited. Approved external nature assets are scenery only; foliage density is not a substitute for architecture, gameplay content, or environmental storytelling.
+- Functional MMO world activity is now being added on top of the existing systems: gathering, crafting, rest points, persistent caches, additional regional NPCs, and optional side quests. The next acceptance gate is a fresh-player Studio session that actually feels like an MMORPG, not another source-only map milestone.
 
 ## Development strategy
 

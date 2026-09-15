@@ -4072,6 +4072,42 @@ local NPC_STYLES = table.freeze({
         Cloth = Color3.fromRGB(55, 81, 70),
         Accent = Color3.fromRGB(91, 164, 123),
     }),
+    camp_healer = table.freeze({
+        Name = "Eira · Wayfarer Healer",
+        Role = "Guide",
+        HairStyle = "bun",
+        Position = ZONES.Camp + Vector3.new(-96, 0, -43),
+        Yaw = math.rad(62),
+        Cloth = Color3.fromRGB(82, 116, 93),
+        Accent = Color3.fromRGB(126, 224, 171),
+    }),
+    glowmere_keeper = table.freeze({
+        Name = "Sella · Glowmere Keeper",
+        Role = "Archivist",
+        HairStyle = "long",
+        Position = ZONES.Glowmere + Vector3.new(-102, 0, -58),
+        Yaw = math.rad(35),
+        Cloth = Color3.fromRGB(66, 103, 96),
+        Accent = Color3.fromRGB(105, 226, 217),
+    }),
+    sunmoss_researcher = table.freeze({
+        Name = "Aven · Sunmoss Researcher",
+        Role = "Archivist",
+        HairStyle = "short",
+        Position = ZONES.Sunmoss + Vector3.new(-20, 0, 72),
+        Yaw = math.rad(18),
+        Cloth = Color3.fromRGB(104, 108, 74),
+        Accent = Color3.fromRGB(206, 224, 112),
+    }),
+    veilfall_warden = table.freeze({
+        Name = "Neris · Veilfall Warden",
+        Role = "Guard",
+        HairStyle = "ponytail",
+        Position = ZONES.Veilfall + Vector3.new(-84, 0, -50),
+        Yaw = math.rad(50),
+        Cloth = Color3.fromRGB(62, 93, 91),
+        Accent = Color3.fromRGB(116, 220, 229),
+    }),
 })
 
 local function makeNpc(parent, npcId)

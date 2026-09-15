@@ -61,6 +61,46 @@ return table.freeze({
         }),
         QuestOffers = table.freeze({ "first_advancement_trial" }),
     }),
+    camp_healer = table.freeze({
+        DisplayName = "Eira · Wayfarer Healer",
+        RegionId = "lumenreach",
+        Dialogue = table.freeze({
+            "A field tonic starts before the bottle. Learn which plants answer to Lumen and you will spend less time crawling home from the Greenway.",
+            "Fresh Lumenleaf grows around the Greenway and Crossroads. Bring me enough to stock the camp, then use the apothecary bench beside the lodge yourself.",
+            "You know the leaf now. The stronger mixture needs Glowreed from the wetland, but the principle is the same: know the land and it keeps you alive.",
+        }),
+        QuestOffers = table.freeze({ "lumen_fieldcraft" }),
+    }),
+    glowmere_keeper = table.freeze({
+        DisplayName = "Sella · Glowmere Keeper",
+        RegionId = "lumenreach",
+        Dialogue = table.freeze({
+            "Glowmere is not empty water. The reeds carry the same light as the old waystones, just softer. Cut only the bright stalks and leave the root bed intact.",
+            "Four clean bundles will do. Walk the wetland while you gather them; the pool changes when you only stare at the road.",
+            "Good cut. Orin's field tonic will hold longer with that pith in the mix.",
+        }),
+        QuestOffers = table.freeze({ "glowmere_reedwork" }),
+    }),
+    sunmoss_researcher = table.freeze({
+        DisplayName = "Aven · Sunmoss Researcher",
+        RegionId = "lumenreach",
+        Dialogue = table.freeze({
+            "The ridge is collecting more Lumen than the valley should be able to feed it. I need live blooms, not dried samples from a merchant shelf.",
+            "Take three blooms from separate outcrops and stand at the overlook. If their glow holds at that elevation, the old observatory was measuring something real.",
+            "The readings agree. Whatever is waking under Lumenreach is pushing energy uphill as well as downriver.",
+        }),
+        QuestOffers = table.freeze({ "sunmoss_observations" }),
+    }),
+    veilfall_warden = table.freeze({
+        DisplayName = "Neris · Veilfall Warden",
+        RegionId = "lumenreach",
+        Dialogue = table.freeze({
+            "The crystals below the fall used to be clear. Now they hum when the wisps pass. That is new, and new things in Veilfall are rarely harmless.",
+            "Extract three stable shards and survey the cascade. Do not chase a crystal into the wisp field just because it shines brighter.",
+            "These are resonating with the old Lumen road. The Shattered Arch may be pulling on the whole ravine.",
+        }),
+        QuestOffers = table.freeze({ "veilfall_resonance" }),
+    }),
     foundry_quartermaster = table.freeze({
         DisplayName = "Nera · Foundry Quartermaster",
         RegionId = "brasshaven",

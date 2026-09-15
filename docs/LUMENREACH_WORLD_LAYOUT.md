@@ -1,6 +1,8 @@
-# Lumenreach MMO World Layout — Bespoke MMORPG World V7
+# Lumenreach World Layout — Source Contract (Studio Acceptance Pending)
 
 **Canonical target:** 2350 × 1800 studs, Level 1–10 starter region.
+
+**Acceptance status:** the topology and content below exist in source, but the current Studio presentation is still considered a prototype/blockout. Nothing in this document means the environment is visually finished until player-height Studio QA passes.
 
 Lumenreach V7 is a full replacement of the earlier showcase/camp composition. The runtime generator clears the previous generated model and Terrain, rebuilds macro topography from scratch, cuts the road network into the land, and only then places the authored structures, trees, NPCs, bridges, encounter spaces, landmarks, and portal required by gameplay. New work must extend this terrain-first layout; it must not stack scenery over older geometry.
 
