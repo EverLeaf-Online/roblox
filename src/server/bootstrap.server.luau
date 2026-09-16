@@ -1,6 +1,11 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+-- Do not let Roblox create the first character before profile/world spawn data is ready.
+-- The old auto-load path briefly placed new joins at an arbitrary neutral SpawnLocation,
+-- sometimes below generated terrain, before the authoritative settle teleport corrected it.
+Players.CharacterAutoLoads = false
+
 local ActionPayloadRules = require(ReplicatedStorage.Shared.Validation.ActionPayloadRules)
 local ActionService = require(script.Parent.Services.ActionService)
 local AchievementService = require(script.Parent.Services.AchievementService)
@@ -171,7 +176,9 @@ local function onPlayerAdded(player)
     end
     MonetizationService.OnProfileLoaded(player)
 
-    syncPlayerWorld(player, profileOrReason, player.Character ~= nil)
+    -- Resolve RespawnLocation before the first character exists. This makes the
+    -- engine's initial placement and our authoritative settle pass agree from frame one.
+    syncPlayerWorld(player, profileOrReason, false)
     DeathService.InitPlayer(player)
 
     player.CharacterAdded:Connect(function(character)
@@ -200,14 +207,26 @@ local function onPlayerAdded(player)
         end)
     end)
     if player.Character then
+        -- Defensive support for a character created by Studio/plugin tooling before
+        -- CharacterAutoLoads was disabled. Normal joins reach the branch below.
         task.defer(function()
-            CharacterStatsService.Apply(player, true)
             local profile = PlayerDataService.Get(player)
+            if profile then
+                WorldTravelService.Teleport(player, profile.World.SpawnId, {
+                    SkipStreamingPrefetch = true,
+                })
+            end
+            CharacterStatsService.Apply(player, true)
             if profile then
                 EquipmentVisualService.Apply(player, profile)
             end
             PlayerDataService.NotifyChanged(player)
         end)
+    elseif player.Parent == Players then
+        -- RespawnLocation has already been selected above, so the first visible
+        -- character is created at the intended region spawn rather than at an
+        -- arbitrary neutral SpawnLocation and corrected several frames later.
+        player:LoadCharacter()
     end
 
     if player.Parent == Players then

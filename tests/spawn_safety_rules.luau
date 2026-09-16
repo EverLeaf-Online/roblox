@@ -35,4 +35,23 @@ assert(
     "invisible Brasshaven interior SpawnLocations must be lifted clear of floors"
 )
 
+assert(
+    string.find(bootstrap, "Players.CharacterAutoLoads = false", 1, true),
+    "initial character auto-load must be disabled until profile/world spawn data is ready"
+)
+assert(
+    string.find(bootstrap, "syncPlayerWorld(player, profileOrReason, false)", 1, true),
+    "join flow must resolve RespawnLocation before creating the first character"
+)
+assert(
+    string.find(bootstrap, "player:LoadCharacter()", 1, true),
+    "join flow must explicitly create the character after selecting its spawn"
+)
+local deathService = fs.readFile("src/server/Services/DeathService.luau")
+assert(
+    string.find(deathService, "task.delay(Players.RespawnTime", 1, true)
+        and string.find(deathService, "player:LoadCharacter()", 1, true),
+    "manual character lifecycle must preserve respawning after death"
+)
+
 print("spawn safety rules tests passed")
