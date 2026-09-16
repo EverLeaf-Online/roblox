@@ -4,6 +4,7 @@ local Workspace = game:GetService("Workspace")
 
 local BelforgeAccessRules = require(ReplicatedStorage.Shared.Logic.BelforgeAccessRules)
 local BelforgeColossusService = require(script.Parent.BelforgeColossusService)
+local EnvironmentPrefabService = require(script.Parent.EnvironmentPrefabService)
 local InteractionService = require(script.Parent.InteractionService)
 local PlayerDataService = require(script.Parent.PlayerDataService)
 local PortalService = require(script.Parent.PortalService)
@@ -46,6 +47,141 @@ local function makeCollisionProxy(parent, name, size, cframe)
     proxy.CastShadow = false
     proxy:SetAttribute("EverLeafCollisionProxy", true)
     return proxy
+end
+
+local function setIndustrialVisual(instance)
+    if instance:IsA("BasePart") then
+        instance.CanCollide = false
+        instance.CanTouch = false
+        instance.CanQuery = true
+    end
+    for _, descendant in instance:GetDescendants() do
+        if descendant:IsA("BasePart") then
+            descendant.CanCollide = false
+            descendant.CanTouch = false
+            descendant.CanQuery = true
+        end
+    end
+end
+
+local function prefabScaleForLongest(prefabName, targetLongest)
+    local prefab = EnvironmentPrefabService.Get(prefabName)
+    if not prefab then
+        return 1
+    end
+    local size = if prefab:IsA("Model") then prefab:GetExtentsSize() else prefab.Size
+    local longest = math.max(size.X, size.Y, size.Z)
+    if longest <= 0.01 then
+        return 1
+    end
+    return targetLongest / longest
+end
+
+local function placeIndustrialBuilding(
+    parent,
+    name,
+    prefabName,
+    position,
+    yaw,
+    targetLongest,
+    collisionSpecs
+)
+    local model = Instance.new("Model")
+    model.Name = name
+    model:SetAttribute("EverLeafArchitecture", true)
+    model:SetAttribute("ArchitecturePrefab", prefabName)
+    model:SetAttribute("IndustrialDistrictBuilding", true)
+    model.Parent = parent
+
+    local prefab = EnvironmentPrefabService.Get(prefabName)
+    if not prefab then
+        model:SetAttribute("ArchitecturePrefabMissing", true)
+        warn(
+            string.format(
+                "[BrasshavenWorldService] Missing architecture prefab %s for %s",
+                prefabName,
+                name
+            )
+        )
+        return model
+    end
+
+    local scale = prefabScaleForLongest(prefabName, targetLongest)
+    local base = CFrame.new(position) * CFrame.Angles(0, yaw or 0, 0)
+    local visual = EnvironmentPrefabService.Place(prefabName, model, base, scale)
+    if not visual then
+        model:SetAttribute("ArchitecturePrefabMissing", true)
+        return model
+    end
+    visual.Name = "ArchitectureVisual"
+    setIndustrialVisual(visual)
+
+    for index, spec in collisionSpecs do
+        makeCollisionProxy(
+            model,
+            "ArchitectureCollision" .. index,
+            spec.Size * scale,
+            base * CFrame.new(spec.Offset * scale)
+        )
+    end
+    return model
+end
+
+local function makeFoundryAdminHall(parent, name, position, yaw)
+    return placeIndustrialBuilding(parent, name, "BrassFoundryAdminHall", position, yaw, 42, {
+        { Size = Vector3.new(29, 11, 21), Offset = Vector3.new(0, 5.5, 0) },
+        { Size = Vector3.new(10, 19, 8), Offset = Vector3.new(0, 9.5, -12.5) },
+    })
+end
+
+local function makeMachinistWorkshop(parent, name, position, yaw)
+    return placeIndustrialBuilding(parent, name, "BrassMachinistWorkshop", position, yaw, 44, {
+        { Size = Vector3.new(30, 11, 21), Offset = Vector3.new(-3, 5.5, 0) },
+        { Size = Vector3.new(12, 9, 17), Offset = Vector3.new(14, 4.5, 2) },
+    })
+end
+
+local function makeSmelterHouse(parent, name, position, yaw)
+    return placeIndustrialBuilding(parent, name, "BrassSmelterHouse", position, yaw, 42, {
+        { Size = Vector3.new(25, 14, 23), Offset = Vector3.new(-3, 7, 0) },
+        { Size = Vector3.new(11, 10, 17), Offset = Vector3.new(15, 5, 1) },
+    })
+end
+
+local function makeBoilerStation(parent, name, position, yaw)
+    return placeIndustrialBuilding(parent, name, "BrassBoilerStation", position, yaw, 38, {
+        { Size = Vector3.new(15, 10, 21), Offset = Vector3.new(-8, 5, 0) },
+        { Size = Vector3.new(18, 14, 13), Offset = Vector3.new(8, 7, 1) },
+    })
+end
+
+local function makeWorkerBarracks(parent, name, position, yaw)
+    return placeIndustrialBuilding(parent, name, "BrassWorkerBarracks", position, yaw, 42, {
+        { Size = Vector3.new(22, 11, 21), Offset = Vector3.new(-8, 5.5, 0) },
+        { Size = Vector3.new(15, 9, 14), Offset = Vector3.new(12, 4.5, 4) },
+    })
+end
+
+local function makeLoadingDepot(parent, name, position, yaw)
+    return placeIndustrialBuilding(parent, name, "BrassLoadingDepot", position, yaw, 46, {
+        { Size = Vector3.new(23, 11, 21), Offset = Vector3.new(-9, 5.5, 2) },
+        { Size = Vector3.new(20, 2, 23), Offset = Vector3.new(12, 1, -2) },
+    })
+end
+
+local function makeIndustrialGatehouse(parent, name, position, yaw)
+    return placeIndustrialBuilding(parent, name, "BrassIndustrialGatehouse", position, yaw, 46, {
+        { Size = Vector3.new(10, 21, 13), Offset = Vector3.new(-14, 10.5, 0) },
+        { Size = Vector3.new(10, 21, 13), Offset = Vector3.new(14, 10.5, 0) },
+        { Size = Vector3.new(20, 7, 11), Offset = Vector3.new(0, 18, 0) },
+    })
+end
+
+local function makeRefineryTower(parent, name, position, yaw)
+    return placeIndustrialBuilding(parent, name, "BrassRefineryTower", position, yaw, 40, {
+        { Size = Vector3.new(14, 22, 14), Offset = Vector3.new(0, 11, 0) },
+        { Size = Vector3.new(22, 2, 22), Offset = Vector3.new(0, 18, 0) },
+    })
 end
 
 local function normalizeGeneratedCollisions(world)
@@ -1553,273 +1689,139 @@ local function dressEncounterAreas(parent)
     })
 end
 
-local function makeIndustrialDistrictCourt(parent, spec)
-    local model = Instance.new("Model")
-    model.Name = spec.Name .. "DistrictCourt"
-    model:SetAttribute("MMOComposition", true)
-    model.Parent = parent
-
-    local center = ORIGIN + spec.Offset
-    local yaw = spec.Yaw or 0
-    local base = CFrame.new(center) * CFrame.Angles(0, yaw, 0)
-    local width = spec.Width or 76
-    local depth = spec.Depth or 52
-    local stone = Color3.fromRGB(64, 60, 56)
-    local iron = Color3.fromRGB(75, 72, 68)
-    local brass = spec.Accent or Color3.fromRGB(151, 100, 48)
-
-    local floor = makePart(
-        model,
-        spec.Name .. "CourtFloor",
-        Vector3.new(width, 0.65, depth),
-        base * CFrame.new(0, 0.35, 0),
+local function makeDistrictStreet(parent, name, center, size, yaw)
+    local street = makePart(
+        parent,
+        name,
+        size,
+        CFrame.new(center + Vector3.new(0, 0.35, 0)) * CFrame.Angles(0, yaw or 0, 0),
         Enum.Material.Cobblestone,
-        stone
+        Color3.fromRGB(88, 77, 67)
     )
-    floor.CanCollide = false
-
-    local lane = makePart(
-        model,
-        spec.Name .. "ServiceLane",
-        Vector3.new(14, 0.32, depth + 30),
-        base * CFrame.new(0, 0.72, 0),
-        Enum.Material.Metal,
-        iron
-    )
-    lane.CanCollide = false
-
-    for _, side in { -1, 1 } do
-        local x = side * (width * 0.42)
-        for _, z in { -depth * 0.34, depth * 0.34 } do
-            local post = makePart(
-                model,
-                spec.Name .. "FramePost",
-                Vector3.new(1.2, 11, 1.2),
-                base * CFrame.new(x, 5.5, z),
-                Enum.Material.Metal,
-                iron
-            )
-            makeCollisionProxy(
-                model,
-                spec.Name .. "FramePostCollision",
-                Vector3.new(1.45, 11, 1.45),
-                post.CFrame
-            )
-        end
-    end
-
-    local overhead = makePart(
-        model,
-        spec.Name .. "OverheadGantry",
-        Vector3.new(width * 0.84, 1.2, 3.0),
-        base * CFrame.new(0, 10.5, -depth * 0.34),
-        Enum.Material.DiamondPlate,
-        brass
-    )
-    overhead.CanCollide = false
-    makeCollisionProxy(
-        model,
-        spec.Name .. "OverheadGantryCollision",
-        Vector3.new(width * 0.84, 1.35, 3.2),
-        overhead.CFrame
-    )
-
-    local canopy = makePart(
-        model,
-        spec.Name .. "LoadingCanopy",
-        Vector3.new(width * 0.42, 0.7, 12),
-        base * CFrame.new(-width * 0.24, 7.2, depth * 0.31),
-        Enum.Material.Metal,
-        Color3.fromRGB(88, 75, 62)
-    )
-    canopy.CanCollide = false
-    for _, xoff in { -width * 0.38, -width * 0.10 } do
-        local post = makePart(
-            model,
-            spec.Name .. "CanopyPost",
-            Vector3.new(0.8, 7, 0.8),
-            base * CFrame.new(xoff, 3.5, depth * 0.31),
-            Enum.Material.Metal,
-            iron
-        )
-        makeCollisionProxy(
-            model,
-            spec.Name .. "CanopyPostCollision",
-            Vector3.new(1.0, 7, 1.0),
-            post.CFrame
-        )
-    end
-
-    for _, xoff in { -width * 0.35, width * 0.35 } do
-        local lamp = makePart(
-            model,
-            spec.Name .. "FurnaceLamp",
-            Vector3.new(1.0, 6.5, 1.0),
-            base * CFrame.new(xoff, 3.25, -depth * 0.08),
-            Enum.Material.Metal,
-            iron
-        )
-        makeCollisionProxy(
-            model,
-            spec.Name .. "LampCollision",
-            Vector3.new(1.2, 6.5, 1.2),
-            lamp.CFrame
-        )
-        local glow = makePart(
-            model,
-            spec.Name .. "FurnaceLampGlow",
-            Vector3.new(1.8, 1.8, 1.8),
-            base * CFrame.new(xoff, 6.7, -depth * 0.08),
-            Enum.Material.Neon,
-            brass
-        )
-        glow.Shape = Enum.PartType.Ball
-        glow.CanCollide = false
-        glow.CanTouch = false
-        local light = Instance.new("PointLight")
-        light.Color = brass
-        light.Brightness = 1.2
-        light.Range = 18
-        light.Parent = glow
-    end
-
-    makeScrapPile(
-        model,
-        center + base.RightVector * (width * 0.31) + base.LookVector * (depth * 0.27),
-        yaw + math.rad(20),
-        0.72
-    )
-    if spec.Hot then
-        makeHotVent(
-            model,
-            center - base.RightVector * (width * 0.28) + base.LookVector * (depth * 0.05),
-            0.75
-        )
-    end
-
-    makeLabel(model, center + Vector3.new(0, 17, 0), spec.Label)
-    return model
+    street.CanCollide = false
+    street.CanTouch = false
+    return street
 end
 
-local function makeBrasshavenMMOComposition(parent)
-    local districts = {
-        {
-            Name = "Threshold",
-            Label = "FOUNDRY THRESHOLD · TRADE COURT",
-            Offset = Vector3.new(-58, 0, 12),
-            Yaw = math.rad(90),
-            Width = 90,
-            Depth = 58,
-            Accent = Color3.fromRGB(171, 118, 58),
-        },
-        {
-            Name = "Gearworks",
-            Label = "GEARWORKS · MACHINE COURT",
-            Offset = Vector3.new(-78, 0, 76),
-            Yaw = math.rad(10),
-            Width = 84,
-            Depth = 56,
-            Accent = Color3.fromRGB(144, 99, 53),
-        },
-        {
-            Name = "Cinder",
-            Label = "CINDER DUCTS · MAINTENANCE COURT",
-            Offset = Vector3.new(83, 0, -72),
-            Yaw = math.rad(-12),
-            Width = 82,
-            Depth = 54,
-            Accent = Color3.fromRGB(205, 103, 46),
-            Hot = true,
-        },
-        {
-            Name = "Sootworks",
-            Label = "SOOTWORKS · SHIFT YARD",
-            Offset = Vector3.new(-58, 0, 145),
-            Yaw = math.rad(8),
-            Width = 88,
-            Depth = 58,
-            Accent = Color3.fromRGB(139, 91, 48),
-            Hot = true,
-        },
-        {
-            Name = "Dynamo",
-            Label = "DYNAMO GALLERY · POWER COURT",
-            Offset = Vector3.new(64, 0, -148),
-            Yaw = math.rad(-8),
-            Width = 84,
-            Depth = 56,
-            Accent = Color3.fromRGB(90, 174, 220),
-        },
-        {
-            Name = "Rail",
-            Label = "EASTWORKS RAIL YARD · LOADING COURT",
-            Offset = Vector3.new(108, 0, 145),
-            Yaw = math.rad(90),
-            Width = 92,
-            Depth = 62,
-            Accent = Color3.fromRGB(164, 109, 52),
-        },
-        {
-            Name = "Blueglass",
-            Label = "BLUEGLASS ANNEX · RESEARCH COURT",
-            Offset = Vector3.new(-72, 0, 235),
-            Yaw = math.rad(6),
-            Width = 82,
-            Depth = 56,
-            Accent = Color3.fromRGB(86, 177, 219),
-        },
-        {
-            Name = "Smelter",
-            Label = "SMELTER CRUCIBLE · WORKS COURT",
-            Offset = Vector3.new(108, 0, 235),
-            Yaw = math.rad(-6),
-            Width = 86,
-            Depth = 60,
-            Accent = Color3.fromRGB(225, 105, 42),
-            Hot = true,
-        },
-        {
-            Name = "Authority",
-            Label = "AUTHORITY HALL · SECURITY COURT",
-            Offset = Vector3.new(-12, 0, 325),
-            Yaw = 0,
-            Width = 88,
-            Depth = 60,
-            Accent = Color3.fromRGB(170, 115, 55),
-        },
-        {
-            Name = "Runoff",
-            Label = "MOLTEN RUNOFF · CONTROL COURT",
-            Offset = Vector3.new(88, 0, 325),
-            Yaw = 0,
-            Width = 84,
-            Depth = 58,
-            Accent = Color3.fromRGB(232, 91, 35),
-            Hot = true,
-        },
-        {
-            Name = "Bellows",
-            Label = "UPPER BELLOWS · FORGE COURT",
-            Offset = Vector3.new(-58, 0, 395),
-            Yaw = 0,
-            Width = 90,
-            Depth = 60,
-            Accent = Color3.fromRGB(192, 105, 45),
-            Hot = true,
-        },
-        {
-            Name = "Sentinel",
-            Label = "BELFORGE SENTINEL · MUSTER COURT",
-            Offset = Vector3.new(92, 0, 395),
-            Yaw = 0,
-            Width = 92,
-            Depth = 62,
-            Accent = Color3.fromRGB(190, 119, 53),
-        },
-    }
-    for _, spec in districts do
-        makeIndustrialDistrictCourt(parent, spec)
-    end
+local function makeBrasshavenBuildingLayouts(parent)
+    -- V22: these are actual building blocks arranged around streets and working
+    -- yards. The V21 gantry/canopy court overlay was removed rather than stacked
+    -- on top of encounter props.
+    makeDistrictStreet(
+        parent,
+        "ThresholdStreet",
+        ORIGIN + Vector3.new(-62, 0, 4),
+        Vector3.new(116, 0.55, 16),
+        math.rad(90)
+    )
+    makeFoundryAdminHall(
+        parent,
+        "FoundryAdministration",
+        ORIGIN + Vector3.new(-102, 0, -28),
+        math.rad(90)
+    )
+    makeLoadingDepot(parent, "ThresholdTradeDepot", ORIGIN + Vector3.new(-100, 0, 36), math.rad(90))
+    makeWorkerBarracks(
+        parent,
+        "ThresholdWorkerHouse",
+        ORIGIN + Vector3.new(-40, 0, 42),
+        math.rad(180)
+    )
+
+    makeDistrictStreet(
+        parent,
+        "GearworksStreet",
+        ORIGIN + Vector3.new(-86, 0, 110),
+        Vector3.new(118, 0.55, 15),
+        math.rad(90)
+    )
+    makeMachinistWorkshop(
+        parent,
+        "GearworksMachineHall",
+        ORIGIN + Vector3.new(-125, 0, 98),
+        math.rad(90)
+    )
+    makeWorkerBarracks(
+        parent,
+        "SootworksShiftHouse",
+        ORIGIN + Vector3.new(-112, 0, 165),
+        math.rad(90)
+    )
+
+    makeDistrictStreet(
+        parent,
+        "HotworksStreet",
+        ORIGIN + Vector3.new(95, 0, -108),
+        Vector3.new(126, 0.55, 15),
+        math.rad(90)
+    )
+    makeBoilerStation(parent, "CinderBoilerHouse", ORIGIN + Vector3.new(125, 0, -92), math.rad(-90))
+    makeRefineryTower(parent, "DynamoPowerHouse", ORIGIN + Vector3.new(118, 0, -160), math.rad(-90))
+
+    makeDistrictStreet(
+        parent,
+        "EastworksLoadingStreet",
+        ORIGIN + Vector3.new(102, 0, 176),
+        Vector3.new(126, 0.55, 15),
+        math.rad(90)
+    )
+    makeLoadingDepot(
+        parent,
+        "EastworksLoadingDepot",
+        ORIGIN + Vector3.new(126, 0, 165),
+        math.rad(-90)
+    )
+    makeMachinistWorkshop(
+        parent,
+        "EastworksMaintenanceHall",
+        ORIGIN + Vector3.new(118, 0, -235),
+        math.rad(-90)
+    )
+    makeSmelterHouse(
+        parent,
+        "SmelterCrucibleHouse",
+        ORIGIN + Vector3.new(122, 0, 255),
+        math.rad(-90)
+    )
+
+    makeDistrictStreet(
+        parent,
+        "UpperWorksStreet",
+        ORIGIN + Vector3.new(-60, 0, 286),
+        Vector3.new(140, 0.55, 15),
+        math.rad(90)
+    )
+    makeRefineryTower(parent, "BlueglassRefinery", ORIGIN + Vector3.new(-120, 0, 235), math.rad(90))
+    makeFoundryAdminHall(parent, "AuthorityHall", ORIGIN + Vector3.new(-24, 0, 335), 0)
+    makeRefineryTower(parent, "FluxVaultRefinery", ORIGIN + Vector3.new(-125, 0, 330), math.rad(90))
+    makeBoilerStation(
+        parent,
+        "RunoffControlHouse",
+        ORIGIN + Vector3.new(123, 0, 326),
+        math.rad(-90)
+    )
+
+    makeDistrictStreet(
+        parent,
+        "BelforgeApproachStreet",
+        ORIGIN + Vector3.new(12, 0, 395),
+        Vector3.new(245, 0.55, 17),
+        0
+    )
+    makeSmelterHouse(parent, "UpperBellowsHouse", ORIGIN + Vector3.new(-76, 0, 398), 0)
+    makeIndustrialGatehouse(
+        parent,
+        "BelforgeOuterControlGate",
+        ORIGIN + Vector3.new(112, 0, 395),
+        math.rad(90)
+    )
+
+    makeLabel(parent, ORIGIN + Vector3.new(-102, 19, -28), "FOUNDRY ADMINISTRATION")
+    makeLabel(parent, ORIGIN + Vector3.new(-125, 18, 98), "GEARWORKS MACHINE HALL")
+    makeLabel(parent, ORIGIN + Vector3.new(125, 19, -92), "CINDER BOILER HOUSE")
+    makeLabel(parent, ORIGIN + Vector3.new(126, 18, 165), "EASTWORKS LOADING DEPOT")
+    makeLabel(parent, ORIGIN + Vector3.new(-120, 23, 235), "BLUEGLASS REFINERY")
+    makeLabel(parent, ORIGIN + Vector3.new(-24, 20, 335), "AUTHORITY HALL")
 end
 
 function BrasshavenWorldService.Init()
@@ -1830,8 +1832,8 @@ function BrasshavenWorldService.Init()
 
     local world = Instance.new("Model")
     world.Name = GENERATED_NAME
-    world:SetAttribute("WorldDesignVersion", 2)
-    world:SetAttribute("MMOCompositionPass", true)
+    world:SetAttribute("WorldDesignVersion", 3)
+    world:SetAttribute("MMOBuildingLayoutPass", true)
     world.Parent = Workspace
 
     local ground = makePart(
@@ -1880,14 +1882,14 @@ function BrasshavenWorldService.Init()
         end
     end
 
-    makeForgeTower(world, ORIGIN + Vector3.new(62, 0, -70), 28, 1)
-    makeForgeTower(world, ORIGIN + Vector3.new(104, 0, 72), 34, 2)
-    makeForgeTower(world, ORIGIN + Vector3.new(-88, 0, -76), 24, 3)
-    makeForgeTower(world, ORIGIN + Vector3.new(-112, 0, 338), 30, 4)
-    makeForgeTower(world, ORIGIN + Vector3.new(112, 0, 350), 38, 5)
+    makeForgeTower(world, ORIGIN + Vector3.new(146, 0, -155), 28, 1)
+    makeForgeTower(world, ORIGIN + Vector3.new(148, 0, 92), 34, 2)
+    makeForgeTower(world, ORIGIN + Vector3.new(-148, 0, -110), 24, 3)
+    makeForgeTower(world, ORIGIN + Vector3.new(-148, 0, 338), 30, 4)
+    makeForgeTower(world, ORIGIN + Vector3.new(148, 0, 350), 38, 5)
 
     dressEncounterAreas(world)
-    makeBrasshavenMMOComposition(world)
+    makeBrasshavenBuildingLayouts(world)
 
     local wallColor = Color3.fromRGB(81, 73, 65)
     makePart(

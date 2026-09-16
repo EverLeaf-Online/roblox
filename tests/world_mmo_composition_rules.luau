@@ -4,68 +4,78 @@ local lumen = fs.readFile("src/server/Services/LumenreachWorldService.luau")
 local brass = fs.readFile("src/server/Services/BrasshavenWorldService.luau")
 
 assert(
-    string.find(lumen, "local function makeWorldMMOComposition", 1, true),
-    "Lumenreach whole-map composition pass missing"
+    string.find(lumen, "local WORLD_DESIGN_VERSION = 22", 1, true),
+    "Lumenreach building-layout pass must be V22"
 )
 assert(
-    string.find(lumen, "makeWorldMMOComposition(parent)", 1, true),
-    "Lumenreach composition pass is not wired"
+    string.find(lumen, "local function makeWorldMMOComposition", 1, true) == nil,
+    "obsolete Lumenreach clutter-overlay composition helper must stay removed"
 )
-for _, district in
+assert(
+    string.find(lumen, "local function makeWorldSettlements", 1, true)
+        and string.find(lumen, "makeWorldSettlements(parent)", 1, true),
+    "Lumenreach actual settlement layout pass must be wired"
+)
+for _, building in
     {
-        "Greenway",
-        "Crossroads",
-        "Glowmere",
-        "Eastbridge",
-        "Gravebone",
-        "Mossglen",
-        "Sunmoss",
-        "Veilfall",
-        "ShatteredArch",
-        "Proving",
+        "GreenwayCottageWest",
+        "GreenwayCottageEast",
+        "CrossroadsKeeperHouse",
+        "GlowmereDrybankHouse",
+        "EastbridgeBarracks",
+        "GraveboneMausoleum",
+        "MossglenRangerLodge",
+        "SunmossObservatory",
+        "VeilfallSanctuary",
+        "ShatteredNorthTower",
+        "ShatteredSouthTower",
+        "ProvingMentorLodge",
     }
 do
     assert(
-        string.find(lumen, 'Name = "' .. district .. '"', 1, true),
-        "Lumenreach MMO court missing " .. district
+        string.find(lumen, '"' .. building .. '"', 1, true),
+        "Lumenreach layout missing " .. building
     )
 end
-assert(
-    string.find(lumen, 'model:SetAttribute("MMOComposition", true)', 1, true),
-    "Lumenreach courts must identify authored MMO composition"
-)
 
 assert(
-    string.find(brass, "local function makeBrasshavenMMOComposition", 1, true),
-    "Brasshaven whole-map composition pass missing"
+    string.find(brass, "local function makeBrasshavenMMOComposition", 1, true) == nil,
+    "obsolete Brasshaven clutter-court overlay must stay removed"
 )
 assert(
-    string.find(brass, "makeBrasshavenMMOComposition(world)", 1, true),
-    "Brasshaven composition pass is not wired"
+    string.find(brass, "local function makeBrasshavenBuildingLayouts", 1, true)
+        and string.find(brass, "makeBrasshavenBuildingLayouts(world)", 1, true),
+    "Brasshaven actual industrial building layout pass must be wired"
 )
-for _, district in
+assert(
+    string.find(brass, 'world:SetAttribute("WorldDesignVersion", 3)', 1, true)
+        and string.find(brass, 'world:SetAttribute("MMOBuildingLayoutPass", true)', 1, true),
+    "Brasshaven generated world must advertise the real building-layout pass"
+)
+for _, building in
     {
-        "Threshold",
-        "Gearworks",
-        "Cinder",
-        "Sootworks",
-        "Dynamo",
-        "Rail",
-        "Blueglass",
-        "Smelter",
-        "Authority",
-        "Runoff",
-        "Bellows",
-        "Sentinel",
+        "FoundryAdministration",
+        "ThresholdTradeDepot",
+        "ThresholdWorkerHouse",
+        "GearworksMachineHall",
+        "SootworksShiftHouse",
+        "CinderBoilerHouse",
+        "DynamoPowerHouse",
+        "EastworksLoadingDepot",
+        "EastworksMaintenanceHall",
+        "SmelterCrucibleHouse",
+        "BlueglassRefinery",
+        "AuthorityHall",
+        "FluxVaultRefinery",
+        "RunoffControlHouse",
+        "UpperBellowsHouse",
+        "BelforgeOuterControlGate",
     }
 do
     assert(
-        string.find(brass, 'Name = "' .. district .. '"', 1, true),
-        "Brasshaven MMO court missing " .. district
+        string.find(brass, '"' .. building .. '"', 1, true),
+        "Brasshaven layout missing " .. building
     )
 end
-assert(
-    string.find(brass, 'world:SetAttribute("MMOCompositionPass", true)', 1, true),
-    "Brasshaven generated world must advertise the MMO composition pass"
-)
-print("whole-world MMO composition rules tests passed")
+
+print("whole-world MMO building layout rules tests passed")

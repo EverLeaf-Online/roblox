@@ -74,6 +74,13 @@ assert(
     "Brasshaven must run collision normalization after generated content is assembled"
 )
 assert(
+    string.find(source, "local function placeIndustrialBuilding", 1, true) ~= nil
+        and string.find(source, '"ArchitectureCollision" .. index', 1, true) ~= nil
+        and string.find(source, "spec.Size * scale", 1, true) ~= nil
+        and string.find(source, "spec.Offset * scale", 1, true) ~= nil,
+    "Brasshaven industrial meshes must use scale-aligned explicit collision proxies"
+)
+assert(
     string.find(source, "spawn.CanCollide = false", 1, true) ~= nil
         and string.find(source, "spawn.CanQuery = false", 1, true) ~= nil,
     "Brasshaven spawn marker must not behave like a physical platform"

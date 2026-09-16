@@ -16,7 +16,7 @@ local LumenreachWorldService = {}
 local GENERATED_NAME = "EverLeafGeneratedWorld"
 local WORLD_WIDTH = 2200
 local WORLD_DEPTH = 1250
-local WORLD_DESIGN_VERSION = 21
+local WORLD_DESIGN_VERSION = 22
 
 -- Lumenreach is authored as a terrain-first MMORPG region. The generator below
 -- replaces the previous showcase composition completely: terrain is cleared,
@@ -3192,92 +3192,93 @@ local function makeOccupiedHamlet(parent, name, center, yaw, accent, cropAccent)
     model.Parent = parent
     accent = accent or Color3.fromRGB(96, 112, 88)
     cropAccent = cropAccent or Color3.fromRGB(113, 126, 75)
+    yaw = yaw or 0
 
-    local plaza = terrainSurfacePosition(center, 0)
+    -- V22: hamlets are laid out as a short inhabited street with a terminating
+    -- common, not four buildings dropped around a rectangular pad.
+    local south = districtPoint(center, yaw, Vector3.new(0, 0, -42))
+    local north = districtPoint(center, yaw, Vector3.new(0, 0, 30))
+    fillTerrainRoute({ south, center, north }, 13, Enum.Material.Ground)
     Workspace.Terrain:FillBlock(
-        CFrame.new(plaza + Vector3.new(0, -0.45, 0)) * CFrame.Angles(0, yaw or 0, 0),
-        Vector3.new(78, 1.2, 62),
+        CFrame.new(terrainSurfacePosition(center, -0.42)) * CFrame.Angles(0, yaw, 0),
+        Vector3.new(48, 1.0, 36),
         Enum.Material.Ground
     )
 
+    -- Street frontage. Left/right buildings face the lane; the wayhouse closes
+    -- the north end so the settlement has a readable arrival and destination.
     makeCroftCottage(
         model,
-        name .. "Cottage1",
-        districtPoint(center, yaw, Vector3.new(-27, 0, -20)),
-        (yaw or 0) + math.rad(20),
+        name .. "CottageWest",
+        districtPoint(center, yaw, Vector3.new(-27, 0, -14)),
+        yaw + math.rad(90),
         accent,
         false
     )
     makeCroftCottage(
         model,
-        name .. "Cottage2",
-        districtPoint(center, yaw, Vector3.new(25, 0, -21)),
-        (yaw or 0) + math.rad(-18),
+        name .. "CottageEast",
+        districtPoint(center, yaw, Vector3.new(27, 0, -7)),
+        yaw - math.rad(90),
         accent:Lerp(Color3.fromRGB(145, 111, 73), 0.18),
         true
     )
     makeFarmBarn(
         model,
         name .. "Barn",
-        districtPoint(center, yaw, Vector3.new(-28, 0, 21)),
-        (yaw or 0) + math.rad(158),
+        districtPoint(center, yaw, Vector3.new(-31, 0, 18)),
+        yaw + math.rad(90),
         accent:Lerp(Color3.fromRGB(132, 101, 67), 0.32)
     )
     makeRoadWayhouse(
         model,
         name .. "Wayhouse",
-        districtPoint(center, yaw, Vector3.new(26, 0, 22)),
-        (yaw or 0) + math.rad(-160),
+        districtPoint(center, yaw, Vector3.new(10, 0, 31)),
+        yaw + math.rad(180),
         accent
     )
 
     makeLumenWell(
         model,
         name .. "Well",
-        districtPoint(center, yaw, Vector3.new(0, 0, 0)),
+        districtPoint(center, yaw, Vector3.new(4, 0, 10)),
         SIGNATURE.Lumen
     )
-    makeHearth(model, districtPoint(center, yaw, Vector3.new(0, 0, 22)))
+    makeHearth(model, districtPoint(center, yaw, Vector3.new(-8, 0, 7)))
     makeMarketStall(
         model,
-        districtPoint(center, yaw, Vector3.new(2, 0, -30)),
-        (yaw or 0) + math.rad(180),
+        districtPoint(center, yaw, Vector3.new(14, 0, -23)),
+        yaw - math.rad(90),
         accent:Lerp(SIGNATURE.ClothGold, 0.18)
     )
-    makeSupplyStack(model, districtPoint(center, yaw, Vector3.new(39, 0, 7)), yaw or 0, 0.85)
     makeWayfarerCart(
         model,
         name .. "Wagon",
-        districtPoint(center, yaw, Vector3.new(-41, 0, 4)),
-        (yaw or 0) + math.rad(90),
+        districtPoint(center, yaw, Vector3.new(-12, 0, -29)),
+        yaw + math.rad(12),
         true
     )
+
+    -- Crofts sit behind the buildings rather than occupying the public street.
     makeCroftPlot(
         model,
-        name .. "CroftA",
-        districtPoint(center, yaw, Vector3.new(-52, 0, -28)),
-        yaw or 0,
-        28,
+        name .. "CroftWest",
+        districtPoint(center, yaw, Vector3.new(-52, 0, 0)),
+        yaw + math.rad(90),
+        30,
         22,
         cropAccent
     )
     makeCroftPlot(
         model,
-        name .. "CroftB",
-        districtPoint(center, yaw, Vector3.new(52, 0, 28)),
-        yaw or 0,
+        name .. "CroftEast",
+        districtPoint(center, yaw, Vector3.new(52, 0, 10)),
+        yaw - math.rad(90),
         28,
         22,
         cropAccent:Lerp(Color3.fromRGB(164, 141, 71), 0.18)
     )
-    makeWayfarerStreetArch(
-        model,
-        name .. "EntryArch",
-        districtPoint(center, yaw, Vector3.new(0, 0, -47)),
-        yaw or 0,
-        18,
-        SIGNATURE.Lumen
-    )
+    makeWayfarerStreetArch(model, name .. "EntryArch", south, yaw, 18, SIGNATURE.Lumen)
     return model
 end
 
@@ -3286,48 +3287,48 @@ local function makePatrolPost(parent, name, center, yaw, accent)
     model.Name = name
     model.Parent = parent
     accent = accent or Color3.fromRGB(79, 105, 84)
+    yaw = yaw or 0
 
+    local approach = districtPoint(center, yaw, Vector3.new(0, 0, -38))
+    local rear = districtPoint(center, yaw, Vector3.new(0, 0, 25))
+    fillTerrainRoute({ approach, center, rear }, 12, Enum.Material.Ground)
     Workspace.Terrain:FillBlock(
-        CFrame.new(terrainSurfacePosition(center, -0.35)) * CFrame.Angles(0, yaw or 0, 0),
-        Vector3.new(66, 1.0, 48),
+        CFrame.new(terrainSurfacePosition(center, -0.35)) * CFrame.Angles(0, yaw, 0),
+        Vector3.new(54, 1.0, 42),
         Enum.Material.Ground
     )
+
+    -- A defended lane: guardhouse and stores face each other, tower controls the
+    -- entry, and the shelter sits behind the working court.
     makeProvingLodge(
         model,
         name .. "Guardhouse",
-        districtPoint(center, yaw, Vector3.new(-20, 0, 4)),
-        (yaw or 0) + math.rad(12)
+        districtPoint(center, yaw, Vector3.new(-25, 0, -3)),
+        yaw + math.rad(90)
     )
     makeQuartermasterDepot(
         model,
         name .. "Storehouse",
-        districtPoint(center, yaw, Vector3.new(20, 0, 8)),
-        (yaw or 0) - math.rad(15)
+        districtPoint(center, yaw, Vector3.new(25, 0, 4)),
+        yaw - math.rad(90)
     )
-    makeWatchtower(model, districtPoint(center, yaw, Vector3.new(-27, 0, -25)), yaw or 0)
+    makeWatchtower(model, districtPoint(center, yaw, Vector3.new(-20, 0, -30)), yaw + math.rad(15))
     makeRoadsideShelter(
         model,
         name .. "Shelter",
-        districtPoint(center, yaw, Vector3.new(26, 0, -23)),
-        (yaw or 0) + math.rad(180)
+        districtPoint(center, yaw, Vector3.new(18, 0, 24)),
+        yaw + math.rad(180)
     )
-    makeHearth(model, districtPoint(center, yaw, Vector3.new(2, 0, 17)))
-    makeSupplyStack(model, districtPoint(center, yaw, Vector3.new(30, 0, 22)), yaw or 0, 0.8)
+    makeHearth(model, districtPoint(center, yaw, Vector3.new(0, 0, 13)))
+    makeSupplyStack(model, districtPoint(center, yaw, Vector3.new(28, 0, 20)), yaw, 0.8)
     makeWayfarerCart(
         model,
         name .. "PatrolWagon",
-        districtPoint(center, yaw, Vector3.new(-5, 0, -31)),
-        yaw or 0,
+        districtPoint(center, yaw, Vector3.new(-8, 0, -24)),
+        yaw + math.rad(10),
         true
     )
-    makeWayfarerStreetArch(
-        model,
-        name .. "Gate",
-        districtPoint(center, yaw, Vector3.new(0, 0, -40)),
-        yaw or 0,
-        17,
-        SIGNATURE.Lumen
-    )
+    makeWayfarerStreetArch(model, name .. "Gate", approach, yaw, 17, SIGNATURE.Lumen)
     return model
 end
 
@@ -3337,53 +3338,58 @@ local function makeRuinedDistrict(parent, name, center, yaw)
     model.Parent = parent
     local rotation = yaw or 0
 
+    local approach = districtPoint(center, rotation, Vector3.new(0, 0, -42))
+    fillTerrainRoute({ approach, center }, 12, Enum.Material.Ground)
     Workspace.Terrain:FillBlock(
         CFrame.new(terrainSurfacePosition(center, -0.3)) * CFrame.Angles(0, rotation, 0),
-        Vector3.new(78, 1.0, 62),
+        Vector3.new(64, 1.0, 54),
         Enum.Material.Ground
     )
+
+    -- V22 ruins preserve the footprint of a former street/court rather than
+    -- scattering unrelated ruin props across a pad.
     makeRuinedHall(
         model,
-        name .. "HallA",
-        districtPoint(center, rotation, Vector3.new(-24, 0, -12)),
+        name .. "HallWest",
+        districtPoint(center, rotation, Vector3.new(-27, 0, -6)),
         30,
         22,
-        rotation + math.rad(8)
+        rotation + math.rad(90)
     )
     makeRuinedHall(
         model,
-        name .. "HallB",
-        districtPoint(center, rotation, Vector3.new(23, 0, 15)),
+        name .. "HallEast",
+        districtPoint(center, rotation, Vector3.new(27, 0, 4)),
         27,
         20,
-        rotation - math.rad(14)
+        rotation - math.rad(90)
     )
-    makeRuinWall(model, districtPoint(center, rotation, Vector3.new(0, 0, -35)), rotation, 55, 7)
+    makeRuinWall(model, districtPoint(center, rotation, Vector3.new(0, 0, 29)), rotation, 48, 7)
     makeRuinWall(
         model,
-        districtPoint(center, rotation, Vector3.new(-38, 0, 8)),
+        districtPoint(center, rotation, Vector3.new(-33, 0, 12)),
         rotation + math.rad(90),
-        40,
+        31,
         6
     )
     makeStoneShrine(
         model,
         name .. "BrokenShrine",
-        districtPoint(center, rotation, Vector3.new(34, 0, -22)),
-        rotation - math.rad(18),
+        districtPoint(center, rotation, Vector3.new(0, 0, 15)),
+        rotation + math.rad(180),
         Color3.fromRGB(118, 194, 169)
     )
     makeGraveboneMausoleum(
         model,
         name .. "Crypt",
-        districtPoint(center, rotation, Vector3.new(-5, 0, 37)),
+        districtPoint(center, rotation, Vector3.new(0, 0, 38)),
         rotation + math.rad(180)
     )
     makeWayfarerCart(
         model,
         name .. "AbandonedCart",
-        districtPoint(center, rotation, Vector3.new(39, 0, 27)),
-        rotation + math.rad(60),
+        districtPoint(center, rotation, Vector3.new(12, 0, -26)),
+        rotation + math.rad(25),
         false
     )
     return model
@@ -3939,544 +3945,440 @@ local function makeWorldMicroSites(parent)
     end
 end
 
-local function makeDistrictCourt(parent, spec)
-    local model = Instance.new("Model")
-    model.Name = spec.Name .. "MMOCourt"
-    model:SetAttribute("MMOComposition", true)
-    model.Parent = parent
-
-    local center = spec.Center
-    local yaw = spec.Yaw or 0
-    local court = terrainSurfacePosition(center, 0)
-    local width = spec.Width or 72
-    local depth = spec.Depth or 50
-    local accent = spec.Accent or SIGNATURE.Lumen
-
-    Workspace.Terrain:FillBlock(
-        CFrame.new(court + Vector3.new(0, -0.45, 0)) * CFrame.Angles(0, yaw, 0),
-        Vector3.new(width, 1.1, depth),
-        spec.Material or Enum.Material.Slate
-    )
-
-    local forward = districtPoint(center, yaw, Vector3.new(0, 0, -depth * 0.68))
-    local back = districtPoint(center, yaw, Vector3.new(0, 0, depth * 0.68))
-    local left = districtPoint(center, yaw, Vector3.new(-width * 0.62, 0, 0))
-    local right = districtPoint(center, yaw, Vector3.new(width * 0.62, 0, 0))
-    fillTerrainRoute({ forward, center, back }, spec.RoadWidth or 10, Enum.Material.Ground)
-    fillTerrainRoute({ left, center, right }, spec.RoadWidth or 10, Enum.Material.Ground)
-
-    makeWayfarerStreetArch(
-        model,
-        spec.Name .. "ApproachArch",
-        districtPoint(center, yaw, Vector3.new(0, 0, -depth * 0.58)),
-        yaw,
-        spec.ArchWidth or 18,
-        accent
-    )
-    makeWaystone(model, districtPoint(center, yaw, Vector3.new(0, 0, -depth * 0.32)), yaw, 0.8)
-
-    for _, offset in
-        {
-            Vector3.new(-width * 0.34, 0, -depth * 0.30),
-            Vector3.new(width * 0.34, 0, -depth * 0.30),
-            Vector3.new(-width * 0.34, 0, depth * 0.30),
-            Vector3.new(width * 0.34, 0, depth * 0.30),
-        }
-    do
-        makeLantern(model, districtPoint(center, yaw, offset), yaw)
-    end
-
-    if spec.Kind == "market" then
-        makeMarketStall(
-            model,
-            districtPoint(center, yaw, Vector3.new(-22, 0, 10)),
-            yaw + math.rad(90),
-            accent
-        )
-        makeMarketStall(
-            model,
-            districtPoint(center, yaw, Vector3.new(22, 0, 10)),
-            yaw - math.rad(90),
-            accent:Lerp(SIGNATURE.ClothGold, 0.25)
-        )
-        makeWayfarerCart(
-            model,
-            spec.Name .. "TradeCart",
-            districtPoint(center, yaw, Vector3.new(30, 0, -12)),
-            yaw + math.rad(70),
-            true
-        )
-        makeBench(model, districtPoint(center, yaw, Vector3.new(-12, 0, -4)), yaw + math.rad(90))
-        makeBench(model, districtPoint(center, yaw, Vector3.new(12, 0, -4)), yaw - math.rad(90))
-    elseif spec.Kind == "wetland" then
-        makeBoardwalk(model, spec.Name .. "CrosswalkA", left, right, 8)
-        makeBoardwalk(model, spec.Name .. "CrosswalkB", forward, back, 7)
-        makeReedDock(
-            model,
-            spec.Name .. "PublicDock",
-            districtPoint(center, yaw, Vector3.new(width * 0.44, 0, depth * 0.24)),
-            yaw + math.rad(90),
-            22
-        )
-        makeSupplyStack(model, districtPoint(center, yaw, Vector3.new(-24, 0, 12)), yaw, 0.75)
-    elseif spec.Kind == "fort" then
-        makeFenceLine(
-            model,
-            spec.Name .. "NorthWall",
-            districtPoint(center, yaw, Vector3.new(-width * 0.48, 0, depth * 0.44)),
-            districtPoint(center, yaw, Vector3.new(width * 0.48, 0, depth * 0.44)),
-            8,
-            5.5
-        )
-        makeFenceLine(
-            model,
-            spec.Name .. "SouthWall",
-            districtPoint(center, yaw, Vector3.new(-width * 0.48, 0, -depth * 0.44)),
-            districtPoint(center, yaw, Vector3.new(width * 0.48, 0, -depth * 0.44)),
-            8,
-            5.5
-        )
-        makeSupplyStack(model, districtPoint(center, yaw, Vector3.new(-24, 0, 14)), yaw, 0.9)
-        makeSupplyStack(model, districtPoint(center, yaw, Vector3.new(24, 0, 14)), yaw, 0.9)
-        makeHearth(model, districtPoint(center, yaw, Vector3.new(0, 0, 10)))
-    elseif spec.Kind == "ruin" then
-        makeRuinWall(
-            model,
-            districtPoint(center, yaw, Vector3.new(-22, 0, 8)),
-            yaw + math.rad(90),
-            34,
-            7
-        )
-        makeRuinWall(model, districtPoint(center, yaw, Vector3.new(20, 0, -4)), yaw, 30, 6)
-        makeStoneShrine(
-            model,
-            spec.Name .. "CourtShrine",
-            districtPoint(center, yaw, Vector3.new(0, 0, 14)),
-            yaw + math.rad(180),
-            accent
-        )
-        makeWayfarerCart(
-            model,
-            spec.Name .. "BrokenWagon",
-            districtPoint(center, yaw, Vector3.new(27, 0, -15)),
-            yaw + math.rad(38),
-            false
-        )
-    elseif spec.Kind == "research" then
-        makeStoneShrine(
-            model,
-            spec.Name .. "StudyShrine",
-            districtPoint(center, yaw, Vector3.new(0, 0, 12)),
-            yaw + math.rad(180),
-            accent
-        )
-        makeBench(model, districtPoint(center, yaw, Vector3.new(-18, 0, 3)), yaw + math.rad(90))
-        makeBench(model, districtPoint(center, yaw, Vector3.new(18, 0, 3)), yaw - math.rad(90))
-        makeSupplyStack(model, districtPoint(center, yaw, Vector3.new(26, 0, -13)), yaw, 0.7)
-    elseif spec.Kind == "ranger" then
-        makeHearth(model, districtPoint(center, yaw, Vector3.new(0, 0, 9)))
-        makeSupplyStack(model, districtPoint(center, yaw, Vector3.new(-25, 0, 12)), yaw, 0.8)
-        makeWayfarerCart(
-            model,
-            spec.Name .. "RangerCart",
-            districtPoint(center, yaw, Vector3.new(25, 0, -13)),
-            yaw - math.rad(65),
-            true
-        )
-        makeBench(model, districtPoint(center, yaw, Vector3.new(-14, 0, -5)), yaw + math.rad(90))
-    else
-        makeHearth(model, districtPoint(center, yaw, Vector3.new(0, 0, 8)))
-        makeBench(model, districtPoint(center, yaw, Vector3.new(-15, 0, -3)), yaw + math.rad(90))
-        makeBench(model, districtPoint(center, yaw, Vector3.new(15, 0, -3)), yaw - math.rad(90))
-    end
-
-    return model
-end
-
-local function makeWorldMMOComposition(parent)
-    local courts = {
-        {
-            Name = "Greenway",
-            Center = ZONES.Greenway + Vector3.new(0, 0, -28),
-            Yaw = math.rad(2),
-            Kind = "market",
-            Width = 86,
-            Depth = 54,
-            Accent = Color3.fromRGB(113, 159, 91),
-            Material = Enum.Material.Ground,
-        },
-        {
-            Name = "Crossroads",
-            Center = ZONES.Crossroads + Vector3.new(0, 0, 4),
-            Yaw = 0,
-            Kind = "market",
-            Width = 82,
-            Depth = 62,
-            Accent = SIGNATURE.Lumen,
-        },
-        {
-            Name = "Glowmere",
-            Center = ZONES.Glowmere + Vector3.new(0, 0, 18),
-            Yaw = math.rad(-10),
-            Kind = "wetland",
-            Width = 92,
-            Depth = 60,
-            Accent = Color3.fromRGB(112, 226, 211),
-            Material = Enum.Material.Ground,
-        },
-        {
-            Name = "Eastbridge",
-            Center = ZONES.EastLanding + Vector3.new(5, 0, 2),
-            Yaw = math.rad(90),
-            Kind = "fort",
-            Width = 94,
-            Depth = 62,
-            Accent = Color3.fromRGB(108, 220, 180),
-        },
-        {
-            Name = "Gravebone",
-            Center = ZONES.Gravebone + Vector3.new(0, 0, 2),
-            Yaw = math.rad(8),
-            Kind = "ruin",
-            Width = 90,
-            Depth = 66,
-            Accent = Color3.fromRGB(142, 198, 172),
-        },
-        {
-            Name = "Mossglen",
-            Center = ZONES.Mossglen + Vector3.new(-18, 0, -18),
-            Yaw = math.rad(-8),
-            Kind = "ranger",
-            Width = 98,
-            Depth = 64,
-            Accent = Color3.fromRGB(107, 173, 103),
-            Material = Enum.Material.Ground,
-        },
-        {
-            Name = "Sunmoss",
-            Center = ZONES.Sunmoss + Vector3.new(0, 0, 5),
-            Yaw = math.rad(-18),
-            Kind = "research",
-            Width = 82,
-            Depth = 58,
-            Accent = Color3.fromRGB(207, 217, 113),
-        },
-        {
-            Name = "Veilfall",
-            Center = ZONES.Veilfall + Vector3.new(-5, 0, 0),
-            Yaw = math.rad(20),
-            Kind = "research",
-            Width = 76,
-            Depth = 54,
-            Accent = Color3.fromRGB(114, 222, 226),
-        },
-        {
-            Name = "ShatteredArch",
-            Center = ZONES.Ruins + Vector3.new(-18, 0, 4),
-            Yaw = math.rad(90),
-            Kind = "fort",
-            Width = 104,
-            Depth = 72,
-            Accent = Color3.fromRGB(96, 229, 193),
-        },
-        {
-            Name = "Proving",
-            Center = ZONES.Proving + Vector3.new(0, 0, 8),
-            Yaw = math.rad(180),
-            Kind = "fort",
-            Width = 88,
-            Depth = 60,
-            Accent = Color3.fromRGB(111, 235, 188),
-        },
-    }
-    for _, spec in courts do
-        makeDistrictCourt(parent, spec)
-    end
-end
-
 local function makeWorldSettlements(parent)
-    -- Greenway settlement edge: visible habitation immediately outside town.
+    -- V22 replaces the V21 "court overlay" with actual district building
+    -- layouts. Every major zone gets an arrival axis, buildings that face that
+    -- axis, and a deliberately shaped public/service space.
+
+    -- GREENWAY: compact agrarian street, fields behind the buildings.
+    local green = ZONES.Greenway
+    fillTerrainRoute(
+        { green + Vector3.new(0, 0, -88), green + Vector3.new(0, 0, 48) },
+        13,
+        Enum.Material.Ground
+    )
     makeRoadWayhouse(
         parent,
         "GreenwayWayhouse",
-        ZONES.Greenway + Vector3.new(-92, 0, -62),
-        math.rad(48),
+        green + Vector3.new(-30, 0, -18),
+        math.rad(90),
         Color3.fromRGB(97, 112, 80)
     )
     makeFarmBarn(
         parent,
         "GreenwayStoreShed",
-        ZONES.Greenway + Vector3.new(92, 0, -54),
-        math.rad(-42),
+        green + Vector3.new(32, 0, 5),
+        math.rad(-90),
         Color3.fromRGB(112, 91, 62)
     )
-    makeRoadsideShelter(
+    makeCroftCottage(
         parent,
-        "GreenwayTravelShelter",
-        ZONES.Greenway + Vector3.new(18, 0, -92),
-        math.rad(8)
+        "GreenwayCottageWest",
+        green + Vector3.new(-31, 0, 28),
+        math.rad(90),
+        Color3.fromRGB(104, 119, 82),
+        false
     )
-    makeSupplyStack(parent, ZONES.Greenway + Vector3.new(-70, 0, -72), math.rad(32), 0.85)
+    makeCroftCottage(
+        parent,
+        "GreenwayCottageEast",
+        green + Vector3.new(31, 0, 38),
+        math.rad(-90),
+        Color3.fromRGB(116, 120, 82),
+        true
+    )
+    makeMarketStall(
+        parent,
+        green + Vector3.new(13, 0, -35),
+        math.rad(-90),
+        Color3.fromRGB(113, 159, 91)
+    )
+    makeLumenWell(parent, "GreenwayVillageWell", green + Vector3.new(-5, 0, 8), SIGNATURE.Lumen)
+    makeCroftPlot(
+        parent,
+        "GreenwayWestField",
+        green + Vector3.new(-66, 0, 27),
+        math.rad(90),
+        34,
+        25,
+        Color3.fromRGB(132, 146, 74)
+    )
+    makeCroftPlot(
+        parent,
+        "GreenwayEastField",
+        green + Vector3.new(67, 0, 20),
+        math.rad(-90),
+        34,
+        25,
+        Color3.fromRGB(143, 151, 78)
+    )
 
-    -- Crossroads is a staffed Wayfarer waystation, not a sign in a field.
+    -- CROSSROADS: four-sided service square around the route intersection.
+    local cross = ZONES.Crossroads
+    fillTerrainRoute(
+        { cross + Vector3.new(-72, 0, 0), cross + Vector3.new(72, 0, 0) },
+        13,
+        Enum.Material.Ground
+    )
+    fillTerrainRoute(
+        { cross + Vector3.new(0, 0, -70), cross + Vector3.new(0, 0, 70) },
+        13,
+        Enum.Material.Ground
+    )
     makeRoadWayhouse(
         parent,
         "CrossroadsWaystation",
-        ZONES.Crossroads + Vector3.new(-70, 0, -58),
-        math.rad(38),
+        cross + Vector3.new(-35, 0, -31),
+        math.rad(45),
         Color3.fromRGB(84, 108, 87)
     )
     makeQuartermasterDepot(
         parent,
         "CrossroadsCourierHouse",
-        ZONES.Crossroads + Vector3.new(70, 0, 55),
-        math.rad(-142)
+        cross + Vector3.new(36, 0, 30),
+        math.rad(-135)
     )
     makeRoadsideShelter(
         parent,
         "CrossroadsRestShelter",
-        ZONES.Crossroads + Vector3.new(74, 0, -38),
-        math.rad(-65)
+        cross + Vector3.new(34, 0, -31),
+        math.rad(-45)
+    )
+    makeCroftCottage(
+        parent,
+        "CrossroadsKeeperHouse",
+        cross + Vector3.new(-35, 0, 32),
+        math.rad(135),
+        Color3.fromRGB(91, 109, 85),
+        true
     )
     makeStoneShrine(
         parent,
         "CrossroadsWayfarerShrine",
-        ZONES.Crossroads + Vector3.new(-52, 0, 55),
-        math.rad(30),
+        cross + Vector3.new(0, 0, 10),
+        math.rad(180),
         Color3.fromRGB(104, 231, 188)
     )
+    makeMarketStall(
+        parent,
+        cross + Vector3.new(17, 0, 6),
+        math.rad(-90),
+        Color3.fromRGB(104, 125, 91)
+    )
+    makeMarketStall(
+        parent,
+        cross + Vector3.new(-17, 0, 6),
+        math.rad(90),
+        Color3.fromRGB(129, 103, 70)
+    )
 
-    -- Glowmere has an actual wetland community around the shoreline.
+    -- GLOWMERE: houses face a shared raised boardwalk/dock spine.
+    local glow = ZONES.Glowmere
+    local glowSouth = glow + Vector3.new(0, 0, -62)
+    local glowNorth = glow + Vector3.new(0, 0, 58)
+    makeBoardwalk(parent, "GlowmereMainWalk", glowSouth, glowNorth, 9)
     makeGlowmereStiltHouse(
         parent,
         "GlowmereKeeperHut",
-        ZONES.Glowmere + Vector3.new(-112, 0, -74),
-        math.rad(32),
+        glow + Vector3.new(-28, 0, -20),
+        math.rad(90),
         Color3.fromRGB(73, 107, 91)
     )
     makeGlowmereStiltHouse(
         parent,
         "GlowmereReedHouse",
-        ZONES.Glowmere + Vector3.new(102, 0, -80),
-        math.rad(-30),
+        glow + Vector3.new(29, 0, 12),
+        math.rad(-90),
         Color3.fromRGB(92, 112, 86)
+    )
+    makeGlowmereStiltHouse(
+        parent,
+        "GlowmereDrybankHouse",
+        glow + Vector3.new(-30, 0, 36),
+        math.rad(90),
+        Color3.fromRGB(78, 116, 100)
     )
     makeRoadsideShelter(
         parent,
         "GlowmereFisherShelter",
-        ZONES.Glowmere + Vector3.new(105, 0, 62),
-        math.rad(-118)
+        glow + Vector3.new(29, 0, -40),
+        math.rad(-90)
     )
-    makeSupplyStack(parent, ZONES.Glowmere + Vector3.new(-90, 0, -82), math.rad(8), 0.8)
+    makeReedDock(parent, "GlowmerePublicDock", glow + Vector3.new(0, 0, 57), 0, 28)
+    makeSupplyStack(parent, glow + Vector3.new(19, 0, 30), math.rad(-10), 0.8)
 
-    -- Eastbridge is a fortified frontier hamlet with several occupied structures.
-    makeProvingLodge(
-        parent,
-        "EastbridgeBarracks",
-        ZONES.EastLanding + Vector3.new(-58, 0, 48),
-        math.rad(136)
+    -- EASTBRIDGE: a gate-led fortified court with services inside the wall.
+    local east = ZONES.EastLanding
+    fillTerrainRoute(
+        { east + Vector3.new(-92, 0, 0), east + Vector3.new(60, 0, 0) },
+        14,
+        Enum.Material.Ground
     )
+    makeGatehouse(parent, "EastbridgeGatehouse", east + Vector3.new(-66, 0, 0), math.rad(90), 32)
+    makeProvingLodge(parent, "EastbridgeBarracks", east + Vector3.new(-17, 0, 31), math.rad(180))
     makeQuartermasterDepot(
         parent,
         "EastbridgeStorehouse",
-        ZONES.EastLanding + Vector3.new(62, 0, -52),
-        math.rad(-46)
+        east + Vector3.new(30, 0, 29),
+        math.rad(180)
     )
-    makeHealerApothecary(
+    makeHealerApothecary(parent, "EastbridgeMedicLodge", east + Vector3.new(-18, 0, -31), 0)
+    makeRoadWayhouse(
         parent,
-        "EastbridgeMedicLodge",
-        ZONES.EastLanding + Vector3.new(-52, 0, -55),
-        math.rad(44)
-    )
-    makeGatehouse(
-        parent,
-        "EastbridgeGatehouse",
-        ZONES.EastLanding + Vector3.new(-82, 0, 0),
-        math.rad(90),
-        34
+        "EastbridgeScoutOutpost",
+        east + Vector3.new(31, 0, -29),
+        0,
+        Color3.fromRGB(76, 104, 82)
     )
     makeFenceLine(
         parent,
         "EastbridgeNorthWall",
-        ZONES.EastLanding + Vector3.new(-64, 0, 66),
-        ZONES.EastLanding + Vector3.new(64, 0, 66),
+        east + Vector3.new(-47, 0, 57),
+        east + Vector3.new(52, 0, 57),
         8,
-        5
+        5.5
     )
     makeFenceLine(
         parent,
         "EastbridgeSouthWall",
-        ZONES.EastLanding + Vector3.new(-64, 0, -68),
-        ZONES.EastLanding + Vector3.new(64, 0, -68),
+        east + Vector3.new(-47, 0, -57),
+        east + Vector3.new(52, 0, -57),
         8,
-        5
+        5.5
     )
-    makeSupplyStack(parent, ZONES.EastLanding + Vector3.new(56, 0, 18), math.rad(-20), 0.9)
+    makeHearth(parent, east + Vector3.new(7, 0, 2))
+    makeSupplyStack(parent, east + Vector3.new(42, 0, 8), math.rad(-15), 0.85)
 
-    -- Gravebone reads as a destroyed fortified settlement and cemetery.
-    makeRuinedHall(
-        parent,
-        "GraveboneRuinedChapel",
-        ZONES.Gravebone + Vector3.new(-62, 0, 70),
-        34,
-        25,
-        math.rad(16)
+    -- GRAVEBONE: former town street preserved as a ruined processional route.
+    local grave = ZONES.Gravebone
+    fillTerrainRoute(
+        { grave + Vector3.new(0, 0, -92), grave + Vector3.new(0, 0, 80) },
+        12,
+        Enum.Material.Ground
     )
+    makeGatehouse(parent, "GraveboneBrokenGate", grave + Vector3.new(0, 0, -70), 0, 28)
     makeRuinedHall(
         parent,
         "GraveboneGuardHall",
-        ZONES.Gravebone + Vector3.new(92, 0, -76),
-        28,
-        21,
-        math.rad(-24)
+        grave + Vector3.new(-31, 0, -30),
+        30,
+        22,
+        math.rad(90)
     )
-    makeGatehouse(parent, "GraveboneBrokenGate", ZONES.Gravebone + Vector3.new(-5, 0, -105), 0, 30)
+    makeRuinedHall(
+        parent,
+        "GraveboneRuinedChapel",
+        grave + Vector3.new(29, 0, 6),
+        34,
+        25,
+        math.rad(-90)
+    )
+    makeGraveboneMausoleum(
+        parent,
+        "GraveboneMausoleum",
+        grave + Vector3.new(-28, 0, 42),
+        math.rad(90)
+    )
     makeStoneShrine(
         parent,
         "GraveboneMemorial",
-        ZONES.Gravebone + Vector3.new(-92, 0, 18),
-        math.rad(88),
+        grave + Vector3.new(4, 0, 29),
+        math.rad(180),
         Color3.fromRGB(142, 198, 172)
     )
+    makeRuinWall(parent, grave + Vector3.new(35, 0, 48), math.rad(90), 36, 7)
 
-    -- Mossglen has a ranger enclave on the edge of its large party field.
+    -- MOSSLGEN: ranger enclave around a working yard, not isolated cabins.
+    local moss = ZONES.Mossglen
+    fillTerrainRoute(
+        { moss + Vector3.new(-72, 0, -54), moss + Vector3.new(38, 0, 32) },
+        13,
+        Enum.Material.Ground
+    )
     makeMossglenRangerHall(
         parent,
         "MossglenRangerLodge",
-        ZONES.Mossglen + Vector3.new(-128, 0, -92),
-        math.rad(42)
+        moss + Vector3.new(-28, 0, -22),
+        math.rad(45)
     )
     makeCroftCottage(
         parent,
         "MossglenHunterCabin",
-        ZONES.Mossglen + Vector3.new(128, 0, -105),
-        math.rad(-38),
+        moss + Vector3.new(31, 0, -18),
+        math.rad(-45),
         Color3.fromRGB(100, 91, 61),
         true
     )
     makeFarmBarn(
         parent,
         "MossglenSupplyHouse",
-        ZONES.Mossglen + Vector3.new(-150, 0, 12),
-        math.rad(90),
+        moss + Vector3.new(-29, 0, 31),
+        math.rad(135),
         Color3.fromRGB(109, 86, 58)
     )
     makeRoadsideShelter(
         parent,
         "MossglenRestShelter",
-        ZONES.Mossglen + Vector3.new(148, 0, 55),
-        math.rad(-90)
+        moss + Vector3.new(30, 0, 30),
+        math.rad(-135)
     )
-    makeSupplyStack(parent, ZONES.Mossglen + Vector3.new(-112, 0, -64), math.rad(25), 0.9)
+    makeHearth(parent, moss + Vector3.new(1, 0, 5))
+    makeSupplyStack(parent, moss + Vector3.new(-16, 0, 9), math.rad(20), 0.85)
 
-    -- Sunmoss is an old highland observation/research site.
+    -- SUNMOSS: a stepped research compound with observatory as the terminating landmark.
+    local sun = ZONES.Sunmoss
+    fillTerrainRoute(
+        { sun + Vector3.new(0, 0, -75), sun + Vector3.new(0, 0, 54) },
+        12,
+        Enum.Material.Ground
+    )
     makeArchiveResearchLodge(
         parent,
         "SunmossObservatoryLodge",
-        ZONES.Sunmoss + Vector3.new(-92, 0, -72),
-        math.rad(35)
+        sun + Vector3.new(-29, 0, -18),
+        math.rad(90)
     )
     makeCroftCottage(
         parent,
         "SunmossKeeperHouse",
-        ZONES.Sunmoss + Vector3.new(88, 0, 72),
-        math.rad(-145),
+        sun + Vector3.new(30, 0, -13),
+        math.rad(-90),
         Color3.fromRGB(84, 104, 79),
         false
     )
     makeStoneShrine(
         parent,
         "SunmossHighShrine",
-        ZONES.Sunmoss + Vector3.new(-75, 0, 68),
-        math.rad(30),
+        sun + Vector3.new(-23, 0, 26),
+        math.rad(90),
         Color3.fromRGB(207, 217, 113)
     )
-    makeWatchtower(parent, ZONES.Sunmoss + Vector3.new(112, 0, -62), math.rad(-55))
+    makeSunmossObservatory(
+        parent,
+        "SunmossObservatory",
+        sun + Vector3.new(15, 0, 45),
+        math.rad(180)
+    )
+    makeWatchtower(parent, sun + Vector3.new(45, 0, 29), math.rad(-60))
 
-    -- Veilfall contains a surviving refuge beside older ruined infrastructure.
+    -- VEILFALL: refuge buildings line the safer side of a sanctuary approach.
+    local veil = ZONES.Veilfall
+    fillTerrainRoute(
+        { veil + Vector3.new(-48, 0, -58), veil + Vector3.new(28, 0, 42) },
+        11,
+        Enum.Material.Ground
+    )
     makeRoadWayhouse(
         parent,
         "VeilfallRefuge",
-        ZONES.Veilfall + Vector3.new(-104, 0, -68),
-        math.rad(45),
+        veil + Vector3.new(-28, 0, -17),
+        math.rad(55),
         Color3.fromRGB(69, 98, 92)
     )
     makeArchiveResearchLodge(
         parent,
         "VeilfallSurveyHut",
-        ZONES.Veilfall + Vector3.new(108, 0, 68),
-        math.rad(-132)
+        veil + Vector3.new(28, 0, -12),
+        math.rad(-55)
     )
     makeRuinedHall(
         parent,
         "VeilfallOldSanctuary",
-        ZONES.Veilfall + Vector3.new(100, 0, -65),
+        veil + Vector3.new(-28, 0, 28),
         30,
         22,
-        math.rad(-38)
+        math.rad(125)
+    )
+    makeVeilfallSanctuary(
+        parent,
+        "VeilfallSanctuary",
+        veil + Vector3.new(29, 0, 30),
+        math.rad(-125)
     )
     makeStoneShrine(
         parent,
         "VeilfallLumenShrine",
-        ZONES.Veilfall + Vector3.new(-105, 0, 54),
-        math.rad(58),
+        veil + Vector3.new(0, 0, 11),
+        math.rad(180),
         Color3.fromRGB(114, 222, 226)
     )
 
-    -- The Shattered Arch is the remains of a true border fortress.
+    -- SHATTERED ARCH: gate -> guardhouses -> fortress court -> towers.
+    local ruins = ZONES.Ruins
+    fillTerrainRoute(
+        { ruins + Vector3.new(-105, 0, 0), ruins + Vector3.new(65, 0, 0) },
+        15,
+        Enum.Material.Ground
+    )
     makeGatehouse(
         parent,
         "ShatteredArchOuterGate",
-        ZONES.Ruins + Vector3.new(-116, 0, -4),
+        ruins + Vector3.new(-72, 0, 0),
         math.rad(90),
         34
     )
     makeRuinedHall(
         parent,
         "ShatteredArchGuardhouseNorth",
-        ZONES.Ruins + Vector3.new(-90, 0, 92),
+        ruins + Vector3.new(-28, 0, 34),
         34,
         24,
-        math.rad(12)
+        math.rad(180)
     )
     makeRuinedHall(
         parent,
         "ShatteredArchGuardhouseSouth",
-        ZONES.Ruins + Vector3.new(-82, 0, -88),
+        ruins + Vector3.new(-28, 0, -34),
         32,
         23,
-        math.rad(-10)
+        0
     )
-    makeWatchtower(parent, ZONES.Ruins + Vector3.new(-132, 0, 92), math.rad(20))
-    makeWatchtower(parent, ZONES.Ruins + Vector3.new(-130, 0, -94), math.rad(-20))
+    makeShatteredFortressTower(
+        parent,
+        "ShatteredNorthTower",
+        ruins + Vector3.new(26, 0, 39),
+        0,
+        true
+    )
+    makeShatteredFortressTower(
+        parent,
+        "ShatteredSouthTower",
+        ruins + Vector3.new(26, 0, -39),
+        0,
+        true
+    )
     makeStoneShrine(
         parent,
         "ShatteredArchThresholdShrine",
-        ZONES.Ruins + Vector3.new(58, 0, -88),
-        math.rad(-12),
+        ruins + Vector3.new(8, 0, 0),
+        math.rad(90),
         Color3.fromRGB(96, 229, 193)
     )
+    makeSupplyStack(parent, ruins + Vector3.new(-4, 0, 24), math.rad(10), 0.85)
 
-    -- Proving Circle has a mentor compound instead of an isolated ritual ring.
-    makeProvingLodge(
-        parent,
-        "ProvingMentorLodge",
-        ZONES.Proving + Vector3.new(-72, 0, 58),
-        math.rad(48)
+    -- PROVING: mentor/preparation buildings form the forecourt to the ritual circle.
+    local proving = ZONES.Proving
+    fillTerrainRoute(
+        { proving + Vector3.new(0, 0, -72), proving + Vector3.new(0, 0, 52) },
+        12,
+        Enum.Material.Ground
     )
+    makeProvingLodge(parent, "ProvingMentorLodge", proving + Vector3.new(-29, 0, -16), math.rad(90))
     makeRoadsideShelter(
         parent,
         "ProvingPreparationShelter",
-        ZONES.Proving + Vector3.new(76, 0, 56),
-        math.rad(-52)
+        proving + Vector3.new(29, 0, -13),
+        math.rad(-90)
     )
     makeStoneShrine(
         parent,
         "ProvingOathShrine",
-        ZONES.Proving + Vector3.new(0, 0, 70),
+        proving + Vector3.new(0, 0, 24),
         math.rad(180),
         Color3.fromRGB(111, 235, 188)
     )
+    makeBench(parent, proving + Vector3.new(-18, 0, 8), math.rad(90))
+    makeBench(parent, proving + Vector3.new(18, 0, 8), math.rad(-90))
 end
 
 local function makeTown(parent)
@@ -5747,20 +5649,9 @@ end
 local function makeZoneContent(parent)
     makeTown(parent)
     makeWorldSettlements(parent)
-    makeWorldMMOComposition(parent)
     makeSignatureWorldContent(parent)
     makeLumenreachDistrictNetwork(parent)
     makeWorldMicroSites(parent)
-
-    makeRoadWayhouse(
-        parent,
-        "EastbridgeScoutOutpost",
-        ZONES.EastLanding + Vector3.new(38, 0, 38),
-        math.rad(-135),
-        Color3.fromRGB(76, 104, 82)
-    )
-    makeLantern(parent, ZONES.EastLanding + Vector3.new(-18, 0, 24), math.rad(120))
-    makeLantern(parent, ZONES.EastLanding + Vector3.new(34, 0, -22), math.rad(-60))
 
     makeBridge(parent, "Eastbridge", EASTBRIDGE_WEST, EASTBRIDGE_EAST, 18)
     makeBridge(parent, "Reedbridge", REEDBRIDGE_WEST, REEDBRIDGE_EAST, 14)

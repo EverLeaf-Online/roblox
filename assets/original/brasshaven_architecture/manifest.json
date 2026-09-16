@@ -1,0 +1,50 @@
+{
+  "BrassFoundryAdminHall": {
+    "file": "assets/original/brasshaven_architecture/BrassFoundryAdminHall.glb",
+    "triangles": 924,
+    "vertices": 504,
+    "materials": 1
+  },
+  "BrassMachinistWorkshop": {
+    "file": "assets/original/brasshaven_architecture/BrassMachinistWorkshop.glb",
+    "triangles": 820,
+    "vertices": 448,
+    "materials": 1
+  },
+  "BrassSmelterHouse": {
+    "file": "assets/original/brasshaven_architecture/BrassSmelterHouse.glb",
+    "triangles": 680,
+    "vertices": 372,
+    "materials": 1
+  },
+  "BrassBoilerStation": {
+    "file": "assets/original/brasshaven_architecture/BrassBoilerStation.glb",
+    "triangles": 596,
+    "vertices": 324,
+    "materials": 1
+  },
+  "BrassWorkerBarracks": {
+    "file": "assets/original/brasshaven_architecture/BrassWorkerBarracks.glb",
+    "triangles": 704,
+    "vertices": 384,
+    "materials": 1
+  },
+  "BrassLoadingDepot": {
+    "file": "assets/original/brasshaven_architecture/BrassLoadingDepot.glb",
+    "triangles": 696,
+    "vertices": 380,
+    "materials": 1
+  },
+  "BrassIndustrialGatehouse": {
+    "file": "assets/original/brasshaven_architecture/BrassIndustrialGatehouse.glb",
+    "triangles": 396,
+    "vertices": 216,
+    "materials": 1
+  },
+  "BrassRefineryTower": {
+    "file": "assets/original/brasshaven_architecture/BrassRefineryTower.glb",
+    "triangles": 580,
+    "vertices": 316,
+    "materials": 1
+  }
+}

@@ -252,3 +252,5 @@ Status: ACTIVE — current generic/box architecture is temporary until replaced 
 - Belforge: NOT accepted; encounter shell exists but architectural support pass remains.
 
 - V21 whole-map MMO composition pass: rebuilt the spatial hierarchy beyond Wayfarer across Greenway, Crossroads, Glowmere, Eastbridge, Gravebone, Mossglen, Sunmoss, Veilfall, Shattered Arch, Proving, plus Brasshaven/Eastworks/Belforge district courts. Each major area now has authored approach lanes, courts, thresholds, lighting/service rhythm, and region-specific activity framing instead of isolated objects in open terrain. This remains source-complete only until Studio player-height acceptance.
+
+- [x] V22: stopped using the V21 district-court overlay as a substitute for layout. Actual Lumenreach buildings were repositioned to form readable streets/compounds in every major district; secondary hamlets, patrol posts and ruins were restructured the same way. Brasshaven received an original eight-asset industrial MeshPart kit and actual building blocks instead of gantry/canopy clutter layered over encounter props. Fresh Studio screenshots are still required before visual acceptance.
