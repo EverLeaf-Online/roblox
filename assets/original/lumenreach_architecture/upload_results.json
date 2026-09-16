@@ -1,0 +1,34 @@
+{
+  "LumenCivicHall": {
+    "assetId": 127768353689424,
+    "moderation": "Approved"
+  },
+  "LumenQuartermasterDepot": {
+    "assetId": 84750321219058,
+    "moderation": "Approved"
+  },
+  "LumenArchiveLodge": {
+    "assetId": 103322782929462,
+    "moderation": "Approved"
+  },
+  "LumenWayfarerInn": {
+    "assetId": 118338713936616,
+    "moderation": "Approved"
+  },
+  "LumenHealerLodge": {
+    "assetId": 88168406420725,
+    "moderation": "Approved"
+  },
+  "LumenCraftWorkshop": {
+    "assetId": 105268332724582,
+    "moderation": "Approved"
+  },
+  "LumenOpenStable": {
+    "assetId": 87422611932371,
+    "moderation": "Approved"
+  },
+  "LumenProvingLodge": {
+    "assetId": 97764957110691,
+    "moderation": "Approved"
+  }
+}

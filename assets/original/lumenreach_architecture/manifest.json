@@ -1,0 +1,50 @@
+{
+  "LumenCivicHall": {
+    "file": "assets/original/lumenreach_architecture/LumenCivicHall.glb",
+    "triangles": 1768,
+    "vertices": 966,
+    "materials": 9
+  },
+  "LumenQuartermasterDepot": {
+    "file": "assets/original/lumenreach_architecture/LumenQuartermasterDepot.glb",
+    "triangles": 1652,
+    "vertices": 902,
+    "materials": 8
+  },
+  "LumenArchiveLodge": {
+    "file": "assets/original/lumenreach_architecture/LumenArchiveLodge.glb",
+    "triangles": 1468,
+    "vertices": 804,
+    "materials": 9
+  },
+  "LumenWayfarerInn": {
+    "file": "assets/original/lumenreach_architecture/LumenWayfarerInn.glb",
+    "triangles": 1736,
+    "vertices": 948,
+    "materials": 9
+  },
+  "LumenHealerLodge": {
+    "file": "assets/original/lumenreach_architecture/LumenHealerLodge.glb",
+    "triangles": 1792,
+    "vertices": 978,
+    "materials": 7
+  },
+  "LumenCraftWorkshop": {
+    "file": "assets/original/lumenreach_architecture/LumenCraftWorkshop.glb",
+    "triangles": 680,
+    "vertices": 372,
+    "materials": 6
+  },
+  "LumenOpenStable": {
+    "file": "assets/original/lumenreach_architecture/LumenOpenStable.glb",
+    "triangles": 548,
+    "vertices": 300,
+    "materials": 7
+  },
+  "LumenProvingLodge": {
+    "file": "assets/original/lumenreach_architecture/LumenProvingLodge.glb",
+    "triangles": 1520,
+    "vertices": 830,
+    "materials": 8
+  }
+}

@@ -35,36 +35,34 @@ assert(
 
 for _, token in
     {
-        '"EntryTowerCollision"',
-        '"LoadingPorchCollision"',
-        '"ReadingDeckCollision"',
-        '"InnPorchCollision"',
-        '"HerbPorchCollision"',
-        '"WorkshopPostCollision"',
-        '"StablePostCollision"',
-        '"PavilionPostCollision"',
-        '"WayhouseOpenPostCollision"',
-        '"BarnLeanPostCollision"',
-        '"CottagePorchCollision"',
+        "local function placeArchitectureBuilding",
+        'wrapper:SetAttribute("EverLeafArchitecture", true)',
+        'wrapper:SetAttribute("ArchitecturePrefab", prefabName)',
+        '"ArchitectureCollision" .. index',
+        "EnvironmentPrefabService.Place(",
+        '"LumenCivicHall"',
+        '"LumenQuartermasterDepot"',
+        '"LumenArchiveLodge"',
+        '"LumenWayfarerInn"',
+        '"LumenHealerLodge"',
+        '"LumenCraftWorkshop"',
+        '"LumenOpenStable"',
+        '"LumenProvingLodge"',
     }
 do
     assert(
         string.find(source, token, 1, true) ~= nil,
-        "missing archetype collision contract " .. token
+        "missing V16 MeshPart architecture contract " .. token
     )
 end
 
 assert(
-    string.find(source, "local WORLD_DESIGN_VERSION = 15", 1, true) ~= nil,
+    string.find(source, "local WORLD_DESIGN_VERSION = 16", 1, true) ~= nil,
     "architecture conversion must bump world design version"
 )
 
 for _, token in
     {
-        "makeFrontierTruss",
-        "makeFrontierDoorCanopy",
-        "makeFrontierFacadeFrames",
-        "makeFrontierChimney",
         "flattenTerrain(camp, Vector3.new(300, 0, 240), 2.0",
         'makeWayfarerCivicHall(parent, "WayfarerHall", camp + Vector3.new(-46, 0, -66), math.rad(180))',
         'makeArchiveResearchLodge(parent, "ArchiveLodge", camp + Vector3.new(28, 0, -76), math.rad(180))',
@@ -74,7 +72,7 @@ for _, token in
 do
     assert(
         string.find(source, token, 1, true) ~= nil,
-        "missing V15 authored architecture/placement contract: " .. token
+        "missing V16 mesh architecture/placement contract: " .. token
     )
 end
 

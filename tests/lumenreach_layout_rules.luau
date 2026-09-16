@@ -6,7 +6,7 @@ for _, required in
     {
         "local WORLD_WIDTH = 2200",
         "local WORLD_DEPTH = 1250",
-        "local WORLD_DESIGN_VERSION = 15",
+        "local WORLD_DESIGN_VERSION = 16",
         'world:SetAttribute("WorldDesignVersion", WORLD_DESIGN_VERSION)',
         'world:SetAttribute("TerrainFirstMMOLayout", true)',
         "terrain:Clear()",
@@ -402,7 +402,7 @@ assert(
 for _, requiredProxy in
     {
         '"FoundationCollision"',
-        '"EntryTowerCollision"',
+        '"ArchitectureCollision"',
         '"BenchCollision"',
         '"HearthCollision"',
         '"MarketCounterCollision"',
@@ -429,7 +429,6 @@ for _, requiredProxy in
         '"ArchPillarCollision"',
         '"GraveMarkerCollision"',
         '"SignBoardCollision"',
-        '"CivicPorchCollision"',
         '"MarketPostCollision"',
         '"MarketCanopyCollision"',
         '"ShelterRoofCollision"',
@@ -441,7 +440,7 @@ for _, requiredProxy in
 do
     assert(
         string.find(source, requiredProxy, 1, true) ~= nil,
-        "missing V13 collision coverage: " .. requiredProxy
+        "missing current collision coverage: " .. requiredProxy
     )
 end
 assert(
@@ -512,7 +511,7 @@ assert(
         and string.find(source, "local function makeRoadWayhouse", 1, true) ~= nil
         and string.find(source, "local function makeFarmBarn", 1, true) ~= nil
         and string.find(source, "local function makeCroftCottage", 1, true) ~= nil,
-    "V15 must provide explicit frontier architecture archetypes instead of one generic cottage shell"
+    "V16 must preserve explicit frontier architecture archetypes while moving major buildings to authored MeshParts"
 )
 
 local genericBuildingCallCount = 0
@@ -544,7 +543,7 @@ for _, namedBuilding in
 do
     assert(
         string.find(source, namedBuilding, 1, true) ~= nil,
-        "missing V15 architecture conversion: " .. namedBuilding
+        "missing V16 architecture conversion: " .. namedBuilding
     )
 end
 

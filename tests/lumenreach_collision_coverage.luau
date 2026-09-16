@@ -10,14 +10,6 @@ local builders = {
     "makeFrontierFoundation",
     "makeFrontierWall",
     "makeFrontierRoofPair",
-    "makeWayfarerCivicHall",
-    "makeQuartermasterDepot",
-    "makeArchiveResearchLodge",
-    "makeWayfarerInn",
-    "makeHealerApothecary",
-    "makeCraftWorkshop",
-    "makeOpenStable",
-    "makeProvingLodge",
     "makeRoadWayhouse",
     "makeFarmBarn",
     "makeCroftCottage",
@@ -78,6 +70,14 @@ for _, name in builders do
         name .. " creates physical world geometry without an explicit collision proxy"
     )
 end
+
+local architecturePlacement = functionBody("placeArchitectureBuilding")
+assert(
+    string.find(architecturePlacement, "makeCollisionProxy(", 1, true) ~= nil
+        and string.find(architecturePlacement, '"ArchitectureCollision" .. index', 1, true)
+            ~= nil,
+    "MeshPart architecture must remain render-only and use explicit simple collision proxies"
+)
 
 local normalizer = functionBody("normalizeGeneratedCollisions")
 assert(

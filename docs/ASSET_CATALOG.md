@@ -38,6 +38,23 @@ Primary source: Poly Haven CC0 forest assets, including the **Pine Forest** coll
 
 These models are EverLeaf-owned Roblox uploads derived from CC0 source files. The loader sanitizes every imported model before prefab registration. The old broken Creator Store tree `580221169` is not an active Lumenreach dependency. Procedural geometry remains as a fail-safe where practical.
 
+### Original EverLeaf Lumenreach architecture kit — active
+
+These are **original EverLeaf-authored stylized low-poly meshes**, generated from the reproducible Blender source script `scripts/generate_lumenreach_architecture.py`, exported as GLB, uploaded to the EverLeaf Roblox creator account, and sanitized before placement. They replace Part-built block shells for major Lumenreach buildings while retaining simple server-authored collision proxies.
+
+| Prefab | Roblox asset ID | Approx source tris | Purpose |
+|---|---:|---:|---|
+| `LumenCivicHall` | `127768353689424` | 1,768 | Wayfarer civic/quest landmark |
+| `LumenQuartermasterDepot` | `84750321219058` | 1,652 | storehouse/loading depot |
+| `LumenArchiveLodge` | `103322782929462` | 1,468 | archive/research lodge |
+| `LumenWayfarerInn` | `118338713936616` | 1,736 | inn/social building |
+| `LumenHealerLodge` | `88168406420725` | 1,792 | healer/apothecary |
+| `LumenCraftWorkshop` | `105268332724582` | 680 | open craft workshop |
+| `LumenOpenStable` | `87422611932371` | 548 | open stable |
+| `LumenProvingLodge` | `97764957110691` | 1,520 | training/proving lodge |
+
+All eight assets returned Roblox moderation state `Approved` on upload. Source GLBs and generation metadata live under `assets/original/lumenreach_architecture/`; canonical uploaded IDs live in `assets/roblox/lumenreach_architecture_asset_ids.json`.
+
 ### Original in-project environment props
 
 Lumenreach also includes code-built props that have no external asset dependency: wildflower patches, grass/bush fallbacks, mushroom clusters, cattail clusters, Lumen waystones, crystals, camp furniture, lanterns, bridge pieces, ruins, fireflies, and fallback deadwood/rock geometry. These are intentionally lightweight and keep the map readable if a remote prefab fails to load.

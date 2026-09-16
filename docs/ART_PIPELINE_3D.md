@@ -60,3 +60,8 @@ Every benchmark scene must be profiled before its quality bar becomes the standa
 - low/medium/high graphics scalability behavior.
 
 Visual quality that cannot survive the target performance budget is not production quality.
+## Original architecture asset pipeline
+
+Lumenreach architecture now has a reproducible original-asset path. `scripts/generate_lumenreach_architecture.py` runs headless in Blender and exports optimized GLBs under `assets/original/lumenreach_architecture/`. Major buildings are uploaded as EverLeaf-owned Roblox model assets, registered in `EnvironmentAssetRegistry`, sanitized on load, and kept render-only. Gameplay collision remains server-authored from simple explicit proxy volumes rather than imported mesh collision.
+
+This is the required direction for production buildings: authored meshes for visible architecture, Parts only for hidden collision/blockout/support. New region kits should follow this pattern instead of adding another generic Part-building generator.
