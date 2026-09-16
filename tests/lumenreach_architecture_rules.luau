@@ -1,6 +1,7 @@
 local fs = require("@lune/fs")
 
 local source = fs.readFile("src/server/Services/LumenreachWorldService.luau")
+local worldConfig = fs.readFile("src/server/Content/LumenreachWorldConfig.luau")
 
 local requiredArchetypes = {
     "makeWayfarerCivicHall",
@@ -65,7 +66,7 @@ do
 end
 
 assert(
-    string.find(source, "local WORLD_DESIGN_VERSION = 25", 1, true) ~= nil,
+    string.find(worldConfig, "DesignVersion = 25", 1, true) ~= nil,
     "architecture conversion must bump world design version"
 )
 

@@ -2,16 +2,18 @@ local fs = require("@lune/fs")
 
 local source = fs.readFile("src/server/Services/LumenreachWorldService.luau")
 local terrainBuilder = fs.readFile("src/server/Services/LumenreachTerrainBuilder.luau")
+local worldConfig = fs.readFile("src/server/Content/LumenreachWorldConfig.luau")
+local contractSource = source .. "\n" .. worldConfig
 
 for _, required in
     {
-        "local WORLD_WIDTH = 2200",
-        "local WORLD_DEPTH = 1250",
-        "local WORLD_DESIGN_VERSION = 25",
+        "WorldWidth = 2200",
+        "WorldDepth = 1250",
+        "DesignVersion = 25",
         'world:SetAttribute("WorldDesignVersion", WORLD_DESIGN_VERSION)',
         'world:SetAttribute("TerrainFirstMMOLayout", true)',
         "LumenreachTerrainBuilder.Build({",
-        "local ROUTES = table.freeze",
+        "local routes = table.freeze",
         'Id = "greenway"',
         'Id = "proving_road"',
         'Id = "glowmere_road"',
@@ -41,7 +43,7 @@ for _, required in
         '"WayfarerRuinWall"',
         '"WayfarerOverlook"',
         '"LumenPylon"',
-        "local DRESSING_EXCLUSIONS = table.freeze",
+        "local dressingExclusions = table.freeze",
         "local function scatterForestBand",
         "local function dressRouteEdges",
         '"FernPrimary"',
@@ -131,7 +133,7 @@ for _, required in
     }
 do
     assert(
-        string.find(source, required, 1, true) ~= nil,
+        string.find(contractSource, required, 1, true) ~= nil,
         "missing Lumenreach v4 contract: " .. required
     )
 end
@@ -158,9 +160,9 @@ assert(
     "starter town redesign must not regress to the old tent-camp composition"
 )
 assert(
-    string.find(source, "local WORLD_WIDTH = 2350", 1, true) == nil
-        and string.find(source, "local WORLD_DEPTH = 1800", 1, true) == nil
-        and string.find(source, "local WORLD_DEPTH = 1700", 1, true) == nil,
+    string.find(worldConfig, "WorldWidth = 2350", 1, true) == nil
+        and string.find(worldConfig, "WorldDepth = 1800", 1, true) == nil
+        and string.find(worldConfig, "WorldDepth = 1700", 1, true) == nil,
     "previous map dimensions must not be restored"
 )
 assert(
@@ -184,24 +186,24 @@ assert(
     "floating landmark labels must stay compact at player height"
 )
 assert(
-    string.find(source, "local TRAINING_ORIGIN = ZONES.Camp + Vector3.new(68, 0, -18)", 1, true)
+    string.find(worldConfig, "local trainingOrigin = zones.Camp + Vector3.new(68, 0, -18)", 1, true)
         ~= nil,
     "training dummy must remain in the open side yard, not inside a town building"
 )
 
 for _, combatPocket in
     {
-        "ZONES.Greenway + Vector3.new(0, 0, 72)",
-        "ZONES.Glowmere + Vector3.new(-90, 0, 70)",
-        "ZONES.Gravebone + Vector3.new(70, 0, 70)",
-        "ZONES.Mossglen + Vector3.new(-20, 0, -90)",
-        "ZONES.Mossglen + Vector3.new(-10, 0, 100)",
-        "ZONES.Veilfall + Vector3.new(0, 0, -80)",
-        "ZONES.Ruins + Vector3.new(88, 0, 55)",
+        "zones.Greenway + Vector3.new(0, 0, 72)",
+        "zones.Glowmere + Vector3.new(-90, 0, 70)",
+        "zones.Gravebone + Vector3.new(70, 0, 70)",
+        "zones.Mossglen + Vector3.new(-20, 0, -90)",
+        "zones.Mossglen + Vector3.new(-10, 0, 100)",
+        "zones.Veilfall + Vector3.new(0, 0, -80)",
+        "zones.Ruins + Vector3.new(88, 0, 55)",
     }
 do
     assert(
-        string.find(source, combatPocket, 1, true) ~= nil,
+        string.find(worldConfig, combatPocket, 1, true) ~= nil,
         "action-combat pocket drifted back onto a through-road: " .. combatPocket
     )
 end
@@ -382,7 +384,7 @@ assert(
     "V9 inter-zone population must include inhabited hamlets, patrol posts, ruins, and working crofts"
 )
 assert(
-    string.find(source, "local WORLD_DEPTH = 1250", 1, true) ~= nil,
+    string.find(worldConfig, "WorldDepth = 1250", 1, true) ~= nil,
     "Lumenreach footprint must not retain the oversized empty 1800-stud north-south acreage"
 )
 

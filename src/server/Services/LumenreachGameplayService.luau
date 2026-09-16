@@ -1,5 +1,6 @@
 local Workspace = game:GetService("Workspace")
 
+local LumenreachWorldConfig = require(script.Parent.Parent.Content.LumenreachWorldConfig)
 local LumenreachActivityService = require(script.Parent.LumenreachActivityService)
 
 local LumenreachGameplayService = {}
@@ -7,19 +8,7 @@ local LumenreachGameplayService = {}
 local GENERATED_NAME = "EverLeafGeneratedWorld"
 local initialized = false
 
-local ZONES = table.freeze({
-    Camp = Vector3.new(-950, 2, 0),
-    Greenway = Vector3.new(-720, 1, 40),
-    Crossroads = Vector3.new(-480, 4, 50),
-    Glowmere = Vector3.new(-420, -4, 430),
-    EastLanding = Vector3.new(-120, 6, 90),
-    Gravebone = Vector3.new(120, 6, -220),
-    Mossglen = Vector3.new(130, 6, 300),
-    Sunmoss = Vector3.new(500, 34, 430),
-    Veilfall = Vector3.new(420, -18, -360),
-    Ruins = Vector3.new(900, 10, 60),
-    Proving = Vector3.new(-930, 4, -330),
-})
+local ZONES = LumenreachWorldConfig.Zones
 
 local COLORS = table.freeze({
     Timber = Color3.fromRGB(72, 53, 36),

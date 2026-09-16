@@ -3,6 +3,7 @@ local Workspace = game:GetService("Workspace")
 
 local EnemySpawnerService = require(script.Parent.EnemySpawnerService)
 local EnvironmentPrefabService = require(script.Parent.EnvironmentPrefabService)
+local LumenreachWorldConfig = require(script.Parent.Parent.Content.LumenreachWorldConfig)
 local InteractionService = require(script.Parent.InteractionService)
 local LumenreachTerrainBuilder = require(script.Parent.LumenreachTerrainBuilder)
 local PlayerDataService = require(script.Parent.PlayerDataService)
@@ -15,219 +16,25 @@ local WorldTravelService = require(script.Parent.WorldTravelService)
 local LumenreachWorldService = {}
 
 local GENERATED_NAME = "EverLeafGeneratedWorld"
-local WORLD_WIDTH = 2200
-local WORLD_DEPTH = 1250
-local WORLD_DESIGN_VERSION = 25
+local WORLD_WIDTH = LumenreachWorldConfig.WorldWidth
+local WORLD_DEPTH = LumenreachWorldConfig.WorldDepth
+local WORLD_DESIGN_VERSION = LumenreachWorldConfig.DesignVersion
+local ZONES = LumenreachWorldConfig.Zones
+local EASTBRIDGE_WEST = LumenreachWorldConfig.EastbridgeWest
+local EASTBRIDGE_EAST = LumenreachWorldConfig.EastbridgeEast
+local REEDBRIDGE_WEST = LumenreachWorldConfig.ReedbridgeWest
+local REEDBRIDGE_EAST = LumenreachWorldConfig.ReedbridgeEast
+local ARRIVAL_ORIGIN = LumenreachWorldConfig.ArrivalOrigin
+local TRAINING_ORIGIN = LumenreachWorldConfig.TrainingOrigin
+local BRAMBLE_ORIGIN = LumenreachWorldConfig.BrambleOrigin
+local ROUTES = LumenreachWorldConfig.Routes
+local GORGE_POINTS = LumenreachWorldConfig.GorgePoints
+local DRESSING_EXCLUSIONS = LumenreachWorldConfig.DressingExclusions
 
 -- Lumenreach is authored as a terrain-first MMORPG region. The generator below
 -- replaces the previous showcase composition completely: terrain is cleared,
 -- the macro topography is rebuilt, roads are cut into the land, and only then
 -- are town/encounter structures placed. Nothing is layered on top of the old map.
-local ZONES = table.freeze({
-    Camp = Vector3.new(-950, 2, 0),
-    Greenway = Vector3.new(-720, 1, 40),
-    Crossroads = Vector3.new(-480, 4, 50),
-    Glowmere = Vector3.new(-420, -4, 430),
-    EastLanding = Vector3.new(-120, 6, 90),
-    Gravebone = Vector3.new(120, 6, -220),
-    Mossglen = Vector3.new(130, 6, 300),
-    Sunmoss = Vector3.new(500, 34, 430),
-    Veilfall = Vector3.new(420, -18, -360),
-    Ruins = Vector3.new(900, 10, 60),
-    Proving = Vector3.new(-930, 4, -330),
-})
-
-local EASTBRIDGE_WEST = Vector3.new(-292, 4, 92)
-local EASTBRIDGE_EAST = Vector3.new(-205, 6, 92)
-local REEDBRIDGE_WEST = Vector3.new(-315, 0, 350)
-local REEDBRIDGE_EAST = Vector3.new(-228, 6, 350)
-local ARRIVAL_ORIGIN = ZONES.Camp + Vector3.new(-65, 0, 12)
-local TRAINING_ORIGIN = ZONES.Camp + Vector3.new(68, 0, -18)
-local BRAMBLE_ORIGIN = ZONES.Mossglen + Vector3.new(150, 0, -30)
-
-local ROUTES = table.freeze({
-    table.freeze({
-        Id = "greenway",
-        Width = 22,
-        Points = table.freeze({
-            ZONES.Camp + Vector3.new(88, 0, 12),
-            Vector3.new(-835, 2, 20),
-            ZONES.Greenway,
-            Vector3.new(-610, 3, 52),
-            ZONES.Crossroads,
-        }),
-    }),
-    table.freeze({
-        Id = "proving_road",
-        Width = 15,
-        Points = table.freeze({
-            ZONES.Camp + Vector3.new(5, 0, -82),
-            Vector3.new(-945, 3, -190),
-            Vector3.new(-940, 4, -270),
-            ZONES.Proving,
-        }),
-    }),
-    table.freeze({
-        Id = "glowmere_road",
-        Width = 16,
-        Points = table.freeze({
-            ZONES.Crossroads,
-            Vector3.new(-490, 3, 175),
-            Vector3.new(-470, 0, 300),
-            ZONES.Glowmere,
-        }),
-    }),
-    table.freeze({
-        Id = "eastbridge_west",
-        Width = 20,
-        Points = table.freeze({
-            ZONES.Crossroads,
-            Vector3.new(-395, 4, 75),
-            Vector3.new(-335, 4, 88),
-            EASTBRIDGE_WEST,
-        }),
-    }),
-    table.freeze({
-        Id = "eastbridge_east",
-        Width = 20,
-        Points = table.freeze({
-            EASTBRIDGE_EAST,
-            ZONES.EastLanding,
-        }),
-    }),
-    table.freeze({
-        Id = "reedbridge_west",
-        Width = 15,
-        Points = table.freeze({
-            ZONES.Glowmere,
-            Vector3.new(-360, -1, 390),
-            REEDBRIDGE_WEST,
-        }),
-    }),
-    table.freeze({
-        Id = "reedbridge_east",
-        Width = 15,
-        Points = table.freeze({
-            REEDBRIDGE_EAST,
-            Vector3.new(-110, 6, 345),
-            ZONES.Mossglen,
-        }),
-    }),
-    table.freeze({
-        Id = "gravebone_road",
-        Width = 16,
-        Points = table.freeze({
-            ZONES.EastLanding,
-            Vector3.new(-20, 6, 20),
-            Vector3.new(58, 6, -90),
-            ZONES.Gravebone,
-        }),
-    }),
-    table.freeze({
-        Id = "mossglen_road",
-        Width = 19,
-        Points = table.freeze({
-            ZONES.EastLanding,
-            Vector3.new(-30, 6, 185),
-            Vector3.new(40, 6, 255),
-            ZONES.Mossglen,
-        }),
-    }),
-    table.freeze({
-        Id = "sunmoss_road",
-        Width = 16,
-        Points = table.freeze({
-            ZONES.Mossglen,
-            Vector3.new(260, 14, 350),
-            Vector3.new(385, 26, 395),
-            ZONES.Sunmoss,
-        }),
-    }),
-    table.freeze({
-        Id = "bramble_road",
-        Width = 14,
-        Points = table.freeze({
-            ZONES.Mossglen + Vector3.new(75, 0, -12),
-            BRAMBLE_ORIGIN,
-        }),
-    }),
-    table.freeze({
-        Id = "veilfall_road",
-        Width = 16,
-        Points = table.freeze({
-            ZONES.Gravebone,
-            Vector3.new(225, 1, -270),
-            Vector3.new(320, -8, -330),
-            ZONES.Veilfall,
-        }),
-    }),
-    table.freeze({
-        Id = "ruins_main",
-        Width = 20,
-        Points = table.freeze({
-            ZONES.Mossglen + Vector3.new(70, 0, -75),
-            Vector3.new(350, 7, 200),
-            Vector3.new(540, 8, 150),
-            Vector3.new(720, 9, 100),
-            ZONES.Ruins,
-        }),
-    }),
-    table.freeze({
-        Id = "sunmoss_return",
-        Width = 15,
-        Points = table.freeze({
-            ZONES.Sunmoss,
-            Vector3.new(620, 27, 360),
-            Vector3.new(735, 18, 235),
-            ZONES.Ruins + Vector3.new(-45, 0, 38),
-        }),
-    }),
-    table.freeze({
-        Id = "veilfall_return",
-        Width = 16,
-        Points = table.freeze({
-            ZONES.Veilfall,
-            Vector3.new(570, -10, -290),
-            Vector3.new(700, 1, -170),
-            Vector3.new(810, 8, -40),
-            ZONES.Ruins + Vector3.new(-35, 0, -38),
-        }),
-    }),
-})
-
-local GORGE_POINTS = table.freeze({
-    Vector3.new(-370, -6, 560),
-    Vector3.new(-325, -7, 410),
-    Vector3.new(-265, -8, 265),
-    Vector3.new(-250, -9, 95),
-    Vector3.new(-155, -10, -20),
-    Vector3.new(-30, -11, -135),
-    Vector3.new(150, -13, -245),
-    Vector3.new(335, -16, -330),
-    ZONES.Veilfall + Vector3.new(-20, 0, -5),
-})
-
--- Environment density is authored around gameplay rather than sprayed uniformly.
--- These pockets remain deliberately open for spawn safety, readable combat, bosses,
--- bridges, and the advancement trial.
-local DRESSING_EXCLUSIONS = table.freeze({
-    table.freeze({ Center = ARRIVAL_ORIGIN, Radius = 54 }),
-    table.freeze({ Center = TRAINING_ORIGIN, Radius = 34 }),
-    table.freeze({ Center = ZONES.Camp, Radius = 136 }),
-    table.freeze({ Center = ZONES.Crossroads, Radius = 82 }),
-    table.freeze({ Center = ZONES.EastLanding, Radius = 88 }),
-    table.freeze({ Center = ZONES.Proving, Radius = 50 }),
-    table.freeze({ Center = ZONES.Greenway + Vector3.new(0, 0, 72), Radius = 48 }),
-    table.freeze({ Center = ZONES.Glowmere + Vector3.new(-90, 0, 70), Radius = 50 }),
-    table.freeze({ Center = ZONES.Glowmere + Vector3.new(-62, 0, 48), Radius = 24 }),
-    table.freeze({ Center = ZONES.Gravebone + Vector3.new(70, 0, 70), Radius = 48 }),
-    table.freeze({ Center = ZONES.Gravebone + Vector3.new(-60, 0, -60), Radius = 28 }),
-    table.freeze({ Center = ZONES.Mossglen + Vector3.new(-20, 0, -90), Radius = 54 }),
-    table.freeze({ Center = BRAMBLE_ORIGIN, Radius = 48 }),
-    table.freeze({ Center = ZONES.Mossglen + Vector3.new(-10, 0, 100), Radius = 58 }),
-    table.freeze({ Center = ZONES.Veilfall + Vector3.new(0, 0, -80), Radius = 52 }),
-    table.freeze({ Center = ZONES.Ruins + Vector3.new(88, 0, 55), Radius = 56 }),
-})
 
 local function makePart(parent, name, size, cframe, material, color)
     local part = Instance.new("Part")

@@ -1,8 +1,11 @@
+local LumenreachWorldConfig = require(script.Parent.LumenreachWorldConfig)
+local ZONES = LumenreachWorldConfig.Zones
+
 return table.freeze({
     greenway_breach = table.freeze({
         DisplayName = "Greenway Breach",
         RegionId = "lumenreach",
-        Center = Vector3.new(-720, 2, 40),
+        Center = ZONES.Greenway + Vector3.new(0, 1, 0),
         Radius = 115,
         DurationSeconds = 180,
         StartText = "Hostile creatures are breaking across the Greenway. Join the defense before the trail is overrun.",
@@ -27,7 +30,7 @@ return table.freeze({
     glowmere_surge = table.freeze({
         DisplayName = "Glowmere Surge",
         RegionId = "lumenreach",
-        Center = Vector3.new(-420, 0, 430),
+        Center = ZONES.Glowmere + Vector3.new(0, 4, 0),
         Radius = 108,
         DurationSeconds = 195,
         StartText = "The Glowmere is surging with unstable Lumen. Clear the creatures gathering around the wetland channels.",
@@ -53,7 +56,7 @@ return table.freeze({
     eastbridge_assault = table.freeze({
         DisplayName = "Eastbridge Assault",
         RegionId = "lumenreach",
-        Center = Vector3.new(-120, 8, 90),
+        Center = ZONES.EastLanding + Vector3.new(0, 2, 0),
         Radius = 122,
         DurationSeconds = 210,
         StartText = "Gravebone forces are pushing toward Eastbridge. Hold the landing and break their advance.",
