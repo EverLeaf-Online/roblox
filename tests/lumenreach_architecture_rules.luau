@@ -60,27 +60,28 @@ for _, token in
 do
     assert(
         string.find(source, token, 1, true) ~= nil,
-        "missing V19 MeshPart architecture contract " .. token
+        "missing V20 MeshPart architecture contract " .. token
     )
 end
 
 assert(
-    string.find(source, "local WORLD_DESIGN_VERSION = 19", 1, true) ~= nil,
+    string.find(source, "local WORLD_DESIGN_VERSION = 20", 1, true) ~= nil,
     "architecture conversion must bump world design version"
 )
 
 for _, token in
     {
         "flattenTerrain(camp, Vector3.new(300, 0, 240), 2.0",
-        'makeWayfarerCivicHall(parent, "WayfarerHall", camp + Vector3.new(-46, 0, -66), math.rad(180))',
-        'makeArchiveResearchLodge(parent, "ArchiveLodge", camp + Vector3.new(28, 0, -76), math.rad(180))',
-        'makeQuartermasterDepot(parent, "QuartermasterHouse", camp + Vector3.new(-56, 0, 62), 0)',
-        'makeWayfarerInn(parent, "WayfarerInn", camp + Vector3.new(58, 0, 62), 0)',
+        'makeWayfarerCivicHall(parent, "WayfarerHall", camp + Vector3.new(-30, 0, -62), math.rad(180))',
+        'makeArchiveResearchLodge(parent, "ArchiveLodge", camp + Vector3.new(33, 0, -61), math.rad(180))',
+        '"QuartermasterHouse"',
+        "camp + Vector3.new(-64, 0, 34)",
+        'makeWayfarerInn(parent, "WayfarerInn", camp + Vector3.new(65, 0, 35), math.rad(-22))',
     }
 do
     assert(
         string.find(source, token, 1, true) ~= nil,
-        "missing V19 mesh architecture/placement contract: " .. token
+        "missing V20 mesh architecture/placement contract: " .. token
     )
 end
 
@@ -96,7 +97,7 @@ assert(
 
 assert(
     string.find(source, "local function setArchitectureVisual", 1, true),
-    "V19 architecture query helper missing"
+    "V20 architecture query helper missing"
 )
 assert(
     string.find(source, "descendant.CanQuery = true", 1, true),
@@ -110,5 +111,20 @@ assert(
     string.find(source, "spec.Offset * architectureScale", 1, true),
     "architecture collision offsets must scale with the visual"
 )
+
+for _, token in
+    {
+        '"WayfarerEastGate"',
+        '"WayfarerSouthGate"',
+        '"MarketArch"',
+        '"MarketCart"',
+        '"ArrivalCart"',
+        '"WayfarerSquareWell"',
+        '"MARKET LANE"',
+        '"HEALER / STOREHOUSE"',
+    }
+do
+    assert(string.find(source, token, 1, true) ~= nil, "missing V20 MMO hub composition: " .. token)
+end
 
 print("Lumenreach architecture rules tests passed")

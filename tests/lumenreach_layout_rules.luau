@@ -6,7 +6,7 @@ for _, required in
     {
         "local WORLD_WIDTH = 2200",
         "local WORLD_DEPTH = 1250",
-        "local WORLD_DESIGN_VERSION = 19",
+        "local WORLD_DESIGN_VERSION = 20",
         'world:SetAttribute("WorldDesignVersion", WORLD_DESIGN_VERSION)',
         'world:SetAttribute("TerrainFirstMMOLayout", true)',
         "terrain:Clear()",
@@ -219,7 +219,7 @@ assert(
 )
 
 assert(
-    string.find(source, "makeTownExpansion(parent)", 1, true) ~= nil
+    string.find(source, "local function makeTown(parent)", 1, true) ~= nil
         and string.find(source, "makeWorldSettlements(parent)", 1, true) ~= nil,
     "V7 must populate the region with actual settlements and structures, not only foliage dressing"
 )
@@ -415,7 +415,6 @@ for _, requiredProxy in
         '"TrainingPostCollision"',
         '"GrandstandTierCollision"',
         '"MonumentDaisCollision"',
-        '"TownGatePostCollision"',
         '"RingStoneCollision"',
         '"PathDisciplinePlinthCollision"',
         '"ArchPillarCollision"',
@@ -426,7 +425,6 @@ for _, requiredProxy in
         '"ShelterRoofCollision"',
         '"ArchBeamCollision"',
         '"ArchRoofCollision"',
-        '"TownGateBeamCollision"',
     }
 do
     assert(
@@ -474,7 +472,7 @@ assert(
 )
 local microSiteStart = string.find(source, "local function makeWorldMicroSites", 1, true)
 local microSiteEnd =
-    string.find(source, "local function makeTownExpansion", microSiteStart or 1, true)
+    string.find(source, "local function makeTown(parent)", microSiteStart or 1, true)
 assert(microSiteStart and microSiteEnd, "V13 micro-site section must be present")
 local microSiteBody = string.sub(source, microSiteStart, microSiteEnd - 1)
 local microSiteCount = 0
@@ -502,7 +500,7 @@ assert(
         and string.find(source, "local function makeRoadWayhouse", 1, true) ~= nil
         and string.find(source, "local function makeFarmBarn", 1, true) ~= nil
         and string.find(source, "local function makeCroftCottage", 1, true) ~= nil,
-    "V19 must preserve explicit frontier architecture archetypes while moving major buildings to authored MeshParts"
+    "V20 must preserve explicit frontier architecture archetypes while moving major buildings to authored MeshParts"
 )
 
 local genericBuildingCallCount = 0
@@ -534,7 +532,25 @@ for _, namedBuilding in
 do
     assert(
         string.find(source, namedBuilding, 1, true) ~= nil,
-        "missing V19 architecture conversion: " .. namedBuilding
+        "missing V20 architecture conversion: " .. namedBuilding
+    )
+end
+
+for _, token in
+    {
+        'Name = "Wayfarer Merchant"',
+        'Name = "Wayfarer Artisan"',
+        'Name = "Wayfarer Patrol"',
+        'Name = "Wayfarer Scholar"',
+        'Name = "Wayfarer Recruit"',
+        '"WayfarerEastGate"',
+        '"MarketArch"',
+        '"TRAINING COURT"',
+    }
+do
+    assert(
+        string.find(source, token, 1, true) ~= nil,
+        "missing V20 Wayfarer MMO-hub content: " .. token
     )
 end
 

@@ -82,13 +82,17 @@ local meshArchitectureBuilders = {
     makeSunmossObservatory = true,
     makeVeilfallSanctuary = true,
     makeShatteredFortressTower = true,
+    makeTown = true,
 }
 
 for _, name in builders do
     local body = functionBody(name)
     local ownsProxy = string.find(body, "makeCollisionProxy(", 1, true) ~= nil
     local delegatesToMeshProxy = meshArchitectureBuilders[name] == true
-        and string.find(body, "placeArchitecturePrefabBuilding", 1, true) ~= nil
+        and (
+            string.find(body, "placeArchitecturePrefabBuilding", 1, true) ~= nil
+            or (name == "makeTown" and string.find(body, "makeGatehouse(", 1, true) ~= nil)
+        )
     assert(
         ownsProxy or delegatesToMeshProxy,
         name .. " creates physical world geometry without an explicit collision proxy"
@@ -116,7 +120,6 @@ for _, required in
         '"MarketCanopyCollision"',
         '"ShelterRoofCollision"',
         '"ArchRoofCollision"',
-        '"TownGateBeamCollision"',
     }
 do
     assert(

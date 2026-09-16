@@ -16,7 +16,7 @@ local LumenreachWorldService = {}
 local GENERATED_NAME = "EverLeafGeneratedWorld"
 local WORLD_WIDTH = 2200
 local WORLD_DEPTH = 1250
-local WORLD_DESIGN_VERSION = 19
+local WORLD_DESIGN_VERSION = 20
 
 -- Lumenreach is authored as a terrain-first MMORPG region. The generator below
 -- replaces the previous showcase composition completely: terrain is cleared,
@@ -3939,62 +3939,6 @@ local function makeWorldMicroSites(parent)
     end
 end
 
-local function makeTownExpansion(parent)
-    local camp = ZONES.Camp
-    makeHealerApothecary(
-        parent,
-        "WayfarerHealerLodge",
-        camp + Vector3.new(-108, 0, -22),
-        math.rad(-90)
-    )
-    makeCraftWorkshop(parent, "WayfarerCraftHall", camp + Vector3.new(4, 0, 94), 0)
-    makeQuartermasterDepot(
-        parent,
-        "WayfarerStorehouse",
-        camp + Vector3.new(-116, 0, 72),
-        math.rad(-90)
-    )
-    makeOpenStable(parent, "WayfarerStable", camp + Vector3.new(108, 0, 78), math.rad(90))
-    makeProvingLodge(parent, "PathkeeperLodge", camp + Vector3.new(2, 0, -112), math.rad(180))
-    makeWatchtower(parent, camp + Vector3.new(-125, 0, -86), math.rad(25))
-    makeWatchtower(parent, camp + Vector3.new(124, 0, -82), math.rad(-25))
-    makeFenceLine(
-        parent,
-        "CampNorthPalisade",
-        camp + Vector3.new(-120, 0, 100),
-        camp + Vector3.new(112, 0, 100),
-        8,
-        5.5
-    )
-    makeFenceLine(
-        parent,
-        "CampSouthPalisadeWest",
-        camp + Vector3.new(-120, 0, -112),
-        camp + Vector3.new(-20, 0, -112),
-        8,
-        5.5
-    )
-    makeFenceLine(
-        parent,
-        "CampSouthPalisadeEast",
-        camp + Vector3.new(42, 0, -112),
-        camp + Vector3.new(112, 0, -112),
-        8,
-        5.5
-    )
-    makeFenceLine(
-        parent,
-        "CampWestPalisade",
-        camp + Vector3.new(-132, 0, -96),
-        camp + Vector3.new(-132, 0, 92),
-        8,
-        5.5
-    )
-    makeSupplyStack(parent, camp + Vector3.new(-84, 0, 43), math.rad(16), 1.0)
-    makeSupplyStack(parent, camp + Vector3.new(82, 0, 43), math.rad(-12), 1.0)
-    makeSupplyStack(parent, camp + Vector3.new(80, 0, -52), math.rad(32), 0.9)
-end
-
 local function makeWorldSettlements(parent)
     -- Greenway settlement edge: visible habitation immediately outside town.
     makeRoadWayhouse(
@@ -4283,111 +4227,218 @@ end
 local function makeTown(parent)
     local camp = ZONES.Camp
 
-    -- V15: grade the town footprint before any structure samples terrain.
-    -- Previous passes changed plaza terrain after buildings had already chosen
-    -- their ground height, which produced floating/sunk structures and bad joins.
+    -- V20: Wayfarer is composed as an MMO hub, not a collection of buildings
+    -- scattered across one giant open rectangle. Grade first, then build a
+    -- compact civic square, service street, market lane, training court, and
+    -- two readable gates around a clear pedestrian spine.
     flattenTerrain(camp, Vector3.new(300, 0, 240), 2.0, Enum.Material.Ground)
+
+    -- Main east/west Wayfarer street and north/south civic lane.
     Workspace.Terrain:FillBlock(
-        CFrame.new(camp.X - 12, 1.25, camp.Z + 2),
-        Vector3.new(142, 1.5, 112),
+        CFrame.new(camp.X, 1.25, camp.Z + 4),
+        Vector3.new(250, 1.5, 34),
+        Enum.Material.Ground
+    )
+    Workspace.Terrain:FillBlock(
+        CFrame.new(camp.X - 4, 1.25, camp.Z - 18),
+        Vector3.new(34, 1.5, 182),
+        Enum.Material.Ground
+    )
+    -- Central square: deliberately much smaller than the old empty plaza.
+    Workspace.Terrain:FillBlock(
+        CFrame.new(camp.X - 2, 1.3, camp.Z + 4),
+        Vector3.new(88, 1.6, 72),
         Enum.Material.Slate
     )
+    -- Market and service courts use different ground material to read as
+    -- destinations rather than leftover open terrain.
     Workspace.Terrain:FillBlock(
-        CFrame.new(camp.X + 63, 1.25, camp.Z + 3),
-        Vector3.new(48, 1.5, 126),
+        CFrame.new(camp.X + 63, 1.25, camp.Z + 49),
+        Vector3.new(80, 1.5, 56),
         Enum.Material.Ground
     )
     Workspace.Terrain:FillBlock(
-        CFrame.new(camp.X - 70, 1.25, camp.Z + 8),
-        Vector3.new(42, 1.5, 58),
+        CFrame.new(camp.X - 70, 1.25, camp.Z + 47),
+        Vector3.new(62, 1.5, 58),
         Enum.Material.Ground
     )
 
-    -- Core buildings face the plaza instead of being rotated arbitrarily.
-    makeWayfarerCivicHall(parent, "WayfarerHall", camp + Vector3.new(-46, 0, -66), math.rad(180))
-    makeArchiveResearchLodge(parent, "ArchiveLodge", camp + Vector3.new(28, 0, -76), math.rad(180))
-    makeQuartermasterDepot(parent, "QuartermasterHouse", camp + Vector3.new(-56, 0, 62), 0)
-    makeWayfarerInn(parent, "WayfarerInn", camp + Vector3.new(58, 0, 62), 0)
-
-    makeHearth(parent, camp + Vector3.new(-3, 0, 4))
-    makeBench(parent, camp + Vector3.new(-22, 0, 18), math.rad(24))
-    makeBench(parent, camp + Vector3.new(20, 0, 18), math.rad(-24))
-    makeBench(parent, camp + Vector3.new(-20, 0, -17), math.rad(155))
-    makeMarketStall(
+    -- Civic edge. Entrances face the square at short player-readable distances.
+    makeWayfarerCivicHall(parent, "WayfarerHall", camp + Vector3.new(-30, 0, -62), math.rad(180))
+    makeArchiveResearchLodge(parent, "ArchiveLodge", camp + Vector3.new(33, 0, -61), math.rad(180))
+    makeQuartermasterDepot(
         parent,
-        camp + Vector3.new(-34, 0, 31),
-        math.rad(180),
-        Color3.fromRGB(128, 101, 62)
+        "QuartermasterHouse",
+        camp + Vector3.new(-64, 0, 34),
+        math.rad(22)
     )
-    makeMarketStall(
+    makeWayfarerInn(parent, "WayfarerInn", camp + Vector3.new(65, 0, 35), math.rad(-22))
+
+    -- The hearth/well court is the visual and social center of the settlement.
+    makeHearth(parent, camp + Vector3.new(-3, 0, 1))
+    makeLumenWell(
         parent,
-        camp + Vector3.new(34, 0, 31),
-        math.rad(180),
-        Color3.fromRGB(94, 81, 128)
+        "WayfarerSquareWell",
+        camp + Vector3.new(13, 0, 4),
+        Color3.fromRGB(100, 236, 194)
+    )
+    for _, spec in
+        {
+            { Vector3.new(-27, 0, 16), math.rad(24) },
+            { Vector3.new(29, 0, 16), math.rad(-24) },
+            { Vector3.new(-27, 0, -18), math.rad(155) },
+            { Vector3.new(28, 0, -18), math.rad(-155) },
+        }
+    do
+        makeBench(parent, camp + spec[1], spec[2])
+    end
+
+    -- Market lane: multiple stalls, cargo and lighting make this a real service
+    -- cluster rather than two isolated props in the middle of the road.
+    for _, spec in
+        {
+            { Vector3.new(43, 0, 67), math.rad(180), Color3.fromRGB(128, 101, 62) },
+            { Vector3.new(66, 0, 69), math.rad(180), Color3.fromRGB(94, 81, 128) },
+            { Vector3.new(88, 0, 64), math.rad(180), Color3.fromRGB(82, 118, 94) },
+            { Vector3.new(48, 0, 88), 0, Color3.fromRGB(112, 76, 58) },
+        }
+    do
+        makeMarketStall(parent, camp + spec[1], spec[2], spec[3])
+    end
+    makeSupplyStack(parent, camp + Vector3.new(78, 0, 89), math.rad(-12), 1.0)
+    makeSupplyStack(parent, camp + Vector3.new(94, 0, 43), math.rad(26), 0.85)
+
+    -- West-side service court.
+    makeHealerApothecary(
+        parent,
+        "WayfarerHealerLodge",
+        camp + Vector3.new(-105, 0, -24),
+        math.rad(-90)
+    )
+    makeQuartermasterDepot(
+        parent,
+        "WayfarerStorehouse",
+        camp + Vector3.new(-111, 0, 55),
+        math.rad(-90)
+    )
+    makeSupplyStack(parent, camp + Vector3.new(-82, 0, 50), math.rad(16), 1.0)
+    makeStoneShrine(
+        parent,
+        "WayfarerWestShrine",
+        camp + Vector3.new(-81, 0, -45),
+        math.rad(90),
+        Color3.fromRGB(104, 231, 188)
     )
 
-    -- Training yard: deliberately clear enough for dodge/combat practice.
+    -- South/east production and stable lane.
+    makeCraftWorkshop(parent, "WayfarerCraftHall", camp + Vector3.new(5, 0, 91), 0)
+    makeForgeYard(parent, "WayfarerForgeYard", camp + Vector3.new(-32, 0, 91), math.rad(180))
+    makeOpenStable(parent, "WayfarerStable", camp + Vector3.new(108, 0, 80), math.rad(90))
+    makeProvingLodge(parent, "PathkeeperLodge", camp + Vector3.new(4, 0, -108), math.rad(180))
+
+    -- Training court remains readable and open for dodge/combat practice, but
+    -- it is framed by architecture rather than floating in a blank field.
     for _, offset in
         {
-            Vector3.new(45, 0, -45),
-            Vector3.new(82, 0, -45),
-            Vector3.new(45, 0, 22),
-            Vector3.new(82, 0, 22),
+            Vector3.new(55, 0, -35),
+            Vector3.new(86, 0, -35),
+            Vector3.new(55, 0, 9),
+            Vector3.new(86, 0, 9),
         }
     do
         makeLumenPylon(parent, camp + offset, 7)
     end
-    makeSign(parent, camp + Vector3.new(62, 0, -31), math.rad(-90), "TRAINING YARD")
+    makeSign(parent, camp + Vector3.new(70, 0, -20), math.rad(-90), "TRAINING COURT")
 
-    makeLantern(parent, camp + Vector3.new(-58, 0, 18), math.rad(90))
-    makeLantern(parent, camp + Vector3.new(-28, 0, 45), math.rad(180))
-    makeLantern(parent, camp + Vector3.new(25, 0, 45), math.rad(180))
-    makeLantern(parent, camp + Vector3.new(55, 0, 18), math.rad(-90))
-    makeLantern(parent, camp + Vector3.new(-30, 0, -40), 0)
-    makeLantern(parent, camp + Vector3.new(34, 0, -40), 0)
-    makeLantern(parent, camp + Vector3.new(-82, 0, 48), math.rad(120))
+    -- Strong town thresholds. The mesh gatehouses make entering/leaving the hub
+    -- feel like crossing a defended settlement boundary.
+    makeGatehouse(parent, "WayfarerEastGate", camp + Vector3.new(122, 0, 3), math.rad(90), 32)
+    makeGatehouse(parent, "WayfarerSouthGate", camp + Vector3.new(2, 0, -116), math.rad(180), 30)
+    makeWatchtower(parent, camp + Vector3.new(-124, 0, -88), math.rad(25))
+    makeWatchtower(parent, camp + Vector3.new(124, 0, -82), math.rad(-25))
 
-    makeSign(parent, camp + Vector3.new(88, 0, 32), math.rad(-76), "GREENWAY  →")
-    makeSign(parent, camp + Vector3.new(8, 0, -104), math.rad(180), "PROVING CIRCLE")
-    makeSign(parent, camp + Vector3.new(-88, 0, 12), math.rad(88), "ARRIVAL / WAYFARER HALL")
-    makeLumenPylon(parent, camp + Vector3.new(-102, 0, -18), 7)
-    makeLumenPylon(parent, camp + Vector3.new(-102, 0, 44), 7)
-
-    -- Eastern departure gate is a landmark, not a wall. The opening is wide
-    -- enough for parties to sprint/dodge through without snagging.
-    local gateBase = CFrame.new(terrainSurfacePosition(camp + Vector3.new(116, 0, 12), 0))
-        * CFrame.Angles(0, math.rad(90), 0)
-    for _, side in { -1, 1 } do
-        makePart(
-            parent,
-            "TownGatePost",
-            Vector3.new(2.0, 11, 2.0),
-            gateBase * CFrame.new(side * 13.5, 5.5, 0),
-            Enum.Material.Wood,
-            Color3.fromRGB(70, 50, 34)
-        )
-        makeCollisionProxy(
-            parent,
-            "TownGatePostCollision",
-            Vector3.new(2.3, 11, 2.3),
-            gateBase * CFrame.new(side * 13.5, 5.5, 0)
-        )
-    end
-    local top = makePart(
+    -- Palisade frames the hub but leaves the two gate openings clear.
+    makeFenceLine(
         parent,
-        "TownGateBeam",
-        Vector3.new(30.5, 1.4, 2.2),
-        gateBase * CFrame.new(0, 10.0, 0),
-        Enum.Material.Wood,
-        Color3.fromRGB(70, 50, 34)
+        "CampNorthPalisade",
+        camp + Vector3.new(-122, 0, 105),
+        camp + Vector3.new(114, 0, 105),
+        8,
+        5.5
     )
-    top.CanCollide = false
-    top.CanTouch = false
-    top.CanQuery = false
-    makePartSurfaceCollisionProxy(parent, top, "TownGateBeamCollision", Vector3.new(0.1, 0.1, 0.1))
-    makeLumenPylon(parent, camp + Vector3.new(116, 0, -19), 9)
-    makeLumenPylon(parent, camp + Vector3.new(116, 0, 43), 9)
-    makeTownExpansion(parent)
+    makeFenceLine(
+        parent,
+        "CampSouthPalisadeWest",
+        camp + Vector3.new(-122, 0, -116),
+        camp + Vector3.new(-22, 0, -116),
+        8,
+        5.5
+    )
+    makeFenceLine(
+        parent,
+        "CampSouthPalisadeEast",
+        camp + Vector3.new(25, 0, -116),
+        camp + Vector3.new(114, 0, -116),
+        8,
+        5.5
+    )
+    makeFenceLine(
+        parent,
+        "CampWestPalisade",
+        camp + Vector3.new(-134, 0, -98),
+        camp + Vector3.new(-134, 0, 96),
+        8,
+        5.5
+    )
+
+    -- Street rhythm and service readability.
+    for _, offset in
+        {
+            Vector3.new(-55, 0, 18),
+            Vector3.new(-31, 0, 41),
+            Vector3.new(28, 0, 41),
+            Vector3.new(54, 0, 18),
+            Vector3.new(-31, 0, -38),
+            Vector3.new(33, 0, -38),
+            Vector3.new(93, 0, 18),
+            Vector3.new(-93, 0, 17),
+            Vector3.new(18, 0, 72),
+            Vector3.new(-17, 0, 72),
+        }
+    do
+        makeLantern(parent, camp + offset, 0)
+    end
+    makeWayfarerBanner(
+        parent,
+        "HallBannerA",
+        camp + Vector3.new(-44, 0, -39),
+        0,
+        Color3.fromRGB(72, 133, 104)
+    )
+    makeWayfarerBanner(
+        parent,
+        "HallBannerB",
+        camp + Vector3.new(-16, 0, -39),
+        0,
+        Color3.fromRGB(72, 133, 104)
+    )
+    makeWayfarerStreetArch(
+        parent,
+        "MarketArch",
+        camp + Vector3.new(63, 0, 49),
+        math.rad(90),
+        18,
+        Color3.fromRGB(166, 123, 62)
+    )
+
+    makeSign(parent, camp + Vector3.new(98, 0, 20), math.rad(-76), "GREENWAY  →")
+    makeSign(parent, camp + Vector3.new(10, 0, -92), math.rad(180), "PROVING CIRCLE")
+    makeSign(parent, camp + Vector3.new(-70, 0, -28), math.rad(90), "HEALER / STOREHOUSE")
+    makeSign(parent, camp + Vector3.new(49, 0, 48), math.rad(180), "MARKET LANE")
+
+    -- Carts and cargo imply actual travel/economy traffic through the hub.
+    makeWayfarerCart(parent, "MarketCart", camp + Vector3.new(98, 0, 52), math.rad(-15), true)
+    makeWayfarerCart(parent, "ArrivalCart", camp + Vector3.new(-87, 0, 13), math.rad(92), false)
 end
 
 local function makeStoneCircle(parent, center, radius, count, name)
@@ -5135,6 +5186,46 @@ local AMBIENT_RESIDENTS = table.freeze({
         Role = "Scout",
         HairStyle = "ponytail",
         Cloth = Color3.fromRGB(92, 82, 59),
+    }),
+    table.freeze({
+        Name = "Wayfarer Merchant",
+        Position = ZONES.Camp + Vector3.new(62, 0, 77),
+        Yaw = math.rad(175),
+        Role = "Quartermaster",
+        HairStyle = "bun",
+        Cloth = Color3.fromRGB(119, 86, 58),
+    }),
+    table.freeze({
+        Name = "Wayfarer Artisan",
+        Position = ZONES.Camp + Vector3.new(8, 0, 76),
+        Yaw = math.rad(165),
+        Role = "Quartermaster",
+        HairStyle = "short",
+        Cloth = Color3.fromRGB(101, 73, 54),
+    }),
+    table.freeze({
+        Name = "Wayfarer Patrol",
+        Position = ZONES.Camp + Vector3.new(108, 0, 8),
+        Yaw = math.rad(90),
+        Role = "Guard",
+        HairStyle = "short",
+        Cloth = Color3.fromRGB(58, 88, 69),
+    }),
+    table.freeze({
+        Name = "Wayfarer Scholar",
+        Position = ZONES.Camp + Vector3.new(31, 0, -42),
+        Yaw = math.rad(180),
+        Role = "Archivist",
+        HairStyle = "long",
+        Cloth = Color3.fromRGB(79, 86, 112),
+    }),
+    table.freeze({
+        Name = "Wayfarer Recruit",
+        Position = ZONES.Camp + Vector3.new(70, 0, -4),
+        Yaw = math.rad(-90),
+        Role = "Guard",
+        HairStyle = "ponytail",
+        Cloth = Color3.fromRGB(70, 96, 75),
     }),
     table.freeze({
         Name = "Greenway Farmer",
