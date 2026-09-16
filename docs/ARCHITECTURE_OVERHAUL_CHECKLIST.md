@@ -1,0 +1,243 @@
+# EverLeaf Whole-Game Architecture Overhaul Checklist
+
+Status: ACTIVE — current generic/box architecture is temporary until replaced and accepted in Studio.
+
+## Non-negotiable world-building rules
+
+- [ ] No major building may be a plain rectangular shell with one generic gable roof.
+- [ ] Every named service/quest building must have a unique silhouette readable from the road.
+- [ ] Every archetype needs a purpose-readable frontage: entrance, porch/loading/service/work area, signage, props, and route connection.
+- [ ] Foundations must visually meet terrain; no floating walls, exposed gaps, or buried doors.
+- [ ] Roofs must have correct eaves, ridge joins, wall closure, and player/camera clearance.
+- [ ] Render geometry and movement collision stay separate; collision uses explicit simple proxies.
+- [ ] Districts must use regional architecture rather than recolored copies of Wayfarer buildings.
+- [ ] Important structures require player-height Studio acceptance screenshots before being marked complete.
+- [ ] Foliage does not count as settlement/content density.
+- [ ] Repeated micro-sites must rotate among multiple structural archetypes rather than clone one hut.
+
+## Shared architecture families
+
+### Lumenreach frontier kit
+
+- [ ] Wayfarer civic hall — tall center volume, offset side wing, broad entry porch, banners, landmark ridge.
+- [ ] Healer/apothecary lodge — low split roof, open herb porch, drying racks, side garden/work table.
+- [ ] Smithy/forge — open-sided work bay, stone forge and chimney, lean-to roof, tool/anvil yard.
+- [ ] Archive/research lodge — stepped footprint, reading deck, side annex, shelves/chests/research props.
+- [ ] Quartermaster/storehouse — heavy stone base, loading porch, reinforced doors, exterior storage canopy.
+- [ ] Inn/rest lodge — L-shaped or long hall, deep social porch, lantern frontage, seating court.
+- [ ] Croft cottage — compact asymmetrical home, lean-to storage, fenced work yard, varied roof orientation.
+- [ ] Ranger/hunter cabin — narrow lodge, front deck, drying rack, weapon/tool wall, elevated lookout option.
+- [ ] Watch/guard post — compact enclosed hut plus raised lookout/deck; not a cottage recolor.
+- [ ] Road wayhouse — sheltered bench/service bay with partial enclosure and visible travel supplies.
+- [ ] Glowmere stilt house — raised floor, stilts, dock/deck, reed canopy, waterside stairs.
+- [ ] Shrine shelter — open pavilion/stone-and-timber ritual structure, readable from route.
+- [ ] Frontier ruin — broken version of a recognizable real structure with missing walls/roof sections, not random blocks.
+- [ ] Gatehouse — occupied defensive structure with side rooms/platforms and a true pass-through opening.
+- [ ] Proving lodge — aspirant barracks/training pavilion distinct from normal town housing.
+
+### Brasshaven / Belforge industrial kit
+
+- [ ] Foundry administration hall — metal/brick massing, overhead service bridge, reinforced entrance.
+- [ ] Machinist workshop — asymmetrical shed, open loading bay, gantry/hoist, tool yard.
+- [ ] Smelter house — furnace stack, vented roof, heavy service doors, slag channel frontage.
+- [ ] Boiler station — vertical tanks/stack silhouette, pipe manifolds, maintenance deck.
+- [ ] Worker barracks — industrial rowhouse/bunk structure, external stairs/walkway, service yard.
+- [ ] Trade/loading depot — canopy, loading platform, crane/rail interface, stacked cargo.
+- [ ] Scrap market — modular covered stalls built from industrial frames, not Wayfarer fabric stalls.
+- [ ] Industrial gatehouse — thick portal, control booth, catwalk, warning lights.
+- [ ] Pipe bridge/gantry — traversable overhead industrial connector with rails and maintenance access.
+- [ ] Refinery tower — vertical landmark with platforms, pipes, service ladder geometry.
+- [ ] Belforge arena support block — staging room, marshal station, equipment bay, spectator/service structure.
+- [ ] Industrial ruin — damaged factory shell with recognizable bays, broken gantries, collapsed roof sections.
+
+## Lumenreach replacement matrix
+
+### Wayfarer Camp — highest priority
+
+- [ ] `WayfarerHall` -> bespoke civic hall archetype.
+- [ ] `QuartermasterHouse` -> quartermaster/storehouse archetype with loading porch.
+- [ ] `ArchiveLodge` -> archive/research lodge archetype.
+- [ ] `WayfarerInn` -> social inn/rest lodge archetype.
+- [ ] `WayfarerHealerLodge` -> healer/apothecary lodge archetype.
+- [ ] `WayfarerCraftHall` -> dedicated crafts hall/covered workshop, not house shell.
+- [ ] `WayfarerStorehouse` -> bulk warehouse/storehouse archetype.
+- [ ] `WayfarerStable` -> open stable with stalls, tack shed, fenced yard.
+- [ ] `PathkeeperLodge` -> mentor/proving lodge archetype.
+- [ ] `WayfarerForgeYard` -> fully open smithy/forge archetype integrated into town circulation.
+- [ ] Re-layout Camp so entrances face streets/courts and buildings do not overlap service props, NPCs, stalls, or shrines.
+- [ ] Create one coherent central street/plaza hierarchy instead of scattered objects on open ground.
+
+### Greenway / Crossroads
+
+- [ ] `GreenwayWayhouse` -> road wayhouse archetype.
+- [ ] `GreenwayStoreShed` -> farm storage/barn archetype.
+- [ ] Greenway crofts -> at least 3 cottage/barn variants, not cloned boxes.
+- [ ] `CrossroadsWaystation` -> recognizable travel station with porch, stable/loading side, notice board.
+- [ ] `CrossroadsCourierHouse` -> courier depot with loading dock and dispatch canopy.
+- [ ] Replace repeated patrol/wayhouse micro-sites with alternating watch-post, shrine, croft, courier, and road-service structures.
+
+### Glowmere
+
+- [ ] `GlowmereKeeperHut` -> stilt keeper house with deck/dock.
+- [ ] `GlowmereReedHouse` -> second stilt-house silhouette, not a recolor.
+- [ ] `GlowmereDrybank` settlement -> raised walkways, reed sheds, fisher structures, dock frontage.
+- [ ] Reed-side micro-sites must use wetland structures, not land cottages.
+
+### Eastbridge
+
+- [ ] `EastbridgeBarracks` -> fortified barracks with wall-facing entrance and drill yard.
+- [ ] `EastbridgeStorehouse` -> fortified supply depot/loading structure.
+- [ ] `EastbridgeMedicLodge` -> field medic station with covered treatment porch.
+- [ ] `EastbridgeScoutOutpost` -> ranger/scout watch structure.
+- [ ] `EastbridgeGatehouse` -> true occupied defensive gatehouse with guard platforms.
+- [ ] Eastbridge wards -> use frontier-fort kit, not Wayfarer cottage copies.
+
+### Gravebone
+
+- [ ] `GraveboneRuinedChapel` -> recognizable ruined chapel silhouette.
+- [ ] `GraveboneGuardHall` -> collapsed guard hall with broken roof/wall logic.
+- [ ] Mausoleums/crypts -> multiple tomb silhouettes and partial structural collapse variants.
+- [ ] Gravebone roadside ruins -> actual ruined buildings/courtyards rather than isolated wall blocks.
+
+### Mossglen
+
+- [ ] `MossglenRangerLodge` -> ranger hall with porch/work deck.
+- [ ] `MossglenHunterCabin` -> hunter cabin variant with drying/tool rack.
+- [ ] `MossglenSupplyHouse` -> timber depot/supply shelter.
+- [ ] Mossglen Trailhead/Woodcamp -> logging/ranger architecture with sheds and work yards.
+
+### Sunmoss
+
+- [ ] `SunmossObservatoryLodge` -> research lodge integrated with observatory deck/tower.
+- [ ] `SunmossKeeperHouse` -> ridge keeper shelter with windbreak/porch.
+- [ ] `SunmossObservatory` -> stronger landmark silhouette, layered platforms and visible research equipment.
+- [ ] Ascent camps -> pilgrimage/research shelters, not ordinary cottages.
+
+### Veilfall
+
+- [ ] `VeilfallRefuge` -> protected refuge compound with sheltered courtyard.
+- [ ] `VeilfallSurveyHut` -> cliff survey station/deck.
+- [ ] `VeilfallSanctuary` -> distinct sanctuary pavilion integrated into ravine geometry.
+- [ ] Upper/West refuge micro-sites -> storm/ravine shelters with retaining walls and covered entries.
+
+### Proving Circle
+
+- [ ] `ProvingMentorLodge` -> aspirant/mentor training lodge.
+- [ ] `ProvingAspirantWard` -> barracks/training-yard architecture, not hamlet cottages.
+- [ ] Grandstands/monument/support structures must read as one designed advancement complex.
+
+### Shattered Lumen Arch
+
+- [ ] `ShatteredForwardCamp` -> military frontier camp with command shelter, supply bay, watch platform.
+- [ ] `ShatteredBarracksRuins` -> ruined barracks with readable room/bay structure.
+- [ ] Fortress towers/arch ruins -> consistent fortress kit with damaged variants and believable connections.
+- [ ] Arch micro-sites -> checkpoints, collapsed guard rooms, ruined supply courts, not generic huts.
+
+## Brasshaven / Belforge replacement matrix
+
+### Brasshaven Foundry Threshold / Eastworks
+
+- [ ] Replace flat threshold presentation with an authored industrial street frontage.
+- [ ] Build a Foundry Administration Hall.
+- [ ] Build a Machinist Workshop.
+- [ ] Build a Smelter House.
+- [ ] Build a Boiler Station.
+- [ ] Build Worker Barracks.
+- [ ] Build Trade/Loading Depot.
+- [ ] Replace generic vendor counters with industrial market/depot stalls.
+- [ ] Convert isolated forge towers into a coherent skyline/industrial block system.
+- [ ] Add traversable gantries/pipe bridges between key buildings where useful.
+- [ ] Ensure encounter areas sit inside believable industrial yards rather than empty floors with props.
+
+### Gearworks / Cinder / Sootworks / Dynamo / Rail / Blueglass / Flux / Authority / Runoff
+
+- [ ] Gearworks Yard -> machinery workshop + service shed + gantry.
+- [ ] Cinder Ducts -> boiler/vent station + maintenance shelter.
+- [ ] Sootworks -> worker/service block + damaged shift building.
+- [ ] Dynamo Gallery -> power-house structure around coils instead of freestanding effects.
+- [ ] Eastworks Rail Yard -> depot/loading platform/control hut/crane support.
+- [ ] Blueglass Annex -> research/refinery structure around lenses.
+- [ ] Upper Flux Vaults -> secured industrial vault building.
+- [ ] Authority Hall -> real civic/security building, not columns only.
+- [ ] Molten Runoff -> foundry channel control building and catwalks.
+- [ ] Upper Bellows Court -> bellows/piston house rather than isolated cylinders.
+
+### Belforge
+
+- [ ] `BelforgeEntrance` -> full industrial gatehouse/control structure.
+- [ ] `BelforgeAntechamber` -> authored staging hall with machinery/service rooms.
+- [ ] `BelforgeColossusArena` -> arena architecture with spectator/service/support structures.
+- [ ] Add marshal/oathkeeper staging spaces and readable arena circulation.
+- [ ] Add industrial ruin/damage variants around late-game encounter routes.
+
+## World placement and composition audit
+
+- [ ] Audit every building against nearby NPCs, stalls, shrines, carts, fences, roads, combat spaces, and interactables.
+- [ ] Remove duplicate/overlapping structures and duplicate ambient NPC placements.
+- [ ] Entrances must face logical streets or courtyards.
+- [ ] Keep minimum clear pedestrian lane around doors and service prompts.
+- [ ] Keep dodge/combat areas free of decorative collision clutter.
+- [ ] Building groups need believable yards/courts instead of arbitrary spacing.
+- [ ] Major routes should reveal landmarks/buildings in layers rather than all structures sitting on one plane.
+- [ ] No building should sit visibly unsupported on slope edges; use stepped stone bases, retaining walls, stilts, or terrain pads.
+
+## Collision/QA acceptance for every archetype
+
+- [ ] Foundation collision matches visible base.
+- [ ] Wall collision matches actual wall sections and door openings.
+- [ ] Roof collision starts at/inside wall line; decorative eaves never create invisible blockers.
+- [ ] Roof/wall gaps are visually closed.
+- [ ] Porches/decks/steps are traversable.
+- [ ] Canopies above walkways have full R15 avatar + camera clearance.
+- [ ] Props use either intentional simple collision or render-only behavior; never accidental Part defaults.
+- [ ] NPC spawn/idle positions are clear of all structural proxies.
+- [ ] Camera raycasts and player movement agree on solid geometry.
+- [ ] Water remains swimmable and is never used as grounding surface.
+- [ ] Player-height Studio walkthrough completed for all sides/entrances of the archetype.
+
+## Implementation order
+
+### Phase A — architecture framework
+
+- [ ] Introduce explicit Lumenreach archetype builders instead of direct generic `makeBuilding` use for named structures.
+- [ ] Introduce explicit Brasshaven industrial building builders.
+- [ ] Add tests that reject new named service buildings built only through the generic box builder.
+- [ ] Keep a generic primitive builder only for low-importance background/support structures.
+
+### Phase B — starter-region conversion
+
+- [ ] Rebuild Wayfarer Camp core buildings.
+- [ ] Rebuild Greenway/Crossroads buildings.
+- [ ] Rebuild Glowmere.
+- [ ] Rebuild Eastbridge.
+- [ ] Rebuild Gravebone.
+- [ ] Rebuild Mossglen.
+- [ ] Rebuild Sunmoss.
+- [ ] Rebuild Veilfall.
+- [ ] Rebuild Proving Circle support architecture.
+- [ ] Rebuild Shattered Arch frontier/ruins.
+- [ ] Replace cloned district/micro-site structures with regional variants.
+
+### Phase C — mid/late-game conversion
+
+- [ ] Build Brasshaven industrial kit.
+- [ ] Recompose Foundry Threshold/Eastworks around actual buildings.
+- [ ] Rebuild each Brasshaven encounter district around an authored industrial destination.
+- [ ] Rebuild Belforge gate/antechamber/arena support architecture.
+
+### Phase D — whole-game acceptance
+
+- [ ] Walk every current region at player height in Studio.
+- [ ] Verify no generic placeholder building remains in a named hub/quest/service/district location.
+- [ ] Capture acceptance screenshots for every major settlement/district.
+- [ ] Verify traversal/collision/camera around every new archetype.
+- [ ] Verify performance/part counts after replacement.
+- [ ] Only then mark architecture overhaul complete.
+
+## Current acceptance status
+
+- Lumenreach topology/gameplay source: implemented, visual architecture overhaul NOT complete.
+- Wayfarer Camp: NOT accepted; generic building family still present.
+- Lumenreach outlying districts: NOT accepted; many still derive from generic building family.
+- Brasshaven/Eastworks: NOT accepted; industrial environment lacks complete building architecture.
+- Belforge: NOT accepted; encounter shell exists but architectural support pass remains.

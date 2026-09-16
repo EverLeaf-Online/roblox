@@ -7,6 +7,8 @@
 
 ## Lumenreach starter region — SOURCE BUILT / STUDIO ACCEPTANCE NOT PASSED
 
+**Architecture status:** NOT ACCEPTED. The current generator still contains generic rectangular/gable building shells. A whole-game architecture replacement is now active across Lumenreach, Brasshaven/Eastworks, and Belforge. See [`ARCHITECTURE_OVERHAUL_CHECKLIST.md`](ARCHITECTURE_OVERHAUL_CHECKLIST.md) for the exact replacement matrix, regional archetypes, collision criteria, and implementation order.
+
 - The 2200×1250 Level 1–10 topology, combat spaces, settlements, crossings, quest route, and custom EverLeaf structure set exist in source, but **the current Studio world is not accepted as production-quality**. It still requires a player-height environment rebuild/QA pass and must not be described as finished merely because the generator/tests pass.
 - Generic Toolbox/Creator Store architecture remains prohibited. Approved external nature assets are scenery only; foliage density is not a substitute for architecture, gameplay content, or environmental storytelling.
 - Lumenreach V11 now uses an explicit proxy-only collision contract: visible environment geometry cannot accidentally become physical, solid world objects receive simple authored blockers, and those blockers participate in camera/LOS queries. This is source-tested but still requires full Studio walk/dodge/camera traversal before acceptance.
@@ -79,7 +81,7 @@ Architecture closure completed:
 
 ### Current verified Phase B baseline — 2026-09-15
 
-Studio-verified gameplay foundations remain third-person movement/camera, sprint/jump/dodge, basic combat, hostile enemy damage, React HUD/dialogue, quest accept/progress/turn-in, and Rojo/Wally/React sync. Lumenreach has now been **fully replaced** by the terrain-first V3 generator: 2200×1250 studs, permanent Wayfarer town, terrain-authored roads, two real gorge bridges, wetland/highland/ravine macro spaces, party-scale encounter floors, natural Terrain boundaries, and the Brasshaven gate at the far-east capstone. The generator clears the previous world before building V3, so future map work must refine this layout instead of stacking scenery over older geometry. Player-height art/collision/multiplayer/performance QA is the current Studio priority. The canonical contract is `docs/LUMENREACH_WORLD_LAYOUT.md`.
+Studio-verified gameplay foundations remain third-person movement/camera, sprint/jump/dodge, basic combat, hostile enemy damage, React HUD/dialogue, quest accept/progress/turn-in, and Rojo/Wally/React sync. Lumenreach uses the current 2200×1250 terrain-first generator with permanent town, authored roads, two gorge bridges, wetland/highland/ravine macro spaces, encounter floors, natural Terrain boundaries, and the Brasshaven gate at the far-east capstone. **This does not mean the region is visually complete:** its generic building family is now explicitly scheduled for replacement by bespoke regional architecture. Player-height art/collision/multiplayer/performance QA remains the acceptance gate. The canonical layout contract is `docs/LUMENREACH_WORLD_LAYOUT.md`; the architecture replacement contract is `docs/ARCHITECTURE_OVERHAUL_CHECKLIST.md`.
 
 ### Phase B — 3D foundation + complete game shell — ACTIVE
 
