@@ -108,8 +108,10 @@ end
 assert(gatherNodeCount >= 8, "Lumenreach should contain multiple authored gather-node placements")
 
 assert(
-    string.find(gameplay, '"BenchCollision"', 1, true) ~= nil,
-    "apothecary must prevent avatar/camera clipping"
+    string.find(gameplay, '"BenchCollision"', 1, true) ~= nil
+        and string.find(gameplay, 'blocker:SetAttribute("EverLeafCollisionProxy", true)', 1, true) ~= nil
+        and string.find(gameplay, "blocker.CanQuery = true", 1, true) ~= nil,
+    "apothecary collision must block both avatar movement and camera/world queries"
 )
 assert(
     string.find(gameplay, "Vector3.new(9.2, 0.48, 3.6)", 1, true) ~= nil,

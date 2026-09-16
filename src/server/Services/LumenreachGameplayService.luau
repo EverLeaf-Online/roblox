@@ -398,8 +398,9 @@ local function makeApothecaryBench(parent, position)
     )
     blocker.Transparency = 1
     blocker.CanCollide = true
-    blocker.CanQuery = false
+    blocker.CanQuery = true
     blocker.CastShadow = false
+    blocker:SetAttribute("EverLeafCollisionProxy", true)
 
     local smallPrompt = prompt(smallStation, "Brew", "Small Tonic · 2 Lumenleaf", 0.8)
     LumenreachActivityService.Bind(smallPrompt, {

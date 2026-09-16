@@ -6,7 +6,9 @@
 
 **Acceptance status:** the topology and content below exist in source, but the current Studio presentation is still considered a prototype/blockout. Nothing in this document means the environment is visually finished until player-height Studio QA passes.
 
-Lumenreach V7 is a full replacement of the earlier showcase/camp composition. The runtime generator clears the previous generated model and Terrain, rebuilds macro topography from scratch, cuts the road network into the land, and only then places the authored structures, trees, NPCs, bridges, encounter spaces, landmarks, and portal required by gameplay. New work must extend this terrain-first layout; it must not stack scenery over older geometry.
+**V11 collision contract:** rendered geometry is non-colliding by default. Physical architecture/props use explicit simplified `EverLeafCollisionProxy` blockers; imported foliage stays render-only except for deliberate trunk/solid-prop proxies. Collision proxies are queryable so camera, line-of-sight, and projectile raycasts agree with movement collision.
+
+The terrain-first Lumenreach lineage introduced in V7 is a full replacement of the earlier showcase/camp composition. The runtime generator clears the previous generated model and Terrain, rebuilds macro topography from scratch, cuts the road network into the land, and only then places the authored structures, trees, NPCs, bridges, encounter spaces, landmarks, and portal required by gameplay. New work must extend this terrain-first layout; it must not stack scenery over older geometry.
 
 ## Topology
 
@@ -97,7 +99,7 @@ All V7 architecture is native Roblox geometry or approved environment prefabs. N
 
 ## Source contract
 
-`src/server/Services/LumenreachWorldService.luau` is the canonical V7 generator. It owns:
+`src/server/Services/LumenreachWorldService.luau` is the canonical V11 generator. It owns:
 
 - `WORLD_WIDTH = 2200` and `WORLD_DEPTH = 1250`;
 - zone centers and progression bands;

@@ -67,7 +67,8 @@ local function getCameraCollisionDistance(focus, idealOffset)
         local hit = ray.Instance
         local blocksCamera = hit == Workspace.Terrain
         if hit:IsA("BasePart") then
-            blocksCamera = hit.CanCollide and hit.Transparency < 0.95
+            local collisionProxy = hit:GetAttribute("EverLeafCollisionProxy") == true
+            blocksCamera = hit.CanCollide and (hit.Transparency < 0.95 or collisionProxy)
         end
 
         if blocksCamera then

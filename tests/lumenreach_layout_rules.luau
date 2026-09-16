@@ -6,7 +6,7 @@ for _, required in
     {
         "local WORLD_WIDTH = 2200",
         "local WORLD_DEPTH = 1250",
-        "local WORLD_DESIGN_VERSION = 10",
+        "local WORLD_DESIGN_VERSION = 11",
         'world:SetAttribute("WorldDesignVersion", WORLD_DESIGN_VERSION)',
         'world:SetAttribute("TerrainFirstMMOLayout", true)',
         "terrain:Clear()",
@@ -383,16 +383,15 @@ assert(
 )
 
 assert(
-    string.find(source, "local SOLID_VISUAL_PARTS = table.freeze", 1, true) ~= nil
-        and string.find(source, "local function normalizeGeneratedCollisions", 1, true) ~= nil
+    string.find(source, "local function normalizeGeneratedCollisions", 1, true) ~= nil
         and string.find(
-                source,
-                'descendant:GetAttribute("EverLeafCollisionProxy") == true',
-                1,
-                true
-            )
-            ~= nil,
-    "V10 must centralize Lumenreach collision policy instead of relying on incidental Part defaults"
+            source,
+            'descendant:GetAttribute("EverLeafCollisionProxy") == true',
+            1,
+            true
+        ) ~= nil
+        and string.find(source, "descendant.CanQuery = true", 1, true) ~= nil,
+    "V11 must use explicit queryable collision proxies instead of incidental visual-part collision"
 )
 assert(
     string.find(source, "part.CanCollide = false", 1, true) ~= nil
@@ -400,10 +399,58 @@ assert(
         and string.find(source, "part.CanCollide = true", 1, true) ~= nil,
     "generated render geometry must default non-collidable while explicit collision proxies stay solid"
 )
+for _, requiredProxy in
+    {
+        '"BuildingFloorCollision"',
+        '"BuildingBackWallCollision"',
+        '"BenchCollision"',
+        '"HearthCollision"',
+        '"MarketCounterCollision"',
+        '"WatchtowerPostCollision"',
+        '"FenceCollision"',
+        '"DockCollision"',
+        '"RuinWallCollision"',
+        '"SupplyStackCollision"',
+        '"ShrinePillarCollision"',
+        '"CartBodyCollision"',
+        '"ForgeBodyCollision"',
+        '"WellCollision"',
+        '"TrainingPostCollision"',
+        '"StiltFloorCollision"',
+        '"MausoleumBackCollision"',
+        '"ObservatoryPillarCollision"',
+        '"SanctuaryPillarCollision"',
+        '"FortressTowerCollision"',
+        '"GrandstandTierCollision"',
+        '"MonumentDaisCollision"',
+        '"TownGatePostCollision"',
+        '"RingStoneCollision"',
+        '"PathDisciplinePlinthCollision"',
+        '"ArchPillarCollision"',
+        '"GraveMarkerCollision"',
+    }
+do
+    assert(
+        string.find(source, requiredProxy, 1, true) ~= nil,
+        "missing V11 collision coverage: " .. requiredProxy
+    )
+end
 assert(
-    string.find(source, '"FenceCollision"', 1, true) ~= nil
-        and string.find(source, '"DockCollision"', 1, true) ~= nil,
-    "fences and docks must use simple collision proxies instead of snag-prone decorative pieces"
+    string.find(source, 'prefabName == "MossyRockSet"', 1, true) ~= nil
+        and string.find(source, 'prefabName == "FallenTreeTrunk"', 1, true) ~= nil
+        and string.find(source, 'prefabName == "PineRoots"', 1, true) ~= nil,
+    "large imported dressing must receive simple collision proxies rather than remain ghost geometry"
+)
+assert(
+    string.find(source, "local function findTreeTrunkPart", 1, true) ~= nil
+        and string.find(
+                source,
+                "local trunkPosition = if trunk then trunk.Position else ground",
+                1,
+                true
+            )
+            ~= nil,
+    "tree collision must align to the imported trunk rather than assuming the prefab pivot is centered"
 )
 assert(
     string.find(source, "normalizeGeneratedCollisions(world)", 1, true) ~= nil

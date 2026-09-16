@@ -16,7 +16,7 @@ local LumenreachWorldService = {}
 local GENERATED_NAME = "EverLeafGeneratedWorld"
 local WORLD_WIDTH = 2200
 local WORLD_DEPTH = 1250
-local WORLD_DESIGN_VERSION = 10
+local WORLD_DESIGN_VERSION = 11
 
 -- Lumenreach is authored as a terrain-first MMORPG region. The generator below
 -- replaces the previous showcase composition completely: terrain is cleared,
@@ -268,7 +268,9 @@ local function makeCollisionProxy(parent, name, size, cframe)
     part.Transparency = 1
     part.CanCollide = true
     part.CanTouch = false
-    part.CanQuery = false
+    -- Collision proxies represent actual world solids. Keep them queryable so
+    -- camera/LOS/projectile raycasts obey the same geometry players collide with.
+    part.CanQuery = true
     part.CastShadow = false
     part:SetAttribute("EverLeafCollisionProxy", true)
     return part
@@ -287,6 +289,27 @@ local function setRenderOnly(instance)
             descendant.CanQuery = false
         end
     end
+end
+
+local function makeBoundingCollisionProxy(parent, source, name, scale)
+    local boxCFrame
+    local boxSize
+    if source:IsA("Model") then
+        boxCFrame, boxSize = source:GetBoundingBox()
+    elseif source:IsA("BasePart") then
+        boxCFrame = source.CFrame
+        boxSize = source.Size
+    else
+        return nil
+    end
+
+    scale = scale or Vector3.new(1, 1, 1)
+    local size = Vector3.new(
+        math.max(0.5, boxSize.X * scale.X),
+        math.max(0.5, boxSize.Y * scale.Y),
+        math.max(0.5, boxSize.Z * scale.Z)
+    )
+    return makeCollisionProxy(parent, name, size, boxCFrame)
 end
 
 local function distanceToSegmentXZ(point, a, b)
@@ -676,6 +699,35 @@ local function prefabScaleForHeight(prefabName, targetHeight)
     return targetHeight / size.Y
 end
 
+local function findTreeTrunkPart(instance)
+    local best = nil
+    local bestScore = -math.huge
+    local candidates = { instance }
+    for _, descendant in instance:GetDescendants() do
+        table.insert(candidates, descendant)
+    end
+
+    for _, candidate in candidates do
+        if candidate:IsA("BasePart") then
+            local lower = string.lower(candidate.Name)
+            local nameScore = 0
+            if string.find(lower, "trunk", 1, true) then
+                nameScore = 1000
+            elseif string.find(lower, "stem", 1, true) then
+                nameScore = 700
+            elseif string.find(lower, "tree", 1, true) then
+                nameScore = 250
+            end
+            local score = nameScore + candidate.Size.Y * 2
+            if score > bestScore then
+                best = candidate
+                bestScore = score
+            end
+        end
+    end
+    return best
+end
+
 local function placeTree(parent, position, targetHeight, yaw)
     local prefab = EnvironmentPrefabService.Get("TreePrimary")
     if not prefab then
@@ -692,11 +744,15 @@ local function placeTree(parent, position, targetHeight, yaw)
         return nil
     end
     setRenderOnly(placed)
+    local trunk = findTreeTrunkPart(placed)
+    local trunkHeight = math.clamp(targetHeight * 0.42, 6.5, 13)
+    local trunkRadius = math.clamp(targetHeight * 0.065, 1.25, 2.5)
+    local trunkPosition = if trunk then trunk.Position else ground
     makeCollisionProxy(
         placed,
         "TreeTrunkCollision",
-        Vector3.new(3.2, math.clamp(targetHeight * 0.38, 7, 13), 3.2),
-        CFrame.new(ground + Vector3.new(0, math.clamp(targetHeight * 0.19, 3.5, 6.5), 0))
+        Vector3.new(trunkRadius * 2, trunkHeight, trunkRadius * 2),
+        CFrame.new(trunkPosition.X, ground.Y + trunkHeight * 0.5, trunkPosition.Z)
     )
     return placed
 end
@@ -749,6 +805,28 @@ local function placeDressingPrefab(parent, prefabName, position, yaw, targetLong
     if placed then
         setRenderOnly(placed)
         placed:SetAttribute("LumenreachDressing", true)
+
+        -- Large scenery is physical, but imported mesh hulls are not trusted for
+        -- gameplay collision. Use one predictable shrunken box per solid prop.
+        local collisionScale = nil
+        if prefabName == "MossyRockSet" then
+            collisionScale = Vector3.new(0.72, 0.72, 0.72)
+        elseif prefabName == "TreeStump" or prefabName == "TreeStump2" then
+            collisionScale = Vector3.new(0.70, 0.82, 0.70)
+        elseif prefabName == "FallenTreeTrunk" or prefabName == "FallenTreeTrunk2" then
+            collisionScale = Vector3.new(0.80, 0.62, 0.76)
+        elseif prefabName == "PineRoots" then
+            collisionScale = Vector3.new(0.74, 0.46, 0.74)
+        end
+        if collisionScale then
+            local collisionParent = if placed:IsA("Model") then placed else parent
+            makeBoundingCollisionProxy(
+                collisionParent,
+                placed,
+                prefabName .. "Collision",
+                collisionScale
+            )
+        end
     end
     return placed
 end
@@ -1209,6 +1287,43 @@ local function makeBuilding(parent, name, center, width, depth, height, yaw, acc
         timber
     )
     lintel.CanCollide = false
+
+    makeCollisionProxy(
+        model,
+        "BuildingFloorCollision",
+        Vector3.new(width, 0.9, depth),
+        base * CFrame.new(0, 0.78, 0)
+    )
+    makeCollisionProxy(
+        model,
+        "BuildingBackWallCollision",
+        Vector3.new(width, height, 1.05),
+        base * CFrame.new(0, height * 0.5 + 0.8, depth * 0.5)
+    )
+    makeCollisionProxy(
+        model,
+        "BuildingLeftWallCollision",
+        Vector3.new(1.05, height, depth),
+        base * CFrame.new(-width * 0.5, height * 0.5 + 0.8, 0)
+    )
+    makeCollisionProxy(
+        model,
+        "BuildingRightWallCollision",
+        Vector3.new(1.05, height, depth),
+        base * CFrame.new(width * 0.5, height * 0.5 + 0.8, 0)
+    )
+    makeCollisionProxy(
+        model,
+        "BuildingFrontLeftCollision",
+        Vector3.new(sideWidth, height, 1.05),
+        base * CFrame.new(-(doorWidth + sideWidth) * 0.5, height * 0.5 + 0.8, -depth * 0.5)
+    )
+    makeCollisionProxy(
+        model,
+        "BuildingFrontRightCollision",
+        Vector3.new(sideWidth, height, 1.05),
+        base * CFrame.new((doorWidth + sideWidth) * 0.5, height * 0.5 + 0.8, -depth * 0.5)
+    )
     return model
 end
 
@@ -1246,6 +1361,12 @@ local function makeBench(parent, position, yaw)
             wood
         )
     end
+    makeCollisionProxy(
+        model,
+        "BenchCollision",
+        Vector3.new(7.7, 2.5, 2.2),
+        base * CFrame.new(0, 1.25, 0)
+    )
     return model
 end
 
@@ -1289,6 +1410,12 @@ local function makeHearth(parent, position)
     light.Range = 22
     light.Shadows = true
     light.Parent = ember
+    makeCollisionProxy(
+        model,
+        "HearthCollision",
+        Vector3.new(8.6, 1.8, 8.6),
+        CFrame.new(ground + Vector3.new(0, 0.9, 0))
+    )
     return model
 end
 
@@ -1382,6 +1509,18 @@ local function makeMarketStall(parent, position, yaw, accent)
         crate.CanTouch = false
         crate.CanQuery = false
     end
+    makeCollisionProxy(
+        model,
+        "MarketCounterCollision",
+        Vector3.new(11.6, 2.8, 2.6),
+        base * CFrame.new(0, 1.4, -0.55)
+    )
+    makeCollisionProxy(
+        model,
+        "MarketBackCollision",
+        Vector3.new(10.9, 4.9, 0.7),
+        base * CFrame.new(0, 2.45, 2.55)
+    )
     return model
 end
 
@@ -1432,6 +1571,22 @@ local function makeWatchtower(parent, position, yaw)
         )
         railB.CanCollide = false
     end
+    for _, x in { -1, 1 } do
+        for _, z in { -1, 1 } do
+            makeCollisionProxy(
+                model,
+                "WatchtowerPostCollision",
+                Vector3.new(1.35, 13, 1.35),
+                base * CFrame.new(x * 4.4, 6.5, z * 4.4)
+            )
+        end
+    end
+    makeCollisionProxy(
+        model,
+        "WatchtowerDeckCollision",
+        Vector3.new(11, 0.9, 11),
+        base * CFrame.new(0, 12.3, 0)
+    )
     return model
 end
 
@@ -1493,6 +1648,12 @@ local function makeRuinWall(parent, position, yaw, length, height)
             Color3.fromRGB(75, 84, 82)
         )
     end
+    makeCollisionProxy(
+        model,
+        "RuinWallCollision",
+        Vector3.new(length, math.max(2.5, height * 0.78), 3.0),
+        base * CFrame.new(0, math.max(2.5, height * 0.78) * 0.5, 0)
+    )
     return model
 end
 
@@ -1531,6 +1692,26 @@ local function makeOverlookDeck(parent, position, yaw, width, depth)
         wood
     )
     front.CanCollide = false
+    makeCollisionProxy(
+        model,
+        "OverlookDeckCollision",
+        Vector3.new(width, 0.8, depth),
+        base * CFrame.new(0, 0.6, 0)
+    )
+    for _, side in { -1, 1 } do
+        makeCollisionProxy(
+            model,
+            "OverlookRailCollision",
+            Vector3.new(0.65, 2.3, depth),
+            base * CFrame.new(side * width * 0.5, 1.7, 0)
+        )
+    end
+    makeCollisionProxy(
+        model,
+        "OverlookFrontRailCollision",
+        Vector3.new(width, 2.3, 0.65),
+        base * CFrame.new(0, 1.7, -depth * 0.5)
+    )
     return model
 end
 
@@ -1563,6 +1744,12 @@ local function makeLumenPylon(parent, position, height)
     light.Brightness = 1.0
     light.Range = 15
     light.Parent = glow
+    makeCollisionProxy(
+        model,
+        "PylonCollision",
+        Vector3.new(3.5, height, 3.5),
+        CFrame.new(ground + Vector3.new(0, height * 0.5, 0))
+    )
     return model
 end
 
@@ -1657,6 +1844,12 @@ local function makeSupplyStack(parent, position, yaw, scale)
     barrel.CanCollide = false
     barrel.CanTouch = false
     barrel.CanQuery = false
+    makeCollisionProxy(
+        model,
+        "SupplyStackCollision",
+        Vector3.new(7.4, 3.8, 5.2) * scale,
+        base * CFrame.new(0.45 * scale, 1.9 * scale, 0.15 * scale)
+    )
     return model
 end
 
@@ -1689,6 +1882,14 @@ local function makeRoadsideShelter(parent, name, position, yaw)
     roof.CanCollide = false
     roof.CanTouch = false
     roof.CanQuery = false
+    for _, x in { -5.5, 5.5 } do
+        makeCollisionProxy(
+            model,
+            "ShelterPostCollision",
+            Vector3.new(1.0, 7.2, 1.0),
+            base * CFrame.new(x, 3.6, 0)
+        )
+    end
     makeBench(model, position + Vector3.new(0, 0, 1), yaw or 0)
     return model
 end
@@ -1743,6 +1944,20 @@ local function makeStoneShrine(parent, name, position, yaw, accent)
     light.Brightness = 1.1
     light.Range = 18
     light.Parent = lumen
+    makeCollisionProxy(
+        model,
+        "ShrineBaseCollision",
+        Vector3.new(14, 1.3, 10),
+        base * CFrame.new(0, 0.65, 0)
+    )
+    for _, x in { -4.8, 4.8 } do
+        makeCollisionProxy(
+            model,
+            "ShrinePillarCollision",
+            Vector3.new(2.5, 9.5, 2.5),
+            base * CFrame.new(x, 5.4, 0)
+        )
+    end
     return model
 end
 
@@ -1770,6 +1985,12 @@ local function makeRuinedHall(parent, name, center, width, depth, yaw)
         7
     )
     makeRuinWall(model, center + (base.LookVector * (depth * 0.44)), yaw, width * 0.8, 9)
+    makeCollisionProxy(
+        model,
+        "RuinFloorCollision",
+        Vector3.new(width, 0.9, depth),
+        base * CFrame.new(0, 0.45, 0)
+    )
     for _, offset in
         { Vector3.new(-width * 0.28, 0, -depth * 0.2), Vector3.new(width * 0.23, 0, depth * 0.14) }
     do
@@ -1781,6 +2002,12 @@ local function makeRuinedHall(parent, name, center, width, depth, yaw)
             CFrame.new(pillarGround + Vector3.new(0, 4, 0)),
             Enum.Material.Slate,
             stone
+        )
+        makeCollisionProxy(
+            model,
+            "BrokenPillarCollision",
+            Vector3.new(3.2, 8, 3.2),
+            CFrame.new(pillarGround + Vector3.new(0, 4, 0))
         )
     end
     return model
@@ -1813,6 +2040,14 @@ local function makeGatehouse(parent, name, position, yaw, width)
         Color3.fromRGB(62, 72, 69)
     )
     beam.CanCollide = false
+    for _, side in { -1, 1 } do
+        makeCollisionProxy(
+            model,
+            "GateTowerCollision",
+            Vector3.new(8.2, 17, 10.2),
+            base * CFrame.new(side * width * 0.5, 8.5, 0)
+        )
+    end
     return model
 end
 
@@ -1846,6 +2081,12 @@ local function makeSignatureCrystal(parent, name, base, height, color)
     light.Range = 12
     light.Shadows = false
     light.Parent = crystal
+    makeCollisionProxy(
+        parent,
+        name .. "Collision",
+        Vector3.new(1.45, height, 1.45),
+        base * CFrame.new(0, height * 0.5, 0)
+    )
     return crystal
 end
 
@@ -1895,6 +2136,12 @@ local function makeWayfarerBanner(parent, name, position, yaw, accent)
     sigil.CanCollide = false
     sigil.CanTouch = false
     sigil.CanQuery = false
+    makeCollisionProxy(
+        model,
+        "BannerPoleCollision",
+        Vector3.new(0.8, 10.5, 0.8),
+        base * CFrame.new(0, 5.25, 0)
+    )
     return model
 end
 
@@ -1979,6 +2226,14 @@ local function makeWayfarerStreetArch(parent, name, position, yaw, width, accent
     crest.CanCollide = false
     crest.CanTouch = false
     crest.CanQuery = false
+    for _, side in { -1, 1 } do
+        makeCollisionProxy(
+            model,
+            "ArchPostCollision",
+            Vector3.new(2.45, 12, 2.45),
+            base * CFrame.new(side * width * 0.5, 6, 0)
+        )
+    end
     return model
 end
 
@@ -2054,6 +2309,18 @@ local function makeWayfarerCart(parent, name, position, yaw, loaded)
             cargo.CanQuery = false
         end
     end
+    makeCollisionProxy(
+        model,
+        "CartBodyCollision",
+        Vector3.new(9.5, 5.0, 6.2),
+        base * CFrame.new(0, 2.5, 0)
+    )
+    makeCollisionProxy(
+        model,
+        "CartShaftCollision",
+        Vector3.new(4.2, 1.2, 10.0),
+        base * CFrame.new(0, 2.2, -7.0)
+    )
     return model
 end
 
@@ -2141,6 +2408,26 @@ local function makeForgeYard(parent, name, position, yaw)
     awning.CanCollide = false
     awning.CanTouch = false
     awning.CanQuery = false
+    makeCollisionProxy(
+        model,
+        "ForgeBodyCollision",
+        Vector3.new(7.2, 13.0, 6.2),
+        base * CFrame.new(-4.5, 6.5, 1.2)
+    )
+    makeCollisionProxy(
+        model,
+        "ForgeAnvilCollision",
+        Vector3.new(4.5, 4.2, 2.3),
+        base * CFrame.new(4.8, 2.1, -1.0)
+    )
+    for _, x in { -8.5, 8.5 } do
+        makeCollisionProxy(
+            model,
+            "ForgeAwningPostCollision",
+            Vector3.new(0.9, 7.2, 0.9),
+            base * CFrame.new(x, 3.6, 6.1)
+        )
+    end
     return model
 end
 
@@ -2184,6 +2471,12 @@ local function makeLumenWell(parent, name, position, accent)
         4.2,
         accent or SIGNATURE.Lumen
     )
+    makeCollisionProxy(
+        model,
+        "WellCollision",
+        Vector3.new(10.8, 2.6, 10.8),
+        base * CFrame.new(0, 1.3, 0)
+    )
     return model
 end
 
@@ -2223,6 +2516,14 @@ local function makeTrainingGround(parent, name, position, yaw)
         core.CanCollide = false
         core.CanTouch = false
         core.CanQuery = false
+    end
+    for index, x in { -10, 0, 10 } do
+        makeCollisionProxy(
+            model,
+            "TrainingPostCollision" .. index,
+            Vector3.new(1.7, 7.2, 1.7),
+            base * CFrame.new(x, 3.6, 0)
+        )
     end
     for _, z in { -9, 9 } do
         makeFenceLine(
@@ -2312,6 +2613,42 @@ local function makeGlowmereStiltHouse(parent, name, position, yaw, accent)
         2.2,
         accent or Color3.fromRGB(112, 226, 211)
     )
+    for _, x in { -6.5, 6.5 } do
+        for _, z in { -5.0, 5.0 } do
+            makeCollisionProxy(
+                model,
+                "StiltCollision",
+                Vector3.new(1.15, 8.0, 1.15),
+                base * CFrame.new(x, 4.0, z)
+            )
+        end
+    end
+    makeCollisionProxy(
+        model,
+        "StiltFloorCollision",
+        Vector3.new(15.5, 0.9, 12.5),
+        base * CFrame.new(0, floorY, 0)
+    )
+    makeCollisionProxy(
+        model,
+        "StiltBackWallCollision",
+        Vector3.new(15.5, 7.0, 1.0),
+        base * CFrame.new(0, floorY + 3.5, 5.8)
+    )
+    for _, x in { -7.0, 7.0 } do
+        makeCollisionProxy(
+            model,
+            "StiltSideWallCollision",
+            Vector3.new(1.0, 7.0, 12.0),
+            base * CFrame.new(x, floorY + 3.5, 0)
+        )
+    end
+    makeCollisionProxy(
+        model,
+        "StiltPorchCollision",
+        Vector3.new(10, 0.8, 5.5),
+        base * CFrame.new(0, floorY, -8.3)
+    )
     return model
 end
 
@@ -2352,15 +2689,19 @@ local function makeReedDock(parent, name, position, yaw, length)
         Vector3.new(7.6, 0.7, length + 2.5),
         base * CFrame.new(0, 0.95, -length * 0.5)
     )
+    local skiffCFrame = base
+        * CFrame.new(8.2, 0.7, -length * 0.55)
+        * CFrame.Angles(math.rad(4), 0, 0)
     local skiff = makePart(
         model,
         "WayfarerSkiff",
         Vector3.new(5.2, 1.2, 13.0),
-        base * CFrame.new(8.2, 0.7, -length * 0.55) * CFrame.Angles(math.rad(4), 0, 0),
+        skiffCFrame,
         Enum.Material.WoodPlanks,
         Color3.fromRGB(92, 68, 45)
     )
     skiff.CanCollide = false
+    makeCollisionProxy(model, "SkiffCollision", Vector3.new(5.4, 1.5, 13.0), skiffCFrame)
     return model
 end
 
@@ -2412,6 +2753,26 @@ local function makeGraveboneMausoleum(parent, name, position, yaw)
         4.6,
         Color3.fromRGB(128, 196, 170)
     )
+    makeCollisionProxy(
+        model,
+        "MausoleumBaseCollision",
+        Vector3.new(18, 1.5, 16),
+        base * CFrame.new(0, 0.75, 0)
+    )
+    for _, x in { -7, 7 } do
+        makeCollisionProxy(
+            model,
+            "MausoleumPillarCollision",
+            Vector3.new(3.4, 11, 3.4),
+            base * CFrame.new(x, 6.1, -5.5)
+        )
+    end
+    makeCollisionProxy(
+        model,
+        "MausoleumBackCollision",
+        Vector3.new(17, 11, 2.4),
+        base * CFrame.new(0, 6.1, 6.2)
+    )
     return model
 end
 
@@ -2448,6 +2809,12 @@ local function makeMossglenRangerHall(parent, name, position, yaw)
         )
         bow.CanCollide = false
     end
+    makeCollisionProxy(
+        model,
+        "RangerPorchCollision",
+        Vector3.new(28, 0.8, 8),
+        base * CFrame.new(0, 0.8, -18)
+    )
     return model
 end
 
@@ -2511,6 +2878,28 @@ local function makeSunmossObservatory(parent, name, position, yaw)
         3.4,
         Color3.fromRGB(207, 225, 112)
     )
+    makeCollisionProxy(
+        model,
+        "ObservatoryBaseCollision",
+        Vector3.new(24, 1.3, 24),
+        base * CFrame.new(0, 0.65, 0)
+    )
+    for _, x in { -8, 8 } do
+        for _, z in { -8, 8 } do
+            makeCollisionProxy(
+                model,
+                "ObservatoryPillarCollision",
+                Vector3.new(2.3, 15, 2.3),
+                base * CFrame.new(x, 7.5, z)
+            )
+        end
+    end
+    makeCollisionProxy(
+        model,
+        "ObservatoryDeckCollision",
+        Vector3.new(26, 1.1, 26),
+        base * CFrame.new(0, 15.2, 0)
+    )
     return model
 end
 
@@ -2558,6 +2947,22 @@ local function makeVeilfallSanctuary(parent, name, position, yaw)
             7.5 - math.abs(x) * 0.2,
             Color3.fromRGB(115, 226, 225)
         )
+    end
+    makeCollisionProxy(
+        model,
+        "SanctuaryFloorCollision",
+        Vector3.new(32, 1.1, 26),
+        base * CFrame.new(0, 0.55, 0)
+    )
+    for _, x in { -12, 0, 12 } do
+        for _, z in { -9, 9 } do
+            makeCollisionProxy(
+                model,
+                "SanctuaryPillarCollision",
+                Vector3.new(2.5, 13, 2.5),
+                base * CFrame.new(x, 6.5, z)
+            )
+        end
     end
     return model
 end
@@ -2612,6 +3017,12 @@ local function makeShatteredFortressTower(parent, name, position, yaw, brokenSid
             end
         end
     end
+    makeCollisionProxy(
+        model,
+        "FortressTowerCollision",
+        Vector3.new(18.3, 28, 18.3),
+        base * CFrame.new(0, 14, 0)
+    )
     return model
 end
 
@@ -2632,6 +3043,14 @@ local function makeProvingGrandstand(parent, name, position, yaw, width)
             SIGNATURE.TimberLight
         )
         bench.CanCollide = false
+    end
+    for tier = 0, 3 do
+        makeCollisionProxy(
+            model,
+            "GrandstandTierCollision" .. tier,
+            Vector3.new(width, 1.2, 4.5),
+            base * CFrame.new(0, 0.6 + tier * 1.5, tier * 3.7)
+        )
     end
     for _, x in { -width * 0.46, width * 0.46 } do
         local support = makePart(
@@ -2674,6 +3093,12 @@ local function makeFivePathMonument(parent, position)
         makeSignatureCrystal(model, "PathCrystal" .. index, base, 8.5, colors[index])
     end
     makeSignatureCrystal(model, "ConvergenceCrystal", CFrame.new(ground), 12.0, SIGNATURE.Lumen)
+    makeCollisionProxy(
+        model,
+        "MonumentDaisCollision",
+        Vector3.new(26, 1.3, 26),
+        CFrame.new(ground + Vector3.new(0, 0.65, 0))
+    )
     return model
 end
 
@@ -3253,6 +3678,12 @@ local function makeCroftPlot(parent, name, position, yaw, width, depth, accent)
         SIGNATURE.Timber
     )
     arms.CanCollide = false
+    makeCollisionProxy(
+        model,
+        "ScarecrowCollision",
+        Vector3.new(0.9, 6.5, 0.9),
+        base * CFrame.new(width * 0.31, 3.25, -depth * 0.24)
+    )
     return model
 end
 
@@ -4329,6 +4760,12 @@ local function makeTown(parent)
             Enum.Material.Wood,
             Color3.fromRGB(70, 50, 34)
         )
+        makeCollisionProxy(
+            parent,
+            "TownGatePostCollision",
+            Vector3.new(2.3, 11, 2.3),
+            gateBase * CFrame.new(side * 13.5, 5.5, 0)
+        )
     end
     local top = makePart(
         parent,
@@ -4365,6 +4802,12 @@ local function makeStoneCircle(parent, center, radius, count, name)
         stone.CanCollide = false
         stone.CanTouch = false
         stone.CanQuery = false
+        makeCollisionProxy(
+            model,
+            "RingStoneCollision" .. index,
+            Vector3.new(4.5, 1.45, 2.5),
+            stone.CFrame
+        )
     end
     return model
 end
@@ -4404,6 +4847,12 @@ local function makeProvingCircle(parent)
         lumen.CanCollide = false
         lumen.CanTouch = false
         lumen.CanQuery = false
+        makeCollisionProxy(
+            parent,
+            "PathDisciplinePlinthCollision" .. index,
+            Vector3.new(7, 0.9, 7),
+            CFrame.new(ground + Vector3.new(0, 0.45, 0))
+        )
     end
 end
 
@@ -4416,14 +4865,16 @@ local function makeRuins(parent)
     local dark = Color3.fromRGB(64, 72, 69)
 
     for _, x in { -18, 18 } do
+        local pillarCFrame = CFrame.new(origin + Vector3.new(x, 12.5, 0))
         makePart(
             model,
             "ArchPillar",
             Vector3.new(8, 25, 8),
-            CFrame.new(origin + Vector3.new(x, 12.5, 0)),
+            pillarCFrame,
             Enum.Material.Slate,
             stone
         )
+        makeCollisionProxy(model, "ArchPillarCollision", Vector3.new(8.2, 25, 8.2), pillarCFrame)
     end
     makePart(
         model,
@@ -4629,6 +5080,12 @@ local function makeGraveboneSetpiece(parent)
             Color3.fromRGB(72, 78, 76)
         )
         marker.CanCollide = false
+        makeCollisionProxy(
+            parent,
+            "GraveMarkerCollision",
+            Vector3.new(2.3, 4.4, 1.0),
+            marker.CFrame
+        )
     end
 end
 
@@ -5435,64 +5892,25 @@ local function makeExplorationContent(parent)
     makeExplorationTrigger(parent, "shattered_forward_camp", Vector3.new(555, 0, 220), 28)
 end
 
-local SOLID_VISUAL_PARTS = table.freeze({
-    Floor = true,
-    Deck = true,
-    RangerPorch = true,
-    StiltFloor = true,
-    StiltPorch = true,
-    StiltBackWall = true,
-    StiltSideWall = true,
-    MausoleumBase = true,
-    MausoleumPillar = true,
-    MausoleumBack = true,
-    ObservatoryBase = true,
-    ObservatoryPillar = true,
-    ObservatoryDeck = true,
-    SanctuaryFloor = true,
-    SanctuaryPillar = true,
-    FortressTowerCore = true,
-    GateTower = true,
-    ArchPillar = true,
-    ArchPost = true,
-    TownGatePost = true,
-    ShrineBase = true,
-    ShrinePillar = true,
-    TowerPost = true,
-    TowerDeck = true,
-    RuinFloor = true,
-    RuinStone = true,
-    BrokenPillar = true,
-    Pillar = true,
-    MonumentDais = true,
-    PathDisciplinePlinth = true,
-})
-
-local function shouldUseVisibleCollision(part)
-    if SOLID_VISUAL_PARTS[part.Name] then
-        return true
-    end
-    return string.sub(part.Name, 1, 4) == "Wall"
-end
-
 local function normalizeGeneratedCollisions(world)
+    -- V11 rule: generated render geometry never owns movement collision.
+    -- Every physical object is represented by an explicit, simple proxy created
+    -- by its builder. This eliminates mesh/trim/roof/prop snagging and also makes
+    -- missing collision auditable instead of depending on Part defaults/names.
     for _, descendant in world:GetDescendants() do
         if descendant:IsA("BasePart") then
             if descendant:GetAttribute("EverLeafCollisionProxy") == true then
                 descendant.Transparency = 1
                 descendant.CanCollide = true
                 descendant.CanTouch = false
-                descendant.CanQuery = false
+                descendant.CanQuery = true
                 descendant.CastShadow = false
-            elseif descendant:IsA("SpawnLocation") then
+            else
                 descendant.CanCollide = false
                 descendant.CanTouch = false
-                descendant.CanQuery = false
-            else
-                local solid = shouldUseVisibleCollision(descendant)
-                descendant.CanCollide = solid
-                descendant.CanTouch = false
-                descendant.CanQuery = solid
+                if descendant:IsA("SpawnLocation") or descendant.Transparency >= 0.95 then
+                    descendant.CanQuery = false
+                end
             end
         end
     end
