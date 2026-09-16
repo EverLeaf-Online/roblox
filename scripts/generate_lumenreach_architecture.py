@@ -373,7 +373,74 @@ def ruined_hall():
     return join_and_export('LumenRuinedHall')
 
 
-builders=[civic_hall,quartermaster,archive,inn,healer,workshop,stable,proving,road_wayhouse,farm_barn,croft_cottage_a,croft_cottage_b,glowmere_stilt_house,mossglen_ranger_hall,frontier_gatehouse,ruined_hall]
+
+
+def forge_yard():
+    foundation(25,20)
+    add_box('ForgeBody',(-5,1,4.1),(8,7,6.2),'stone',0.14)
+    add_box('ForgeMouth',(-5,-2.6,3.4),(3.8,0.25,2.5),'lumen',0.05)
+    chimney(-5,3.5,10)
+    add_box('AnvilStand',(5,-1,2.0),(2.2,2.2,2.2),'wood',0.08)
+    add_box('Anvil',(5,-1,3.3),(5.2,2.2,1.2),'metal',0.08)
+    for x in (-10,10): add_box('CanopyPost',(x,6,5.0),(0.5,0.5,8.0),'wood',0.05)
+    add_box('CanopyRoof',(0,6,8.9),(22,7.5,0.45),'roof_alt',0.06,rot=(math.radians(6),0,0))
+    add_box('ToolRack',(8,6.2,4.5),(5.5,0.45,6.0),'wood_light',0.05)
+    return join_and_export('LumenForgeYard')
+
+def gravebone_mausoleum():
+    foundation(20,18)
+    add_box('TombBack',(0,7,6.5),(18,2.2,11),'stone',0.12)
+    for x in (-7,7): add_box('TombPillar',(x,-5.5,6.2),(3.0,3.0,11),'stone',0.12)
+    add_box('Entablature',(0,-5.5,11.4),(18,3.2,1.6),'stone',0.10)
+    add_gable('TombCrown',(0,0,0),20,18,12.2,5.5,'roof',0.2)
+    add_box('CryptDoor',(0,5.8,5.2),(5.0,0.3,7.2),'metal',0.06)
+    add_cylinder('MemorialLumen',(0,-7.0,4.5),1.0,6.5,'lumen',8)
+    return join_and_export('LumenGraveboneMausoleum')
+
+def sunmoss_observatory():
+    add_cylinder('ObservatoryBase',(0,0,1.0),13.5,2.0,'stone',12)
+    for x in (-8,8):
+        for y in (-8,8): add_box('ObservatoryPillar',(x,y,8.0),(2.1,2.1,14.0),'stone',0.08)
+    add_cylinder('ObservatoryDeck',(0,0,15.2),14.5,1.0,'wood_light',12)
+    add_cylinder('ScopePivot',(0,0,18.0),2.4,4.0,'metal',10)
+    add_cylinder('ScopeTube',(0,-3.5,23.0),3.0,15.0,'metal',12,rot=(math.radians(58),0,0))
+    add_cylinder('ScopeLens',(0,-9.5,27.3),2.2,0.7,'lumen',12,rot=(math.radians(58),0,0))
+    for a in range(0,360,60):
+        r=11.5; x=math.cos(math.radians(a))*r; y=math.sin(math.radians(a))*r
+        add_box('RailPost',(x,y,17.0),(0.35,0.35,3.0),'metal',0.04)
+    return join_and_export('LumenSunmossObservatory')
+
+def veilfall_sanctuary():
+    add_box('SanctuaryFloor',(0,0,0.65),(34,27,1.3),'stone',0.12)
+    for x in (-12,0,12):
+        for y in (-9,9): add_box('SanctuaryPillar',(x,y,7.0),(2.2,2.2,13.0),'stone',0.08)
+    add_box('RearBeam',(0,9,13.0),(31,3.0,2.0),'stone',0.08)
+    add_box('FrontBeam',(0,-9,13.0),(31,2.0,1.4),'wood',0.06)
+    add_box('Canopy',(0,0,14.4),(30,20,0.55),'roof_alt',0.08)
+    for x in (-8,0,8): add_cylinder('SanctuaryLumen',(x,0,5.0),0.9,7.0,'lumen',8)
+    return join_and_export('LumenVeilfallSanctuary')
+
+def shattered_tower():
+    add_box('TowerCore',(0,0,14),(18,18,28),'stone',0.12)
+    add_box('TowerBand',(0,0,21),(20,20,2.0),'metal',0.06)
+    for x in (-7,0,7):
+        for y in (-8.7,8.7):
+            if not (x==7 and y>0): add_box('Merlon',(x,y,30.5),(4.0,2.6,5.0),'stone',0.07)
+    for y in (-7,0,7):
+        for x in (-8.7,8.7):
+            if not (y==-7 and x<0): add_box('Merlon',(x,y,30.5),(2.6,4.0,5.0),'stone',0.07)
+    add_box('BrokenButtress',(9.5,6.5,8.0),(4.0,5.0,12.0),'stone',0.10,rot=(0,0,math.radians(-8)))
+    return join_and_export('LumenShatteredFortressTower')
+
+def stone_shrine():
+    add_box('ShrineBase',(0,0,0.65),(15,11,1.3),'stone',0.12)
+    for x in (-5,5): add_box('ShrinePillar',(x,0,5.5),(2.1,2.1,9.5),'stone',0.08)
+    add_box('ShrineCrown',(0,0,10.6),(14,3.2,2.0),'stone',0.08)
+    add_box('ShrineCanopy',(0,0,12.0),(16,8,0.5),'roof_alt',0.06,rot=(0,math.radians(3),0))
+    add_box('ShrineLumen',(0,-2.0,5.3),(2.2,0.55,6.2),'lumen',0.05)
+    return join_and_export('LumenStoneShrine')
+
+builders=[civic_hall,quartermaster,archive,inn,healer,workshop,stable,proving,road_wayhouse,farm_barn,croft_cottage_a,croft_cottage_b,glowmere_stilt_house,mossglen_ranger_hall,frontier_gatehouse,ruined_hall,forge_yard,gravebone_mausoleum,sunmoss_observatory,veilfall_sanctuary,shattered_tower,stone_shrine]
 manifest={}
 for fn in builders:
     clear(); M=materials(); globals()['M']=M

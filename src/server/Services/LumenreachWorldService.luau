@@ -16,7 +16,7 @@ local LumenreachWorldService = {}
 local GENERATED_NAME = "EverLeafGeneratedWorld"
 local WORLD_WIDTH = 2200
 local WORLD_DEPTH = 1250
-local WORLD_DESIGN_VERSION = 17
+local WORLD_DESIGN_VERSION = 18
 
 -- Lumenreach is authored as a terrain-first MMORPG region. The generator below
 -- replaces the previous showcase composition completely: terrain is cleared,
@@ -274,18 +274,6 @@ local function makeCollisionProxy(parent, name, size, cframe)
     part.CastShadow = false
     part:SetAttribute("EverLeafCollisionProxy", true)
     return part
-end
-
-local function makeWedgeCollisionProxy(parent, name, size, cframe)
-    local wedge =
-        makeWedge(parent, name, size, cframe, Enum.Material.SmoothPlastic, Color3.new(0, 0, 0))
-    wedge.Transparency = 1
-    wedge.CanCollide = true
-    wedge.CanTouch = false
-    wedge.CanQuery = true
-    wedge.CastShadow = false
-    wedge:SetAttribute("EverLeafCollisionProxy", true)
-    return wedge
 end
 
 local function makePartSurfaceCollisionProxy(parent, source, name, extraSize)
@@ -1829,71 +1817,12 @@ local function makeRoadsideShelter(parent, name, position, yaw)
     return model
 end
 
-local function makeStoneShrine(parent, name, position, yaw, accent)
-    local ground = terrainSurfacePosition(position, 0)
-    local model = Instance.new("Model")
-    model.Name = name
-    model.Parent = parent
-    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
-    local stone = Color3.fromRGB(78, 88, 83)
-    makePart(
-        model,
-        "ShrineBase",
-        Vector3.new(14, 1.2, 10),
-        base * CFrame.new(0, 0.6, 0),
-        Enum.Material.Slate,
-        stone
-    )
-    for _, x in { -4.8, 4.8 } do
-        makePart(
-            model,
-            "ShrinePillar",
-            Vector3.new(2.2, 9.5, 2.2),
-            base * CFrame.new(x, 5.4, 0),
-            Enum.Material.Slate,
-            stone
-        )
-    end
-    local crown = makePart(
-        model,
-        "ShrineCrown",
-        Vector3.new(13, 2.0, 3.0),
-        base * CFrame.new(0, 10.2, 0),
-        Enum.Material.Slate,
-        Color3.fromRGB(65, 76, 72)
-    )
-    crown.CanCollide = false
-    local lumen = makePart(
-        model,
-        "ShrineLumen",
-        Vector3.new(2.4, 5.6, 0.6),
-        base * CFrame.new(0, 5.2, -1.8),
-        Enum.Material.Neon,
-        accent or Color3.fromRGB(104, 231, 188)
-    )
-    lumen.CanCollide = false
-    lumen.CanTouch = false
-    lumen.CanQuery = false
-    local light = Instance.new("PointLight")
-    light.Color = lumen.Color
-    light.Brightness = 1.1
-    light.Range = 18
-    light.Parent = lumen
-    makeCollisionProxy(
-        model,
-        "ShrineBaseCollision",
-        Vector3.new(14, 1.3, 10),
-        base * CFrame.new(0, 0.65, 0)
-    )
-    for _, x in { -4.8, 4.8 } do
-        makeCollisionProxy(
-            model,
-            "ShrinePillarCollision",
-            Vector3.new(2.5, 9.5, 2.5),
-            base * CFrame.new(x, 5.4, 0)
-        )
-    end
-    return model
+local function makeStoneShrine(parent, name, position, yaw, _accent)
+    return placeArchitecturePrefabBuilding(parent, name, "LumenStoneShrine", position, yaw, 22, {
+        { Size = Vector3.new(15, 1.4, 11), Offset = Vector3.new(0, 0.7, 0) },
+        { Size = Vector3.new(2.4, 10, 2.4), Offset = Vector3.new(-5, 5, 0) },
+        { Size = Vector3.new(2.4, 10, 2.4), Offset = Vector3.new(5, 5, 0) },
+    })
 end
 
 local function makeRuinedHall(parent, name, center, width, depth, yaw)
@@ -2204,110 +2133,12 @@ local function makeWayfarerCart(parent, name, position, yaw, loaded)
 end
 
 local function makeForgeYard(parent, name, position, yaw)
-    local ground = terrainSurfacePosition(position, 0)
-    local model = Instance.new("Model")
-    model.Name = name
-    model.Parent = parent
-    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
-    local pad = makePart(
-        model,
-        "ForgePad",
-        Vector3.new(22, 0.8, 17),
-        base * CFrame.new(0, 0.4, 0),
-        Enum.Material.Slate,
-        SIGNATURE.SlateDark
-    )
-    pad.CanCollide = false
-    local forge = makePart(
-        model,
-        "ForgeBody",
-        Vector3.new(7, 5, 6),
-        base * CFrame.new(-4.5, 2.8, 1.2),
-        Enum.Material.Brick,
-        Color3.fromRGB(74, 68, 61)
-    )
-    forge.CanCollide = false
-    local mouth = makePart(
-        model,
-        "ForgeMouth",
-        Vector3.new(3.4, 2.2, 0.5),
-        base * CFrame.new(-4.5, 2.6, -1.9),
-        Enum.Material.Neon,
-        Color3.fromRGB(255, 147, 66)
-    )
-    mouth.CanCollide = false
-    mouth.CanTouch = false
-    mouth.CanQuery = false
-    local chimney = makePart(
-        model,
-        "ForgeChimney",
-        Vector3.new(2.8, 10, 2.8),
-        base * CFrame.new(-4.5, 8.0, 1.2),
-        Enum.Material.Brick,
-        Color3.fromRGB(65, 62, 58)
-    )
-    chimney.CanCollide = false
-    local anvil = makePart(
-        model,
-        "ForgeAnvil",
-        Vector3.new(4.2, 1.2, 2.0),
-        base * CFrame.new(4.8, 3.0, -1.0),
-        Enum.Material.Metal,
-        Color3.fromRGB(84, 91, 91)
-    )
-    anvil.CanCollide = false
-    local stand = makePart(
-        model,
-        "AnvilStand",
-        Vector3.new(1.8, 2.4, 1.8),
-        base * CFrame.new(4.8, 1.2, -1.0),
-        Enum.Material.Wood,
-        SIGNATURE.Timber
-    )
-    stand.CanCollide = false
-    for _, x in { -8.5, 8.5 } do
-        local post = makePart(
-            model,
-            "ForgeAwningPost",
-            Vector3.new(0.6, 9.0, 0.6),
-            base * CFrame.new(x, 4.5, 6.7),
-            Enum.Material.Wood,
-            SIGNATURE.Timber
-        )
-        post.CanCollide = false
-    end
-    local awning = makePart(
-        model,
-        "ForgeAwning",
-        Vector3.new(19, 0.5, 6.5),
-        base * CFrame.new(0, 8.9, 6.3) * CFrame.Angles(math.rad(-7), 0, 0),
-        Enum.Material.Fabric,
-        Color3.fromRGB(124, 83, 57)
-    )
-    awning.CanCollide = false
-    awning.CanTouch = false
-    awning.CanQuery = false
-    makeCollisionProxy(
-        model,
-        "ForgeBodyCollision",
-        Vector3.new(7.2, 13.0, 6.2),
-        base * CFrame.new(-4.5, 6.5, 1.2)
-    )
-    makeCollisionProxy(
-        model,
-        "ForgeAnvilCollision",
-        Vector3.new(4.5, 4.2, 2.3),
-        base * CFrame.new(4.8, 2.1, -1.0)
-    )
-    for _, x in { -8.5, 8.5 } do
-        makeCollisionProxy(
-            model,
-            "ForgeAwningPostCollision",
-            Vector3.new(0.9, 7.2, 0.9),
-            base * CFrame.new(x, 3.6, 6.1)
-        )
-    end
-    return model
+    return placeArchitecturePrefabBuilding(parent, name, "LumenForgeYard", position, yaw, 34, {
+        { Size = Vector3.new(8, 13, 7), Offset = Vector3.new(-5, 6.5, 1) },
+        { Size = Vector3.new(5.5, 4.5, 2.5), Offset = Vector3.new(5, 2.25, -1) },
+        { Size = Vector3.new(1, 8, 1), Offset = Vector3.new(-10, 4, 6) },
+        { Size = Vector3.new(1, 8, 1), Offset = Vector3.new(10, 4, 6) },
+    })
 end
 
 local function makeLumenWell(parent, name, position, accent)
@@ -2490,75 +2321,20 @@ local function makeReedDock(parent, name, position, yaw, length)
 end
 
 local function makeGraveboneMausoleum(parent, name, position, yaw)
-    local ground = terrainSurfacePosition(position, 0)
-    local model = Instance.new("Model")
-    model.Name = name
-    model.Parent = parent
-    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
-    makePart(
-        model,
-        "MausoleumBase",
-        Vector3.new(18, 1.4, 16),
-        base * CFrame.new(0, 0.7, 0),
-        Enum.Material.Slate,
-        SIGNATURE.SlateDark
+    return placeArchitecturePrefabBuilding(
+        parent,
+        name,
+        "LumenGraveboneMausoleum",
+        position,
+        yaw,
+        30,
+        {
+            { Size = Vector3.new(20, 1.5, 18), Offset = Vector3.new(0, 0.75, 0) },
+            { Size = Vector3.new(18, 11, 2.5), Offset = Vector3.new(0, 6, 7) },
+            { Size = Vector3.new(3.4, 11, 3.4), Offset = Vector3.new(-7, 6, -5.5) },
+            { Size = Vector3.new(3.4, 11, 3.4), Offset = Vector3.new(7, 6, -5.5) },
+        }
     )
-    for _, x in { -7, 7 } do
-        makePart(
-            model,
-            "MausoleumPillar",
-            Vector3.new(3.2, 11, 3.2),
-            base * CFrame.new(x, 6.1, -5.5),
-            Enum.Material.Slate,
-            SIGNATURE.Slate
-        )
-    end
-    makePart(
-        model,
-        "MausoleumBack",
-        Vector3.new(17, 11, 2.2),
-        base * CFrame.new(0, 6.1, 6.2),
-        Enum.Material.Slate,
-        SIGNATURE.Slate
-    )
-    local cap = makeWedge(
-        model,
-        "MausoleumCrown",
-        Vector3.new(20, 5.0, 17.5),
-        base * CFrame.new(0, 13.2, 0) * CFrame.Angles(0, math.rad(90), 0),
-        Enum.Material.Slate,
-        Color3.fromRGB(58, 67, 65)
-    )
-    cap.CanCollide = false
-    makeWedgeCollisionProxy(model, "MausoleumCrownCollision", cap.Size, cap.CFrame)
-    makeSignatureCrystal(
-        model,
-        "MemorialLumen",
-        base * CFrame.new(0, 2.2, -6.6),
-        4.6,
-        Color3.fromRGB(128, 196, 170)
-    )
-    makeCollisionProxy(
-        model,
-        "MausoleumBaseCollision",
-        Vector3.new(18, 1.5, 16),
-        base * CFrame.new(0, 0.75, 0)
-    )
-    for _, x in { -7, 7 } do
-        makeCollisionProxy(
-            model,
-            "MausoleumPillarCollision",
-            Vector3.new(3.4, 11, 3.4),
-            base * CFrame.new(x, 6.1, -5.5)
-        )
-    end
-    makeCollisionProxy(
-        model,
-        "MausoleumBackCollision",
-        Vector3.new(17, 11, 2.4),
-        base * CFrame.new(0, 6.1, 6.2)
-    )
-    return model
 end
 
 local function makeMossglenRangerHall(parent, name, position, yaw)
@@ -2577,211 +2353,56 @@ local function makeMossglenRangerHall(parent, name, position, yaw)
 end
 
 local function makeSunmossObservatory(parent, name, position, yaw)
-    local ground = terrainSurfacePosition(position, 0)
-    local model = Instance.new("Model")
-    model.Name = name
-    model.Parent = parent
-    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
-    makePart(
-        model,
-        "ObservatoryBase",
-        Vector3.new(24, 1.2, 24),
-        base * CFrame.new(0, 0.6, 0),
-        Enum.Material.Slate,
-        SIGNATURE.SlateDark
+    return placeArchitecturePrefabBuilding(
+        parent,
+        name,
+        "LumenSunmossObservatory",
+        position,
+        yaw,
+        42,
+        {
+            { Size = Vector3.new(27, 2, 27), Offset = Vector3.new(0, 1, 0) },
+            { Size = Vector3.new(2.5, 15, 2.5), Offset = Vector3.new(-8, 7.5, -8) },
+            { Size = Vector3.new(2.5, 15, 2.5), Offset = Vector3.new(8, 7.5, -8) },
+            { Size = Vector3.new(2.5, 15, 2.5), Offset = Vector3.new(-8, 7.5, 8) },
+            { Size = Vector3.new(2.5, 15, 2.5), Offset = Vector3.new(8, 7.5, 8) },
+            { Size = Vector3.new(27, 1.2, 27), Offset = Vector3.new(0, 15.2, 0) },
+        }
     )
-    for _, x in { -8, 8 } do
-        for _, z in { -8, 8 } do
-            makePart(
-                model,
-                "ObservatoryPillar",
-                Vector3.new(2.0, 15, 2.0),
-                base * CFrame.new(x, 7.5, z),
-                Enum.Material.Slate,
-                SIGNATURE.Slate
-            )
-        end
-    end
-    makePart(
-        model,
-        "ObservatoryDeck",
-        Vector3.new(26, 1.0, 26),
-        base * CFrame.new(0, 15.2, 0),
-        Enum.Material.WoodPlanks,
-        SIGNATURE.TimberLight
-    )
-    local axis = makePart(
-        model,
-        "LumenScopeAxis",
-        Vector3.new(2.0, 9.0, 2.0),
-        base * CFrame.new(0, 20.1, 0) * CFrame.Angles(math.rad(58), 0, 0),
-        Enum.Material.Metal,
-        SIGNATURE.Bronze
-    )
-    axis.CanCollide = false
-    local scope = makePart(
-        model,
-        "LumenScope",
-        Vector3.new(5.0, 5.0, 14.0),
-        base * CFrame.new(0, 24.0, -2.8) * CFrame.Angles(math.rad(-32), 0, 0),
-        Enum.Material.Metal,
-        Color3.fromRGB(95, 105, 103)
-    )
-    scope.Shape = Enum.PartType.Cylinder
-    scope.CanCollide = false
-    makeSignatureCrystal(
-        model,
-        "ScopeLens",
-        base * CFrame.new(0, 27.4, -8.2),
-        3.4,
-        Color3.fromRGB(207, 225, 112)
-    )
-    makeCollisionProxy(
-        model,
-        "ObservatoryBaseCollision",
-        Vector3.new(24, 1.3, 24),
-        base * CFrame.new(0, 0.65, 0)
-    )
-    for _, x in { -8, 8 } do
-        for _, z in { -8, 8 } do
-            makeCollisionProxy(
-                model,
-                "ObservatoryPillarCollision",
-                Vector3.new(2.3, 15, 2.3),
-                base * CFrame.new(x, 7.5, z)
-            )
-        end
-    end
-    makeCollisionProxy(
-        model,
-        "ObservatoryDeckCollision",
-        Vector3.new(26, 1.1, 26),
-        base * CFrame.new(0, 15.2, 0)
-    )
-    return model
 end
 
 local function makeVeilfallSanctuary(parent, name, position, yaw)
-    local ground = terrainSurfacePosition(position, 0)
-    local model = Instance.new("Model")
-    model.Name = name
-    model.Parent = parent
-    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
-    makePart(
-        model,
-        "SanctuaryFloor",
-        Vector3.new(32, 1.0, 26),
-        base * CFrame.new(0, 0.5, 0),
-        Enum.Material.Slate,
-        Color3.fromRGB(67, 80, 78)
+    return placeArchitecturePrefabBuilding(
+        parent,
+        name,
+        "LumenVeilfallSanctuary",
+        position,
+        yaw,
+        42,
+        {
+            { Size = Vector3.new(34, 1.4, 27), Offset = Vector3.new(0, 0.7, 0) },
+            { Size = Vector3.new(2.5, 13, 2.5), Offset = Vector3.new(-12, 6.5, -9) },
+            { Size = Vector3.new(2.5, 13, 2.5), Offset = Vector3.new(0, 6.5, -9) },
+            { Size = Vector3.new(2.5, 13, 2.5), Offset = Vector3.new(12, 6.5, -9) },
+            { Size = Vector3.new(2.5, 13, 2.5), Offset = Vector3.new(-12, 6.5, 9) },
+            { Size = Vector3.new(2.5, 13, 2.5), Offset = Vector3.new(0, 6.5, 9) },
+            { Size = Vector3.new(2.5, 13, 2.5), Offset = Vector3.new(12, 6.5, 9) },
+        }
     )
-    for _, x in { -12, 0, 12 } do
-        for _, z in { -9, 9 } do
-            local pillar = makePart(
-                model,
-                "SanctuaryPillar",
-                Vector3.new(2.2, 13, 2.2),
-                base * CFrame.new(x, 6.5, z),
-                Enum.Material.Slate,
-                SIGNATURE.Slate
-            )
-            pillar.CanCollide = false
-        end
-    end
-    makePart(
-        model,
-        "SanctuaryBridgeBeam",
-        Vector3.new(31, 2.0, 3.0),
-        base * CFrame.new(0, 12.0, 9),
-        Enum.Material.Slate,
-        SIGNATURE.SlateDark
-    ).CanCollide =
-        false
-    for _, x in { -8, 0, 8 } do
-        makeSignatureCrystal(
-            model,
-            "SanctuaryLumen",
-            base * CFrame.new(x, 1.0, 0),
-            7.5 - math.abs(x) * 0.2,
-            Color3.fromRGB(115, 226, 225)
-        )
-    end
-    makeCollisionProxy(
-        model,
-        "SanctuaryFloorCollision",
-        Vector3.new(32, 1.1, 26),
-        base * CFrame.new(0, 0.55, 0)
-    )
-    for _, x in { -12, 0, 12 } do
-        for _, z in { -9, 9 } do
-            makeCollisionProxy(
-                model,
-                "SanctuaryPillarCollision",
-                Vector3.new(2.5, 13, 2.5),
-                base * CFrame.new(x, 6.5, z)
-            )
-        end
-    end
-    return model
 end
 
-local function makeShatteredFortressTower(parent, name, position, yaw, brokenSide)
-    local ground = terrainSurfacePosition(position, 0)
-    local model = Instance.new("Model")
-    model.Name = name
-    model.Parent = parent
-    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
-    makePart(
-        model,
-        "FortressTowerCore",
-        Vector3.new(18, 28, 18),
-        base * CFrame.new(0, 14, 0),
-        Enum.Material.Slate,
-        Color3.fromRGB(68, 77, 75)
+local function makeShatteredFortressTower(parent, name, position, yaw, _brokenSide)
+    return placeArchitecturePrefabBuilding(
+        parent,
+        name,
+        "LumenShatteredFortressTower",
+        position,
+        yaw,
+        38,
+        {
+            { Size = Vector3.new(18.5, 28, 18.5), Offset = Vector3.new(0, 14, 0) },
+        }
     )
-    makePart(
-        model,
-        "FortressTowerBand",
-        Vector3.new(20, 2.0, 20),
-        base * CFrame.new(0, 20, 0),
-        Enum.Material.Slate,
-        Color3.fromRGB(54, 63, 61)
-    )
-    for _, x in { -7, 0, 7 } do
-        for _, z in { -8.5, 8.5 } do
-            if not (brokenSide and x == 7 and z > 0) then
-                makePart(
-                    model,
-                    "FortressMerlon",
-                    Vector3.new(4.0, 5.0, 2.5),
-                    base * CFrame.new(x, 30.5, z),
-                    Enum.Material.Slate,
-                    SIGNATURE.SlateDark
-                )
-            end
-        end
-    end
-    for _, z in { -7, 0, 7 } do
-        for _, x in { -8.5, 8.5 } do
-            if not (brokenSide and z == -7 and x < 0) then
-                makePart(
-                    model,
-                    "FortressMerlon",
-                    Vector3.new(2.5, 5.0, 4.0),
-                    base * CFrame.new(x, 30.5, z),
-                    Enum.Material.Slate,
-                    SIGNATURE.SlateDark
-                )
-            end
-        end
-    end
-    makeCollisionProxy(
-        model,
-        "FortressTowerCollision",
-        Vector3.new(18.3, 28, 18.3),
-        base * CFrame.new(0, 14, 0)
-    )
-    return model
 end
 
 local function makeProvingGrandstand(parent, name, position, yaw, width)

@@ -62,5 +62,29 @@
   "LumenRuinedHall": {
     "assetId": 133702935578347,
     "moderation": "Approved"
+  },
+  "LumenForgeYard": {
+    "assetId": 115045579898423,
+    "moderation": "Approved"
+  },
+  "LumenGraveboneMausoleum": {
+    "assetId": 90687448622867,
+    "moderation": "Approved"
+  },
+  "LumenSunmossObservatory": {
+    "assetId": 72910144160451,
+    "moderation": "Approved"
+  },
+  "LumenVeilfallSanctuary": {
+    "assetId": 89230413054325,
+    "moderation": "Approved"
+  },
+  "LumenShatteredFortressTower": {
+    "assetId": 136833732602200,
+    "moderation": "Approved"
+  },
+  "LumenStoneShrine": {
+    "assetId": 105255978786194,
+    "moderation": "Approved"
   }
 }

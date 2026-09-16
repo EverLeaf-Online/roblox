@@ -62,5 +62,29 @@
   "LumenRuinedHall": {
     "Model": 133702935578347,
     "Moderation": "Approved"
+  },
+  "LumenForgeYard": {
+    "Model": 115045579898423,
+    "Moderation": "Approved"
+  },
+  "LumenGraveboneMausoleum": {
+    "Model": 90687448622867,
+    "Moderation": "Approved"
+  },
+  "LumenSunmossObservatory": {
+    "Model": 72910144160451,
+    "Moderation": "Approved"
+  },
+  "LumenVeilfallSanctuary": {
+    "Model": 89230413054325,
+    "Moderation": "Approved"
+  },
+  "LumenShatteredFortressTower": {
+    "Model": 136833732602200,
+    "Moderation": "Approved"
+  },
+  "LumenStoneShrine": {
+    "Model": 105255978786194,
+    "Moderation": "Approved"
   }
 }

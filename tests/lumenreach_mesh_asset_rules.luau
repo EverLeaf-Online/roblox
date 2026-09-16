@@ -22,6 +22,12 @@ local assets = {
     { "LumenMossglenRangerHall", "105347638360093" },
     { "LumenFrontierGatehouse", "90751638251875" },
     { "LumenRuinedHall", "133702935578347" },
+    { "LumenForgeYard", "115045579898423" },
+    { "LumenGraveboneMausoleum", "90687448622867" },
+    { "LumenSunmossObservatory", "72910144160451" },
+    { "LumenVeilfallSanctuary", "89230413054325" },
+    { "LumenShatteredFortressTower", "136833732602200" },
+    { "LumenStoneShrine", "105255978786194" },
 }
 
 for _, spec in assets do

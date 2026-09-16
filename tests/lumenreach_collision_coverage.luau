@@ -76,6 +76,12 @@ local meshArchitectureBuilders = {
     makeMossglenRangerHall = true,
     makeRuinedHall = true,
     makeGatehouse = true,
+    makeStoneShrine = true,
+    makeForgeYard = true,
+    makeGraveboneMausoleum = true,
+    makeSunmossObservatory = true,
+    makeVeilfallSanctuary = true,
+    makeShatteredFortressTower = true,
 }
 
 for _, name in builders do
@@ -126,8 +132,14 @@ assert(
 )
 assert(
     string.find(source, '"ForgeAwningCollision"', 1, true) == nil
-        and string.find(source, "base * CFrame.new(0, 8.9, 6.3)", 1, true) ~= nil,
-    "forge cloth awning must stay overhead render-only instead of becoming a low movement blocker"
+        and string.find(
+                functionBody("makeForgeYard"),
+                "placeArchitecturePrefabBuilding",
+                1,
+                true
+            )
+            ~= nil,
+    "forge visible awning/roof must remain render-only under the MeshPart architecture collision contract"
 )
 
 print("Lumenreach collision coverage tests passed")

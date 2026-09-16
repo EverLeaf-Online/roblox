@@ -94,5 +94,41 @@
     "triangles": 440,
     "vertices": 240,
     "materials": 3
+  },
+  "LumenForgeYard": {
+    "file": "assets/original/lumenreach_architecture/LumenForgeYard.glb",
+    "triangles": 484,
+    "vertices": 264,
+    "materials": 6
+  },
+  "LumenGraveboneMausoleum": {
+    "file": "assets/original/lumenreach_architecture/LumenGraveboneMausoleum.glb",
+    "triangles": 324,
+    "vertices": 178,
+    "materials": 4
+  },
+  "LumenSunmossObservatory": {
+    "file": "assets/original/lumenreach_architecture/LumenSunmossObservatory.glb",
+    "triangles": 652,
+    "vertices": 356,
+    "materials": 4
+  },
+  "LumenVeilfallSanctuary": {
+    "file": "assets/original/lumenreach_architecture/LumenVeilfallSanctuary.glb",
+    "triangles": 524,
+    "vertices": 288,
+    "materials": 4
+  },
+  "LumenShatteredFortressTower": {
+    "file": "assets/original/lumenreach_architecture/LumenShatteredFortressTower.glb",
+    "triangles": 572,
+    "vertices": 312,
+    "materials": 2
+  },
+  "LumenStoneShrine": {
+    "file": "assets/original/lumenreach_architecture/LumenStoneShrine.glb",
+    "triangles": 264,
+    "vertices": 144,
+    "materials": 3
   }
 }

@@ -6,7 +6,7 @@ for _, required in
     {
         "local WORLD_WIDTH = 2200",
         "local WORLD_DEPTH = 1250",
-        "local WORLD_DESIGN_VERSION = 17",
+        "local WORLD_DESIGN_VERSION = 18",
         'world:SetAttribute("WorldDesignVersion", WORLD_DESIGN_VERSION)',
         'world:SetAttribute("TerrainFirstMMOLayout", true)',
         "terrain:Clear()",
@@ -410,15 +410,9 @@ for _, requiredProxy in
         '"DockCollision"',
         '"RuinWallCollision"',
         '"SupplyStackCollision"',
-        '"ShrinePillarCollision"',
         '"CartBodyCollision"',
-        '"ForgeBodyCollision"',
         '"WellCollision"',
         '"TrainingPostCollision"',
-        '"MausoleumBackCollision"',
-        '"ObservatoryPillarCollision"',
-        '"SanctuaryPillarCollision"',
-        '"FortressTowerCollision"',
         '"GrandstandTierCollision"',
         '"MonumentDaisCollision"',
         '"TownGatePostCollision"',
@@ -508,7 +502,7 @@ assert(
         and string.find(source, "local function makeRoadWayhouse", 1, true) ~= nil
         and string.find(source, "local function makeFarmBarn", 1, true) ~= nil
         and string.find(source, "local function makeCroftCottage", 1, true) ~= nil,
-    "V17 must preserve explicit frontier architecture archetypes while moving major buildings to authored MeshParts"
+    "V18 must preserve explicit frontier architecture archetypes while moving major buildings to authored MeshParts"
 )
 
 local genericBuildingCallCount = 0
@@ -540,7 +534,7 @@ for _, namedBuilding in
 do
     assert(
         string.find(source, namedBuilding, 1, true) ~= nil,
-        "missing V17 architecture conversion: " .. namedBuilding
+        "missing V18 architecture conversion: " .. namedBuilding
     )
 end
 
