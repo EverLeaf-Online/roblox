@@ -219,3 +219,5 @@ Current implementation follows that rule: the Founder pass grants recognition/co
 - Hero NPC visual replacement: Ilyra, Orin, Tovin, Maela, and Seren now have original reviewed model assets loaded onto a hidden Roblox R15 animation skeleton. The generated R15 character factory remains only as a fallback for NPCs without authored production art. Studio visual/animation acceptance is still required.
 
 - Persistent storage is now implemented and enabled: schema v4 adds 96-slot storage, server-authoritative deposit/withdraw actions use rollback-safe profile transactions and inventory stack rules, and a dedicated Storage menu provides single-item/stack transfers. Trading remains disabled until its two-player atomic transaction/session design is completed.
+
+- Production asset QA gate: CI now parses every current authored architecture/creature/NPC GLB and rejects collapsed geometry, extreme proportions, suspicious scale, over-budget triangle counts, invalid GLB headers, and external image dependencies before Rojo builds pass. This prevents technically valid but obviously malformed model exports from silently becoming production assets.
