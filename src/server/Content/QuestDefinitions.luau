@@ -194,6 +194,20 @@ return table.freeze({
             Items = table.freeze({ field_tonic = 1 }),
         }),
     }),
+    greenway_breach_watch = table.freeze({
+        DisplayName = "Hold the Greenway",
+        MinimumLevel = 3,
+        StartNpcId = "lumen_guide",
+        PrerequisiteQuests = table.freeze({ "lumen_trail_watch" }),
+        Objectives = table.freeze({
+            table.freeze({ Type = "PublicEvent", Target = "greenway_breach", Required = 1 }),
+        }),
+        Reward = table.freeze({
+            Exp = 140,
+            Currencies = table.freeze({ Shards = 12 }),
+            Items = table.freeze({ field_tonic = 1 }),
+        }),
+    }),
     brasshaven_passage = table.freeze({
         DisplayName = "The Road Beyond Lumenreach",
         MinimumLevel = 10,

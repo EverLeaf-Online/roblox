@@ -11,6 +11,7 @@ Net.Events = table.freeze({
     PlayerDamageEvent = "PlayerDamageEvent",
     MovementIntent = "MovementIntent",
     TradeEvent = "TradeEvent",
+    PublicEvent = "PublicEvent",
 })
 
 Net.Functions = table.freeze({

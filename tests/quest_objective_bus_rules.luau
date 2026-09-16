@@ -9,9 +9,21 @@ local consumable = fs.readFile("src/server/Services/ConsumableService.luau")
 local ui = fs.readFile("src/client/Controllers/ReactUIController.luau")
 local quests = fs.readFile("src/server/Content/QuestDefinitions.luau")
 local loot = fs.readFile("src/server/Services/LootDropService.luau")
+local publicEvent = fs.readFile("src/server/Services/PublicEventService.luau")
 
 for _, objectiveType in
-    { "Defeat", "Collect", "Explore", "Interact", "Craft", "Use", "Reach", "Escort", "Survive" }
+    {
+        "Defeat",
+        "Collect",
+        "Explore",
+        "Interact",
+        "Craft",
+        "Use",
+        "Reach",
+        "Escort",
+        "Survive",
+        "PublicEvent",
+    }
 do
     assert(
         string.find(bus, objectiveType .. " = true", 1, true),
@@ -52,13 +64,25 @@ assert(
     string.find(exploration, 'QuestObjectiveService.Record(profile, "Reach"', 1, true),
     "landmarks must progress Reach objectives"
 )
-for _, token in { 'Type = "Interact"', 'Type = "Craft"', 'Type = "Use"', 'Type = "Reach"' } do
+assert(
+    string.find(publicEvent, 'QuestObjectiveService.Record(profile, "PublicEvent"', 1, true),
+    "public events must progress PublicEvent objectives"
+)
+for _, token in
+    {
+        'Type = "Interact"',
+        'Type = "Craft"',
+        'Type = "Use"',
+        'Type = "Reach"',
+        'Type = "PublicEvent"',
+    }
+do
     assert(
         string.find(quests, token, 1, true),
         "quest content must actually use objective type " .. token
     )
 end
-for _, phrase in { "Talk to %s", "Craft %s", "Use %s", "Reach %s" } do
+for _, phrase in { "Talk to %s", "Craft %s", "Use %s", "Reach %s", "Complete %s" } do
     assert(
         string.find(ui, phrase, 1, true),
         "quest HUD missing readable objective wording " .. phrase

@@ -12,6 +12,7 @@ local VALID_TYPES = table.freeze({
     Reach = true,
     Escort = true,
     Survive = true,
+    PublicEvent = true,
 })
 
 function QuestObjectiveService.Record(profile, objectiveType, targetId, amount)

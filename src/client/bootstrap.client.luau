@@ -14,6 +14,7 @@ local Net = require(ReplicatedStorage.Shared.Net)
 local NotificationStore = require(script.Parent.UI.NotificationStore)
 local PartyStore = require(script.Parent.State.PartyStore)
 local ProfileStore = require(script.Parent.State.ProfileStore)
+local PublicEventStore = require(script.Parent.State.PublicEventStore)
 local TradeStore = require(script.Parent.State.TradeStore)
 
 local function startController(name, controller)
@@ -51,6 +52,7 @@ task.spawn(function()
     local partyEvent = remotes:WaitForChild(Net.Events.PartyEvent, 5)
     local worldNotice = remotes:WaitForChild(Net.Events.WorldNotice, 5)
     local tradeEvent = remotes:WaitForChild(Net.Events.TradeEvent, 5)
+    local publicEvent = remotes:WaitForChild(Net.Events.PublicEvent, 5)
     local requestProfile = remotes:WaitForChild(Net.Functions.RequestProfile, 5)
 
     if
@@ -59,6 +61,7 @@ task.spawn(function()
         or not partyEvent
         or not worldNotice
         or not tradeEvent
+        or not publicEvent
         or not requestProfile
     then
         warn("[ClientBootstrap] Profile remotes were not ready")
@@ -79,6 +82,7 @@ task.spawn(function()
     profileChanged.OnClientEvent:Connect(setProfileSnapshot)
     partyEvent.OnClientEvent:Connect(PartyStore.Push)
     tradeEvent.OnClientEvent:Connect(TradeStore.Push)
+    publicEvent.OnClientEvent:Connect(PublicEventStore.Push)
     worldNotice.OnClientEvent:Connect(function(payload)
         if type(payload) ~= "table" then
             return

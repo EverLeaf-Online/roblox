@@ -12,6 +12,7 @@ local CatalogClient = require(script.Parent.Parent.Services.CatalogClient)
 local ProgressionPresentation = require(script.Parent.Parent.Presentation.ProgressionPresentation)
 local PartyStore = require(script.Parent.Parent.State.PartyStore)
 local ProfileStore = require(script.Parent.Parent.State.ProfileStore)
+local PublicEventStore = require(script.Parent.Parent.State.PublicEventStore)
 local TradeStore = require(script.Parent.Parent.State.TradeStore)
 local SkillCooldownStore = require(script.Parent.Parent.State.SkillCooldownStore)
 local EverLeafIcons = require(script.Parent.Parent.UI.EverLeafIcons)
@@ -21,6 +22,7 @@ local BossHud = require(script.Parent.Parent.UI.Components.BossHud)
 local PartyHud = require(script.Parent.Parent.UI.Components.PartyHud)
 local PartyOverlay = require(script.Parent.Parent.UI.Components.PartyOverlay)
 local PlayerDamageFeedback = require(script.Parent.Parent.UI.Components.PlayerDamageFeedback)
+local PublicEventHud = require(script.Parent.Parent.UI.Components.PublicEventHud)
 local AdvancementOverlay = require(script.Parent.Parent.UI.Components.AdvancementOverlay)
 local CosmeticsPanel = require(script.Parent.Parent.UI.Components.CosmeticsPanel)
 local ShopOverlay = require(script.Parent.Parent.UI.Components.ShopOverlay)
@@ -420,6 +422,8 @@ local function objectiveText(objective, progress, fallbackText)
         return string.format("Escort %s  %d/%d", prettyId(objective.Target), current, required)
     elseif objective.Type == "Survive" then
         return string.format("Survive %s  %d/%d", prettyId(objective.Target), current, required)
+    elseif objective.Type == "PublicEvent" then
+        return string.format("Complete %s  %d/%d", prettyId(objective.Target), current, required)
     end
     return string.format(
         "%s %s  %d/%d",
@@ -3409,6 +3413,7 @@ local function App()
     local partyState, setPartyState = React.useState(PartyStore.GetState())
     local tradeOpen, setTradeOpen = React.useState(false)
     local tradeState, setTradeState = React.useState(TradeStore.GetState())
+    local publicEventState, setPublicEventState = React.useState(PublicEventStore.GetState())
     local menuOpen, setMenuOpen = React.useState(false)
     local menuTab, setMenuTab = React.useState("CHARACTER")
     local health, setHealth = React.useState(100)
@@ -3503,6 +3508,35 @@ local function App()
                             3.5
                         )
                     end
+                end
+            end
+        end)
+        return function()
+            connection:Disconnect()
+        end
+    end, {})
+
+    React.useEffect(function()
+        local previousResult = nil
+        local connection = PublicEventStore.Changed:Connect(function(snapshot)
+            setPublicEventState(snapshot)
+            local result = snapshot and snapshot.Result
+            if result and result ~= previousResult then
+                previousResult = result
+                if result.Type == "Completed" then
+                    NotificationStore.Push(
+                        "success",
+                        "Public Event Cleared",
+                        "The defense succeeded. Check your rewards and quest progress.",
+                        4.5
+                    )
+                elseif result.Type == "Failed" then
+                    NotificationStore.Push(
+                        "warning",
+                        "Public Event Failed",
+                        "The event ended before the objective was secured.",
+                        4
+                    )
                 end
             end
         end)
@@ -3904,6 +3938,11 @@ local function App()
         }),
         PartyHud = React.createElement(PartyHud, {
             Party = partyState and partyState.Party,
+            Hidden = uiOpen or dead,
+        }),
+        PublicEventHud = React.createElement(PublicEventHud, {
+            Event = publicEventState and publicEventState.Active,
+            RegionId = profile and profile.World and profile.World.RegionId,
             Hidden = uiOpen or dead,
         }),
         PartyOverlay = partyOpen and React.createElement(PartyOverlay, {

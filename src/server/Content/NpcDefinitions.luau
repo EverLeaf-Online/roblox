@@ -10,6 +10,7 @@ return table.freeze({
         QuestOffers = table.freeze({
             "lumen_first_steps",
             "lumen_trail_watch",
+            "greenway_breach_watch",
             "brasshaven_passage",
         }),
     }),

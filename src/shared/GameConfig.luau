@@ -220,6 +220,13 @@ GameConfig.Features = {
     Trading = true,
 }
 
+GameConfig.PublicEvents = {
+    Enabled = true,
+    InitialDelaySeconds = 90,
+    CooldownSeconds = 300,
+    DurationSeconds = 180,
+}
+
 GameConfig.Monetization = {
     RobuxPowerPurchasesAllowed = false,
     CosmeticOnly = true,

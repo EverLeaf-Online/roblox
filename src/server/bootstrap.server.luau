@@ -36,6 +36,7 @@ local PlayerDataService = require(script.Parent.Services.PlayerDataService)
 local PlayerDamageService = require(script.Parent.Services.PlayerDamageService)
 local PlayerDodgeService = require(script.Parent.Services.PlayerDodgeService)
 local PlayerPresentationService = require(script.Parent.Services.PlayerPresentationService)
+local PublicEventService = require(script.Parent.Services.PublicEventService)
 local RateLimiterService = require(script.Parent.Services.RateLimiterService)
 local ResourceService = require(script.Parent.Services.ResourceService)
 local SnapshotService = require(script.Parent.Services.SnapshotService)
@@ -70,6 +71,7 @@ local interactionEvent = ensureRemote("RemoteEvent", Net.Events.InteractionEvent
 local playerDamageEvent = ensureRemote("RemoteEvent", Net.Events.PlayerDamageEvent)
 local movementIntent = ensureRemote("RemoteEvent", Net.Events.MovementIntent)
 local tradeEvent = ensureRemote("RemoteEvent", Net.Events.TradeEvent)
+local publicEvent = ensureRemote("RemoteEvent", Net.Events.PublicEvent)
 ensureRemote("RemoteEvent", Net.Events.WorldNotice)
 local requestProfile = ensureRemote("RemoteFunction", Net.Functions.RequestProfile)
 local basicAttack = ensureRemote("RemoteFunction", Net.Functions.BasicAttack)
@@ -93,6 +95,7 @@ NpcAmbientService.Init()
 MonsterAnimationService.Init()
 EnemyAIService.Init()
 MonsterSpawnService.Init()
+PublicEventService.Init()
 BelforgeColossusService.Init()
 ExplorationService.Init()
 PartyService.Init()
@@ -105,6 +108,12 @@ Players.RespawnTime = 3
 TradeService.Event:Connect(function(player, payload)
     if player and player.Parent == Players then
         tradeEvent:FireClient(player, payload)
+    end
+end)
+
+PublicEventService.Event:Connect(function(player, payload)
+    if player and player.Parent == Players then
+        publicEvent:FireClient(player, payload)
     end
 end)
 
@@ -242,6 +251,7 @@ local function onPlayerAdded(player)
 
     if player.Parent == Players then
         profileReady:FireClient(player, SnapshotService.Build(player))
+        PublicEventService.SendSnapshot(player)
     end
 end
 

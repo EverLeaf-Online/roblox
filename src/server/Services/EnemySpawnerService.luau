@@ -46,28 +46,32 @@ function EnemySpawnerService.Spawn(enemyIdOrTemplate, position, parent, options)
         end
     end
 
-    local ok, reason = EnemyService.Register(enemy, enemyId, function(deadEnemy, deadDefinition)
-        local respawnPosition = deadEnemy:GetPivot().Position
-        local respawnParent = deadEnemy.Parent
+    local ok, reason = EnemyService.Register(
+        enemy,
+        enemyId,
+        function(deadEnemy, deadDefinition, winner, eligibleUserIds)
+            local respawnPosition = deadEnemy:GetPivot().Position
+            local respawnParent = deadEnemy.Parent
 
-        if options.OnDeath then
-            task.spawn(options.OnDeath, deadEnemy, deadDefinition)
-        end
-
-        task.delay(options.DeathLinger or 2.6, function()
-            if deadEnemy.Parent then
-                deadEnemy:Destroy()
+            if options.OnDeath then
+                task.spawn(options.OnDeath, deadEnemy, deadDefinition, winner, eligibleUserIds)
             end
-        end)
 
-        if options.AutoRespawn ~= false then
-            task.delay(deadDefinition.RespawnSeconds or 5, function()
-                if respawnParent and respawnParent.Parent then
-                    EnemySpawnerService.Spawn(enemyId, respawnPosition, respawnParent, options)
+            task.delay(options.DeathLinger or 2.6, function()
+                if deadEnemy.Parent then
+                    deadEnemy:Destroy()
                 end
             end)
+
+            if options.AutoRespawn ~= false then
+                task.delay(deadDefinition.RespawnSeconds or 5, function()
+                    if respawnParent and respawnParent.Parent then
+                        EnemySpawnerService.Spawn(enemyId, respawnPosition, respawnParent, options)
+                    end
+                end)
+            end
         end
-    end)
+    )
 
     if not ok then
         enemy:Destroy()

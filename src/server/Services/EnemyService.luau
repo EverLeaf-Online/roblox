@@ -130,13 +130,18 @@ function EnemyService.Register(enemy, enemyId, onDeath)
             end
         end
 
+        local eligibleUserIds = {}
+        for _, contributor in rewardPlan.Eligible do
+            table.insert(eligibleUserIds, contributor.UserId)
+        end
+
         states[enemy] = nil
         EnemyAIService.Detach(enemy)
         MonsterThreatService.Clear(enemy)
         MonsterCombat.PlayDeath(enemy)
         CollectionService:RemoveTag(enemy, "EverLeafEnemy")
         if onDeath then
-            task.spawn(onDeath, enemy, definition, winner)
+            task.spawn(onDeath, enemy, definition, winner, eligibleUserIds)
         end
     end)
 
