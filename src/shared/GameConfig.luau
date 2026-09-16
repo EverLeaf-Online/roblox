@@ -217,7 +217,7 @@ GameConfig.Features = {
     Crafting = true,
     Enhancement = false,
     Storage = true,
-    Trading = false,
+    Trading = true,
 }
 
 GameConfig.Monetization = {

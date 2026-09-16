@@ -87,6 +87,22 @@ local SCHEMAS = {
     ["party.decline"] = {},
     ["party.kick"] = { TargetUserId = integerField(1, MAX_SAFE_INTEGER) },
     ["party.leave"] = {},
+    ["trade.request"] = { TargetUserId = integerField(1, MAX_SAFE_INTEGER) },
+    ["trade.accept"] = {},
+    ["trade.decline"] = {},
+    ["trade.add_item"] = {
+        InventoryIndex = integerField(1, 512),
+        Quantity = integerField(1, 999_999),
+    },
+    ["trade.remove_item"] = {
+        ItemId = stringField(64, false),
+        Quantity = integerField(1, 999_999),
+    },
+    ["trade.set_shards"] = { Amount = integerField(0, 1_000_000_000) },
+    ["trade.lock"] = {},
+    ["trade.unlock"] = {},
+    ["trade.confirm"] = {},
+    ["trade.cancel"] = {},
     ["party.ready.respond"] = { Accepted = booleanField() },
     ["social.inspect"] = { TargetUserId = integerField(1, MAX_SAFE_INTEGER) },
     ["cosmetic.equip"] = {

@@ -14,6 +14,7 @@ local ShopService = require(script.Parent.ShopService)
 local SocialProfileService = require(script.Parent.SocialProfileService)
 local SkillService = require(script.Parent.SkillService)
 local StatService = require(script.Parent.StatService)
+local TradeService = require(script.Parent.TradeService)
 local StorageService = require(script.Parent.StorageService)
 
 local ActionService = {}
@@ -111,6 +112,36 @@ handlers["party.kick"] = function(player, _, payload)
 end
 handlers["party.leave"] = function(player)
     return PartyService.Leave(player)
+end
+handlers["trade.request"] = function(player, _, payload)
+    return TradeService.Request(player, payload.TargetUserId)
+end
+handlers["trade.accept"] = function(player)
+    return TradeService.Accept(player)
+end
+handlers["trade.decline"] = function(player)
+    return TradeService.Decline(player)
+end
+handlers["trade.add_item"] = function(player, _, payload)
+    return TradeService.AddItem(player, payload.InventoryIndex, payload.Quantity)
+end
+handlers["trade.remove_item"] = function(player, _, payload)
+    return TradeService.RemoveItem(player, payload.ItemId, payload.Quantity)
+end
+handlers["trade.set_shards"] = function(player, _, payload)
+    return TradeService.SetShards(player, payload.Amount)
+end
+handlers["trade.lock"] = function(player)
+    return TradeService.Lock(player)
+end
+handlers["trade.unlock"] = function(player)
+    return TradeService.Unlock(player)
+end
+handlers["trade.confirm"] = function(player)
+    return TradeService.Confirm(player)
+end
+handlers["trade.cancel"] = function(player)
+    return TradeService.Cancel(player)
 end
 handlers["party.ready.respond"] = function(player, _, payload)
     if type(payload.Accepted) ~= "boolean" then

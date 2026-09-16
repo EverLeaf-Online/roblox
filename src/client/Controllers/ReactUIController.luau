@@ -12,6 +12,7 @@ local CatalogClient = require(script.Parent.Parent.Services.CatalogClient)
 local ProgressionPresentation = require(script.Parent.Parent.Presentation.ProgressionPresentation)
 local PartyStore = require(script.Parent.Parent.State.PartyStore)
 local ProfileStore = require(script.Parent.Parent.State.ProfileStore)
+local TradeStore = require(script.Parent.Parent.State.TradeStore)
 local SkillCooldownStore = require(script.Parent.Parent.State.SkillCooldownStore)
 local EverLeafIcons = require(script.Parent.Parent.UI.EverLeafIcons)
 local NotificationStore = require(script.Parent.Parent.UI.NotificationStore)
@@ -26,6 +27,7 @@ local ShopOverlay = require(script.Parent.Parent.UI.Components.ShopOverlay)
 local StoragePanel = require(script.Parent.Parent.UI.Components.StoragePanel)
 local PremiumShopPanel = require(script.Parent.Parent.UI.Components.PremiumShopPanel)
 local ToastStack = require(script.Parent.Parent.UI.Components.ToastStack)
+local TradeOverlay = require(script.Parent.Parent.UI.Components.TradeOverlay)
 local EquipmentEligibilityRules = require(ReplicatedStorage.Shared.Logic.EquipmentEligibilityRules)
 local EquipmentComparisonRules = require(ReplicatedStorage.Shared.Logic.EquipmentComparisonRules)
 local SkillProgressionRules = require(ReplicatedStorage.Shared.Logic.SkillProgressionRules)
@@ -3405,6 +3407,8 @@ local function App()
     local advancementOpen, setAdvancementOpen = React.useState(false)
     local partyOpen, setPartyOpen = React.useState(false)
     local partyState, setPartyState = React.useState(PartyStore.GetState())
+    local tradeOpen, setTradeOpen = React.useState(false)
+    local tradeState, setTradeState = React.useState(TradeStore.GetState())
     local menuOpen, setMenuOpen = React.useState(false)
     local menuTab, setMenuTab = React.useState("CHARACTER")
     local health, setHealth = React.useState(100)
@@ -3508,6 +3512,31 @@ local function App()
     end, {})
 
     React.useEffect(function()
+        local connection = TradeStore.Changed:Connect(function(snapshot)
+            setTradeState(snapshot)
+            if snapshot and (snapshot.Request or snapshot.Trade) then
+                setInteraction(nil)
+                setShopOpen(false)
+                setAdvancementOpen(false)
+                setPartyOpen(false)
+                setMenuOpen(false)
+                setTradeOpen(true)
+            elseif snapshot and snapshot.Result and snapshot.Result.Type == "Completed" then
+                setTradeOpen(false)
+                NotificationStore.Push(
+                    "success",
+                    "Trade Complete",
+                    "The exchange was completed securely.",
+                    4
+                )
+            end
+        end)
+        return function()
+            connection:Disconnect()
+        end
+    end, {})
+
+    React.useEffect(function()
         local connection = ProfileStore.Subscribe(function(snapshot)
             emitProfileNotifications(previousProfile.current, snapshot)
             previousProfile.current = snapshot
@@ -3539,6 +3568,7 @@ local function App()
             setShopOpen(false)
             setAdvancementOpen(false)
             setPartyOpen(false)
+            setTradeOpen(false)
             setMenuOpen(false)
             setDamageFeedback(nil)
             damageFeedbackGeneration.current += 1
@@ -3636,12 +3666,18 @@ local function App()
     React.useEffect(function()
         player:SetAttribute(
             "EverLeafUiCapture",
-            interaction ~= nil or shopOpen or advancementOpen or partyOpen or menuOpen or dead
+            interaction ~= nil
+                or shopOpen
+                or advancementOpen
+                or partyOpen
+                or tradeOpen
+                or menuOpen
+                or dead
         )
         return function()
             player:SetAttribute("EverLeafUiCapture", false)
         end
-    end, { interaction, shopOpen, advancementOpen, partyOpen, menuOpen, dead })
+    end, { interaction, shopOpen, advancementOpen, partyOpen, tradeOpen, menuOpen, dead })
 
     React.useEffect(function()
         if inputMode ~= "GAMEPAD" then
@@ -3657,6 +3693,8 @@ local function App()
             targetName = "ShopBuyTab"
         elseif interaction then
             targetName = "DialogueClose"
+        elseif tradeOpen then
+            targetName = if tradeState and tradeState.Request then "TradeAccept" else "TradeCancel"
         elseif partyOpen then
             local readyCheck = partyState and partyState.ReadyCheck
             if readyCheck then
@@ -3695,6 +3733,8 @@ local function App()
         advancementOpen,
         partyOpen,
         partyState,
+        tradeOpen,
+        tradeState,
         menuOpen,
         menuTab,
     })
@@ -3710,6 +3750,7 @@ local function App()
                 or shopOpen
                 or advancementOpen
                 or partyOpen
+                or tradeOpen
                 or menuOpen
 
             if keyCode == Enum.KeyCode.ButtonB and uiLayerOpen then
@@ -3721,6 +3762,8 @@ local function App()
                     setInteraction(nil)
                 elseif partyOpen then
                     setPartyOpen(false)
+                elseif tradeOpen then
+                    setTradeOpen(false)
                 elseif menuOpen then
                     setMenuOpen(false)
                 end
@@ -3733,6 +3776,7 @@ local function App()
                 and not shopOpen
                 and not advancementOpen
                 and not partyOpen
+                and not tradeOpen
             then
                 setMenuOpen(not menuOpen)
                 return
@@ -3762,9 +3806,22 @@ local function App()
                 and interaction == nil
                 and not shopOpen
                 and not advancementOpen
+                and not tradeOpen
                 and not menuOpen
             then
                 setPartyOpen(not partyOpen)
+                return
+            end
+
+            if
+                keyCode == Enum.KeyCode.T
+                and interaction == nil
+                and not shopOpen
+                and not advancementOpen
+                and not partyOpen
+                and not menuOpen
+            then
+                setTradeOpen(not tradeOpen)
                 return
             end
 
@@ -3772,7 +3829,13 @@ local function App()
                 return
             end
 
-            if interaction == nil and not shopOpen and not advancementOpen and not partyOpen then
+            if
+                interaction == nil
+                and not shopOpen
+                and not advancementOpen
+                and not partyOpen
+                and not tradeOpen
+            then
                 local tabByKey = {
                     [Enum.KeyCode.C] = "CHARACTER",
                     [Enum.KeyCode.I] = "INVENTORY",
@@ -3804,6 +3867,8 @@ local function App()
                     setInteraction(nil)
                 elseif partyOpen then
                     setPartyOpen(false)
+                elseif tradeOpen then
+                    setTradeOpen(false)
                 elseif menuOpen then
                     setMenuOpen(false)
                 end
@@ -3812,9 +3877,23 @@ local function App()
         return function()
             connection:Disconnect()
         end
-    end, { interaction, shopOpen, advancementOpen, partyOpen, menuOpen, menuTab, dead })
+    end, {
+        interaction,
+        shopOpen,
+        advancementOpen,
+        partyOpen,
+        tradeOpen,
+        menuOpen,
+        menuTab,
+        dead,
+    })
 
-    local uiOpen = interaction ~= nil or shopOpen or advancementOpen or partyOpen or menuOpen
+    local uiOpen = interaction ~= nil
+        or shopOpen
+        or advancementOpen
+        or partyOpen
+        or tradeOpen
+        or menuOpen
     return React.createElement(React.Fragment, nil, {
         HUD = React.createElement(HUD, {
             Profile = profile,
@@ -3831,6 +3910,13 @@ local function App()
             PartyState = partyState,
             OnClose = function()
                 setPartyOpen(false)
+            end,
+        }) or nil,
+        TradeOverlay = tradeOpen and React.createElement(TradeOverlay, {
+            TradeState = tradeState,
+            Profile = profile,
+            OnClose = function()
+                setTradeOpen(false)
             end,
         }) or nil,
         Menu = menuOpen and React.createElement(MainMenu, {

@@ -10,6 +10,7 @@ Net.Events = table.freeze({
     WorldNotice = "WorldNotice",
     PlayerDamageEvent = "PlayerDamageEvent",
     MovementIntent = "MovementIntent",
+    TradeEvent = "TradeEvent",
 })
 
 Net.Functions = table.freeze({
