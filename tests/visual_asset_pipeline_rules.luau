@@ -104,6 +104,15 @@ assert(
     "authored monster assets must be sanitized"
 )
 assert(
+    string.find(monsters, "assetSpec.Parents", 1, true)
+        and string.find(monsters, "parentPart.CFrame:ToObjectSpace(part.CFrame)", 1, true),
+    "authored monster accessories must follow their animated body segment"
+)
+assert(
+    string.find(monsterRegistry, "Parents = {", 1, true),
+    "authored monster registry must define visual parent hierarchies"
+)
+assert(
     string.find(monsters, 'VisualSource", "authored_asset"', 1, true),
     "runtime authored monster source tag missing"
 )

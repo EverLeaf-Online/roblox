@@ -82,16 +82,26 @@ local function loadAuthoredMonster(assetSpec, definition)
     humanoid.Parent = model
 
     local pivot = importedModel:GetPivot()
+    local visualByName = {}
     for _, part in visualParts do
         local original = part.CFrame
         part.Parent = model
         part.CFrame = pivot:ToObjectSpace(original)
+        visualByName[part.Name] = part
+    end
+
+    -- Authored props must follow the body segment they visually belong to. Attaching
+    -- every mesh directly to HumanoidRootPart made eyes, armor, horns, caps, claws,
+    -- and weapons appear to detach whenever the primary body joint animated.
+    for _, part in visualParts do
+        local parentName = assetSpec.Parents and assetSpec.Parents[part.Name]
+        local parentPart = parentName and visualByName[parentName] or nil
         local motor = Instance.new("Motor6D")
         motor.Name = (assetSpec.Joints and assetSpec.Joints[part.Name]) or (part.Name .. "Joint")
-        motor.Part0 = root
+        motor.Part0 = parentPart or root
         motor.Part1 = part
-        motor.C0 = part.CFrame
-        motor.Parent = root
+        motor.C0 = if parentPart then parentPart.CFrame:ToObjectSpace(part.CFrame) else part.CFrame
+        motor.Parent = parentPart or root
     end
     container:Destroy()
     model.PrimaryPart = root
