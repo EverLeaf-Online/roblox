@@ -6,7 +6,7 @@ for _, required in
     {
         "local WORLD_WIDTH = 2200",
         "local WORLD_DEPTH = 1250",
-        "local WORLD_DESIGN_VERSION = 14",
+        "local WORLD_DESIGN_VERSION = 15",
         'world:SetAttribute("WorldDesignVersion", WORLD_DESIGN_VERSION)',
         'world:SetAttribute("TerrainFirstMMOLayout", true)',
         "terrain:Clear()",
@@ -512,7 +512,7 @@ assert(
         and string.find(source, "local function makeRoadWayhouse", 1, true) ~= nil
         and string.find(source, "local function makeFarmBarn", 1, true) ~= nil
         and string.find(source, "local function makeCroftCottage", 1, true) ~= nil,
-    "V14 must provide explicit frontier architecture archetypes instead of one generic cottage shell"
+    "V15 must provide explicit frontier architecture archetypes instead of one generic cottage shell"
 )
 
 local genericBuildingCallCount = 0
@@ -544,7 +544,7 @@ for _, namedBuilding in
 do
     assert(
         string.find(source, namedBuilding, 1, true) ~= nil,
-        "missing V14 architecture conversion: " .. namedBuilding
+        "missing V15 architecture conversion: " .. namedBuilding
     )
 end
 

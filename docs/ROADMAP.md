@@ -8,6 +8,7 @@
 ## Lumenreach starter region — SOURCE BUILT / STUDIO ACCEPTANCE NOT PASSED
 
 - V14 architecture source pass removes the shared generic house shell from named Lumenreach structures and introduces explicit civic hall, depot, archive, inn, healer, workshop, stable, proving, wayhouse, barn, croft, wetland-stilt, and ranger archetypes. This is source progress only until Studio screenshots/walkthroughs accept the new silhouettes and placement.
+- V15 responds to Studio feedback that V14 still looked like generic blocks: it adds visible structural framing/trusses/chimneys/service silhouettes and re-grades/reorients Wayfarer Camp before placement so buildings sit correctly and face actual streets/courts.
 
 **Architecture status:** NOT ACCEPTED. The current generator still contains generic rectangular/gable building shells. A whole-game architecture replacement is now active across Lumenreach, Brasshaven/Eastworks, and Belforge. See [`ARCHITECTURE_OVERHAUL_CHECKLIST.md`](ARCHITECTURE_OVERHAUL_CHECKLIST.md) for the exact replacement matrix, regional archetypes, collision criteria, and implementation order.
 

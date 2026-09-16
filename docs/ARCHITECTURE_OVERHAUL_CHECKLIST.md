@@ -234,6 +234,8 @@ Status: ACTIVE — current generic/box architecture is temporary until replaced 
 - [ ] Verify performance/part counts after replacement.
 - [ ] Only then mark architecture overhaul complete.
 
+- [x] SOURCE PASS V15: screenshot feedback showed V14 still read as flat block architecture. Added exposed truss/gable framing, door hoods, facade timber grids, chimneys, cargo hoists/beacons/loft faces, and corrected Wayfarer Camp grading + plaza-facing placement. Studio acceptance remains required.
+
 ## Current acceptance status
 
 - Lumenreach topology/gameplay source: implemented, visual architecture overhaul NOT complete.
