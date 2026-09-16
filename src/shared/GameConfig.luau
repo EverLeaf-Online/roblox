@@ -225,6 +225,7 @@ GameConfig.PublicEvents = {
     InitialDelaySeconds = 90,
     CooldownSeconds = 300,
     DurationSeconds = 180,
+    Order = { "greenway_breach", "glowmere_surge", "eastbridge_assault" },
 }
 
 GameConfig.Monetization = {

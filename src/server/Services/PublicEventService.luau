@@ -16,6 +16,7 @@ local active = nil
 local generation = 0
 local rng = Random.new()
 local initialized = false
+local rotationIndex = 0
 
 PublicEventService.Event = event.Event
 
@@ -132,7 +133,8 @@ local function finish(state, succeeded, reason)
             state.Definition.RegionId,
             "success",
             state.Definition.DisplayName .. " Cleared",
-            "The Greenway is secure. Participating Wayfarers received an event reward.",
+            state.Definition.SuccessText
+                or "The threat is contained. Participating Wayfarers received an event reward.",
             5
         )
     else
@@ -144,7 +146,8 @@ local function finish(state, succeeded, reason)
             state.Definition.RegionId,
             "warning",
             state.Definition.DisplayName .. " Failed",
-            "The breach did not close in time. The patrol will regroup before the next defense.",
+            state.Definition.FailureText
+                or "The response failed. Local defenders will regroup before the next attempt.",
             5
         )
     end
@@ -281,7 +284,7 @@ function PublicEventService.Start(eventId)
         definition.RegionId,
         "warning",
         definition.DisplayName,
-        "Hostile creatures are breaking across the Greenway. Join the defense to earn a public-event reward.",
+        definition.StartText or "A public threat has emerged. Join nearby Wayfarers to contain it.",
         6
     )
     spawnWave(state)
@@ -291,6 +294,21 @@ function PublicEventService.Start(eventId)
         end
     end)
     return true, stateSnapshot(state)
+end
+
+local function nextConfiguredEventId()
+    local order = tuning().Order
+    if type(order) ~= "table" or #order == 0 then
+        return "greenway_breach"
+    end
+    for _ = 1, #order do
+        rotationIndex = (rotationIndex % #order) + 1
+        local eventId = order[rotationIndex]
+        if type(eventId) == "string" and PublicEventDefinitions[eventId] then
+            return eventId
+        end
+    end
+    return "greenway_breach"
 end
 
 function PublicEventService.Init()
@@ -305,7 +323,7 @@ function PublicEventService.Init()
         task.wait(math.max(10, tonumber(tuning().InitialDelaySeconds) or 90))
         while true do
             if not active then
-                PublicEventService.Start("greenway_breach")
+                PublicEventService.Start(nextConfiguredEventId())
             end
             task.wait(math.max(60, tonumber(tuning().CooldownSeconds) or 300))
         end

@@ -17,6 +17,8 @@ local npcs = fs.readFile("src/server/Content/NpcDefinitions.luau")
 for _, token in
     {
         "greenway_breach = table.freeze",
+        "glowmere_surge = table.freeze",
+        "eastbridge_assault = table.freeze",
         'DisplayName = "Greenway Breach"',
         'MonsterId = "lumen_mossling"',
         'MonsterId = "slime"',
@@ -42,6 +44,10 @@ for _, token in
         "RewardService.Grant",
         "recipientCount(definition.RegionId)",
         "PublicEventService.SendSnapshot",
+        "nextConfiguredEventId",
+        "definition.StartText",
+        "state.Definition.SuccessText",
+        "state.Definition.FailureText",
     }
 do
     assert(string.find(service, token, 1, true), "public event service missing invariant " .. token)
@@ -56,6 +62,15 @@ assert(string.find(config, "GameConfig.PublicEvents", 1, true), "public event tu
 assert(
     string.find(config, "CooldownSeconds = 300", 1, true),
     "public event cooldown tuning missing"
+)
+assert(
+    string.find(
+        config,
+        'Order = { "greenway_breach", "glowmere_surge", "eastbridge_assault" }',
+        1,
+        true
+    ),
+    "public event rotation order missing"
 )
 assert(
     string.find(net, 'PublicEvent = "PublicEvent"', 1, true),
