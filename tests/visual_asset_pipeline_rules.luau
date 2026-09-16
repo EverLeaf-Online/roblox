@@ -83,6 +83,10 @@ for _, token in
         "123954746000436",
         "89263541500191",
         "80182968126504",
+        "120132451351149",
+        "92390768634412",
+        "89565715809321",
+        "130773231745162",
     }
 do
     assert(
@@ -102,6 +106,17 @@ assert(
 assert(
     string.find(monsters, 'VisualSource", "authored_asset"', 1, true),
     "runtime authored monster source tag missing"
+)
+
+assert(
+    fs.isFile("scripts/generate_lumenreach_elite_monsters.py"),
+    "elite monster generator missing"
+)
+assert(fs.isDir("assets/original/lumenreach_elite_monsters"), "elite monster source assets missing")
+local eliteUploads = fs.readFile("assets/original/lumenreach_elite_monsters/upload_results.json")
+assert(
+    string.find(eliteUploads, '"moderation": "Approved"', 1, true),
+    "elite monster assets must be approved"
 )
 
 print("production visual asset pipeline rules tests passed")
