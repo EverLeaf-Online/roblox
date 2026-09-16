@@ -7,6 +7,8 @@
 
 ## Lumenreach starter region — SOURCE BUILT / STUDIO ACCEPTANCE NOT PASSED
 
+- V14 architecture source pass removes the shared generic house shell from named Lumenreach structures and introduces explicit civic hall, depot, archive, inn, healer, workshop, stable, proving, wayhouse, barn, croft, wetland-stilt, and ranger archetypes. This is source progress only until Studio screenshots/walkthroughs accept the new silhouettes and placement.
+
 **Architecture status:** NOT ACCEPTED. The current generator still contains generic rectangular/gable building shells. A whole-game architecture replacement is now active across Lumenreach, Brasshaven/Eastworks, and Belforge. See [`ARCHITECTURE_OVERHAUL_CHECKLIST.md`](ARCHITECTURE_OVERHAUL_CHECKLIST.md) for the exact replacement matrix, regional archetypes, collision criteria, and implementation order.
 
 - The 2200×1250 Level 1–10 topology, combat spaces, settlements, crossings, quest route, and custom EverLeaf structure set exist in source, but **the current Studio world is not accepted as production-quality**. It still requires a player-height environment rebuild/QA pass and must not be described as finished merely because the generator/tests pass.

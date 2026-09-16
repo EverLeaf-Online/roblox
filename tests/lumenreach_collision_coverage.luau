@@ -7,7 +7,20 @@ local builders = {
     "makeWaystone",
     "makeLantern",
     "makeSign",
-    "makeBuilding",
+    "makeFrontierFoundation",
+    "makeFrontierWall",
+    "makeFrontierRoofPair",
+    "makeWayfarerCivicHall",
+    "makeQuartermasterDepot",
+    "makeArchiveResearchLodge",
+    "makeWayfarerInn",
+    "makeHealerApothecary",
+    "makeCraftWorkshop",
+    "makeOpenStable",
+    "makeProvingLodge",
+    "makeRoadWayhouse",
+    "makeFarmBarn",
+    "makeCroftCottage",
     "makeBench",
     "makeHearth",
     "makeMarketStall",
@@ -76,7 +89,6 @@ assert(
 for _, required in
     {
         '"SignBoardCollision"',
-        '"BuildingRoofCollision"',
         '"MarketCanopyCollision"',
         '"ShelterRoofCollision"',
         '"ArchRoofCollision"',
@@ -91,9 +103,9 @@ do
 end
 
 assert(
-    string.find(source, "local solidHalfRun = math.max(1.5, width * 0.5 - 0.2)", 1, true) ~= nil
-        and string.find(source, '"BuildingRoofCollision"', 1, true) ~= nil,
-    "building roof collision must stop at the wall line instead of blocking the eave overhang"
+    string.find(source, "local solidHalfRun = math.max(1.5, width * 0.5 - 0.25)", 1, true) ~= nil
+        and string.find(source, 'name .. "RoofCollision"', 1, true) ~= nil,
+    "frontier archetype roof collision must stop inside the wall line instead of blocking visible eaves"
 )
 assert(
     string.find(source, '"ForgeAwningCollision"', 1, true) == nil

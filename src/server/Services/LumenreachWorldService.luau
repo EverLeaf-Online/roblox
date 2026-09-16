@@ -16,7 +16,7 @@ local LumenreachWorldService = {}
 local GENERATED_NAME = "EverLeafGeneratedWorld"
 local WORLD_WIDTH = 2200
 local WORLD_DEPTH = 1250
-local WORLD_DESIGN_VERSION = 13
+local WORLD_DESIGN_VERSION = 14
 
 -- Lumenreach is authored as a terrain-first MMORPG region. The generator below
 -- replaces the previous showcase composition completely: terrain is cleared,
@@ -1187,187 +1187,6 @@ local function makeSign(parent, position, yaw, text)
         base * CFrame.new(0, 3.15, 0)
     )
     makePartSurfaceCollisionProxy(model, board, "SignBoardCollision", Vector3.new(0.2, 0.2, 0.3))
-    return model
-end
-
-local function makeBuilding(parent, name, center, width, depth, height, yaw, accent)
-    local ground = terrainSurfacePosition(center, 0)
-    local model = Instance.new("Model")
-    model.Name = name
-    model.Parent = parent
-    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
-    local timber = Color3.fromRGB(76, 55, 38)
-    local wallColor = accent or Color3.fromRGB(116, 121, 101)
-    local roofColor = Color3.fromRGB(45, 66, 58)
-
-    -- Sink the foundation into the terrain so houses do not appear to float
-    -- when their footprint straddles small terrain height changes.
-    makePart(
-        model,
-        "StoneFoundation",
-        Vector3.new(width + 1.6, 3.0, depth + 1.6),
-        base * CFrame.new(0, -0.7, 0),
-        Enum.Material.Slate,
-        Color3.fromRGB(74, 82, 78)
-    )
-    makePart(
-        model,
-        "Floor",
-        Vector3.new(width, 0.8, depth),
-        base * CFrame.new(0, 0.8, 0),
-        Enum.Material.WoodPlanks,
-        timber
-    )
-
-    local doorWidth = math.min(7, width * 0.28)
-    local sideWidth = (width - doorWidth) * 0.5
-    local wallSpecs = {
-        { Vector3.new(width, height, 1), Vector3.new(0, height * 0.5 + 0.8, depth * 0.5) },
-        { Vector3.new(1, height, depth), Vector3.new(-width * 0.5, height * 0.5 + 0.8, 0) },
-        { Vector3.new(1, height, depth), Vector3.new(width * 0.5, height * 0.5 + 0.8, 0) },
-        {
-            Vector3.new(sideWidth, height, 1),
-            Vector3.new(-(doorWidth + sideWidth) * 0.5, height * 0.5 + 0.8, -depth * 0.5),
-        },
-        {
-            Vector3.new(sideWidth, height, 1),
-            Vector3.new((doorWidth + sideWidth) * 0.5, height * 0.5 + 0.8, -depth * 0.5),
-        },
-    }
-    for index, spec in wallSpecs do
-        makePart(
-            model,
-            "Wall" .. index,
-            spec[1],
-            base * CFrame.new(spec[2]),
-            Enum.Material.WoodPlanks,
-            wallColor
-        )
-    end
-
-    for _, x in { -1, 1 } do
-        for _, z in { -1, 1 } do
-            makePart(
-                model,
-                "CornerPost",
-                Vector3.new(1.05, height + 1.2, 1.05),
-                base * CFrame.new(x * width * 0.5, height * 0.5 + 0.8, z * depth * 0.5),
-                Enum.Material.Wood,
-                timber
-            )
-        end
-    end
-
-    for _, side in { -1, 1 } do
-        local window = makePart(
-            model,
-            "Window",
-            Vector3.new(4.5, 3.5, 0.25),
-            base * CFrame.new(side * width * 0.27, height * 0.56 + 0.8, -depth * 0.505),
-            Enum.Material.Glass,
-            Color3.fromRGB(129, 207, 183)
-        )
-        window.Transparency = 0.28
-        window.CanCollide = false
-        window.CanTouch = false
-        window.CanQuery = false
-    end
-
-    -- Derive the roof from the actual span so both panels meet at one ridge.
-    local pitch = math.rad(18)
-    local halfRun = width * 0.5 + 1.4
-    local slopeLength = halfRun / math.cos(pitch)
-    local rise = halfRun * math.tan(pitch)
-    local eaveY = height + 0.72
-    for _, side in { -1, 1 } do
-        local roof = makePart(
-            model,
-            "Roof",
-            Vector3.new(slopeLength + 0.15, 0.72, depth + 2.4),
-            base
-                * CFrame.new(side * halfRun * 0.5, eaveY + rise * 0.5, 0)
-                * CFrame.Angles(0, 0, -side * pitch),
-            Enum.Material.WoodPlanks,
-            roofColor
-        )
-        roof.CanCollide = false
-        roof.CanTouch = false
-        roof.CanQuery = false
-
-        -- Only the roof volume directly above the building footprint is solid.
-        -- The visible eaves intentionally overhang the walls, but their collision
-        -- must not create an invisible shoulder-height barrier around the house.
-        local solidHalfRun = math.max(1.5, width * 0.5 - 0.2)
-        local solidSlopeLength = solidHalfRun / math.cos(pitch)
-        local solidRise = solidHalfRun * math.tan(pitch)
-        makeCollisionProxy(
-            model,
-            "BuildingRoofCollision",
-            Vector3.new(solidSlopeLength, 0.66, math.max(2, depth - 0.2)),
-            base
-                * CFrame.new(side * solidHalfRun * 0.5, eaveY + solidRise * 0.5 - 0.18, 0)
-                * CFrame.Angles(0, 0, -side * pitch)
-        )
-    end
-
-    local ridge = makePart(
-        model,
-        "RoofRidge",
-        Vector3.new(0.9, 0.9, depth + 2.6),
-        base * CFrame.new(0, eaveY + rise, 0),
-        Enum.Material.Wood,
-        timber
-    )
-    ridge.CanCollide = false
-    ridge.CanTouch = false
-    ridge.CanQuery = false
-
-    local lintel = makePart(
-        model,
-        "DoorLintel",
-        Vector3.new(doorWidth, 0.7, 1.2),
-        base * CFrame.new(0, height + 0.25, -depth * 0.5 - 0.05),
-        Enum.Material.Wood,
-        timber
-    )
-    lintel.CanCollide = false
-
-    makeCollisionProxy(
-        model,
-        "BuildingFloorCollision",
-        Vector3.new(width, 0.9, depth),
-        base * CFrame.new(0, 0.78, 0)
-    )
-    makeCollisionProxy(
-        model,
-        "BuildingBackWallCollision",
-        Vector3.new(width, height, 1.05),
-        base * CFrame.new(0, height * 0.5 + 0.8, depth * 0.5)
-    )
-    makeCollisionProxy(
-        model,
-        "BuildingLeftWallCollision",
-        Vector3.new(1.05, height, depth),
-        base * CFrame.new(-width * 0.5, height * 0.5 + 0.8, 0)
-    )
-    makeCollisionProxy(
-        model,
-        "BuildingRightWallCollision",
-        Vector3.new(1.05, height, depth),
-        base * CFrame.new(width * 0.5, height * 0.5 + 0.8, 0)
-    )
-    makeCollisionProxy(
-        model,
-        "BuildingFrontLeftCollision",
-        Vector3.new(sideWidth, height, 1.05),
-        base * CFrame.new(-(doorWidth + sideWidth) * 0.5, height * 0.5 + 0.8, -depth * 0.5)
-    )
-    makeCollisionProxy(
-        model,
-        "BuildingFrontRightCollision",
-        Vector3.new(sideWidth, height, 1.05),
-        base * CFrame.new((doorWidth + sideWidth) * 0.5, height * 0.5 + 0.8, -depth * 0.5)
-    )
     return model
 end
 
@@ -2844,43 +2663,138 @@ end
 
 local function makeMossglenRangerHall(parent, name, position, yaw)
     local ground = terrainSurfacePosition(position, 0)
-    local model = makeBuilding(parent, name, position, 40, 28, 10, yaw, Color3.fromRGB(73, 108, 78))
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
     local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+    local wall = Color3.fromRGB(73, 108, 78)
+    local stone = Color3.fromRGB(72, 78, 68)
+
+    makePart(
+        model,
+        "RangerFoundation",
+        Vector3.new(36, 3, 26),
+        base * CFrame.new(0, -0.7, 0),
+        Enum.Material.Slate,
+        stone
+    )
+    makeCollisionProxy(
+        model,
+        "RangerFoundationCollision",
+        Vector3.new(35, 3, 25),
+        base * CFrame.new(0, -0.7, 0)
+    )
+
+    for _, spec in
+        {
+            { "RangerBack", Vector3.new(34, 9, 1), Vector3.new(0, 5.3, 12) },
+            { "RangerLeft", Vector3.new(1, 9, 24), Vector3.new(-17, 5.3, 0) },
+            { "RangerRight", Vector3.new(1, 9, 24), Vector3.new(17, 5.3, 0) },
+            { "RangerFrontLeft", Vector3.new(11, 9, 1), Vector3.new(-11.5, 5.3, -12) },
+            { "RangerFrontRight", Vector3.new(11, 9, 1), Vector3.new(11.5, 5.3, -12) },
+        }
+    do
+        makePart(
+            model,
+            spec[1],
+            spec[2],
+            base * CFrame.new(spec[3]),
+            Enum.Material.WoodPlanks,
+            wall
+        )
+        makeCollisionProxy(
+            model,
+            spec[1] .. "Collision",
+            spec[2] + Vector3.new(0.08, 0, 0.08),
+            base * CFrame.new(spec[3])
+        )
+    end
+
+    local pitch = math.rad(31)
+    local halfRun = 18
+    local slopeLength = halfRun / math.cos(pitch)
+    local rise = halfRun * math.tan(pitch)
+    for _, side in { -1, 1 } do
+        local roof = makePart(
+            model,
+            "RangerRoof",
+            Vector3.new(slopeLength + 0.15, 0.65, 26),
+            base
+                * CFrame.new(side * halfRun * 0.5, 9.8 + rise * 0.5, 0)
+                * CFrame.Angles(0, 0, -side * pitch),
+            Enum.Material.WoodPlanks,
+            Color3.fromRGB(43, 64, 50)
+        )
+        roof.CanCollide = false
+        local solidHalfRun = 16.7
+        local solidSlopeLength = solidHalfRun / math.cos(pitch)
+        local solidRise = solidHalfRun * math.tan(pitch)
+        makeCollisionProxy(
+            model,
+            "RangerRoofCollision",
+            Vector3.new(solidSlopeLength, 0.58, 23.6),
+            base
+                * CFrame.new(side * solidHalfRun * 0.5, 9.8 + solidRise * 0.5 - 0.16, 0)
+                * CFrame.Angles(0, 0, -side * pitch)
+        )
+    end
+
     local porch = makePart(
         model,
         "RangerPorch",
         Vector3.new(28, 0.7, 8),
-        base * CFrame.new(0, 0.8, -18),
+        base * CFrame.new(0, 0.8, -16),
         Enum.Material.WoodPlanks,
         SIGNATURE.TimberLight
     )
     porch.CanCollide = false
+    makeCollisionProxy(model, "RangerPorchCollision", Vector3.new(28, 0.8, 8), porch.CFrame)
     for _, x in { -10, 0, 10 } do
-        local rack = makePart(
+        makePart(
             model,
             "RangerRack",
             Vector3.new(0.6, 6.0, 0.6),
-            base * CFrame.new(x, 3.0, -21),
+            base * CFrame.new(x, 3.0, -19),
             Enum.Material.Wood,
             SIGNATURE.Timber
         )
-        rack.CanCollide = false
         local bow = makePart(
             model,
             "RangerBow",
             Vector3.new(0.28, 4.8, 0.28),
-            base * CFrame.new(x + 0.6, 3.3, -21.4) * CFrame.Angles(0, 0, math.rad(18)),
+            base * CFrame.new(x + 0.6, 3.3, -19.4) * CFrame.Angles(0, 0, math.rad(18)),
             Enum.Material.Wood,
             Color3.fromRGB(117, 82, 48)
         )
         bow.CanCollide = false
     end
-    makeCollisionProxy(
+
+    local deck = makePart(
         model,
-        "RangerPorchCollision",
-        Vector3.new(28, 0.8, 8),
-        base * CFrame.new(0, 0.8, -18)
+        "RangerLookoutDeck",
+        Vector3.new(9, 0.7, 9),
+        base * CFrame.new(21, 6.2, 4),
+        Enum.Material.WoodPlanks,
+        SIGNATURE.TimberLight
     )
+    deck.CanCollide = false
+    makeCollisionProxy(model, "RangerLookoutDeckCollision", Vector3.new(9, 0.8, 9), deck.CFrame)
+    for _, z in { 0, 8 } do
+        makePart(
+            model,
+            "RangerLookoutPost",
+            Vector3.new(0.8, 6, 0.8),
+            base * CFrame.new(21, 3, z),
+            Enum.Material.Wood,
+            SIGNATURE.Timber
+        )
+        makeCollisionProxy(
+            model,
+            "RangerLookoutPostCollision",
+            Vector3.new(1, 6, 1),
+            base * CFrame.new(21, 3, z)
+        )
+    end
     return model
 end
 
@@ -3753,6 +3667,903 @@ local function makeCroftPlot(parent, name, position, yaw, width, depth, accent)
     return model
 end
 
+local function makeFrontierFoundation(model, base, width, depth, stoneColor)
+    makePart(
+        model,
+        "Foundation",
+        Vector3.new(width + 2, 3.2, depth + 2),
+        base * CFrame.new(0, -0.8, 0),
+        Enum.Material.Slate,
+        stoneColor or SIGNATURE.Slate
+    )
+    makeCollisionProxy(
+        model,
+        "FoundationCollision",
+        Vector3.new(width + 1.4, 3.0, depth + 1.4),
+        base * CFrame.new(0, -0.75, 0)
+    )
+end
+
+local function makeFrontierWall(model, name, size, cframe, color, collisionName)
+    makePart(model, name, size, cframe, Enum.Material.WoodPlanks, color)
+    makeCollisionProxy(
+        model,
+        collisionName or (name .. "Collision"),
+        size + Vector3.new(0.08, 0, 0.08),
+        cframe
+    )
+end
+
+local function makeFrontierRoofPair(
+    model,
+    base,
+    name,
+    width,
+    depth,
+    eaveY,
+    pitchDegrees,
+    color,
+    collision
+)
+    local pitch = math.rad(pitchDegrees or 24)
+    local halfRun = width * 0.5 + 1.0
+    local slopeLength = halfRun / math.cos(pitch)
+    local rise = halfRun * math.tan(pitch)
+    for _, side in { -1, 1 } do
+        local roofFrame = base
+            * CFrame.new(side * halfRun * 0.5, eaveY + rise * 0.5, 0)
+            * CFrame.Angles(0, 0, -side * pitch)
+        local roof = makePart(
+            model,
+            name .. "Roof",
+            Vector3.new(slopeLength + 0.15, 0.65, depth + 2.0),
+            roofFrame,
+            Enum.Material.WoodPlanks,
+            color or SIGNATURE.SlateDark
+        )
+        roof.CanCollide = false
+        roof.CanTouch = false
+        roof.CanQuery = false
+        if collision ~= false then
+            local solidHalfRun = math.max(1.5, width * 0.5 - 0.25)
+            local solidSlopeLength = solidHalfRun / math.cos(pitch)
+            local solidRise = solidHalfRun * math.tan(pitch)
+            makeCollisionProxy(
+                model,
+                name .. "RoofCollision",
+                Vector3.new(solidSlopeLength, 0.58, math.max(2, depth - 0.3)),
+                base
+                    * CFrame.new(side * solidHalfRun * 0.5, eaveY + solidRise * 0.5 - 0.16, 0)
+                    * CFrame.Angles(0, 0, -side * pitch)
+            )
+        end
+    end
+    local ridge = makePart(
+        model,
+        name .. "Ridge",
+        Vector3.new(0.75, 0.75, depth + 2.2),
+        base * CFrame.new(0, eaveY + rise, 0),
+        Enum.Material.Wood,
+        SIGNATURE.Timber
+    )
+    ridge.CanCollide = false
+    ridge.CanTouch = false
+    ridge.CanQuery = false
+end
+
+local function makeWayfarerCivicHall(parent, name, position, yaw)
+    local ground = terrainSurfacePosition(position, 0)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+    local wall = Color3.fromRGB(108, 123, 103)
+
+    makeFrontierFoundation(model, base, 40, 27, Color3.fromRGB(70, 78, 75))
+    makeFrontierWall(
+        model,
+        "HallBack",
+        Vector3.new(40, 12, 1.1),
+        base * CFrame.new(0, 6.8, 13.5),
+        wall
+    )
+    makeFrontierWall(
+        model,
+        "HallLeft",
+        Vector3.new(1.1, 12, 27),
+        base * CFrame.new(-20, 6.8, 0),
+        wall
+    )
+    makeFrontierWall(
+        model,
+        "HallRight",
+        Vector3.new(1.1, 12, 27),
+        base * CFrame.new(20, 6.8, 0),
+        wall
+    )
+    makeFrontierWall(
+        model,
+        "HallFrontLeft",
+        Vector3.new(14.5, 12, 1.1),
+        base * CFrame.new(-12.75, 6.8, -13.5),
+        wall
+    )
+    makeFrontierWall(
+        model,
+        "HallFrontRight",
+        Vector3.new(14.5, 12, 1.1),
+        base * CFrame.new(12.75, 6.8, -13.5),
+        wall
+    )
+    makeFrontierRoofPair(model, base, "Hall", 40, 27, 12.6, 27, Color3.fromRGB(43, 66, 58), true)
+
+    -- Tall entry tower gives the civic hall a road-readable silhouette.
+    local towerBase = base * CFrame.new(0, 0, -16)
+    makeFrontierFoundation(model, towerBase, 11, 9, Color3.fromRGB(68, 77, 73))
+    for _, spec in
+        {
+            { Vector3.new(11, 16, 1), Vector3.new(0, 8.8, 4.5) },
+            { Vector3.new(1, 16, 9), Vector3.new(-5.5, 8.8, 0) },
+            { Vector3.new(1, 16, 9), Vector3.new(5.5, 8.8, 0) },
+        }
+    do
+        makeFrontierWall(
+            model,
+            "EntryTower",
+            spec[1],
+            towerBase * CFrame.new(spec[2]),
+            Color3.fromRGB(86, 111, 94),
+            "EntryTowerCollision"
+        )
+    end
+    makeFrontierRoofPair(
+        model,
+        towerBase,
+        "Tower",
+        13,
+        11,
+        16.5,
+        32,
+        Color3.fromRGB(37, 58, 52),
+        true
+    )
+
+    local porch = makePart(
+        model,
+        "CivicPorch",
+        Vector3.new(24, 0.8, 8),
+        base * CFrame.new(0, 0.7, -18),
+        Enum.Material.WoodPlanks,
+        SIGNATURE.TimberLight
+    )
+    porch.CanCollide = false
+    makeCollisionProxy(model, "CivicPorchCollision", Vector3.new(24, 0.9, 8), porch.CFrame)
+    for _, x in { -10, 10 } do
+        makeCollisionProxy(
+            model,
+            "CivicPorchPostCollision",
+            Vector3.new(1.1, 9, 1.1),
+            base * CFrame.new(x, 4.5, -21)
+        )
+        makePart(
+            model,
+            "CivicPorchPost",
+            Vector3.new(0.85, 9, 0.85),
+            base * CFrame.new(x, 4.5, -21),
+            Enum.Material.Wood,
+            SIGNATURE.Timber
+        )
+    end
+    makeWayfarerBanner(
+        model,
+        name .. "BannerL",
+        ground + Vector3.new(-9, 0, -22),
+        yaw or 0,
+        SIGNATURE.Cloth
+    )
+    makeWayfarerBanner(
+        model,
+        name .. "BannerR",
+        ground + Vector3.new(9, 0, -22),
+        yaw or 0,
+        SIGNATURE.ClothGold
+    )
+    return model
+end
+
+local function makeQuartermasterDepot(parent, name, position, yaw)
+    local ground = terrainSurfacePosition(position, 0)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+    local wall = Color3.fromRGB(126, 101, 67)
+    makeFrontierFoundation(model, base, 30, 24, Color3.fromRGB(78, 77, 68))
+    makeFrontierWall(
+        model,
+        "DepotBack",
+        Vector3.new(30, 10, 1),
+        base * CFrame.new(0, 5.8, 12),
+        wall
+    )
+    makeFrontierWall(
+        model,
+        "DepotLeft",
+        Vector3.new(1, 10, 24),
+        base * CFrame.new(-15, 5.8, 0),
+        wall
+    )
+    makeFrontierWall(
+        model,
+        "DepotRight",
+        Vector3.new(1, 10, 24),
+        base * CFrame.new(15, 5.8, 0),
+        wall
+    )
+    makeFrontierWall(
+        model,
+        "DepotFrontL",
+        Vector3.new(9, 10, 1),
+        base * CFrame.new(-10.5, 5.8, -12),
+        wall
+    )
+    makeFrontierWall(
+        model,
+        "DepotFrontR",
+        Vector3.new(9, 10, 1),
+        base * CFrame.new(10.5, 5.8, -12),
+        wall
+    )
+    makeFrontierRoofPair(model, base, "Depot", 30, 24, 10.5, 22, Color3.fromRGB(54, 65, 57), true)
+    local loading = makePart(
+        model,
+        "LoadingPorch",
+        Vector3.new(22, 1.1, 9),
+        base * CFrame.new(0, 1.0, -16),
+        Enum.Material.WoodPlanks,
+        SIGNATURE.TimberLight
+    )
+    loading.CanCollide = false
+    makeCollisionProxy(model, "LoadingPorchCollision", Vector3.new(22, 1.1, 9), loading.CFrame)
+    -- Offset side canopy breaks the box silhouette and reads as cargo handling.
+    local canopy = makePart(
+        model,
+        "CargoCanopy",
+        Vector3.new(10, 0.55, 17),
+        base * CFrame.new(19, 8.2, 1) * CFrame.Angles(0, 0, math.rad(7)),
+        Enum.Material.WoodPlanks,
+        Color3.fromRGB(57, 71, 60)
+    )
+    canopy.CanCollide = false
+    for _, z in { -6, 6 } do
+        makePart(
+            model,
+            "CargoCanopyPost",
+            Vector3.new(0.7, 8, 0.7),
+            base * CFrame.new(19, 4, z),
+            Enum.Material.Wood,
+            SIGNATURE.Timber
+        )
+        makeCollisionProxy(
+            model,
+            "CargoCanopyPostCollision",
+            Vector3.new(0.9, 8, 0.9),
+            base * CFrame.new(19, 4, z)
+        )
+    end
+    makeSupplyStack(model, districtPoint(position, yaw, Vector3.new(21, 0, 8)), yaw or 0, 0.8)
+    return model
+end
+
+local function makeArchiveResearchLodge(parent, name, position, yaw)
+    local ground = terrainSurfacePosition(position, 0)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+    local wall = Color3.fromRGB(96, 90, 123)
+    makeFrontierFoundation(model, base, 28, 21, Color3.fromRGB(72, 75, 80))
+    makeFrontierWall(
+        model,
+        "ArchiveBack",
+        Vector3.new(28, 10, 1),
+        base * CFrame.new(0, 5.8, 10.5),
+        wall
+    )
+    makeFrontierWall(
+        model,
+        "ArchiveLeft",
+        Vector3.new(1, 10, 21),
+        base * CFrame.new(-14, 5.8, 0),
+        wall
+    )
+    makeFrontierWall(
+        model,
+        "ArchiveRight",
+        Vector3.new(1, 10, 21),
+        base * CFrame.new(14, 5.8, 0),
+        wall
+    )
+    makeFrontierWall(
+        model,
+        "ArchiveFrontL",
+        Vector3.new(9, 10, 1),
+        base * CFrame.new(-9.5, 5.8, -10.5),
+        wall
+    )
+    makeFrontierWall(
+        model,
+        "ArchiveFrontR",
+        Vector3.new(9, 10, 1),
+        base * CFrame.new(9.5, 5.8, -10.5),
+        wall
+    )
+    makeFrontierRoofPair(model, base, "Archive", 28, 21, 10.5, 29, Color3.fromRGB(50, 61, 70), true)
+
+    local annexBase = base * CFrame.new(18, 0, 3)
+    makeFrontierFoundation(model, annexBase, 13, 14, Color3.fromRGB(70, 76, 78))
+    makeFrontierWall(
+        model,
+        "ArchiveAnnexBack",
+        Vector3.new(13, 7, 1),
+        annexBase * CFrame.new(0, 4.3, 7),
+        Color3.fromRGB(83, 103, 103)
+    )
+    makeFrontierWall(
+        model,
+        "ArchiveAnnexRight",
+        Vector3.new(1, 7, 14),
+        annexBase * CFrame.new(6.5, 4.3, 0),
+        Color3.fromRGB(83, 103, 103)
+    )
+    makeFrontierWall(
+        model,
+        "ArchiveAnnexFront",
+        Vector3.new(13, 7, 1),
+        annexBase * CFrame.new(0, 4.3, -7),
+        Color3.fromRGB(83, 103, 103)
+    )
+    local annexRoof = makePart(
+        model,
+        "ArchiveAnnexRoof",
+        Vector3.new(15, 0.55, 16),
+        annexBase * CFrame.new(0, 8.0, 0) * CFrame.Angles(0, 0, math.rad(-6)),
+        Enum.Material.WoodPlanks,
+        Color3.fromRGB(44, 65, 62)
+    )
+    annexRoof.CanCollide = false
+
+    local deck = makePart(
+        model,
+        "ReadingDeck",
+        Vector3.new(18, 0.75, 8),
+        base * CFrame.new(-5, 0.7, -14),
+        Enum.Material.WoodPlanks,
+        SIGNATURE.TimberLight
+    )
+    deck.CanCollide = false
+    makeCollisionProxy(model, "ReadingDeckCollision", Vector3.new(18, 0.8, 8), deck.CFrame)
+    return model
+end
+
+local function makeWayfarerInn(parent, name, position, yaw)
+    local ground = terrainSurfacePosition(position, 0)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+    local wall = Color3.fromRGB(78, 108, 87)
+    -- Long main hall.
+    makeFrontierFoundation(model, base, 36, 22, Color3.fromRGB(72, 79, 73))
+    makeFrontierWall(model, "InnBack", Vector3.new(36, 10, 1), base * CFrame.new(0, 5.8, 11), wall)
+    makeFrontierWall(model, "InnLeft", Vector3.new(1, 10, 22), base * CFrame.new(-18, 5.8, 0), wall)
+    makeFrontierWall(model, "InnRight", Vector3.new(1, 10, 22), base * CFrame.new(18, 5.8, 0), wall)
+    makeFrontierWall(
+        model,
+        "InnFrontL",
+        Vector3.new(12, 10, 1),
+        base * CFrame.new(-12, 5.8, -11),
+        wall
+    )
+    makeFrontierWall(
+        model,
+        "InnFrontR",
+        Vector3.new(12, 10, 1),
+        base * CFrame.new(12, 5.8, -11),
+        wall
+    )
+    makeFrontierRoofPair(model, base, "Inn", 36, 22, 10.4, 24, Color3.fromRGB(42, 64, 55), true)
+    -- Perpendicular social wing creates the L footprint.
+    local wing = base * CFrame.new(20, 0, 8) * CFrame.Angles(0, math.rad(90), 0)
+    makeFrontierFoundation(model, wing, 20, 14, Color3.fromRGB(72, 79, 73))
+    makeFrontierWall(
+        model,
+        "InnWingBack",
+        Vector3.new(20, 8, 1),
+        wing * CFrame.new(0, 4.8, 7),
+        wall
+    )
+    makeFrontierWall(
+        model,
+        "InnWingRight",
+        Vector3.new(1, 8, 14),
+        wing * CFrame.new(10, 4.8, 0),
+        wall
+    )
+    makeFrontierRoofPair(model, wing, "InnWing", 20, 14, 8.4, 20, Color3.fromRGB(48, 68, 58), true)
+    local porch = makePart(
+        model,
+        "InnPorch",
+        Vector3.new(30, 0.8, 9),
+        base * CFrame.new(-2, 0.7, -15),
+        Enum.Material.WoodPlanks,
+        SIGNATURE.TimberLight
+    )
+    porch.CanCollide = false
+    makeCollisionProxy(model, "InnPorchCollision", Vector3.new(30, 0.9, 9), porch.CFrame)
+    makeBench(model, districtPoint(position, yaw, Vector3.new(-8, 0, -18)), yaw or 0)
+    makeBench(model, districtPoint(position, yaw, Vector3.new(8, 0, -18)), yaw or 0)
+    return model
+end
+
+local function makeHealerApothecary(parent, name, position, yaw)
+    local ground = terrainSurfacePosition(position, 0)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+    local wall = Color3.fromRGB(94, 122, 100)
+    makeFrontierFoundation(model, base, 25, 18, Color3.fromRGB(73, 82, 77))
+    makeFrontierWall(model, "HealerBack", Vector3.new(25, 8, 1), base * CFrame.new(0, 4.8, 9), wall)
+    makeFrontierWall(
+        model,
+        "HealerLeft",
+        Vector3.new(1, 8, 18),
+        base * CFrame.new(-12.5, 4.8, 0),
+        wall
+    )
+    makeFrontierWall(
+        model,
+        "HealerRight",
+        Vector3.new(1, 8, 18),
+        base * CFrame.new(12.5, 4.8, 0),
+        wall
+    )
+    makeFrontierWall(
+        model,
+        "HealerFrontL",
+        Vector3.new(7.5, 8, 1),
+        base * CFrame.new(-8.75, 4.8, -9),
+        wall
+    )
+    makeFrontierWall(
+        model,
+        "HealerFrontR",
+        Vector3.new(7.5, 8, 1),
+        base * CFrame.new(8.75, 4.8, -9),
+        wall
+    )
+    makeFrontierRoofPair(model, base, "Healer", 25, 18, 8.5, 25, Color3.fromRGB(49, 72, 61), true)
+    local porch = makePart(
+        model,
+        "HerbPorch",
+        Vector3.new(21, 0.7, 9),
+        base * CFrame.new(0, 0.7, -13),
+        Enum.Material.WoodPlanks,
+        SIGNATURE.TimberLight
+    )
+    porch.CanCollide = false
+    makeCollisionProxy(model, "HerbPorchCollision", Vector3.new(21, 0.8, 9), porch.CFrame)
+    local canopy = makePart(
+        model,
+        "HerbCanopy",
+        Vector3.new(22, 0.45, 9),
+        base * CFrame.new(0, 8.6, -13) * CFrame.Angles(math.rad(-5), 0, 0),
+        Enum.Material.Fabric,
+        Color3.fromRGB(79, 125, 95)
+    )
+    canopy.CanCollide = false
+    for _, x in { -9, 9 } do
+        makePart(
+            model,
+            "HerbPorchPost",
+            Vector3.new(0.7, 8, 0.7),
+            base * CFrame.new(x, 4, -16),
+            Enum.Material.Wood,
+            SIGNATURE.Timber
+        )
+        makeCollisionProxy(
+            model,
+            "HerbPorchPostCollision",
+            Vector3.new(0.9, 8, 0.9),
+            base * CFrame.new(x, 4, -16)
+        )
+    end
+    -- Herb drying bars visually identify the service without labels.
+    for i, x in ipairs({ -6, 0, 6 }) do
+        local rack = makePart(
+            model,
+            "HerbRack" .. i,
+            Vector3.new(4.2, 0.4, 0.4),
+            base * CFrame.new(x, 5.6, -16.4),
+            Enum.Material.Wood,
+            SIGNATURE.Timber
+        )
+        rack.CanCollide = false
+    end
+    return model
+end
+
+local function makeCraftWorkshop(parent, name, position, yaw)
+    local ground = terrainSurfacePosition(position, 0)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+    -- Open work hall: rear service block plus large covered bay.
+    makeFrontierFoundation(model, base, 34, 24, Color3.fromRGB(75, 72, 66))
+    makeFrontierWall(
+        model,
+        "WorkshopBack",
+        Vector3.new(34, 9, 1.2),
+        base * CFrame.new(0, 5.3, 12),
+        Color3.fromRGB(119, 87, 61)
+    )
+    makeFrontierWall(
+        model,
+        "WorkshopLeft",
+        Vector3.new(1.2, 9, 24),
+        base * CFrame.new(-17, 5.3, 0),
+        Color3.fromRGB(105, 80, 58)
+    )
+    makeFrontierRoofPair(
+        model,
+        base,
+        "Workshop",
+        34,
+        24,
+        9.8,
+        18,
+        Color3.fromRGB(69, 61, 51),
+        false
+    )
+    for _, x in { -13, -4, 5, 14 } do
+        makePart(
+            model,
+            "WorkshopPost",
+            Vector3.new(0.85, 9, 0.85),
+            base * CFrame.new(x, 4.5, -10),
+            Enum.Material.Wood,
+            SIGNATURE.Timber
+        )
+        makeCollisionProxy(
+            model,
+            "WorkshopPostCollision",
+            Vector3.new(1.0, 9, 1.0),
+            base * CFrame.new(x, 4.5, -10)
+        )
+    end
+    local bench = makePart(
+        model,
+        "WorkshopBench",
+        Vector3.new(13, 1.2, 4),
+        base * CFrame.new(4, 2.2, 4),
+        Enum.Material.WoodPlanks,
+        SIGNATURE.TimberLight
+    )
+    bench.CanCollide = false
+    makeCollisionProxy(
+        model,
+        "WorkshopBenchCollision",
+        Vector3.new(13, 3.0, 4),
+        base * CFrame.new(4, 1.5, 4)
+    )
+    return model
+end
+
+local function makeOpenStable(parent, name, position, yaw)
+    local ground = terrainSurfacePosition(position, 0)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+    makeFrontierFoundation(model, base, 34, 24, Color3.fromRGB(77, 72, 63))
+    makeFrontierWall(
+        model,
+        "StableBack",
+        Vector3.new(34, 8, 1.2),
+        base * CFrame.new(0, 4.8, 12),
+        Color3.fromRGB(102, 83, 59)
+    )
+    for _, x in { -17, -6, 6, 17 } do
+        makePart(
+            model,
+            "StablePost",
+            Vector3.new(1.0, 9, 1.0),
+            base * CFrame.new(x, 4.5, -10),
+            Enum.Material.Wood,
+            SIGNATURE.Timber
+        )
+        makeCollisionProxy(
+            model,
+            "StablePostCollision",
+            Vector3.new(1.15, 9, 1.15),
+            base * CFrame.new(x, 4.5, -10)
+        )
+    end
+    for _, x in { -11.5, 0, 11.5 } do
+        makeFrontierWall(
+            model,
+            "StallDivider",
+            Vector3.new(0.8, 5, 15),
+            base * CFrame.new(x, 2.8, 3),
+            Color3.fromRGB(91, 72, 51),
+            "StallDividerCollision"
+        )
+    end
+    makeFrontierRoofPair(model, base, "Stable", 34, 24, 9.2, 19, Color3.fromRGB(55, 65, 54), false)
+    local tack = makePart(
+        model,
+        "TackShed",
+        Vector3.new(11, 6, 8),
+        base * CFrame.new(21, 3.2, 4),
+        Enum.Material.WoodPlanks,
+        Color3.fromRGB(112, 88, 61)
+    )
+    tack.CanCollide = false
+    makeCollisionProxy(model, "TackShedCollision", Vector3.new(11, 6, 8), tack.CFrame)
+    return model
+end
+
+local function makeProvingLodge(parent, name, position, yaw)
+    local ground = terrainSurfacePosition(position, 0)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+    makeFrontierFoundation(model, base, 32, 19, Color3.fromRGB(70, 80, 76))
+    makeFrontierWall(
+        model,
+        "ProvingBack",
+        Vector3.new(32, 9, 1),
+        base * CFrame.new(0, 5.3, 9.5),
+        Color3.fromRGB(76, 103, 87)
+    )
+    makeFrontierWall(
+        model,
+        "ProvingLeft",
+        Vector3.new(1, 9, 19),
+        base * CFrame.new(-16, 5.3, 0),
+        Color3.fromRGB(76, 103, 87)
+    )
+    makeFrontierWall(
+        model,
+        "ProvingRight",
+        Vector3.new(1, 9, 19),
+        base * CFrame.new(16, 5.3, 0),
+        Color3.fromRGB(76, 103, 87)
+    )
+    makeFrontierRoofPair(model, base, "Proving", 32, 19, 9.8, 30, Color3.fromRGB(43, 64, 55), true)
+    local pavilion = makePart(
+        model,
+        "TrainingPavilion",
+        Vector3.new(20, 0.65, 10),
+        base * CFrame.new(0, 8.4, -14),
+        Enum.Material.WoodPlanks,
+        Color3.fromRGB(49, 70, 60)
+    )
+    pavilion.CanCollide = false
+    for _, x in { -8, 8 } do
+        makePart(
+            model,
+            "PavilionPost",
+            Vector3.new(0.75, 8, 0.75),
+            base * CFrame.new(x, 4, -16),
+            Enum.Material.Wood,
+            SIGNATURE.Timber
+        )
+        makeCollisionProxy(
+            model,
+            "PavilionPostCollision",
+            Vector3.new(0.95, 8, 0.95),
+            base * CFrame.new(x, 4, -16)
+        )
+    end
+    return model
+end
+
+local function makeRoadWayhouse(parent, name, position, yaw, accent)
+    local ground = terrainSurfacePosition(position, 0)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+    local wall = accent or Color3.fromRGB(87, 108, 86)
+    -- Enclosed service room offset to one side.
+    makeFrontierFoundation(model, base * CFrame.new(-6, 0, 0), 15, 15, Color3.fromRGB(73, 80, 74))
+    makeFrontierWall(
+        model,
+        "WayhouseBack",
+        Vector3.new(15, 7, 1),
+        base * CFrame.new(-6, 4.3, 7.5),
+        wall
+    )
+    makeFrontierWall(
+        model,
+        "WayhouseLeft",
+        Vector3.new(1, 7, 15),
+        base * CFrame.new(-13.5, 4.3, 0),
+        wall
+    )
+    makeFrontierWall(
+        model,
+        "WayhouseFront",
+        Vector3.new(15, 7, 1),
+        base * CFrame.new(-6, 4.3, -7.5),
+        wall
+    )
+    local roof = makePart(
+        model,
+        "WayhouseLeanRoof",
+        Vector3.new(31, 0.6, 19),
+        base * CFrame.new(2, 8.7, 0) * CFrame.Angles(0, 0, math.rad(-7)),
+        Enum.Material.WoodPlanks,
+        Color3.fromRGB(48, 68, 58)
+    )
+    roof.CanCollide = false
+    for _, x in { 2, 12 } do
+        makePart(
+            model,
+            "WayhouseOpenPost",
+            Vector3.new(0.75, 8, 0.75),
+            base * CFrame.new(x, 4, -5),
+            Enum.Material.Wood,
+            SIGNATURE.Timber
+        )
+        makeCollisionProxy(
+            model,
+            "WayhouseOpenPostCollision",
+            Vector3.new(0.95, 8, 0.95),
+            base * CFrame.new(x, 4, -5)
+        )
+    end
+    makeBench(model, districtPoint(position, yaw, Vector3.new(7, 0, 2)), yaw or 0)
+    makeSupplyStack(model, districtPoint(position, yaw, Vector3.new(11, 0, 5)), yaw or 0, 0.65)
+    return model
+end
+
+local function makeFarmBarn(parent, name, position, yaw, accent)
+    local ground = terrainSurfacePosition(position, 0)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+    local wall = accent or Color3.fromRGB(111, 95, 65)
+    makeFrontierFoundation(model, base, 27, 19, Color3.fromRGB(77, 73, 64))
+    makeFrontierWall(model, "BarnBack", Vector3.new(27, 9, 1), base * CFrame.new(0, 5.3, 9.5), wall)
+    makeFrontierWall(
+        model,
+        "BarnLeft",
+        Vector3.new(1, 9, 19),
+        base * CFrame.new(-13.5, 5.3, 0),
+        wall
+    )
+    makeFrontierWall(
+        model,
+        "BarnRight",
+        Vector3.new(1, 9, 19),
+        base * CFrame.new(13.5, 5.3, 0),
+        wall
+    )
+    makeFrontierRoofPair(model, base, "Barn", 27, 19, 9.7, 33, Color3.fromRGB(60, 66, 52), true)
+    -- Side lean-to storage breaks the repeated cottage silhouette.
+    local lean = makePart(
+        model,
+        "BarnLeanTo",
+        Vector3.new(10, 0.55, 15),
+        base * CFrame.new(17, 6.5, 1) * CFrame.Angles(0, 0, math.rad(9)),
+        Enum.Material.WoodPlanks,
+        Color3.fromRGB(70, 69, 53)
+    )
+    lean.CanCollide = false
+    for _, z in { -5, 5 } do
+        makePart(
+            model,
+            "BarnLeanPost",
+            Vector3.new(0.7, 6, 0.7),
+            base * CFrame.new(18.5, 3, z),
+            Enum.Material.Wood,
+            SIGNATURE.Timber
+        )
+        makeCollisionProxy(
+            model,
+            "BarnLeanPostCollision",
+            Vector3.new(0.9, 6, 0.9),
+            base * CFrame.new(18.5, 3, z)
+        )
+    end
+    return model
+end
+
+local function makeCroftCottage(parent, name, position, yaw, accent, mirror)
+    local ground = terrainSurfacePosition(position, 0)
+    local model = Instance.new("Model")
+    model.Name = name
+    model.Parent = parent
+    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+    local wall = accent or Color3.fromRGB(96, 112, 82)
+    local side = if mirror == true then -1 else 1
+
+    -- Compact asymmetrical home: main room plus offset storage lean-to.
+    makeFrontierFoundation(model, base, 22, 17, Color3.fromRGB(74, 79, 70))
+    makeFrontierWall(
+        model,
+        "CottageBack",
+        Vector3.new(22, 8, 1),
+        base * CFrame.new(0, 4.8, 8.5),
+        wall
+    )
+    makeFrontierWall(
+        model,
+        "CottageOuter",
+        Vector3.new(1, 8, 17),
+        base * CFrame.new(-11 * side, 4.8, 0),
+        wall
+    )
+    makeFrontierWall(
+        model,
+        "CottageFrontL",
+        Vector3.new(6, 8, 1),
+        base * CFrame.new(-7, 4.8, -8.5),
+        wall
+    )
+    makeFrontierWall(
+        model,
+        "CottageFrontR",
+        Vector3.new(6, 8, 1),
+        base * CFrame.new(7, 4.8, -8.5),
+        wall
+    )
+    makeFrontierRoofPair(model, base, "Cottage", 22, 17, 8.5, 28, Color3.fromRGB(49, 67, 55), true)
+
+    local leanBase = base * CFrame.new(13 * side, 0, 2)
+    makeFrontierFoundation(model, leanBase, 8, 11, Color3.fromRGB(75, 76, 65))
+    makeFrontierWall(
+        model,
+        "LeanToBack",
+        Vector3.new(8, 5.5, 1),
+        leanBase * CFrame.new(0, 3.55, 5.5),
+        wall:Lerp(Color3.fromRGB(124, 95, 65), 0.24)
+    )
+    makeFrontierWall(
+        model,
+        "LeanToOuter",
+        Vector3.new(1, 5.5, 11),
+        leanBase * CFrame.new(4 * side, 3.55, 0),
+        wall:Lerp(Color3.fromRGB(124, 95, 65), 0.24)
+    )
+    local leanRoof = makePart(
+        model,
+        "LeanToRoof",
+        Vector3.new(10, 0.5, 13),
+        leanBase * CFrame.new(0.6 * side, 6.6, 0) * CFrame.Angles(0, 0, math.rad(8 * side)),
+        Enum.Material.WoodPlanks,
+        Color3.fromRGB(57, 66, 53)
+    )
+    leanRoof.CanCollide = false
+    local porch = makePart(
+        model,
+        "CottagePorch",
+        Vector3.new(10, 0.65, 5),
+        base * CFrame.new(0, 0.65, -11),
+        Enum.Material.WoodPlanks,
+        SIGNATURE.TimberLight
+    )
+    porch.CanCollide = false
+    makeCollisionProxy(model, "CottagePorchCollision", Vector3.new(10, 0.75, 5), porch.CFrame)
+    return model
+end
+
 local function makeOccupiedHamlet(parent, name, center, yaw, accent, cropAccent)
     local model = Instance.new("Model")
     model.Name = name
@@ -3767,24 +4578,36 @@ local function makeOccupiedHamlet(parent, name, center, yaw, accent, cropAccent)
         Enum.Material.Ground
     )
 
-    local cottages = {
-        { Vector3.new(-27, 0, -20), 27, 20, 8, math.rad(20) },
-        { Vector3.new(25, 0, -21), 30, 21, 9, math.rad(-18) },
-        { Vector3.new(-28, 0, 21), 24, 19, 8, math.rad(158) },
-        { Vector3.new(26, 0, 22), 26, 20, 8, math.rad(-160) },
-    }
-    for index, spec in cottages do
-        makeBuilding(
-            model,
-            name .. "Cottage" .. index,
-            districtPoint(center, yaw, spec[1]),
-            spec[2],
-            spec[3],
-            spec[4],
-            (yaw or 0) + spec[5],
-            if index % 2 == 0 then accent:Lerp(Color3.fromRGB(145, 111, 73), 0.18) else accent
-        )
-    end
+    makeCroftCottage(
+        model,
+        name .. "Cottage1",
+        districtPoint(center, yaw, Vector3.new(-27, 0, -20)),
+        (yaw or 0) + math.rad(20),
+        accent,
+        false
+    )
+    makeCroftCottage(
+        model,
+        name .. "Cottage2",
+        districtPoint(center, yaw, Vector3.new(25, 0, -21)),
+        (yaw or 0) + math.rad(-18),
+        accent:Lerp(Color3.fromRGB(145, 111, 73), 0.18),
+        true
+    )
+    makeFarmBarn(
+        model,
+        name .. "Barn",
+        districtPoint(center, yaw, Vector3.new(-28, 0, 21)),
+        (yaw or 0) + math.rad(158),
+        accent:Lerp(Color3.fromRGB(132, 101, 67), 0.32)
+    )
+    makeRoadWayhouse(
+        model,
+        name .. "Wayhouse",
+        districtPoint(center, yaw, Vector3.new(26, 0, 22)),
+        (yaw or 0) + math.rad(-160),
+        accent
+    )
 
     makeLumenWell(
         model,
@@ -3847,25 +4670,17 @@ local function makePatrolPost(parent, name, center, yaw, accent)
         Vector3.new(66, 1.0, 48),
         Enum.Material.Ground
     )
-    makeBuilding(
+    makeProvingLodge(
         model,
         name .. "Guardhouse",
         districtPoint(center, yaw, Vector3.new(-20, 0, 4)),
-        27,
-        20,
-        9,
-        (yaw or 0) + math.rad(12),
-        accent
+        (yaw or 0) + math.rad(12)
     )
-    makeBuilding(
+    makeQuartermasterDepot(
         model,
         name .. "Storehouse",
         districtPoint(center, yaw, Vector3.new(20, 0, 8)),
-        24,
-        18,
-        8,
-        (yaw or 0) - math.rad(15),
-        accent:Lerp(Color3.fromRGB(133, 98, 65), 0.28)
+        (yaw or 0) - math.rad(15)
     )
     makeWatchtower(model, districtPoint(center, yaw, Vector3.new(-27, 0, -25)), yaw or 0)
     makeRoadsideShelter(
@@ -4326,13 +5141,10 @@ local function makeRoadsideMicroSite(parent, spec)
             false
         )
     else
-        makeBuilding(
+        makeRoadWayhouse(
             model,
             spec.Name .. "Wayhouse",
             districtPoint(center, yaw, Vector3.new(-10, 0, 2)),
-            25,
-            19,
-            8,
             yaw + math.rad(8),
             accent
         )
@@ -4507,56 +5319,21 @@ end
 
 local function makeTownExpansion(parent)
     local camp = ZONES.Camp
-    makeBuilding(
+    makeHealerApothecary(
         parent,
         "WayfarerHealerLodge",
         camp + Vector3.new(-105, 0, -54),
-        28,
-        22,
-        9,
-        math.rad(62),
-        Color3.fromRGB(96, 124, 101)
+        math.rad(62)
     )
-    makeBuilding(
-        parent,
-        "WayfarerCraftHall",
-        camp + Vector3.new(8, 0, 86),
-        36,
-        25,
-        10,
-        math.rad(178),
-        Color3.fromRGB(123, 91, 64)
-    )
-    makeBuilding(
+    makeCraftWorkshop(parent, "WayfarerCraftHall", camp + Vector3.new(8, 0, 86), math.rad(178))
+    makeQuartermasterDepot(
         parent,
         "WayfarerStorehouse",
         camp + Vector3.new(-112, 0, 62),
-        25,
-        20,
-        8,
-        math.rad(108),
-        Color3.fromRGB(115, 94, 66)
+        math.rad(108)
     )
-    makeBuilding(
-        parent,
-        "WayfarerStable",
-        camp + Vector3.new(102, 0, 72),
-        34,
-        24,
-        9,
-        math.rad(-150),
-        Color3.fromRGB(103, 86, 62)
-    )
-    makeBuilding(
-        parent,
-        "PathkeeperLodge",
-        camp + Vector3.new(15, 0, -104),
-        30,
-        22,
-        9,
-        math.rad(6),
-        Color3.fromRGB(77, 105, 88)
-    )
+    makeOpenStable(parent, "WayfarerStable", camp + Vector3.new(102, 0, 72), math.rad(-150))
+    makeProvingLodge(parent, "PathkeeperLodge", camp + Vector3.new(15, 0, -104), math.rad(6))
     makeWatchtower(parent, camp + Vector3.new(-125, 0, -86), math.rad(25))
     makeWatchtower(parent, camp + Vector3.new(124, 0, -82), math.rad(-25))
     makeFenceLine(
@@ -4598,23 +5375,17 @@ end
 
 local function makeWorldSettlements(parent)
     -- Greenway settlement edge: visible habitation immediately outside town.
-    makeBuilding(
+    makeRoadWayhouse(
         parent,
         "GreenwayWayhouse",
         ZONES.Greenway + Vector3.new(-92, 0, -62),
-        28,
-        21,
-        8,
         math.rad(48),
         Color3.fromRGB(97, 112, 80)
     )
-    makeBuilding(
+    makeFarmBarn(
         parent,
         "GreenwayStoreShed",
         ZONES.Greenway + Vector3.new(92, 0, -54),
-        22,
-        18,
-        7,
         math.rad(-42),
         Color3.fromRGB(112, 91, 62)
     )
@@ -4627,25 +5398,18 @@ local function makeWorldSettlements(parent)
     makeSupplyStack(parent, ZONES.Greenway + Vector3.new(-70, 0, -72), math.rad(32), 0.85)
 
     -- Crossroads is a staffed Wayfarer waystation, not a sign in a field.
-    makeBuilding(
+    makeRoadWayhouse(
         parent,
         "CrossroadsWaystation",
         ZONES.Crossroads + Vector3.new(-70, 0, -58),
-        30,
-        22,
-        9,
         math.rad(38),
         Color3.fromRGB(84, 108, 87)
     )
-    makeBuilding(
+    makeQuartermasterDepot(
         parent,
         "CrossroadsCourierHouse",
         ZONES.Crossroads + Vector3.new(70, 0, 55),
-        24,
-        19,
-        8,
-        math.rad(-142),
-        Color3.fromRGB(111, 91, 66)
+        math.rad(-142)
     )
     makeRoadsideShelter(
         parent,
@@ -4662,23 +5426,17 @@ local function makeWorldSettlements(parent)
     )
 
     -- Glowmere has an actual wetland community around the shoreline.
-    makeBuilding(
+    makeGlowmereStiltHouse(
         parent,
         "GlowmereKeeperHut",
         ZONES.Glowmere + Vector3.new(-112, 0, -74),
-        26,
-        20,
-        8,
         math.rad(32),
         Color3.fromRGB(73, 107, 91)
     )
-    makeBuilding(
+    makeGlowmereStiltHouse(
         parent,
         "GlowmereReedHouse",
         ZONES.Glowmere + Vector3.new(102, 0, -80),
-        24,
-        19,
-        8,
         math.rad(-30),
         Color3.fromRGB(92, 112, 86)
     )
@@ -4691,35 +5449,23 @@ local function makeWorldSettlements(parent)
     makeSupplyStack(parent, ZONES.Glowmere + Vector3.new(-90, 0, -82), math.rad(8), 0.8)
 
     -- Eastbridge is a fortified frontier hamlet with several occupied structures.
-    makeBuilding(
+    makeProvingLodge(
         parent,
         "EastbridgeBarracks",
         ZONES.EastLanding + Vector3.new(-58, 0, 48),
-        30,
-        22,
-        9,
-        math.rad(136),
-        Color3.fromRGB(83, 102, 78)
+        math.rad(136)
     )
-    makeBuilding(
+    makeQuartermasterDepot(
         parent,
         "EastbridgeStorehouse",
         ZONES.EastLanding + Vector3.new(62, 0, -52),
-        27,
-        21,
-        8,
-        math.rad(-46),
-        Color3.fromRGB(118, 91, 60)
+        math.rad(-46)
     )
-    makeBuilding(
+    makeHealerApothecary(
         parent,
         "EastbridgeMedicLodge",
         ZONES.EastLanding + Vector3.new(-52, 0, -55),
-        24,
-        19,
-        8,
-        math.rad(44),
-        Color3.fromRGB(92, 119, 97)
+        math.rad(44)
     )
     makeGatehouse(
         parent,
@@ -4773,33 +5519,24 @@ local function makeWorldSettlements(parent)
     )
 
     -- Mossglen has a ranger enclave on the edge of its large party field.
-    makeBuilding(
+    makeMossglenRangerHall(
         parent,
         "MossglenRangerLodge",
         ZONES.Mossglen + Vector3.new(-128, 0, -92),
-        32,
-        24,
-        9,
-        math.rad(42),
-        Color3.fromRGB(74, 109, 78)
+        math.rad(42)
     )
-    makeBuilding(
+    makeCroftCottage(
         parent,
         "MossglenHunterCabin",
         ZONES.Mossglen + Vector3.new(128, 0, -105),
-        26,
-        20,
-        8,
         math.rad(-38),
-        Color3.fromRGB(100, 91, 61)
+        Color3.fromRGB(100, 91, 61),
+        true
     )
-    makeBuilding(
+    makeFarmBarn(
         parent,
         "MossglenSupplyHouse",
         ZONES.Mossglen + Vector3.new(-150, 0, 12),
-        24,
-        19,
-        8,
         math.rad(90),
         Color3.fromRGB(109, 86, 58)
     )
@@ -4812,25 +5549,19 @@ local function makeWorldSettlements(parent)
     makeSupplyStack(parent, ZONES.Mossglen + Vector3.new(-112, 0, -64), math.rad(25), 0.9)
 
     -- Sunmoss is an old highland observation/research site.
-    makeBuilding(
+    makeArchiveResearchLodge(
         parent,
         "SunmossObservatoryLodge",
         ZONES.Sunmoss + Vector3.new(-92, 0, -72),
-        30,
-        23,
-        9,
-        math.rad(35),
-        Color3.fromRGB(105, 111, 77)
+        math.rad(35)
     )
-    makeBuilding(
+    makeCroftCottage(
         parent,
         "SunmossKeeperHouse",
         ZONES.Sunmoss + Vector3.new(88, 0, 72),
-        24,
-        19,
-        8,
         math.rad(-145),
-        Color3.fromRGB(84, 104, 79)
+        Color3.fromRGB(84, 104, 79),
+        false
     )
     makeStoneShrine(
         parent,
@@ -4842,25 +5573,18 @@ local function makeWorldSettlements(parent)
     makeWatchtower(parent, ZONES.Sunmoss + Vector3.new(112, 0, -62), math.rad(-55))
 
     -- Veilfall contains a surviving refuge beside older ruined infrastructure.
-    makeBuilding(
+    makeRoadWayhouse(
         parent,
         "VeilfallRefuge",
         ZONES.Veilfall + Vector3.new(-104, 0, -68),
-        27,
-        21,
-        8,
         math.rad(45),
         Color3.fromRGB(69, 98, 92)
     )
-    makeBuilding(
+    makeArchiveResearchLodge(
         parent,
         "VeilfallSurveyHut",
         ZONES.Veilfall + Vector3.new(108, 0, 68),
-        23,
-        18,
-        8,
-        math.rad(-132),
-        Color3.fromRGB(86, 105, 90)
+        math.rad(-132)
     )
     makeRuinedHall(
         parent,
@@ -4913,15 +5637,11 @@ local function makeWorldSettlements(parent)
     )
 
     -- Proving Circle has a mentor compound instead of an isolated ritual ring.
-    makeBuilding(
+    makeProvingLodge(
         parent,
         "ProvingMentorLodge",
         ZONES.Proving + Vector3.new(-72, 0, 58),
-        30,
-        22,
-        9,
-        math.rad(48),
-        Color3.fromRGB(81, 106, 88)
+        math.rad(48)
     )
     makeRoadsideShelter(
         parent,
@@ -4944,46 +5664,15 @@ local function makeTown(parent)
     -- Four permanent service buildings define a readable town square. The
     -- arrival lane remains open on the west side and the Greenway departure
     -- gate stays visible from the spawn point.
-    makeBuilding(
-        parent,
-        "WayfarerHall",
-        camp + Vector3.new(-42, 0, -60),
-        44,
-        30,
-        11,
-        math.rad(8),
-        Color3.fromRGB(112, 124, 103)
-    )
-    makeBuilding(
+    makeWayfarerCivicHall(parent, "WayfarerHall", camp + Vector3.new(-42, 0, -60), math.rad(8))
+    makeQuartermasterDepot(
         parent,
         "QuartermasterHouse",
         camp + Vector3.new(-62, 0, 66),
-        30,
-        23,
-        9,
-        math.rad(168),
-        Color3.fromRGB(132, 106, 69)
+        math.rad(168)
     )
-    makeBuilding(
-        parent,
-        "ArchiveLodge",
-        camp + Vector3.new(48, 0, -72),
-        32,
-        24,
-        10,
-        math.rad(-12),
-        Color3.fromRGB(103, 95, 126)
-    )
-    makeBuilding(
-        parent,
-        "WayfarerInn",
-        camp + Vector3.new(66, 0, 62),
-        31,
-        24,
-        10,
-        math.rad(-165),
-        Color3.fromRGB(82, 112, 88)
-    )
+    makeArchiveResearchLodge(parent, "ArchiveLodge", camp + Vector3.new(48, 0, -72), math.rad(-12))
+    makeWayfarerInn(parent, "WayfarerInn", camp + Vector3.new(66, 0, 62), math.rad(-165))
 
     -- Plaza, service court, and training yard are authored as separate town
     -- rooms so new players immediately understand where to socialize, shop,
@@ -6100,13 +6789,10 @@ local function makeZoneContent(parent)
     makeLumenreachDistrictNetwork(parent)
     makeWorldMicroSites(parent)
 
-    makeBuilding(
+    makeRoadWayhouse(
         parent,
         "EastbridgeScoutOutpost",
         ZONES.EastLanding + Vector3.new(38, 0, 38),
-        24,
-        18,
-        8,
         math.rad(-135),
         Color3.fromRGB(76, 104, 82)
     )

@@ -199,22 +199,22 @@ Status: ACTIVE — current generic/box architecture is temporary until replaced 
 
 ### Phase A — architecture framework
 
-- [ ] Introduce explicit Lumenreach archetype builders instead of direct generic `makeBuilding` use for named structures.
+- [x] Introduce explicit Lumenreach archetype builders instead of direct generic `makeBuilding` use for named structures.
 - [ ] Introduce explicit Brasshaven industrial building builders.
-- [ ] Add tests that reject new named service buildings built only through the generic box builder.
-- [ ] Keep a generic primitive builder only for low-importance background/support structures.
+- [x] Add tests that reject new named service buildings built only through the generic box builder.
+- [x] Remove the obsolete generic `makeBuilding` shell entirely; low-importance support structures use purpose-specific primitive builders instead.
 
 ### Phase B — starter-region conversion
 
-- [ ] Rebuild Wayfarer Camp core buildings.
-- [ ] Rebuild Greenway/Crossroads buildings.
-- [ ] Rebuild Glowmere.
-- [ ] Rebuild Eastbridge.
+- [x] SOURCE PASS V14: rebuild Wayfarer Camp core buildings with explicit civic hall, depot, archive, inn, healer, workshop, stable, and proving archetypes. Studio visual acceptance remains.
+- [x] SOURCE PASS V14: rebuild Greenway/Crossroads named buildings and district cottages with wayhouse/barn/croft archetypes. Studio visual acceptance remains.
+- [x] SOURCE PASS V14: named Glowmere houses now use the stilt-house architecture path instead of the generic cottage shell. Studio visual acceptance remains.
+- [x] SOURCE PASS V14: named Eastbridge barracks/storehouse/medic/scout structures now use explicit service/outpost archetypes. Gatehouse refinement still has its own checklist item.
 - [ ] Rebuild Gravebone.
-- [ ] Rebuild Mossglen.
-- [ ] Rebuild Sunmoss.
-- [ ] Rebuild Veilfall.
-- [ ] Rebuild Proving Circle support architecture.
+- [x] SOURCE PASS V14: Mossglen ranger lodge/hunter/supply structures use ranger/croft/barn archetypes. Studio visual acceptance remains.
+- [x] SOURCE PASS V14: Sunmoss lodge/keeper structures use research/croft archetypes; observatory landmark refinement remains tracked separately.
+- [x] SOURCE PASS V14: Veilfall refuge/survey structures use wayhouse/research archetypes; sanctuary refinement remains tracked separately.
+- [x] SOURCE PASS V14: Proving mentor/support lodge uses the dedicated proving architecture path; full aspirant complex refinement remains tracked separately.
 - [ ] Rebuild Shattered Arch frontier/ruins.
 - [ ] Replace cloned district/micro-site structures with regional variants.
 

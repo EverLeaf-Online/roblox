@@ -6,7 +6,7 @@ for _, required in
     {
         "local WORLD_WIDTH = 2200",
         "local WORLD_DEPTH = 1250",
-        "local WORLD_DESIGN_VERSION = 13",
+        "local WORLD_DESIGN_VERSION = 14",
         'world:SetAttribute("WorldDesignVersion", WORLD_DESIGN_VERSION)',
         'world:SetAttribute("TerrainFirstMMOLayout", true)',
         "terrain:Clear()",
@@ -401,8 +401,8 @@ assert(
 )
 for _, requiredProxy in
     {
-        '"BuildingFloorCollision"',
-        '"BuildingBackWallCollision"',
+        '"FoundationCollision"',
+        '"EntryTowerCollision"',
         '"BenchCollision"',
         '"HearthCollision"',
         '"MarketCounterCollision"',
@@ -429,7 +429,7 @@ for _, requiredProxy in
         '"ArchPillarCollision"',
         '"GraveMarkerCollision"',
         '"SignBoardCollision"',
-        '"BuildingRoofCollision"',
+        '"CivicPorchCollision"',
         '"MarketPostCollision"',
         '"MarketCanopyCollision"',
         '"ShelterRoofCollision"',
@@ -499,5 +499,53 @@ assert(
         and string.find(source, 'Name = "Veilfall Refugee"', 1, true) == nil,
     "functional regional NPCs must not have overlapping ambient duplicates"
 )
+
+assert(
+    string.find(source, "local function makeWayfarerCivicHall", 1, true) ~= nil
+        and string.find(source, "local function makeQuartermasterDepot", 1, true) ~= nil
+        and string.find(source, "local function makeArchiveResearchLodge", 1, true) ~= nil
+        and string.find(source, "local function makeWayfarerInn", 1, true) ~= nil
+        and string.find(source, "local function makeHealerApothecary", 1, true) ~= nil
+        and string.find(source, "local function makeCraftWorkshop", 1, true) ~= nil
+        and string.find(source, "local function makeOpenStable", 1, true) ~= nil
+        and string.find(source, "local function makeProvingLodge", 1, true) ~= nil
+        and string.find(source, "local function makeRoadWayhouse", 1, true) ~= nil
+        and string.find(source, "local function makeFarmBarn", 1, true) ~= nil
+        and string.find(source, "local function makeCroftCottage", 1, true) ~= nil,
+    "V14 must provide explicit frontier architecture archetypes instead of one generic cottage shell"
+)
+
+local genericBuildingCallCount = 0
+for _ in string.gmatch(source, "makeBuilding%(") do
+    genericBuildingCallCount += 1
+end
+assert(
+    genericBuildingCallCount == 0,
+    "named Lumenreach architecture must no longer call the generic makeBuilding helper"
+)
+
+for _, namedBuilding in
+    {
+        '"WayfarerHall"',
+        '"QuartermasterHouse"',
+        '"ArchiveLodge"',
+        '"WayfarerInn"',
+        '"WayfarerHealerLodge"',
+        '"WayfarerCraftHall"',
+        '"WayfarerStable"',
+        '"PathkeeperLodge"',
+        '"GlowmereKeeperHut"',
+        '"EastbridgeBarracks"',
+        '"MossglenRangerLodge"',
+        '"SunmossObservatoryLodge"',
+        '"VeilfallRefuge"',
+        '"ProvingMentorLodge"',
+    }
+do
+    assert(
+        string.find(source, namedBuilding, 1, true) ~= nil,
+        "missing V14 architecture conversion: " .. namedBuilding
+    )
+end
 
 print("Lumenreach terrain-first MMO redesign rules tests passed")
