@@ -99,4 +99,22 @@ assert(
     "Lumenreach architecture must place sanitized Creator Store prefabs"
 )
 
+assert(
+    string.find(world, "local function architectureScaleForLongest", 1, true),
+    "Lumenreach architecture needs a dedicated third-party scale guard"
+)
+assert(
+    string.find(
+        world,
+        "math.clamp(prefabScaleForLongest(prefabName, targetLongest), 0.25, 3.0)",
+        1,
+        true
+    ),
+    "Lumenreach Creator Store buildings must clamp pathological source-unit scaling"
+)
+assert(
+    string.find(world, 'wrapper:SetAttribute("ArchitectureScale", architectureScale)', 1, true),
+    "placed architecture must expose its normalized scale for Studio QA"
+)
+
 print("Lumenreach Creator Store architecture asset rules tests passed")

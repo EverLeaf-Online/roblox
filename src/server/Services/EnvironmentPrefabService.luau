@@ -27,6 +27,13 @@ local BLOCKED_CLASSES = {
     BillboardGui = true,
     SurfaceGui = true,
     ScreenGui = true,
+    ParticleEmitter = true,
+    Beam = true,
+    Trail = true,
+    Smoke = true,
+    Fire = true,
+    Sparkles = true,
+    Highlight = true,
 }
 
 local function getFolder()
@@ -40,6 +47,7 @@ local function getFolder()
 end
 
 local function sanitize(instance)
+    local removed = 0
     for _, descendant in instance:GetDescendants() do
         local blocked = BLOCKED_CLASSES[descendant.ClassName]
             or descendant:IsA("LuaSourceContainer")
@@ -49,7 +57,9 @@ local function sanitize(instance)
             or descendant:IsA("PackageLink")
             or descendant:IsA("LayerCollector")
             or descendant:IsA("GuiObject")
+            or descendant:IsA("Light")
         if blocked then
+            removed += 1
             descendant:Destroy()
         elseif descendant:IsA("BasePart") then
             descendant.Anchored = true
@@ -57,6 +67,7 @@ local function sanitize(instance)
             descendant.CanQuery = true
         end
     end
+    return removed
 end
 
 local function setCollision(instance)
@@ -185,14 +196,23 @@ local function normalizeModel(model)
         model.CanCollide = string.find(name, "trunk", 1, true) ~= nil
             or string.find(name, "stem", 1, true) ~= nil
     end
-    sanitize(model)
+
+    local removed = sanitize(model)
     setCollision(model)
-    if model:IsA("Model") and not model.PrimaryPart then
-        local candidate = model:FindFirstChildWhichIsA("BasePart", true)
-        if candidate then
-            model.PrimaryPart = candidate
-        end
+
+    if model:IsA("Model") then
+        -- Never promote an arbitrary imported part to PrimaryPart. Creator Store
+        -- buildings often enumerate a roof, beam, or decoration first; using that
+        -- rotated part as the model pivot was tilting whole buildings when PivotTo
+        -- aligned the prefab in the world. Static environment models use a neutral
+        -- WorldPivot instead.
+        model.PrimaryPart = nil
+        local sourcePivot = model:GetPivot()
+        model:PivotTo(CFrame.new(sourcePivot.Position))
     end
+
+    model:SetAttribute("EverLeafSanitizedEnvironmentAsset", true)
+    model:SetAttribute("EverLeafSanitizedRemovedCount", removed)
 end
 
 function EnvironmentPrefabService.Get(prefabName)

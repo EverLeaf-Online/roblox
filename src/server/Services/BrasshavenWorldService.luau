@@ -79,6 +79,10 @@ local function prefabScaleForLongest(prefabName, targetLongest)
     return targetLongest / longest
 end
 
+local function architectureScaleForLongest(prefabName, targetLongest)
+    return math.clamp(prefabScaleForLongest(prefabName, targetLongest), 0.25, 3.0)
+end
+
 local function placeIndustrialBuilding(
     parent,
     name,
@@ -93,6 +97,7 @@ local function placeIndustrialBuilding(
     model:SetAttribute("EverLeafArchitecture", true)
     model:SetAttribute("ArchitecturePrefab", prefabName)
     model:SetAttribute("IndustrialDistrictBuilding", true)
+    model:SetAttribute("CreatorStoreArchitecture", true)
     model.Parent = parent
 
     local prefab = EnvironmentPrefabService.Get(prefabName)
@@ -108,7 +113,7 @@ local function placeIndustrialBuilding(
         return model
     end
 
-    local scale = prefabScaleForLongest(prefabName, targetLongest)
+    local scale = architectureScaleForLongest(prefabName, targetLongest)
     local base = CFrame.new(position) * CFrame.Angles(0, yaw or 0, 0)
     local visual = EnvironmentPrefabService.Place(prefabName, model, base, scale)
     if not visual then
@@ -116,6 +121,7 @@ local function placeIndustrialBuilding(
         return model
     end
     visual.Name = "ArchitectureVisual"
+    model:SetAttribute("ArchitectureScale", scale)
     setIndustrialVisual(visual)
 
     for index, spec in collisionSpecs do
@@ -1849,7 +1855,7 @@ function BrasshavenWorldService.Init()
 
     local world = Instance.new("Model")
     world.Name = GENERATED_NAME
-    world:SetAttribute("WorldDesignVersion", 5)
+    world:SetAttribute("WorldDesignVersion", 6)
     world:SetAttribute("MMOBuildingLayoutPass", true)
     world:SetAttribute("CreatorStoreArchitecture", true)
     world.Parent = Workspace

@@ -85,4 +85,38 @@ assert(
 assert(string.find(registry, "99210238800832", 1, true), "replacement civic structure missing")
 assert(string.find(registry, "82741417148839", 1, true), "replacement Wayfarer inn missing")
 
+for _, token in
+    {
+        "ParticleEmitter = true",
+        "Beam = true",
+        "Trail = true",
+        "Smoke = true",
+        "Fire = true",
+        "Sparkles = true",
+        "Highlight = true",
+        'descendant:IsA("Light")',
+    }
+do
+    assert(
+        string.find(sanitizer, token, 1, true),
+        "Creator Store sanitizer must strip imported presentation behavior: " .. token
+    )
+end
+assert(
+    string.find(sanitizer, "model.PrimaryPart = nil", 1, true),
+    "Creator Store models must discard imported/arbitrary PrimaryPart pivots"
+)
+assert(
+    string.find(sanitizer, "model.PrimaryPart = candidate", 1, true) == nil,
+    "an arbitrary roof/beam must never become a building PrimaryPart"
+)
+assert(
+    string.find(sanitizer, "model:PivotTo(CFrame.new(sourcePivot.Position))", 1, true),
+    "Creator Store model pivot rotation must be neutralized before placement"
+)
+assert(
+    string.find(sanitizer, 'model:SetAttribute("EverLeafSanitizedRemovedCount", removed)', 1, true),
+    "sanitized imports must expose how much third-party content was removed"
+)
+
 print("Creator Store asset security rules tests passed")

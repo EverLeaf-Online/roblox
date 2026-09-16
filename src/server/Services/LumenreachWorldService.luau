@@ -429,6 +429,13 @@ local function prefabScaleForLongest(prefabName, targetLongest)
     return targetLongest / longest
 end
 
+local function architectureScaleForLongest(prefabName, targetLongest)
+    -- Free Creator Store models use wildly different source units. Keep one bad
+    -- source asset from becoming a 100-stud giant (or microscopic) while still
+    -- normalizing ordinary Roblox-scale buildings to their authored district role.
+    return math.clamp(prefabScaleForLongest(prefabName, targetLongest), 0.25, 3.0)
+end
+
 local function placeDressingPrefab(parent, prefabName, position, yaw, targetLongest)
     if not EnvironmentPrefabService.Get(prefabName) then
         return nil
@@ -483,6 +490,7 @@ local function placeArchitecturePrefabBuilding(
     wrapper.Name = name
     wrapper:SetAttribute("EverLeafArchitecture", true)
     wrapper:SetAttribute("ArchitecturePrefab", prefabName)
+    wrapper:SetAttribute("CreatorStoreArchitecture", true)
     wrapper.Parent = parent
 
     local prefab = EnvironmentPrefabService.Get(prefabName)
@@ -499,19 +507,19 @@ local function placeArchitecturePrefabBuilding(
     end
 
     local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
-    local architectureScale = prefabScaleForLongest(prefabName, targetLongest)
+    local architectureScale = architectureScaleForLongest(prefabName, targetLongest)
     local visual = EnvironmentPrefabService.Place(prefabName, wrapper, base, architectureScale)
     if not visual then
         wrapper:SetAttribute("ArchitecturePrefabMissing", true)
         return wrapper
     end
     visual.Name = "ArchitectureVisual"
+    wrapper:SetAttribute("ArchitectureScale", architectureScale)
     setArchitectureVisual(visual)
 
     for index, spec in collisionSpecs do
-        -- Collision specs are authored in the same source-space dimensions as
-        -- the Blender models. Scale both size and offset with the visual so
-        -- collision stays aligned after prefab normalization.
+        -- Collision proxies scale with the curated visual. They remain ours;
+        -- imported Creator Store collision/constraints never own gameplay physics.
         makeCollisionProxy(
             wrapper,
             "ArchitectureCollision" .. index,
