@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
 local BelforgeAccessRules = require(ReplicatedStorage.Shared.Logic.BelforgeAccessRules)
+local BrasshavenWorldConfig = require(script.Parent.Parent.Content.BrasshavenWorldConfig)
 local BelforgeColossusService = require(script.Parent.BelforgeColossusService)
 local EnvironmentPrefabService = require(script.Parent.EnvironmentPrefabService)
 local InteractionService = require(script.Parent.InteractionService)
@@ -16,9 +17,10 @@ local WorldTravelService = require(script.Parent.WorldTravelService)
 local BrasshavenWorldService = {}
 
 local GENERATED_NAME = "EverLeafGeneratedBrasshaven"
-local ORIGIN = Vector3.new(1450, 0, 40)
-local BELFORGE_ANTECHAMBER_ORIGIN = ORIGIN + Vector3.new(430, 0, 395)
-local BELFORGE_ARENA_ORIGIN = ORIGIN + Vector3.new(650, 0, 395)
+local ORIGIN = BrasshavenWorldConfig.Origin
+local BELFORGE_ANTECHAMBER_ORIGIN = BrasshavenWorldConfig.BelforgeAntechamberOrigin
+local BELFORGE_ARENA_ORIGIN = BrasshavenWorldConfig.BelforgeArenaOrigin
+local ENCOUNTERS = BrasshavenWorldConfig.EncounterCenters
 
 local function makePart(parent, name, size, cframe, material, color)
     local part = Instance.new("Part")
@@ -1167,7 +1169,7 @@ local function makeHotVent(parent, position, scale)
 end
 
 local function dressEncounterAreas(parent)
-    local scrapCenter = ORIGIN + Vector3.new(-22, 0, -56)
+    local scrapCenter = ENCOUNTERS.ScrapLanes
     makeLabel(parent, scrapCenter + Vector3.new(0, 15, 0), "SCRAP LANES")
     makeScrapPile(parent, scrapCenter + Vector3.new(-14, 0, -10), math.rad(15), 1.05)
     makeScrapPile(parent, scrapCenter + Vector3.new(12, 0, 8), math.rad(-32), 0.9)
@@ -1191,7 +1193,7 @@ local function dressEncounterAreas(parent)
         )
     end
 
-    local hotworksCenter = ORIGIN + Vector3.new(58, 0, 58)
+    local hotworksCenter = ENCOUNTERS.LowerHotworks
     makeLabel(parent, hotworksCenter + Vector3.new(0, 16, 0), "LOWER HOTWORKS")
     makeHotVent(parent, hotworksCenter + Vector3.new(-14, 0, -8), 1.0)
     makeHotVent(parent, hotworksCenter + Vector3.new(10, 0, 11), 0.82)
@@ -1217,7 +1219,7 @@ local function dressEncounterAreas(parent)
         RespawnTime = 29,
     })
 
-    local gearworksCenter = ORIGIN + Vector3.new(-78, 0, 76)
+    local gearworksCenter = ENCOUNTERS.Gearworks
     makeLabel(parent, gearworksCenter + Vector3.new(0, 16, 0), "GEARWORKS YARD")
     makeScrapPile(parent, gearworksCenter + Vector3.new(-18, 0, -8), math.rad(9), 1.0)
     makeScrapPile(parent, gearworksCenter + Vector3.new(15, 0, 11), math.rad(-38), 0.92)
@@ -1241,7 +1243,7 @@ local function dressEncounterAreas(parent)
         )
     end
 
-    local cinderCenter = ORIGIN + Vector3.new(83, 0, -72)
+    local cinderCenter = ENCOUNTERS.CinderDucts
     makeLabel(parent, cinderCenter + Vector3.new(0, 17, 0), "CINDER DUCTS")
     makeHotVent(parent, cinderCenter + Vector3.new(-12, 0, -7), 0.9)
     makeHotVent(parent, cinderCenter + Vector3.new(15, 0, 10), 0.78)
@@ -1266,7 +1268,7 @@ local function dressEncounterAreas(parent)
         )
     end
 
-    local bastionCenter = ORIGIN + Vector3.new(122, 0, -40)
+    local bastionCenter = ENCOUNTERS.RegulatorRow
     makeLabel(parent, bastionCenter + Vector3.new(0, 18, 0), "REGULATOR ROW")
     makeScrapPile(parent, bastionCenter + Vector3.new(-16, 0, 13), math.rad(52), 0.75)
     for index = -2, 2 do
@@ -1326,7 +1328,7 @@ local function dressEncounterAreas(parent)
         RespawnTime = 100,
     })
 
-    local sootworksCenter = ORIGIN + Vector3.new(-58, 0, 145)
+    local sootworksCenter = ENCOUNTERS.Sootworks
     makeLabel(parent, sootworksCenter + Vector3.new(0, 18, 0), "SOOTWORKS DEAD SHIFT")
     makeScrapPile(parent, sootworksCenter + Vector3.new(-18, 0, -12), math.rad(14), 1.05)
     makeScrapPile(parent, sootworksCenter + Vector3.new(16, 0, 13), math.rad(-21), 0.9)
@@ -1349,7 +1351,7 @@ local function dressEncounterAreas(parent)
         )
     end
 
-    local dynamoCenter = ORIGIN + Vector3.new(64, 0, -148)
+    local dynamoCenter = ENCOUNTERS.DynamoGallery
     makeLabel(parent, dynamoCenter + Vector3.new(0, 19, 0), "DYNAMO GALLERY")
     for index = 1, 4 do
         local coil = makePart(
@@ -1386,7 +1388,7 @@ local function dressEncounterAreas(parent)
         light.Parent = core
     end
 
-    local railCenter = ORIGIN + Vector3.new(108, 0, 145)
+    local railCenter = ENCOUNTERS.EastworksRail
     makeLabel(parent, railCenter + Vector3.new(0, 20, 0), "EASTWORKS RAIL YARD")
     for lane = -2, 2 do
         local rail = makePart(
@@ -1430,7 +1432,7 @@ local function dressEncounterAreas(parent)
         RespawnTime = 115,
     })
 
-    local blueglassCenter = ORIGIN + Vector3.new(-72, 0, 235)
+    local blueglassCenter = ENCOUNTERS.BlueglassAnnex
     makeLabel(parent, blueglassCenter + Vector3.new(0, 20, 0), "BLUEGLASS ANNEX")
     for index = 1, 5 do
         local lens = makePart(
@@ -1454,7 +1456,7 @@ local function dressEncounterAreas(parent)
     end
     makeScrapPile(parent, blueglassCenter + Vector3.new(-18, 0, 13), math.rad(18), 0.85)
 
-    local maintenanceCenter = ORIGIN + Vector3.new(68, 0, -235)
+    local maintenanceCenter = ENCOUNTERS.MaintenanceDeck
     makeLabel(parent, maintenanceCenter + Vector3.new(0, 20, 0), "EASTWORKS MAINTENANCE DECK")
     makeScrapPile(parent, maintenanceCenter + Vector3.new(-17, 0, -12), math.rad(31), 0.9)
     makeScrapPile(parent, maintenanceCenter + Vector3.new(18, 0, 11), math.rad(-44), 0.88)
@@ -1477,7 +1479,7 @@ local function dressEncounterAreas(parent)
         )
     end
 
-    local smelterCenter = ORIGIN + Vector3.new(108, 0, 235)
+    local smelterCenter = ENCOUNTERS.SmelterYard
     makeLabel(parent, smelterCenter + Vector3.new(0, 22, 0), "SMELTER CRUCIBLE YARD")
     makeHotVent(parent, smelterCenter + Vector3.new(-18, 0, -13), 1.05)
     makeHotVent(parent, smelterCenter + Vector3.new(17, 0, 12), 0.92)
@@ -1529,7 +1531,7 @@ local function dressEncounterAreas(parent)
         RespawnTime = 125,
     })
 
-    local fluxVaultCenter = ORIGIN + Vector3.new(-105, 0, 325)
+    local fluxVaultCenter = ENCOUNTERS.FluxVaults
     makeLabel(parent, fluxVaultCenter + Vector3.new(0, 20, 0), "UPPER FLUX VAULTS")
     for index = 1, 5 do
         local prism = makePart(
@@ -1552,7 +1554,7 @@ local function dressEncounterAreas(parent)
     end
     makeScrapPile(parent, fluxVaultCenter + Vector3.new(-18, 0, 15), math.rad(24), 0.8)
 
-    local enforcementCenter = ORIGIN + Vector3.new(-12, 0, 325)
+    local enforcementCenter = ENCOUNTERS.AuthorityHall
     makeLabel(parent, enforcementCenter + Vector3.new(0, 20, 0), "AUTHORITY HALL")
     for index = -2, 2 do
         local column = makePart(
@@ -1581,7 +1583,7 @@ local function dressEncounterAreas(parent)
         band.CanCollide = false
     end
 
-    local runoffCenter = ORIGIN + Vector3.new(88, 0, 325)
+    local runoffCenter = ENCOUNTERS.MoltenRunoff
     makeLabel(parent, runoffCenter + Vector3.new(0, 20, 0), "MOLTEN RUNOFF CHANNELS")
     for index = -2, 2 do
         local channel = makePart(
@@ -1598,7 +1600,7 @@ local function dressEncounterAreas(parent)
     makeHotVent(parent, runoffCenter + Vector3.new(-20, 0, -18), 0.8)
     makeHotVent(parent, runoffCenter + Vector3.new(20, 0, 18), 0.75)
 
-    local bellowsCenter = ORIGIN + Vector3.new(-58, 0, 395)
+    local bellowsCenter = ENCOUNTERS.BellowsCourt
     makeLabel(parent, bellowsCenter + Vector3.new(0, 22, 0), "UPPER BELLOWS COURT")
     for index = 1, 4 do
         local tower = makePart(
@@ -1621,7 +1623,7 @@ local function dressEncounterAreas(parent)
     makeHotVent(parent, bellowsCenter + Vector3.new(-18, 0, 13), 1.0)
     makeHotVent(parent, bellowsCenter + Vector3.new(17, 0, 12), 1.0)
 
-    local sentinelCenter = ORIGIN + Vector3.new(92, 0, 395)
+    local sentinelCenter = ENCOUNTERS.SentinelPost
     makeLabel(parent, sentinelCenter + Vector3.new(0, 22, 0), "BELFORGE SENTINEL POST")
     for index = -2, 2 do
         local barricade = makePart(

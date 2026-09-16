@@ -12,11 +12,13 @@ for path in (ROOT / "src/server/Services").glob("*.luau"):
         if "EnemySpawnerService.Spawn(" not in line:
             continue
         window = "\n".join(lines[index:index + 14])
-        if "GroundToTerrain = true" not in window:
+        terrain_grounded = "GroundToTerrain = true" in window
+        surface_grounded = "GroundInclude =" in window and "GroundToTerrain =" in window
+        if not terrain_grounded and not surface_grounded:
             violations.append(f"{path.relative_to(ROOT)}:{index + 1}")
 
 if violations:
-    print("direct enemy spawns must explicitly opt into terrain grounding:")
+    print("direct enemy spawns must explicitly opt into terrain or authored-surface grounding:")
     for violation in violations:
         print(" -", violation)
     sys.exit(1)

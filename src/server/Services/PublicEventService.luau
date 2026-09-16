@@ -24,24 +24,28 @@ local function tuning()
     return GameConfig.PublicEvents or {}
 end
 
-local function eligiblePlayer(player, regionId)
+local function eligiblePlayer(player, definition)
     local profile = PlayerDataService.Get(player)
-    return profile and profile.World and profile.World.RegionId == regionId
+    if not profile or not profile.World or profile.World.RegionId ~= definition.RegionId then
+        return false
+    end
+    local minimumLevel = math.max(1, tonumber(definition.MinimumLevel) or 1)
+    return (tonumber(profile.Level) or 1) >= minimumLevel
 end
 
-local function recipientCount(regionId)
+local function recipientCount(definition)
     local count = 0
     for _, player in Players:GetPlayers() do
-        if eligiblePlayer(player, regionId) then
+        if eligiblePlayer(player, definition) then
             count += 1
         end
     end
     return count
 end
 
-local function broadcast(payload, regionId)
+local function broadcast(payload, definition)
     for _, player in Players:GetPlayers() do
-        if eligiblePlayer(player, regionId) then
+        if eligiblePlayer(player, definition) then
             event:Fire(player, payload)
         end
     end
@@ -52,6 +56,7 @@ local function stateSnapshot(state)
         Id = state.Id,
         Title = state.Definition.DisplayName,
         RegionId = state.Definition.RegionId,
+        MinimumLevel = math.max(1, tonumber(state.Definition.MinimumLevel) or 1),
         Stage = state.Wave,
         StageCount = #state.Definition.Waves,
         Alive = state.Alive,
@@ -62,15 +67,12 @@ local function stateSnapshot(state)
 end
 
 local function broadcastState(state, eventType)
-    broadcast(
-        { Type = eventType or "Changed", Event = stateSnapshot(state) },
-        state.Definition.RegionId
-    )
+    broadcast({ Type = eventType or "Changed", Event = stateSnapshot(state) }, state.Definition)
 end
 
-local function noticeRegion(regionId, kind, title, body, duration)
+local function noticeRegion(definition, kind, title, body, duration)
     for _, player in Players:GetPlayers() do
-        if eligiblePlayer(player, regionId) then
+        if eligiblePlayer(player, definition) then
             WorldNoticeService.Send(player, {
                 Kind = kind,
                 Title = title,
@@ -81,8 +83,9 @@ local function noticeRegion(regionId, kind, title, body, duration)
     end
 end
 
-local function eventParent()
-    local world = Workspace:FindFirstChild("EverLeafGeneratedWorld")
+local function eventParent(definition)
+    local worldName = definition.WorldModelName or "EverLeafGeneratedWorld"
+    local world = Workspace:FindFirstChild(worldName)
     if not world then
         return Workspace
     end
@@ -93,6 +96,24 @@ local function eventParent()
         folder.Parent = world
     end
     return folder
+end
+
+local function resolveGroundInclude(definition)
+    if type(definition.GroundSurfaceName) ~= "string" or definition.GroundSurfaceName == "" then
+        return nil
+    end
+    local root = Workspace
+    if type(definition.WorldModelName) == "string" and definition.WorldModelName ~= "" then
+        root = Workspace:FindFirstChild(definition.WorldModelName)
+        if not root then
+            return nil, "event_world_unavailable"
+        end
+    end
+    local surface = root:FindFirstChild(definition.GroundSurfaceName, true)
+    if not surface or not surface:IsA("BasePart") then
+        return nil, "event_ground_surface_unavailable"
+    end
+    return { surface }
 end
 
 local function cleanupState(state)
@@ -128,9 +149,9 @@ local function finish(state, succeeded, reason)
             Event = stateSnapshot(state),
             Reward = state.Definition.Reward,
             RewardedPlayers = rewarded,
-        }, state.Definition.RegionId)
+        }, state.Definition)
         noticeRegion(
-            state.Definition.RegionId,
+            state.Definition,
             "success",
             state.Definition.DisplayName .. " Cleared",
             state.Definition.SuccessText
@@ -140,10 +161,10 @@ local function finish(state, succeeded, reason)
     else
         broadcast(
             { Type = "Failed", Event = stateSnapshot(state), Reason = reason },
-            state.Definition.RegionId
+            state.Definition
         )
         noticeRegion(
-            state.Definition.RegionId,
+            state.Definition,
             "warning",
             state.Definition.DisplayName .. " Failed",
             state.Definition.FailureText
@@ -155,7 +176,9 @@ end
 
 local function randomSpawnPosition(definition)
     local angle = rng:NextNumber(0, math.pi * 2)
-    local distance = rng:NextNumber(34, math.max(35, definition.Radius * 0.72))
+    local outerRadius = math.max(8, tonumber(definition.SpawnRadius) or definition.Radius * 0.72)
+    local innerRadius = math.clamp(tonumber(definition.SpawnInnerRadius) or 34, 0, outerRadius)
+    local distance = rng:NextNumber(innerRadius, outerRadius)
     return definition.Center
         + Vector3.new(math.cos(angle) * distance, 8, math.sin(angle) * distance)
 end
@@ -191,7 +214,8 @@ spawnWave = function(state)
                 state.Folder,
                 {
                     AutoRespawn = false,
-                    GroundToTerrain = true,
+                    GroundToTerrain = state.GroundInclude == nil,
+                    GroundInclude = state.GroundInclude,
                     DeathLinger = 2.0,
                     OnDeath = function(_, _, _, eligibleUserIds)
                         if active ~= state or state.Finished then
@@ -241,7 +265,7 @@ function PublicEventService.SendSnapshot(player)
     if not active or not player or player.Parent ~= Players then
         return false
     end
-    if not eligiblePlayer(player, active.Definition.RegionId) then
+    if not eligiblePlayer(player, active.Definition) then
         return false
     end
     event:Fire(player, { Type = "Started", Event = stateSnapshot(active) })
@@ -256,14 +280,19 @@ function PublicEventService.Start(eventId)
     if not definition then
         return false, "unknown_public_event"
     end
-    if recipientCount(definition.RegionId) == 0 then
-        return false, "no_players_in_region"
+    if recipientCount(definition) == 0 then
+        return false, "no_eligible_players_in_region"
+    end
+
+    local groundInclude, groundReason = resolveGroundInclude(definition)
+    if definition.GroundSurfaceName and not groundInclude then
+        return false, groundReason or "event_ground_surface_unavailable"
     end
 
     generation += 1
     local folder = Instance.new("Folder")
     folder.Name = "PublicEvent_" .. eventId .. "_" .. generation
-    folder.Parent = eventParent()
+    folder.Parent = eventParent(definition)
     local duration = tonumber(definition.DurationSeconds)
         or tonumber(tuning().DurationSeconds)
         or 180
@@ -277,11 +306,12 @@ function PublicEventService.Start(eventId)
         Folder = folder,
         Finished = false,
         Generation = generation,
+        GroundInclude = groundInclude,
     }
     active = state
     broadcastState(state, "Started")
     noticeRegion(
-        definition.RegionId,
+        definition,
         "warning",
         definition.DisplayName,
         definition.StartText or "A public threat has emerged. Join nearby Wayfarers to contain it.",
@@ -299,16 +329,18 @@ end
 local function nextConfiguredEventId()
     local order = tuning().Order
     if type(order) ~= "table" or #order == 0 then
-        return "greenway_breach"
+        local fallback = PublicEventDefinitions.greenway_breach
+        return fallback and recipientCount(fallback) > 0 and "greenway_breach" or nil
     end
     for _ = 1, #order do
         rotationIndex = (rotationIndex % #order) + 1
         local eventId = order[rotationIndex]
-        if type(eventId) == "string" and PublicEventDefinitions[eventId] then
+        local definition = type(eventId) == "string" and PublicEventDefinitions[eventId] or nil
+        if definition and recipientCount(definition) > 0 then
             return eventId
         end
     end
-    return "greenway_breach"
+    return nil
 end
 
 function PublicEventService.Init()
@@ -323,7 +355,10 @@ function PublicEventService.Init()
         task.wait(math.max(10, tonumber(tuning().InitialDelaySeconds) or 90))
         while true do
             if not active then
-                PublicEventService.Start(nextConfiguredEventId())
+                local eventId = nextConfiguredEventId()
+                if eventId then
+                    PublicEventService.Start(eventId)
+                end
             end
             task.wait(math.max(60, tonumber(tuning().CooldownSeconds) or 300))
         end

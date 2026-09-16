@@ -27,10 +27,11 @@ function EnemySpawnerService.Spawn(enemyIdOrTemplate, position, parent, options)
     enemy:SetAttribute("MonsterEmerging", options.Emerging == true)
     enemy:PivotTo(CFrame.new(position))
     enemy.Parent = parent or Workspace
-    if options.GroundToTerrain == true and options.Emerging ~= true then
+    local hasGroundInclude = type(options.GroundInclude) == "table" and #options.GroundInclude > 0
+    if (options.GroundToTerrain == true or hasGroundInclude) and options.Emerging ~= true then
         local grounded, groundReason = WorldGroundingService.GroundModel(enemy, position, {
             Clearance = options.GroundClearance,
-            IgnoreWater = true,
+            IncludeInstances = options.GroundInclude,
         })
         if not grounded then
             enemy:Destroy()

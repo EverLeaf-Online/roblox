@@ -225,7 +225,14 @@ GameConfig.PublicEvents = {
     InitialDelaySeconds = 90,
     CooldownSeconds = 300,
     DurationSeconds = 180,
-    Order = { "greenway_breach", "glowmere_surge", "eastbridge_assault" },
+    Order = {
+        "greenway_breach",
+        "glowmere_surge",
+        "eastbridge_assault",
+        "foundry_scrap_surge",
+        "eastworks_grid_break",
+        "upper_foundry_lockdown",
+    },
 }
 
 GameConfig.Monetization = {

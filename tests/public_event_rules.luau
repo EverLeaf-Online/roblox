@@ -19,7 +19,13 @@ for _, token in
         "greenway_breach = table.freeze",
         "glowmere_surge = table.freeze",
         "eastbridge_assault = table.freeze",
+        "foundry_scrap_surge = table.freeze",
+        "eastworks_grid_break = table.freeze",
+        "upper_foundry_lockdown = table.freeze",
         'DisplayName = "Greenway Breach"',
+        'DisplayName = "Foundry Scrap Surge"',
+        'DisplayName = "Eastworks Grid Break"',
+        'DisplayName = "Upper Foundry Lockdown"',
         'MonsterId = "lumen_mossling"',
         'MonsterId = "slime"',
         'MonsterId = "peco_peco"',
@@ -36,13 +42,17 @@ for _, token in
     {
         "PublicEventService.Start",
         "AutoRespawn = false",
-        "GroundToTerrain = true",
+        "GroundToTerrain = state.GroundInclude == nil",
+        "GroundInclude = state.GroundInclude",
         "Participants = {}",
         'QuestObjectiveService.Record(profile, "PublicEvent", state.Id, 1)',
         'enemy:SetAttribute("PublicEventId", state.Id)',
         "eligibleUserIds",
         "RewardService.Grant",
-        "recipientCount(definition.RegionId)",
+        "recipientCount(definition)",
+        "resolveGroundInclude",
+        "definition.MinimumLevel",
+        "eventParent(definition)",
         "PublicEventService.SendSnapshot",
         "nextConfiguredEventId",
         "definition.StartText",
@@ -63,14 +73,24 @@ assert(
     string.find(config, "CooldownSeconds = 300", 1, true),
     "public event cooldown tuning missing"
 )
+for _, eventId in
+    {
+        "greenway_breach",
+        "glowmere_surge",
+        "eastbridge_assault",
+        "foundry_scrap_surge",
+        "eastworks_grid_break",
+        "upper_foundry_lockdown",
+    }
+do
+    assert(
+        string.find(config, '"' .. eventId .. '"', 1, true),
+        "public event rotation missing " .. eventId
+    )
+end
 assert(
-    string.find(
-        config,
-        'Order = { "greenway_breach", "glowmere_surge", "eastbridge_assault" }',
-        1,
-        true
-    ),
-    "public event rotation order missing"
+    string.find(service, "recipientCount(definition) > 0", 1, true),
+    "automatic event rotation must skip regions without eligible players"
 )
 assert(
     string.find(net, 'PublicEvent = "PublicEvent"', 1, true),

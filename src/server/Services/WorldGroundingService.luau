@@ -38,14 +38,28 @@ function WorldGroundingService.GroundModel(model, requestedPosition, options)
     local stagingHeight = tonumber(options.StagingHeight) or 40
     model:PivotTo(CFrame.new(requestedPosition + Vector3.new(0, stagingHeight, 0)) * rotation)
 
-    local terrain = Workspace:FindFirstChildOfClass("Terrain")
-    if not terrain then
-        return false, "terrain_missing"
+    local includeInstances = {}
+    if type(options.IncludeInstances) == "table" then
+        for _, instance in options.IncludeInstances do
+            if typeof(instance) == "Instance" and instance.Parent then
+                table.insert(includeInstances, instance)
+            end
+        end
+    end
+
+    local groundSource = "world_surface"
+    if #includeInstances == 0 then
+        local terrain = Workspace:FindFirstChildOfClass("Terrain")
+        if not terrain then
+            return false, "terrain_missing"
+        end
+        table.insert(includeInstances, terrain)
+        groundSource = "terrain"
     end
 
     local params = RaycastParams.new()
     params.FilterType = Enum.RaycastFilterType.Include
-    params.FilterDescendantsInstances = { terrain }
+    params.FilterDescendantsInstances = includeInstances
     -- World grounding treats water as traversable volume, never as a floor.
     -- Callers that need aquatic placement should provide their own water-specific resolver.
     params.IgnoreWater = true
@@ -67,6 +81,7 @@ function WorldGroundingService.GroundModel(model, requestedPosition, options)
     model:PivotTo(CFrame.new(0, shiftY, 0) * model:GetPivot())
 
     model:SetAttribute("EverLeafGroundY", hit.Position.Y)
+    model:SetAttribute("EverLeafGroundSource", groundSource)
     model:SetAttribute("EverLeafGroundClearance", clearance)
     model:SetAttribute("EverLeafGroundShiftY", shiftY)
     return true
