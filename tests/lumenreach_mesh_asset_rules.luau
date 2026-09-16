@@ -4,30 +4,39 @@ local registry = fs.readFile("src/server/Content/EnvironmentAssetRegistry.luau")
 local world = fs.readFile("src/server/Services/LumenreachWorldService.luau")
 local manifest = fs.readFile("assets/original/lumenreach_architecture/manifest.json")
 local uploads = fs.readFile("assets/original/lumenreach_architecture/upload_results.json")
+local generator = fs.readFile("scripts/generate_lumenreach_architecture.py")
+assert(
+    fs.isFile("assets/original/lumenreach_architecture/lumen_palette.png"),
+    "architecture palette texture is missing"
+)
+assert(
+    string.find(generator, "apply_palette_atlas", 1, true),
+    "architecture generator must bake the flat-color palette into the GLBs"
+)
 
 local assets = {
-    { "LumenCivicHall", "127768353689424" },
-    { "LumenQuartermasterDepot", "84750321219058" },
-    { "LumenArchiveLodge", "103322782929462" },
-    { "LumenWayfarerInn", "118338713936616" },
-    { "LumenHealerLodge", "88168406420725" },
-    { "LumenCraftWorkshop", "105268332724582" },
-    { "LumenOpenStable", "87422611932371" },
-    { "LumenProvingLodge", "97764957110691" },
-    { "LumenRoadWayhouse", "104717310952590" },
-    { "LumenFarmBarn", "74150114579140" },
-    { "LumenCroftCottageA", "134706181384015" },
-    { "LumenCroftCottageB", "128457775419453" },
-    { "LumenGlowmereStiltHouse", "98647766328538" },
-    { "LumenMossglenRangerHall", "105347638360093" },
-    { "LumenFrontierGatehouse", "90751638251875" },
-    { "LumenRuinedHall", "133702935578347" },
-    { "LumenForgeYard", "115045579898423" },
-    { "LumenGraveboneMausoleum", "90687448622867" },
-    { "LumenSunmossObservatory", "72910144160451" },
-    { "LumenVeilfallSanctuary", "89230413054325" },
-    { "LumenShatteredFortressTower", "136833732602200" },
-    { "LumenStoneShrine", "105255978786194" },
+    { "LumenCivicHall", "133556360685406" },
+    { "LumenQuartermasterDepot", "137239183865764" },
+    { "LumenArchiveLodge", "137267951808879" },
+    { "LumenWayfarerInn", "71957319643364" },
+    { "LumenHealerLodge", "120378183892930" },
+    { "LumenCraftWorkshop", "131833611058968" },
+    { "LumenOpenStable", "85851512665594" },
+    { "LumenProvingLodge", "119304858476581" },
+    { "LumenRoadWayhouse", "98034643639937" },
+    { "LumenFarmBarn", "89701830913140" },
+    { "LumenCroftCottageA", "132542848015613" },
+    { "LumenCroftCottageB", "116174241850482" },
+    { "LumenGlowmereStiltHouse", "139234768601269" },
+    { "LumenMossglenRangerHall", "106301394317624" },
+    { "LumenFrontierGatehouse", "120621904681287" },
+    { "LumenRuinedHall", "70784355192049" },
+    { "LumenForgeYard", "123625015286607" },
+    { "LumenGraveboneMausoleum", "84123705929702" },
+    { "LumenSunmossObservatory", "106886408516548" },
+    { "LumenVeilfallSanctuary", "136210017750290" },
+    { "LumenShatteredFortressTower", "111947348903814" },
+    { "LumenStoneShrine", "120864356034791" },
 }
 
 for _, spec in assets do

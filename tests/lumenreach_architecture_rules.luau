@@ -60,12 +60,12 @@ for _, token in
 do
     assert(
         string.find(source, token, 1, true) ~= nil,
-        "missing V18 MeshPart architecture contract " .. token
+        "missing V19 MeshPart architecture contract " .. token
     )
 end
 
 assert(
-    string.find(source, "local WORLD_DESIGN_VERSION = 18", 1, true) ~= nil,
+    string.find(source, "local WORLD_DESIGN_VERSION = 19", 1, true) ~= nil,
     "architecture conversion must bump world design version"
 )
 
@@ -80,7 +80,7 @@ for _, token in
 do
     assert(
         string.find(source, token, 1, true) ~= nil,
-        "missing V18 mesh architecture/placement contract: " .. token
+        "missing V19 mesh architecture/placement contract: " .. token
     )
 end
 
@@ -92,6 +92,23 @@ local hallAt =
 assert(
     gradeAt < hallAt,
     "Wayfarer Camp terrain must be graded before buildings sample their ground height"
+)
+
+assert(
+    string.find(source, "local function setArchitectureVisual", 1, true),
+    "V19 architecture query helper missing"
+)
+assert(
+    string.find(source, "descendant.CanQuery = true", 1, true),
+    "architecture visuals must participate in camera/LOS queries"
+)
+assert(
+    string.find(source, "spec.Size * architectureScale", 1, true),
+    "architecture collision size must scale with the visual"
+)
+assert(
+    string.find(source, "spec.Offset * architectureScale", 1, true),
+    "architecture collision offsets must scale with the visual"
 )
 
 print("Lumenreach architecture rules tests passed")

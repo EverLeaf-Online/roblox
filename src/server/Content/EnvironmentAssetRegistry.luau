@@ -249,7 +249,7 @@ local EnvironmentAssetRegistry = {
         Notes = "Second optimized fallen-trunk silhouette for large deadwood variation.",
     },
     LumenCivicHall = {
-        AssetId = 127768353689424,
+        AssetId = 133556360685406,
         Name = "EverLeaf Lumen Civic Hall",
         Source = "Original EverLeaf low-poly architecture",
         Status = "approved_for_sanitized_import",
@@ -259,7 +259,7 @@ local EnvironmentAssetRegistry = {
         Notes = "Original EverLeaf authored MeshPart building; render geometry only, gameplay collision is provided by explicit world proxies.",
     },
     LumenQuartermasterDepot = {
-        AssetId = 84750321219058,
+        AssetId = 137239183865764,
         Name = "EverLeaf Lumen Quartermaster Depot",
         Source = "Original EverLeaf low-poly architecture",
         Status = "approved_for_sanitized_import",
@@ -269,7 +269,7 @@ local EnvironmentAssetRegistry = {
         Notes = "Original EverLeaf authored MeshPart building.",
     },
     LumenArchiveLodge = {
-        AssetId = 103322782929462,
+        AssetId = 137267951808879,
         Name = "EverLeaf Lumen Archive Lodge",
         Source = "Original EverLeaf low-poly architecture",
         Status = "approved_for_sanitized_import",
@@ -279,7 +279,7 @@ local EnvironmentAssetRegistry = {
         Notes = "Original EverLeaf authored MeshPart building.",
     },
     LumenWayfarerInn = {
-        AssetId = 118338713936616,
+        AssetId = 71957319643364,
         Name = "EverLeaf Lumen Wayfarer Inn",
         Source = "Original EverLeaf low-poly architecture",
         Status = "approved_for_sanitized_import",
@@ -289,7 +289,7 @@ local EnvironmentAssetRegistry = {
         Notes = "Original EverLeaf authored MeshPart building.",
     },
     LumenHealerLodge = {
-        AssetId = 88168406420725,
+        AssetId = 120378183892930,
         Name = "EverLeaf Lumen Healer Lodge",
         Source = "Original EverLeaf low-poly architecture",
         Status = "approved_for_sanitized_import",
@@ -299,7 +299,7 @@ local EnvironmentAssetRegistry = {
         Notes = "Original EverLeaf authored MeshPart building.",
     },
     LumenCraftWorkshop = {
-        AssetId = 105268332724582,
+        AssetId = 131833611058968,
         Name = "EverLeaf Lumen Craft Workshop",
         Source = "Original EverLeaf low-poly architecture",
         Status = "approved_for_sanitized_import",
@@ -309,7 +309,7 @@ local EnvironmentAssetRegistry = {
         Notes = "Original EverLeaf authored open-sided MeshPart workshop.",
     },
     LumenOpenStable = {
-        AssetId = 87422611932371,
+        AssetId = 85851512665594,
         Name = "EverLeaf Lumen Open Stable",
         Source = "Original EverLeaf low-poly architecture",
         Status = "approved_for_sanitized_import",
@@ -319,7 +319,7 @@ local EnvironmentAssetRegistry = {
         Notes = "Original EverLeaf authored open-sided MeshPart stable.",
     },
     LumenProvingLodge = {
-        AssetId = 97764957110691,
+        AssetId = 119304858476581,
         Name = "EverLeaf Lumen Proving Lodge",
         Source = "Original EverLeaf low-poly architecture",
         Status = "approved_for_sanitized_import",
@@ -329,7 +329,7 @@ local EnvironmentAssetRegistry = {
         Notes = "Original EverLeaf authored MeshPart proving lodge.",
     },
     LumenRoadWayhouse = {
-        AssetId = 104717310952590,
+        AssetId = 98034643639937,
         Name = "EverLeaf LumenRoadWayhouse",
         Source = "Original EverLeaf low-poly architecture",
         Status = "approved_for_sanitized_import",
@@ -339,7 +339,7 @@ local EnvironmentAssetRegistry = {
         Notes = "Original EverLeaf authored district architecture MeshPart; visible mesh and gameplay collision are separated.",
     },
     LumenFarmBarn = {
-        AssetId = 74150114579140,
+        AssetId = 89701830913140,
         Name = "EverLeaf LumenFarmBarn",
         Source = "Original EverLeaf low-poly architecture",
         Status = "approved_for_sanitized_import",
@@ -349,7 +349,7 @@ local EnvironmentAssetRegistry = {
         Notes = "Original EverLeaf authored district architecture MeshPart; visible mesh and gameplay collision are separated.",
     },
     LumenCroftCottageA = {
-        AssetId = 134706181384015,
+        AssetId = 132542848015613,
         Name = "EverLeaf LumenCroftCottageA",
         Source = "Original EverLeaf low-poly architecture",
         Status = "approved_for_sanitized_import",
@@ -359,7 +359,7 @@ local EnvironmentAssetRegistry = {
         Notes = "Original EverLeaf authored district architecture MeshPart; visible mesh and gameplay collision are separated.",
     },
     LumenCroftCottageB = {
-        AssetId = 128457775419453,
+        AssetId = 116174241850482,
         Name = "EverLeaf LumenCroftCottageB",
         Source = "Original EverLeaf low-poly architecture",
         Status = "approved_for_sanitized_import",
@@ -369,7 +369,7 @@ local EnvironmentAssetRegistry = {
         Notes = "Original EverLeaf authored district architecture MeshPart; visible mesh and gameplay collision are separated.",
     },
     LumenGlowmereStiltHouse = {
-        AssetId = 98647766328538,
+        AssetId = 139234768601269,
         Name = "EverLeaf LumenGlowmereStiltHouse",
         Source = "Original EverLeaf low-poly architecture",
         Status = "approved_for_sanitized_import",
@@ -379,7 +379,7 @@ local EnvironmentAssetRegistry = {
         Notes = "Original EverLeaf authored district architecture MeshPart; visible mesh and gameplay collision are separated.",
     },
     LumenMossglenRangerHall = {
-        AssetId = 105347638360093,
+        AssetId = 106301394317624,
         Name = "EverLeaf LumenMossglenRangerHall",
         Source = "Original EverLeaf low-poly architecture",
         Status = "approved_for_sanitized_import",
@@ -389,7 +389,7 @@ local EnvironmentAssetRegistry = {
         Notes = "Original EverLeaf authored district architecture MeshPart; visible mesh and gameplay collision are separated.",
     },
     LumenFrontierGatehouse = {
-        AssetId = 90751638251875,
+        AssetId = 120621904681287,
         Name = "EverLeaf LumenFrontierGatehouse",
         Source = "Original EverLeaf low-poly architecture",
         Status = "approved_for_sanitized_import",
@@ -399,7 +399,7 @@ local EnvironmentAssetRegistry = {
         Notes = "Original EverLeaf authored district architecture MeshPart; visible mesh and gameplay collision are separated.",
     },
     LumenRuinedHall = {
-        AssetId = 133702935578347,
+        AssetId = 70784355192049,
         Name = "EverLeaf LumenRuinedHall",
         Source = "Original EverLeaf low-poly architecture",
         Status = "approved_for_sanitized_import",
@@ -409,7 +409,7 @@ local EnvironmentAssetRegistry = {
         Notes = "Original EverLeaf authored district architecture MeshPart; visible mesh and gameplay collision are separated.",
     },
     LumenForgeYard = {
-        AssetId = 115045579898423,
+        AssetId = 123625015286607,
         Name = "EverLeaf LumenForgeYard",
         Source = "Original EverLeaf low-poly architecture",
         Status = "approved_for_sanitized_import",
@@ -419,7 +419,7 @@ local EnvironmentAssetRegistry = {
         Notes = "Original EverLeaf authored Lumenreach landmark MeshPart; gameplay collision is provided by explicit simple proxies.",
     },
     LumenGraveboneMausoleum = {
-        AssetId = 90687448622867,
+        AssetId = 84123705929702,
         Name = "EverLeaf LumenGraveboneMausoleum",
         Source = "Original EverLeaf low-poly architecture",
         Status = "approved_for_sanitized_import",
@@ -429,7 +429,7 @@ local EnvironmentAssetRegistry = {
         Notes = "Original EverLeaf authored Lumenreach landmark MeshPart; gameplay collision is provided by explicit simple proxies.",
     },
     LumenSunmossObservatory = {
-        AssetId = 72910144160451,
+        AssetId = 106886408516548,
         Name = "EverLeaf LumenSunmossObservatory",
         Source = "Original EverLeaf low-poly architecture",
         Status = "approved_for_sanitized_import",
@@ -439,7 +439,7 @@ local EnvironmentAssetRegistry = {
         Notes = "Original EverLeaf authored Lumenreach landmark MeshPart; gameplay collision is provided by explicit simple proxies.",
     },
     LumenVeilfallSanctuary = {
-        AssetId = 89230413054325,
+        AssetId = 136210017750290,
         Name = "EverLeaf LumenVeilfallSanctuary",
         Source = "Original EverLeaf low-poly architecture",
         Status = "approved_for_sanitized_import",
@@ -449,7 +449,7 @@ local EnvironmentAssetRegistry = {
         Notes = "Original EverLeaf authored Lumenreach landmark MeshPart; gameplay collision is provided by explicit simple proxies.",
     },
     LumenShatteredFortressTower = {
-        AssetId = 136833732602200,
+        AssetId = 111947348903814,
         Name = "EverLeaf LumenShatteredFortressTower",
         Source = "Original EverLeaf low-poly architecture",
         Status = "approved_for_sanitized_import",
@@ -459,7 +459,7 @@ local EnvironmentAssetRegistry = {
         Notes = "Original EverLeaf authored Lumenreach landmark MeshPart; gameplay collision is provided by explicit simple proxies.",
     },
     LumenStoneShrine = {
-        AssetId = 105255978786194,
+        AssetId = 120864356034791,
         Name = "EverLeaf LumenStoneShrine",
         Source = "Original EverLeaf low-poly architecture",
         Status = "approved_for_sanitized_import",

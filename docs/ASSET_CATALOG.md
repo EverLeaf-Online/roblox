@@ -44,16 +44,30 @@ These are **original EverLeaf-authored stylized low-poly meshes**, generated fro
 
 | Prefab | Roblox asset ID | Approx source tris | Purpose |
 |---|---:|---:|---|
-| `LumenCivicHall` | `127768353689424` | 1,768 | Wayfarer civic/quest landmark |
-| `LumenQuartermasterDepot` | `84750321219058` | 1,652 | storehouse/loading depot |
-| `LumenArchiveLodge` | `103322782929462` | 1,468 | archive/research lodge |
-| `LumenWayfarerInn` | `118338713936616` | 1,736 | inn/social building |
-| `LumenHealerLodge` | `88168406420725` | 1,792 | healer/apothecary |
-| `LumenCraftWorkshop` | `105268332724582` | 680 | open craft workshop |
-| `LumenOpenStable` | `87422611932371` | 548 | open stable |
-| `LumenProvingLodge` | `97764957110691` | 1,520 | training/proving lodge |
+| `LumenCivicHall` | `133556360685406` | 1,768 | Wayfarer civic/quest landmark |
+| `LumenQuartermasterDepot` | `137239183865764` | 1,652 | storehouse/loading depot |
+| `LumenArchiveLodge` | `137267951808879` | 1,468 | archive/research lodge |
+| `LumenWayfarerInn` | `71957319643364` | 1,736 | inn/social building |
+| `LumenHealerLodge` | `120378183892930` | 1,792 | healer/apothecary |
+| `LumenCraftWorkshop` | `131833611058968` | 680 | open craft workshop |
+| `LumenOpenStable` | `85851512665594` | 548 | open stable |
+| `LumenProvingLodge` | `119304858476581` | 1,520 | training/proving lodge |
+| `LumenRoadWayhouse` | `98034643639937` | 868 | road-service shelter |
+| `LumenFarmBarn` | `89701830913140` | 912 | farm storage/barn |
+| `LumenCroftCottageA` | `132542848015613` | 1,440 | croft cottage variant A |
+| `LumenCroftCottageB` | `116174241850482` | 1,472 | croft cottage variant B |
+| `LumenGlowmereStiltHouse` | `139234768601269` | 1,220 | wetland stilt-house |
+| `LumenMossglenRangerHall` | `106301394317624` | 1,748 | ranger/hunter hall |
+| `LumenFrontierGatehouse` | `120621904681287` | 560 | frontier defensive gatehouse |
+| `LumenRuinedHall` | `70784355192049` | 440 | recognizable ruined hall |
+| `LumenForgeYard` | `123625015286607` | 484 | open forge/smithy |
+| `LumenGraveboneMausoleum` | `84123705929702` | 324 | Gravebone tomb structure |
+| `LumenSunmossObservatory` | `106886408516548` | 652 | highland observatory landmark |
+| `LumenVeilfallSanctuary` | `136210017750290` | 524 | ravine sanctuary landmark |
+| `LumenShatteredFortressTower` | `111947348903814` | 572 | Shattered Arch fortress landmark |
+| `LumenStoneShrine` | `120864356034791` | 264 | route/shrine landmark |
 
-All eight assets returned Roblox moderation state `Approved` on upload. Source GLBs and generation metadata live under `assets/original/lumenreach_architecture/`; canonical uploaded IDs live in `assets/roblox/lumenreach_architecture_asset_ids.json`.
+All 22 current architecture assets returned Roblox moderation state `Approved` on the V19 upload. The V19 GLBs bake the stylized flat-color palette into an embedded texture atlas so Roblox does not collapse the authored materials to pale/white surfaces. Source GLBs and generation metadata live under `assets/original/lumenreach_architecture/`; canonical uploaded IDs live in `assets/roblox/lumenreach_architecture_asset_ids.json`.
 
 ### Original in-project environment props
 

@@ -1,90 +1,90 @@
 {
-  "LumenCivicHall": {
-    "assetId": 127768353689424,
-    "moderation": "Approved"
-  },
-  "LumenQuartermasterDepot": {
-    "assetId": 84750321219058,
-    "moderation": "Approved"
-  },
   "LumenArchiveLodge": {
-    "assetId": 103322782929462,
+    "assetId": 137267951808879,
     "moderation": "Approved"
   },
-  "LumenWayfarerInn": {
-    "assetId": 118338713936616,
-    "moderation": "Approved"
-  },
-  "LumenHealerLodge": {
-    "assetId": 88168406420725,
+  "LumenCivicHall": {
+    "assetId": 133556360685406,
     "moderation": "Approved"
   },
   "LumenCraftWorkshop": {
-    "assetId": 105268332724582,
-    "moderation": "Approved"
-  },
-  "LumenOpenStable": {
-    "assetId": 87422611932371,
-    "moderation": "Approved"
-  },
-  "LumenProvingLodge": {
-    "assetId": 97764957110691,
-    "moderation": "Approved"
-  },
-  "LumenRoadWayhouse": {
-    "assetId": 104717310952590,
-    "moderation": "Approved"
-  },
-  "LumenFarmBarn": {
-    "assetId": 74150114579140,
+    "assetId": 131833611058968,
     "moderation": "Approved"
   },
   "LumenCroftCottageA": {
-    "assetId": 134706181384015,
+    "assetId": 132542848015613,
     "moderation": "Approved"
   },
   "LumenCroftCottageB": {
-    "assetId": 128457775419453,
+    "assetId": 116174241850482,
     "moderation": "Approved"
   },
-  "LumenGlowmereStiltHouse": {
-    "assetId": 98647766328538,
-    "moderation": "Approved"
-  },
-  "LumenMossglenRangerHall": {
-    "assetId": 105347638360093,
-    "moderation": "Approved"
-  },
-  "LumenFrontierGatehouse": {
-    "assetId": 90751638251875,
-    "moderation": "Approved"
-  },
-  "LumenRuinedHall": {
-    "assetId": 133702935578347,
+  "LumenFarmBarn": {
+    "assetId": 89701830913140,
     "moderation": "Approved"
   },
   "LumenForgeYard": {
-    "assetId": 115045579898423,
+    "assetId": 123625015286607,
+    "moderation": "Approved"
+  },
+  "LumenFrontierGatehouse": {
+    "assetId": 120621904681287,
+    "moderation": "Approved"
+  },
+  "LumenGlowmereStiltHouse": {
+    "assetId": 139234768601269,
     "moderation": "Approved"
   },
   "LumenGraveboneMausoleum": {
-    "assetId": 90687448622867,
+    "assetId": 84123705929702,
     "moderation": "Approved"
   },
-  "LumenSunmossObservatory": {
-    "assetId": 72910144160451,
+  "LumenHealerLodge": {
+    "assetId": 120378183892930,
     "moderation": "Approved"
   },
-  "LumenVeilfallSanctuary": {
-    "assetId": 89230413054325,
+  "LumenMossglenRangerHall": {
+    "assetId": 106301394317624,
+    "moderation": "Approved"
+  },
+  "LumenOpenStable": {
+    "assetId": 85851512665594,
+    "moderation": "Approved"
+  },
+  "LumenProvingLodge": {
+    "assetId": 119304858476581,
+    "moderation": "Approved"
+  },
+  "LumenQuartermasterDepot": {
+    "assetId": 137239183865764,
+    "moderation": "Approved"
+  },
+  "LumenRoadWayhouse": {
+    "assetId": 98034643639937,
+    "moderation": "Approved"
+  },
+  "LumenRuinedHall": {
+    "assetId": 70784355192049,
     "moderation": "Approved"
   },
   "LumenShatteredFortressTower": {
-    "assetId": 136833732602200,
+    "assetId": 111947348903814,
     "moderation": "Approved"
   },
   "LumenStoneShrine": {
-    "assetId": 105255978786194,
+    "assetId": 120864356034791,
+    "moderation": "Approved"
+  },
+  "LumenSunmossObservatory": {
+    "assetId": 106886408516548,
+    "moderation": "Approved"
+  },
+  "LumenVeilfallSanctuary": {
+    "assetId": 136210017750290,
+    "moderation": "Approved"
+  },
+  "LumenWayfarerInn": {
+    "assetId": 71957319643364,
     "moderation": "Approved"
   }
 }

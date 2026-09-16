@@ -3,132 +3,132 @@
     "file": "assets/original/lumenreach_architecture/LumenCivicHall.glb",
     "triangles": 1768,
     "vertices": 966,
-    "materials": 9
+    "materials": 1
   },
   "LumenQuartermasterDepot": {
     "file": "assets/original/lumenreach_architecture/LumenQuartermasterDepot.glb",
     "triangles": 1652,
     "vertices": 902,
-    "materials": 8
+    "materials": 1
   },
   "LumenArchiveLodge": {
     "file": "assets/original/lumenreach_architecture/LumenArchiveLodge.glb",
     "triangles": 1468,
     "vertices": 804,
-    "materials": 9
+    "materials": 1
   },
   "LumenWayfarerInn": {
     "file": "assets/original/lumenreach_architecture/LumenWayfarerInn.glb",
     "triangles": 1736,
     "vertices": 948,
-    "materials": 9
+    "materials": 1
   },
   "LumenHealerLodge": {
     "file": "assets/original/lumenreach_architecture/LumenHealerLodge.glb",
     "triangles": 1792,
     "vertices": 978,
-    "materials": 7
+    "materials": 1
   },
   "LumenCraftWorkshop": {
     "file": "assets/original/lumenreach_architecture/LumenCraftWorkshop.glb",
     "triangles": 680,
     "vertices": 372,
-    "materials": 6
+    "materials": 1
   },
   "LumenOpenStable": {
     "file": "assets/original/lumenreach_architecture/LumenOpenStable.glb",
     "triangles": 548,
     "vertices": 300,
-    "materials": 7
+    "materials": 1
   },
   "LumenProvingLodge": {
     "file": "assets/original/lumenreach_architecture/LumenProvingLodge.glb",
     "triangles": 1520,
     "vertices": 830,
-    "materials": 8
+    "materials": 1
   },
   "LumenRoadWayhouse": {
     "file": "assets/original/lumenreach_architecture/LumenRoadWayhouse.glb",
     "triangles": 868,
     "vertices": 474,
-    "materials": 7
+    "materials": 1
   },
   "LumenFarmBarn": {
     "file": "assets/original/lumenreach_architecture/LumenFarmBarn.glb",
     "triangles": 912,
     "vertices": 498,
-    "materials": 7
+    "materials": 1
   },
   "LumenCroftCottageA": {
     "file": "assets/original/lumenreach_architecture/LumenCroftCottageA.glb",
     "triangles": 1440,
     "vertices": 786,
-    "materials": 8
+    "materials": 1
   },
   "LumenCroftCottageB": {
     "file": "assets/original/lumenreach_architecture/LumenCroftCottageB.glb",
     "triangles": 1472,
     "vertices": 804,
-    "materials": 8
+    "materials": 1
   },
   "LumenGlowmereStiltHouse": {
     "file": "assets/original/lumenreach_architecture/LumenGlowmereStiltHouse.glb",
     "triangles": 1220,
     "vertices": 666,
-    "materials": 6
+    "materials": 1
   },
   "LumenMossglenRangerHall": {
     "file": "assets/original/lumenreach_architecture/LumenMossglenRangerHall.glb",
     "triangles": 1748,
     "vertices": 954,
-    "materials": 7
+    "materials": 1
   },
   "LumenFrontierGatehouse": {
     "file": "assets/original/lumenreach_architecture/LumenFrontierGatehouse.glb",
     "triangles": 560,
     "vertices": 306,
-    "materials": 6
+    "materials": 1
   },
   "LumenRuinedHall": {
     "file": "assets/original/lumenreach_architecture/LumenRuinedHall.glb",
     "triangles": 440,
     "vertices": 240,
-    "materials": 3
+    "materials": 1
   },
   "LumenForgeYard": {
     "file": "assets/original/lumenreach_architecture/LumenForgeYard.glb",
     "triangles": 484,
     "vertices": 264,
-    "materials": 6
+    "materials": 1
   },
   "LumenGraveboneMausoleum": {
     "file": "assets/original/lumenreach_architecture/LumenGraveboneMausoleum.glb",
     "triangles": 324,
     "vertices": 178,
-    "materials": 4
+    "materials": 1
   },
   "LumenSunmossObservatory": {
     "file": "assets/original/lumenreach_architecture/LumenSunmossObservatory.glb",
     "triangles": 652,
     "vertices": 356,
-    "materials": 4
+    "materials": 1
   },
   "LumenVeilfallSanctuary": {
     "file": "assets/original/lumenreach_architecture/LumenVeilfallSanctuary.glb",
     "triangles": 524,
     "vertices": 288,
-    "materials": 4
+    "materials": 1
   },
   "LumenShatteredFortressTower": {
     "file": "assets/original/lumenreach_architecture/LumenShatteredFortressTower.glb",
     "triangles": 572,
     "vertices": 312,
-    "materials": 2
+    "materials": 1
   },
   "LumenStoneShrine": {
     "file": "assets/original/lumenreach_architecture/LumenStoneShrine.glb",
     "triangles": 264,
     "vertices": 144,
-    "materials": 3
+    "materials": 1
   }
 }

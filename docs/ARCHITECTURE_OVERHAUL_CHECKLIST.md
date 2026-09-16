@@ -204,6 +204,7 @@ Status: ACTIVE — current generic/box architecture is temporary until replaced 
 - [x] V16: added a reproducible original-asset generator and committed source GLBs/upload manifests so architecture is not dependent on generic Marketplace packs.
 - [x] V17: converted district-scale wayhouses, barns, crofts (2 silhouettes), Glowmere stilt houses, Mossglen ranger halls, frontier gatehouses, and ruined halls to original approved MeshPart assets with separate collision proxies.
 - [x] V18: converted forge yards, Gravebone mausoleums, Sunmoss observatory, Veilfall sanctuary, Shattered Arch fortress towers, and stone shrines to original approved MeshPart assets with separate simplified collision proxies.
+- [x] V19: screenshot-driven fix for pale/white imported buildings and camera/interior clipping: embedded palette atlas on all 22 architecture GLBs, queryable render meshes, and scale-aligned collision proxies.
 - [x] Introduce explicit Lumenreach archetype builders instead of direct generic `makeBuilding` use for named structures.
 - [ ] Introduce explicit Brasshaven industrial building builders.
 - [x] Add tests that reject new named service buildings built only through the generic box builder.

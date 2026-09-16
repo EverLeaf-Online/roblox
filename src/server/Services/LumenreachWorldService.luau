@@ -16,7 +16,7 @@ local LumenreachWorldService = {}
 local GENERATED_NAME = "EverLeafGeneratedWorld"
 local WORLD_WIDTH = 2200
 local WORLD_DEPTH = 1250
-local WORLD_DESIGN_VERSION = 18
+local WORLD_DESIGN_VERSION = 19
 
 -- Lumenreach is authored as a terrain-first MMORPG region. The generator below
 -- replaces the previous showcase composition completely: terrain is cleared,
@@ -301,6 +301,25 @@ local function setRenderOnly(instance)
             descendant.CanCollide = false
             descendant.CanTouch = false
             descendant.CanQuery = false
+        end
+    end
+end
+
+local function setArchitectureVisual(instance)
+    -- Architecture must stay non-physical, but unlike foliage/dressing it must
+    -- participate in camera and line-of-sight queries. Turning CanQuery off on
+    -- the imported buildings let the third-person camera pass through roofs and
+    -- walls, which produced the interior/clipping views seen in Studio.
+    if instance:IsA("BasePart") then
+        instance.CanCollide = false
+        instance.CanTouch = false
+        instance.CanQuery = true
+    end
+    for _, descendant in instance:GetDescendants() do
+        if descendant:IsA("BasePart") then
+            descendant.CanCollide = false
+            descendant.CanTouch = false
+            descendant.CanQuery = true
         end
     end
 end
@@ -875,25 +894,24 @@ local function placeArchitecturePrefabBuilding(
     end
 
     local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
-    local visual = EnvironmentPrefabService.Place(
-        prefabName,
-        wrapper,
-        base,
-        prefabScaleForLongest(prefabName, targetLongest)
-    )
+    local architectureScale = prefabScaleForLongest(prefabName, targetLongest)
+    local visual = EnvironmentPrefabService.Place(prefabName, wrapper, base, architectureScale)
     if not visual then
         wrapper:SetAttribute("ArchitecturePrefabMissing", true)
         return wrapper
     end
     visual.Name = "ArchitectureVisual"
-    setRenderOnly(visual)
+    setArchitectureVisual(visual)
 
     for index, spec in collisionSpecs do
+        -- Collision specs are authored in the same source-space dimensions as
+        -- the Blender models. Scale both size and offset with the visual so
+        -- collision stays aligned after prefab normalization.
         makeCollisionProxy(
             wrapper,
             "ArchitectureCollision" .. index,
-            spec.Size,
-            base * CFrame.new(spec.Offset)
+            spec.Size * architectureScale,
+            base * CFrame.new(spec.Offset * architectureScale)
         )
     end
     return wrapper

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Run with: blender --background --python scripts/generate_lumenreach_architecture.py
-import bpy, math, json
+import bpy, math, json, struct, zlib, binascii
 from pathlib import Path
 from mathutils import Vector
 
@@ -23,6 +23,81 @@ PALETTE = {
     'cloth': (0.24, 0.52, 0.39, 1),
     'cloth_gold': (0.66, 0.48, 0.18, 1),
 }
+
+ATLAS_KEYS = list(PALETTE.keys())
+ATLAS_GRID = 4
+ATLAS_CELL = 16
+ATLAS_PATH = OUT / "lumen_palette.png"
+
+def write_palette_png():
+    width = ATLAS_GRID * ATLAS_CELL
+    height = ATLAS_GRID * ATLAS_CELL
+    rows = []
+    for y in range(height):
+        row = bytearray([0])
+        cell_y = y // ATLAS_CELL
+        for x in range(width):
+            cell_x = x // ATLAS_CELL
+            idx = cell_y * ATLAS_GRID + cell_x
+            if idx < len(ATLAS_KEYS):
+                rgba = PALETTE[ATLAS_KEYS[idx]]
+                rgb = [max(0, min(255, round(c * 255))) for c in rgba[:3]]
+            else:
+                rgb = [255, 0, 255]
+            row.extend(rgb)
+        rows.append(bytes(row))
+    raw = b"".join(rows)
+    def chunk(kind, data):
+        return struct.pack(">I", len(data)) + kind + data + struct.pack(">I", binascii.crc32(kind + data) & 0xffffffff)
+    png = b"\x89PNG\r\n\x1a\n"
+    png += chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0))
+    png += chunk(b"IDAT", zlib.compress(raw, 9))
+    png += chunk(b"IEND", b"")
+    ATLAS_PATH.write_bytes(png)
+
+def atlas_material():
+    name = "EL_LumenreachPalette"
+    m = bpy.data.materials.get(name)
+    if m:
+        return m
+    write_palette_png()
+    image = bpy.data.images.load(str(ATLAS_PATH), check_existing=True)
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    nodes = m.node_tree.nodes
+    links = m.node_tree.links
+    bsdf = nodes.get("Principled BSDF")
+    tex = nodes.new("ShaderNodeTexImage")
+    tex.image = image
+    tex.interpolation = "Closest"
+    links.new(tex.outputs["Color"], bsdf.inputs["Base Color"] )
+    bsdf.inputs["Roughness"].default_value = 0.72
+    return m
+
+def material_key_from_name(name):
+    lower = (name or "").lower()
+    for key in ATLAS_KEYS:
+        if lower == ("el_" + key).lower() or lower.endswith("_" + key.lower()):
+            return key
+    return "plaster"
+
+def apply_palette_atlas(obj):
+    slots = [slot.material.name if slot.material else "" for slot in obj.material_slots]
+    uv = obj.data.uv_layers.get("UVMap") or obj.data.uv_layers.new(name="UVMap")
+    for poly in obj.data.polygons:
+        mat_name = slots[poly.material_index] if poly.material_index < len(slots) else ""
+        key = material_key_from_name(mat_name)
+        idx = ATLAS_KEYS.index(key)
+        col = idx % ATLAS_GRID
+        row = idx // ATLAS_GRID
+        u = (col + 0.5) / ATLAS_GRID
+        v = 1.0 - (row + 0.5) / ATLAS_GRID
+        for loop_index in poly.loop_indices:
+            uv.data[loop_index].uv = (u, v)
+        poly.material_index = 0
+    obj.data.materials.clear()
+    obj.data.materials.append(atlas_material())
+
 
 def clear():
     bpy.ops.object.select_all(action='SELECT')
@@ -147,7 +222,10 @@ def join_and_export(name):
     bpy.context.view_layer.objects.active=mesh_objs[0]
     bpy.ops.object.join()
     obj=bpy.context.object; obj.name=name
-    # origin at world ground center, apply no location shift
+    # Bake the stylized material palette into one tiny embedded texture atlas.
+    # Roblox model upload does not reliably preserve multi-material baseColorFactor
+    # values, which previously made these buildings render nearly white in Studio.
+    apply_palette_atlas(obj)
     bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
     # weighted normals where available
     try:
