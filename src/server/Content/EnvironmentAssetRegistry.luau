@@ -254,16 +254,16 @@ local EnvironmentAssetRegistry = {
     -- remotes, joints, sounds, prompts, tools, humanoids, and other behavior
     -- before the geometry can be registered as an EverLeaf prefab.
     LumenCivicHall = {
-        AssetId = 25561936,
-        Name = "Inn",
-        Source = "Roblox Creator Store / @bevillia / free",
+        AssetId = 99210238800832,
+        Name = "Traditional Medieval German Row House Building",
+        Source = "Roblox Creator Store / @Letaij / free",
         Status = "approved_free_creator_store",
         PrefabName = "LumenCivicHall",
         GroundToPivot = true,
         AllowRuntimeLoad = true,
         ThirdPartyFree = true,
-        CreatorStoreUrl = "https://create.roblox.com/store/asset/25561936/Inn",
-        Notes = "Curated free medieval inn reused as the civic-hall massing base; scripts/behavior are stripped before registration.",
+        CreatorStoreUrl = "https://create.roblox.com/store/asset/99210238800832/Traditional-Medieval-German-Row-House-Building",
+        Notes = "2024 free structure selected to replace the malformed tilted Bevillia inn previously used as the civic hall. Visual-only import; all embedded behavior/UI is stripped.",
     },
     LumenQuartermasterDepot = {
         AssetId = 125612298,
@@ -289,15 +289,16 @@ local EnvironmentAssetRegistry = {
         CreditRequired = true,
     },
     LumenWayfarerInn = {
-        AssetId = 1819167267,
-        Name = "Medieval House",
-        Source = "Roblox Creator Store / @VicyX / free",
+        AssetId = 82741417148839,
+        Name = "Traditional Medieval German House",
+        Source = "Roblox Creator Store / @Letaij / free",
         Status = "approved_free_creator_store",
         PrefabName = "LumenWayfarerInn",
         GroundToPivot = true,
         AllowRuntimeLoad = true,
         ThirdPartyFree = true,
-        CreatorStoreUrl = "https://create.roblox.com/store/asset/1819167267/Medieval-House",
+        CreatorStoreUrl = "https://create.roblox.com/store/asset/82741417148839/Traditional-Medieval-German-House",
+        Notes = "2025 free structure from the same visual family as the civic building; visual-only import after sanitization.",
     },
     LumenHealerLodge = {
         AssetId = 2914202068,

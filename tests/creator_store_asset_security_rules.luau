@@ -62,4 +62,27 @@ assert(
     "sanitizer must not blindly destroy curated decal visuals"
 )
 
+for _, token in
+    {
+        "Message = true",
+        "Hint = true",
+        "BillboardGui = true",
+        "SurfaceGui = true",
+        "ScreenGui = true",
+        'descendant:IsA("LayerCollector")',
+        'descendant:IsA("GuiObject")',
+    }
+do
+    assert(
+        string.find(sanitizer, token, 1, true),
+        "Creator Store sanitizer must strip embedded UI/credit content: " .. token
+    )
+end
+assert(
+    string.find(registry, "25561936", 1, true) == nil,
+    "malformed Bevillia inn must stay retired"
+)
+assert(string.find(registry, "99210238800832", 1, true), "replacement civic structure missing")
+assert(string.find(registry, "82741417148839", 1, true), "replacement Wayfarer inn missing")
+
 print("Creator Store asset security rules tests passed")

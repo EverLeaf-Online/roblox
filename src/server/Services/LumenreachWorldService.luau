@@ -2710,7 +2710,7 @@ local function placeArchitectureBuilding(
 end
 
 local function makeWayfarerCivicHall(parent, name, position, yaw)
-    return placeArchitectureBuilding(parent, name, "LumenCivicHall", position, yaw, 48, {
+    return placeArchitectureBuilding(parent, name, "LumenCivicHall", position, yaw, 40, {
         { Size = Vector3.new(22, 12, 16), Offset = Vector3.new(0, 6, 4) },
         { Size = Vector3.new(9, 17, 9), Offset = Vector3.new(0, 8.5, -7) },
         { Size = Vector3.new(9, 10, 20), Offset = Vector3.new(-15, 5, -1) },
@@ -2735,7 +2735,7 @@ local function makeArchiveResearchLodge(parent, name, position, yaw)
 end
 
 local function makeWayfarerInn(parent, name, position, yaw)
-    return placeArchitectureBuilding(parent, name, "LumenWayfarerInn", position, yaw, 50, {
+    return placeArchitectureBuilding(parent, name, "LumenWayfarerInn", position, yaw, 42, {
         { Size = Vector3.new(26, 12, 18), Offset = Vector3.new(-4, 6, 2) },
         { Size = Vector3.new(14, 9, 12), Offset = Vector3.new(11, 4.5, -5) },
         { Size = Vector3.new(10, 11, 10), Offset = Vector3.new(-16, 5.5, -5) },

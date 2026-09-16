@@ -7,10 +7,10 @@ local sanitizer = fs.readFile("src/server/Services/EnvironmentPrefabService.luau
 local project = fs.readFile("default.project.json")
 
 local assets = {
-    { "LumenCivicHall", "25561936" },
+    { "LumenCivicHall", "99210238800832" },
     { "LumenQuartermasterDepot", "125612298" },
     { "LumenArchiveLodge", "4989402992" },
-    { "LumenWayfarerInn", "1819167267" },
+    { "LumenWayfarerInn", "82741417148839" },
     { "LumenHealerLodge", "2914202068" },
     { "LumenCraftWorkshop", "125612298" },
     { "LumenOpenStable", "506010511" },

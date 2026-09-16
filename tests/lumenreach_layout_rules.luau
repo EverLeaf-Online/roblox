@@ -9,7 +9,7 @@ for _, required in
     {
         "WorldWidth = 2200",
         "WorldDepth = 1250",
-        "DesignVersion = 26",
+        "DesignVersion = 27",
         'world:SetAttribute("WorldDesignVersion", WORLD_DESIGN_VERSION)',
         'world:SetAttribute("TerrainFirstMMOLayout", true)',
         "LumenreachTerrainBuilder.Build({",

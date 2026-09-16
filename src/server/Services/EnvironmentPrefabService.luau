@@ -22,6 +22,11 @@ local BLOCKED_CLASSES = {
     Animator = true,
     Seat = true,
     VehicleSeat = true,
+    Message = true,
+    Hint = true,
+    BillboardGui = true,
+    SurfaceGui = true,
+    ScreenGui = true,
 }
 
 local function getFolder()
@@ -42,6 +47,8 @@ local function sanitize(instance)
             or descendant:IsA("JointInstance")
             or descendant:IsA("WeldConstraint")
             or descendant:IsA("PackageLink")
+            or descendant:IsA("LayerCollector")
+            or descendant:IsA("GuiObject")
         if blocked then
             descendant:Destroy()
         elseif descendant:IsA("BasePart") then
