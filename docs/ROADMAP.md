@@ -5,6 +5,12 @@
 **Detailed tracker:** [`MASTER_CHECKLIST.md`](MASTER_CHECKLIST.md)
 **Architecture:** [`ARCHITECTURE.md`](ARCHITECTURE.md)
 
+## Whole-game quality reset — ACTIVE 2026-09-16
+
+The project is no longer allowed to keep extending an existing implementation merely because it already works in source. The canonical audit is [`WHOLE_GAME_QUALITY_AUDIT.md`](WHOLE_GAME_QUALITY_AUDIT.md). Major domains are now classified as **KEEP**, **REFACTOR**, or **REBUILD**. Weak production-facing foundations are replaced before new content is scaled.
+
+Immediate reset priorities are: original MeshPart world architecture, decomposition of the monolithic Lumenreach world generator, authored monster/NPC art pipelines, richer quest objective events, React UI decomposition, and measured Studio performance/vertical-slice acceptance. Server-authoritative persistence, progression, inventory/equipment, combat ownership, party state, security boundaries, and tested save rules remain canonical unless a concrete defect justifies replacement.
+
 ## Lumenreach starter region — SOURCE BUILT / STUDIO ACCEPTANCE NOT PASSED
 
 - V14 architecture source pass removes the shared generic house shell from named Lumenreach structures and introduces explicit civic hall, depot, archive, inn, healer, workshop, stable, proving, wayhouse, barn, croft, wetland-stilt, and ranger archetypes. This is source progress only until Studio screenshots/walkthroughs accept the new silhouettes and placement.

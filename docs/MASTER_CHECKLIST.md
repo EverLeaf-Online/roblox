@@ -14,6 +14,21 @@
 
 ---
 
+## WHOLE-GAME QUALITY RESET — ACTIVE
+
+Canonical audit: [`WHOLE_GAME_QUALITY_AUDIT.md`](WHOLE_GAME_QUALITY_AUDIT.md)
+
+- [x] Audit current repository by domain and classify foundations as KEEP / REFACTOR / REBUILD.
+- [x] Preserve strong server-authoritative persistence/progression/inventory/combat/security foundations instead of rewriting them without evidence.
+- [ ] REBUILD production world-art pipeline around original modular MeshParts; V16 is the first architecture batch, not completion.
+- [ ] REFACTOR `LumenreachWorldService` so terrain, visual placement, gameplay registration, collision, population, and encounters are not owned by one 200KB+ generator module.
+- [ ] REBUILD production monster visuals away from the 2,000-line code-built primitive template service while preserving server combat/AI/reward logic.
+- [ ] REBUILD production NPC visuals away from scripted primitive-body construction while preserving dialogue/quest/shop/grounding contracts.
+- [ ] REFACTOR quest objective vocabulary beyond Defeat / Collect / Explore before large new quest-chain expansion.
+- [ ] REFACTOR the ~160KB `ReactUIController` into focused screens/components before major UI expansion.
+- [ ] RECONCILE generic boss/instance architecture with specialized Belforge lifecycle before adding multiple new dungeons.
+- [ ] Keep Storage/Trading disabled until economy/isolation design is approved; interfaces alone do not count as feature completion.
+- [ ] Establish measured Studio performance budgets and benchmark scenes before accepting world-art density.
 
 ## PHASE 1 — complete starter vertical slice — ACTIVE
 
