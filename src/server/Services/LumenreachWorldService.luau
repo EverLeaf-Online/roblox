@@ -16,7 +16,7 @@ local LumenreachWorldService = {}
 local GENERATED_NAME = "EverLeafGeneratedWorld"
 local WORLD_WIDTH = 2200
 local WORLD_DEPTH = 1250
-local WORLD_DESIGN_VERSION = 11
+local WORLD_DESIGN_VERSION = 12
 
 -- Lumenreach is authored as a terrain-first MMORPG region. The generator below
 -- replaces the previous showcase composition completely: terrain is cleared,
@@ -274,6 +274,32 @@ local function makeCollisionProxy(parent, name, size, cframe)
     part.CastShadow = false
     part:SetAttribute("EverLeafCollisionProxy", true)
     return part
+end
+
+local function makeWedgeCollisionProxy(parent, name, size, cframe)
+    local wedge =
+        makeWedge(parent, name, size, cframe, Enum.Material.SmoothPlastic, Color3.new(0, 0, 0))
+    wedge.Transparency = 1
+    wedge.CanCollide = true
+    wedge.CanTouch = false
+    wedge.CanQuery = true
+    wedge.CastShadow = false
+    wedge:SetAttribute("EverLeafCollisionProxy", true)
+    return wedge
+end
+
+local function makePartSurfaceCollisionProxy(parent, source, name, extraSize)
+    local extra = extraSize or Vector3.zero
+    return makeCollisionProxy(
+        parent,
+        name,
+        Vector3.new(
+            math.max(0.25, source.Size.X + extra.X),
+            math.max(0.25, source.Size.Y + extra.Y),
+            math.max(0.25, source.Size.Z + extra.Z)
+        ),
+        source.CFrame
+    )
 end
 
 local function setRenderOnly(instance)
@@ -1156,10 +1182,11 @@ local function makeSign(parent, position, yaw, text)
     label.Parent = gui
     makeCollisionProxy(
         model,
-        "SignCollision",
+        "SignPostCollision",
         Vector3.new(0.8, 6.3, 0.8),
         base * CFrame.new(0, 3.15, 0)
     )
+    makePartSurfaceCollisionProxy(model, board, "SignBoardCollision", Vector3.new(0.2, 0.2, 0.3))
     return model
 end
 
@@ -1264,6 +1291,7 @@ local function makeBuilding(parent, name, center, width, depth, height, yaw, acc
         roof.CanCollide = false
         roof.CanTouch = false
         roof.CanQuery = false
+        makePartSurfaceCollisionProxy(model, roof, "BuildingRoofCollision")
     end
 
     local ridge = makePart(
@@ -1439,6 +1467,12 @@ local function makeMarketStall(parent, position, yaw, accent)
                 timber
             )
             post.CanCollide = false
+            makePartSurfaceCollisionProxy(
+                model,
+                post,
+                "MarketPostCollision",
+                Vector3.new(0.25, 0, 0.25)
+            )
         end
     end
 
@@ -1484,6 +1518,12 @@ local function makeMarketStall(parent, position, yaw, accent)
     canopy.CanCollide = false
     canopy.CanTouch = false
     canopy.CanQuery = false
+    makePartSurfaceCollisionProxy(
+        model,
+        canopy,
+        "MarketCanopyCollision",
+        Vector3.new(0.15, 0.18, 0.15)
+    )
     local valance = makePart(
         model,
         "CanopyValance",
@@ -1882,6 +1922,12 @@ local function makeRoadsideShelter(parent, name, position, yaw)
     roof.CanCollide = false
     roof.CanTouch = false
     roof.CanQuery = false
+    makePartSurfaceCollisionProxy(
+        model,
+        roof,
+        "ShelterRoofCollision",
+        Vector3.new(0.15, 0.15, 0.15)
+    )
     for _, x in { -5.5, 5.5 } do
         makeCollisionProxy(
             model,
@@ -2193,6 +2239,7 @@ local function makeWayfarerStreetArch(parent, name, position, yaw, width, accent
     beam.CanCollide = false
     beam.CanTouch = false
     beam.CanQuery = false
+    makePartSurfaceCollisionProxy(model, beam, "ArchBeamCollision", Vector3.new(0.1, 0.1, 0.1))
 
     -- Two continuous roof planes replace the detached wedge plates visible in Studio.
     local pitch = math.rad(18)
@@ -2214,6 +2261,7 @@ local function makeWayfarerStreetArch(parent, name, position, yaw, width, accent
         roof.CanCollide = false
         roof.CanTouch = false
         roof.CanQuery = false
+        makePartSurfaceCollisionProxy(model, roof, "ArchRoofCollision", Vector3.new(0.1, 0.1, 0.1))
     end
     local crest = makePart(
         model,
@@ -2408,6 +2456,12 @@ local function makeForgeYard(parent, name, position, yaw)
     awning.CanCollide = false
     awning.CanTouch = false
     awning.CanQuery = false
+    makePartSurfaceCollisionProxy(
+        model,
+        awning,
+        "ForgeAwningCollision",
+        Vector3.new(0.1, 0.15, 0.1)
+    )
     makeCollisionProxy(
         model,
         "ForgeBodyCollision",
@@ -2596,6 +2650,7 @@ local function makeGlowmereStiltHouse(parent, name, position, yaw, accent)
             Color3.fromRGB(44, 67, 59)
         )
         roof.CanCollide = false
+        makePartSurfaceCollisionProxy(model, roof, "StiltRoofCollision", Vector3.new(0.1, 0.1, 0.1))
     end
     local porch = makePart(
         model,
@@ -2746,6 +2801,7 @@ local function makeGraveboneMausoleum(parent, name, position, yaw)
         Color3.fromRGB(58, 67, 65)
     )
     cap.CanCollide = false
+    makeWedgeCollisionProxy(model, "MausoleumCrownCollision", cap.Size, cap.CFrame)
     makeSignatureCrystal(
         model,
         "MemorialLumen",
@@ -4778,6 +4834,7 @@ local function makeTown(parent)
     top.CanCollide = false
     top.CanTouch = false
     top.CanQuery = false
+    makePartSurfaceCollisionProxy(parent, top, "TownGateBeamCollision", Vector3.new(0.1, 0.1, 0.1))
     makeLumenPylon(parent, camp + Vector3.new(116, 0, -19), 9)
     makeLumenPylon(parent, camp + Vector3.new(116, 0, 43), 9)
     makeTownExpansion(parent)
@@ -5265,6 +5322,60 @@ local function attachNpcPresentation(model, root, head, npcId, displayName, acce
     end)
 end
 
+local NPC_CLEARANCE_OFFSETS = table.freeze({
+    Vector3.zero,
+    Vector3.new(5, 0, 0),
+    Vector3.new(-5, 0, 0),
+    Vector3.new(0, 0, 5),
+    Vector3.new(0, 0, -5),
+    Vector3.new(5, 0, 5),
+    Vector3.new(-5, 0, 5),
+    Vector3.new(5, 0, -5),
+    Vector3.new(-5, 0, -5),
+    Vector3.new(10, 0, 0),
+    Vector3.new(-10, 0, 0),
+    Vector3.new(0, 0, 10),
+    Vector3.new(0, 0, -10),
+    Vector3.new(10, 0, 10),
+    Vector3.new(-10, 0, 10),
+    Vector3.new(10, 0, -10),
+    Vector3.new(-10, 0, -10),
+})
+
+local function staticNpcPositionIsClear(world, position)
+    local params = OverlapParams.new()
+    params.FilterType = Enum.RaycastFilterType.Include
+    params.FilterDescendantsInstances = { world }
+    params.MaxParts = 32
+    local parts = Workspace:GetPartBoundsInBox(
+        CFrame.new(position + Vector3.new(0, 3.4, 0)),
+        Vector3.new(5.6, 7.0, 5.6),
+        params
+    )
+    for _, part in parts do
+        if part:GetAttribute("EverLeafCollisionProxy") == true then
+            return false
+        end
+        if part.Name == "HumanoidRootPart" then
+            local model = part:FindFirstAncestorOfClass("Model")
+            if model and model:FindFirstChildOfClass("Humanoid") then
+                return false
+            end
+        end
+    end
+    return true
+end
+
+local function resolveStaticNpcPosition(world, requestedPosition)
+    for _, offset in NPC_CLEARANCE_OFFSETS do
+        local candidate = terrainSurfacePosition(requestedPosition + offset, 0)
+        if staticNpcPositionIsClear(world, candidate) then
+            return candidate
+        end
+    end
+    return terrainSurfacePosition(requestedPosition, 0)
+end
+
 local NPC_STYLES = table.freeze({
     lumen_guide = table.freeze({
         Name = "Ilyra · Wayfarer Guide",
@@ -5354,7 +5465,7 @@ local function makeNpc(parent, npcId)
     if not style then
         return nil
     end
-    local position = terrainSurfacePosition(style.Position, 0)
+    local position = resolveStaticNpcPosition(parent, style.Position)
     local palette = {
         Cloth = style.Cloth,
         DarkCloth = style.Cloth:Lerp(Color3.new(0, 0, 0), 0.24),
@@ -5622,7 +5733,7 @@ local AMBIENT_RESIDENTS = table.freeze({
 })
 
 local function makeAmbientResident(parent, spec, index)
-    local position = terrainSurfacePosition(spec.Position, 0)
+    local position = resolveStaticNpcPosition(parent, spec.Position)
     local cloth = spec.Cloth
     local palette = {
         Cloth = cloth,

@@ -73,4 +73,22 @@ assert(
     "collision normalizer must force render parts non-solid and proxies solid"
 )
 
+for _, required in
+    {
+        '"SignBoardCollision"',
+        '"BuildingRoofCollision"',
+        '"MarketCanopyCollision"',
+        '"ShelterRoofCollision"',
+        '"ArchRoofCollision"',
+        '"ForgeAwningCollision"',
+        '"StiltRoofCollision"',
+        '"TownGateBeamCollision"',
+    }
+do
+    assert(
+        string.find(source, required, 1, true) ~= nil,
+        "missing rigid-surface collision proxy: " .. required
+    )
+end
+
 print("Lumenreach collision coverage tests passed")

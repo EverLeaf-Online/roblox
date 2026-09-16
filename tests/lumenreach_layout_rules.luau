@@ -6,7 +6,7 @@ for _, required in
     {
         "local WORLD_WIDTH = 2200",
         "local WORLD_DEPTH = 1250",
-        "local WORLD_DESIGN_VERSION = 11",
+        "local WORLD_DESIGN_VERSION = 12",
         'world:SetAttribute("WorldDesignVersion", WORLD_DESIGN_VERSION)',
         'world:SetAttribute("TerrainFirstMMOLayout", true)',
         "terrain:Clear()",
@@ -391,7 +391,7 @@ assert(
             true
         ) ~= nil
         and string.find(source, "descendant.CanQuery = true", 1, true) ~= nil,
-    "V11 must use explicit queryable collision proxies instead of incidental visual-part collision"
+    "V12 must use explicit queryable collision proxies instead of incidental visual-part collision"
 )
 assert(
     string.find(source, "part.CanCollide = false", 1, true) ~= nil
@@ -428,11 +428,21 @@ for _, requiredProxy in
         '"PathDisciplinePlinthCollision"',
         '"ArchPillarCollision"',
         '"GraveMarkerCollision"',
+        '"SignBoardCollision"',
+        '"BuildingRoofCollision"',
+        '"MarketPostCollision"',
+        '"MarketCanopyCollision"',
+        '"ShelterRoofCollision"',
+        '"ArchBeamCollision"',
+        '"ArchRoofCollision"',
+        '"ForgeAwningCollision"',
+        '"StiltRoofCollision"',
+        '"TownGateBeamCollision"',
     }
 do
     assert(
         string.find(source, requiredProxy, 1, true) ~= nil,
-        "missing V11 collision coverage: " .. requiredProxy
+        "missing V12 collision coverage: " .. requiredProxy
     )
 end
 assert(
@@ -458,6 +468,14 @@ assert(
         and string.find(source, "normalizeGeneratedCollisions(world)", 1, true)
             < string.find(source, "makeNpc(world, npcId)", 1, true),
     "world collision normalization must run before NPC/enemy models are created"
+)
+
+assert(
+    string.find(source, "local function resolveStaticNpcPosition", 1, true) ~= nil
+        and string.find(source, "staticNpcPositionIsClear", 1, true) ~= nil
+        and string.find(source, 'part:GetAttribute("EverLeafCollisionProxy") == true', 1, true) ~= nil
+        and string.find(source, 'part.Name == "HumanoidRootPart"', 1, true) ~= nil,
+    "V12 static NPCs must be nudged away from physical world proxies and other humanoids instead of overlapping"
 )
 
 print("Lumenreach terrain-first MMO redesign rules tests passed")
