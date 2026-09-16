@@ -7,6 +7,10 @@ local uploads = fs.readFile("assets/original/lumenreach_architecture/upload_resu
 local heroManifest = fs.readFile("assets/original/lumenreach_hero_architecture_v2/manifest.json")
 local heroUploads =
     fs.readFile("assets/original/lumenreach_hero_architecture_v2/upload_results.json")
+local districtManifest =
+    fs.readFile("assets/original/lumenreach_district_architecture_v2/manifest.json")
+local districtUploads =
+    fs.readFile("assets/original/lumenreach_district_architecture_v2/upload_results.json")
 local generator = fs.readFile("scripts/generate_lumenreach_architecture.py")
 assert(
     fs.isFile("assets/original/lumenreach_architecture/lumen_palette.png"),
@@ -26,20 +30,20 @@ local assets = {
     { "LumenCraftWorkshop", "92965358111834", "LumenCraftWorkshopV2" },
     { "LumenOpenStable", "108271598307427", "LumenOpenStableV2" },
     { "LumenProvingLodge", "88192788505333", "LumenProvingLodgeV2" },
-    { "LumenRoadWayhouse", "98034643639937" },
-    { "LumenFarmBarn", "89701830913140" },
-    { "LumenCroftCottageA", "132542848015613" },
-    { "LumenCroftCottageB", "116174241850482" },
-    { "LumenGlowmereStiltHouse", "139234768601269" },
-    { "LumenMossglenRangerHall", "106301394317624" },
-    { "LumenFrontierGatehouse", "120621904681287" },
-    { "LumenRuinedHall", "70784355192049" },
-    { "LumenForgeYard", "123625015286607" },
-    { "LumenGraveboneMausoleum", "84123705929702" },
-    { "LumenSunmossObservatory", "106886408516548" },
-    { "LumenVeilfallSanctuary", "136210017750290" },
-    { "LumenShatteredFortressTower", "111947348903814" },
-    { "LumenStoneShrine", "120864356034791" },
+    { "LumenRoadWayhouse", "113522507708416", nil, "LumenRoadWayhouseV2" },
+    { "LumenFarmBarn", "95470404760231", nil, "LumenFarmBarnV2" },
+    { "LumenCroftCottageA", "85398853803273", nil, "LumenCroftCottageAV2" },
+    { "LumenCroftCottageB", "124535713833238", nil, "LumenCroftCottageBV2" },
+    { "LumenGlowmereStiltHouse", "75557217788082", nil, "LumenGlowmereStiltHouseV2" },
+    { "LumenMossglenRangerHall", "107286041863676", nil, "LumenMossglenRangerHallV2" },
+    { "LumenFrontierGatehouse", "95912537374601", nil, "LumenFrontierGatehouseV2" },
+    { "LumenRuinedHall", "114819696409739", nil, "LumenRuinedHallV2" },
+    { "LumenForgeYard", "112336892534267", nil, "LumenForgeYardV2" },
+    { "LumenGraveboneMausoleum", "113037057944108", nil, "LumenGraveboneMausoleumV2" },
+    { "LumenSunmossObservatory", "127786137346539", nil, "LumenSunmossObservatoryV2" },
+    { "LumenVeilfallSanctuary", "129935484262557", nil, "LumenVeilfallSanctuaryV2" },
+    { "LumenShatteredFortressTower", "105681641070050", nil, "LumenShatteredFortressTowerV2" },
+    { "LumenStoneShrine", "88981727079686", nil, "LumenStoneShrineV2" },
 }
 
 for _, spec in assets do
@@ -55,9 +59,16 @@ for _, spec in assets do
         "architecture assets must be original EverLeaf work"
     )
     local heroName = spec[3]
-    local expectedManifest = if heroName then heroManifest else manifest
-    local expectedUploads = if heroName then heroUploads else uploads
-    local manifestName = heroName or name
+    local districtName = spec[4]
+    local expectedManifest = if heroName
+        then heroManifest
+        elseif districtName then districtManifest
+        else manifest
+    local expectedUploads = if heroName
+        then heroUploads
+        elseif districtName then districtUploads
+        else uploads
+    local manifestName = heroName or districtName or name
     assert(
         string.find(expectedManifest, '"' .. manifestName .. '"', 1, true),
         "generated GLB manifest missing " .. name
@@ -93,7 +104,7 @@ for _, token in
 do
     assert(
         string.find(registry, token, 1, true) ~= nil,
-        "missing V24 hero architecture V2 contract: " .. token
+        "missing V25 hero architecture V2 contract: " .. token
     )
 end
 assert(
@@ -103,6 +114,35 @@ assert(
 assert(
     fs.isDir("assets/original/lumenreach_hero_architecture_v2"),
     "hero architecture V2 source assets missing"
+)
+
+for _, token in
+    {
+        "LumenRoadWayhouseV2",
+        "LumenFarmBarnV2",
+        "LumenCroftCottageAV2",
+        "LumenCroftCottageBV2",
+        "LumenGlowmereStiltHouseV2",
+        "LumenMossglenRangerHallV2",
+        "LumenFrontierGatehouseV2",
+        "LumenRuinedHallV2",
+        "LumenForgeYardV2",
+        "LumenGraveboneMausoleumV2",
+        "LumenSunmossObservatoryV2",
+        "LumenVeilfallSanctuaryV2",
+        "LumenShatteredFortressTowerV2",
+        "LumenStoneShrineV2",
+    }
+do
+    assert(string.find(districtManifest, token, 1, true), "district V2 manifest missing " .. token)
+end
+assert(
+    string.find(districtUploads, '"moderation": "Approved"', 1, true),
+    "district V2 assets must be approved"
+)
+assert(
+    fs.isFile("scripts/generate_lumenreach_district_architecture_v2.py"),
+    "district V2 generator missing"
 )
 
 print("Lumenreach MeshPart architecture asset rules tests passed")

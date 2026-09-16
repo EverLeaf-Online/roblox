@@ -5,6 +5,7 @@ return table.freeze({
         StartNpcId = "lumen_guide",
         Objectives = table.freeze({
             table.freeze({ Type = "Defeat", Target = "lumen_mossling", Required = 2 }),
+            table.freeze({ Type = "Interact", Target = "camp_quartermaster", Required = 1 }),
         }),
         Reward = table.freeze({ Exp = 35, Currencies = table.freeze({ Shards = 4 }) }),
     }),
@@ -28,7 +29,7 @@ return table.freeze({
         StartNpcId = "lumen_guide",
         PrerequisiteQuests = table.freeze({ "lumen_first_steps" }),
         Objectives = table.freeze({
-            table.freeze({ Type = "Explore", Target = "lumenwood_crossroads", Required = 1 }),
+            table.freeze({ Type = "Reach", Target = "lumenwood_crossroads", Required = 1 }),
             table.freeze({ Type = "Explore", Target = "glowmere_pool", Required = 1 }),
         }),
         Reward = table.freeze({ Exp = 70, Currencies = table.freeze({ Shards = 8 }) }),
@@ -139,6 +140,8 @@ return table.freeze({
         PrerequisiteQuests = table.freeze({ "lumen_first_steps" }),
         Objectives = table.freeze({
             table.freeze({ Type = "Collect", Target = "lumenleaf", Required = 4 }),
+            table.freeze({ Type = "Craft", Target = "small_tonic", Required = 1 }),
+            table.freeze({ Type = "Use", Target = "small_tonic", Required = 1 }),
         }),
         Reward = table.freeze({
             Exp = 55,
@@ -154,6 +157,7 @@ return table.freeze({
         Objectives = table.freeze({
             table.freeze({ Type = "Collect", Target = "glowreed", Required = 4 }),
             table.freeze({ Type = "Explore", Target = "glowmere_pool", Required = 1 }),
+            table.freeze({ Type = "Interact", Target = "camp_healer", Required = 1 }),
         }),
         Reward = table.freeze({
             Exp = 95,

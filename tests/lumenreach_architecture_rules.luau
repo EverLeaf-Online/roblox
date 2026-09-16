@@ -60,12 +60,12 @@ for _, token in
 do
     assert(
         string.find(source, token, 1, true) ~= nil,
-        "missing V24 MeshPart architecture contract " .. token
+        "missing V25 MeshPart architecture contract " .. token
     )
 end
 
 assert(
-    string.find(source, "local WORLD_DESIGN_VERSION = 24", 1, true) ~= nil,
+    string.find(source, "local WORLD_DESIGN_VERSION = 25", 1, true) ~= nil,
     "architecture conversion must bump world design version"
 )
 
@@ -81,7 +81,7 @@ for _, token in
 do
     assert(
         string.find(source, token, 1, true) ~= nil,
-        "missing V24 mesh architecture/placement contract: " .. token
+        "missing V25 mesh architecture/placement contract: " .. token
     )
 end
 
@@ -97,7 +97,7 @@ assert(
 
 assert(
     string.find(source, "local function setArchitectureVisual", 1, true),
-    "V24 architecture query helper missing"
+    "V25 architecture query helper missing"
 )
 assert(
     string.find(source, "descendant.CanQuery = true", 1, true),
@@ -124,7 +124,7 @@ for _, token in
         '"HEALER / STOREHOUSE"',
     }
 do
-    assert(string.find(source, token, 1, true) ~= nil, "missing V24 MMO hub composition: " .. token)
+    assert(string.find(source, token, 1, true) ~= nil, "missing V25 MMO hub composition: " .. token)
 end
 
 print("Lumenreach architecture rules tests passed")

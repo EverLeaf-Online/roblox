@@ -404,6 +404,18 @@ local function objectiveText(objective, progress, fallbackText)
         return string.format("Collect %s  %d/%d", prettyId(objective.Target), current, required)
     elseif objective.Type == "Explore" then
         return string.format("Explore %s  %d/%d", prettyId(objective.Target), current, required)
+    elseif objective.Type == "Interact" then
+        return string.format("Talk to %s  %d/%d", prettyId(objective.Target), current, required)
+    elseif objective.Type == "Craft" then
+        return string.format("Craft %s  %d/%d", prettyId(objective.Target), current, required)
+    elseif objective.Type == "Use" then
+        return string.format("Use %s  %d/%d", prettyId(objective.Target), current, required)
+    elseif objective.Type == "Reach" then
+        return string.format("Reach %s  %d/%d", prettyId(objective.Target), current, required)
+    elseif objective.Type == "Escort" then
+        return string.format("Escort %s  %d/%d", prettyId(objective.Target), current, required)
+    elseif objective.Type == "Survive" then
+        return string.format("Survive %s  %d/%d", prettyId(objective.Target), current, required)
     end
     return string.format(
         "%s %s  %d/%d",

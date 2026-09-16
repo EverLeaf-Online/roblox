@@ -7,6 +7,7 @@ local ShopDefinitions = require(script.Parent.Parent.Content.ShopDefinitions)
 local InteractionSessionService = require(script.Parent.InteractionSessionService)
 local PlayerDataService = require(script.Parent.PlayerDataService)
 local QuestService = require(script.Parent.QuestService)
+local QuestObjectiveService = require(script.Parent.QuestObjectiveService)
 local WorldObjectService = require(script.Parent.WorldObjectService)
 
 local InteractionService = {}
@@ -128,8 +129,15 @@ function InteractionService.Begin(player, npcId, worldObject)
     if not sessionOk then
         return false, sessionReason
     end
-    local ok, description = InteractionService.Describe(npcId, PlayerDataService.Get(player))
+    local profile = PlayerDataService.Get(player)
+    local ok, description = InteractionService.Describe(npcId, profile)
     if ok then
+        if profile then
+            local changed = QuestObjectiveService.Record(profile, "Interact", npcId, 1)
+            if changed then
+                PlayerDataService.NotifyChanged(player)
+            end
+        end
         openedEvent:Fire(player, description)
     end
     return ok, description

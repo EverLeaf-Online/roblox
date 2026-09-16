@@ -1,5 +1,6 @@
 local InventoryService = require(script.Parent.InventoryService)
 local ResourceService = require(script.Parent.ResourceService)
+local QuestObjectiveService = require(script.Parent.QuestObjectiveService)
 
 local ConsumableService = {}
 
@@ -24,6 +25,7 @@ function ConsumableService.Use(player, profile, itemId)
     if effects.RestoreMP then
         ResourceService.RestoreMP(player, profile, effects.RestoreMP)
     end
+    QuestObjectiveService.Record(profile, "Use", itemId, 1)
     return true
 end
 

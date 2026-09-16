@@ -97,6 +97,7 @@ local function craft(player, spec)
     if not ok then
         return false, result
     end
+    QuestObjectiveService.Record(profile, "Craft", spec.RecipeId, spec.Quantity or 1)
     PlayerDataService.NotifyChanged(player)
     local item = result and ItemDefinitions[result.ItemId]
     notice(

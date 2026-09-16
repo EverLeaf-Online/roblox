@@ -1,0 +1,72 @@
+{
+  "LumenRoadWayhouseV2": {
+    "file": "assets/original/lumenreach_district_architecture_v2/LumenRoadWayhouseV2.glb",
+    "triangles": 368,
+    "vertices": 204
+  },
+  "LumenFarmBarnV2": {
+    "file": "assets/original/lumenreach_district_architecture_v2/LumenFarmBarnV2.glb",
+    "triangles": 228,
+    "vertices": 126
+  },
+  "LumenCroftCottageAV2": {
+    "file": "assets/original/lumenreach_district_architecture_v2/LumenCroftCottageAV2.glb",
+    "triangles": 184,
+    "vertices": 102
+  },
+  "LumenCroftCottageBV2": {
+    "file": "assets/original/lumenreach_district_architecture_v2/LumenCroftCottageBV2.glb",
+    "triangles": 168,
+    "vertices": 94
+  },
+  "LumenGlowmereStiltHouseV2": {
+    "file": "assets/original/lumenreach_district_architecture_v2/LumenGlowmereStiltHouseV2.glb",
+    "triangles": 452,
+    "vertices": 254
+  },
+  "LumenMossglenRangerHallV2": {
+    "file": "assets/original/lumenreach_district_architecture_v2/LumenMossglenRangerHallV2.glb",
+    "triangles": 212,
+    "vertices": 118
+  },
+  "LumenFrontierGatehouseV2": {
+    "file": "assets/original/lumenreach_district_architecture_v2/LumenFrontierGatehouseV2.glb",
+    "triangles": 276,
+    "vertices": 152
+  },
+  "LumenRuinedHallV2": {
+    "file": "assets/original/lumenreach_district_architecture_v2/LumenRuinedHallV2.glb",
+    "triangles": 220,
+    "vertices": 120
+  },
+  "LumenForgeYardV2": {
+    "file": "assets/original/lumenreach_district_architecture_v2/LumenForgeYardV2.glb",
+    "triangles": 228,
+    "vertices": 126
+  },
+  "LumenGraveboneMausoleumV2": {
+    "file": "assets/original/lumenreach_district_architecture_v2/LumenGraveboneMausoleumV2.glb",
+    "triangles": 216,
+    "vertices": 124
+  },
+  "LumenSunmossObservatoryV2": {
+    "file": "assets/original/lumenreach_district_architecture_v2/LumenSunmossObservatoryV2.glb",
+    "triangles": 232,
+    "vertices": 128
+  },
+  "LumenVeilfallSanctuaryV2": {
+    "file": "assets/original/lumenreach_district_architecture_v2/LumenVeilfallSanctuaryV2.glb",
+    "triangles": 356,
+    "vertices": 200
+  },
+  "LumenShatteredFortressTowerV2": {
+    "file": "assets/original/lumenreach_district_architecture_v2/LumenShatteredFortressTowerV2.glb",
+    "triangles": 352,
+    "vertices": 192
+  },
+  "LumenStoneShrineV2": {
+    "file": "assets/original/lumenreach_district_architecture_v2/LumenStoneShrineV2.glb",
+    "triangles": 172,
+    "vertices": 96
+  }
+}

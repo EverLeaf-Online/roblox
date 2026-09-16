@@ -51,8 +51,9 @@ local function processTrigger(player, trigger)
         local profile = PlayerDataService.Get(player)
         if profile then
             local landmarkId = trigger:GetAttribute("LandmarkId")
-            local changed = QuestObjectiveService.Record(profile, "Explore", landmarkId, 1)
-            if changed then
+            local explored = QuestObjectiveService.Record(profile, "Explore", landmarkId, 1)
+            local reached = QuestObjectiveService.Record(profile, "Reach", landmarkId, 1)
+            if explored or reached then
                 PlayerDataService.NotifyChanged(player)
             end
         end
