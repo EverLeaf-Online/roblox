@@ -6,7 +6,7 @@ local exploration = fs.readFile("src/server/Services/ExplorationService.luau")
 local activity = fs.readFile("src/server/Services/LumenreachActivityService.luau")
 local interaction = fs.readFile("src/server/Services/InteractionService.luau")
 local consumable = fs.readFile("src/server/Services/ConsumableService.luau")
-local ui = fs.readFile("src/client/Controllers/ReactUIController.luau")
+local uiText = fs.readFile("src/client/UI/UiText.luau")
 local quests = fs.readFile("src/server/Content/QuestDefinitions.luau")
 local loot = fs.readFile("src/server/Services/LootDropService.luau")
 local publicEvent = fs.readFile("src/server/Services/PublicEventService.luau")
@@ -84,7 +84,7 @@ do
 end
 for _, phrase in { "Talk to %s", "Craft %s", "Use %s", "Reach %s", "Complete %s" } do
     assert(
-        string.find(ui, phrase, 1, true),
+        string.find(uiText, phrase, 1, true),
         "quest HUD missing readable objective wording " .. phrase
     )
 end
