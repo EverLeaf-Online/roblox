@@ -16,7 +16,7 @@ local LumenreachWorldService = {}
 local GENERATED_NAME = "EverLeafGeneratedWorld"
 local WORLD_WIDTH = 2200
 local WORLD_DEPTH = 1250
-local WORLD_DESIGN_VERSION = 23
+local WORLD_DESIGN_VERSION = 24
 
 -- Lumenreach is authored as a terrain-first MMORPG region. The generator below
 -- replaces the previous showcase composition completely: terrain is cleared,
@@ -3125,57 +3125,64 @@ end
 
 local function makeWayfarerCivicHall(parent, name, position, yaw)
     return placeArchitectureBuilding(parent, name, "LumenCivicHall", position, yaw, 48, {
-        { Size = Vector3.new(31, 12, 21), Offset = Vector3.new(0, 6, 0) },
-        { Size = Vector3.new(8, 15, 7), Offset = Vector3.new(0, 7.5, -14) },
-        { Size = Vector3.new(7, 8, 10), Offset = Vector3.new(18, 4, 3) },
+        { Size = Vector3.new(22, 12, 16), Offset = Vector3.new(0, 6, 4) },
+        { Size = Vector3.new(9, 17, 9), Offset = Vector3.new(0, 8.5, -7) },
+        { Size = Vector3.new(9, 10, 20), Offset = Vector3.new(-15, 5, -1) },
+        { Size = Vector3.new(9, 10, 20), Offset = Vector3.new(15, 5, -1) },
     })
 end
 
 local function makeQuartermasterDepot(parent, name, position, yaw)
     return placeArchitectureBuilding(parent, name, "LumenQuartermasterDepot", position, yaw, 42, {
-        { Size = Vector3.new(27, 10, 19), Offset = Vector3.new(0, 5, 0) },
-        { Size = Vector3.new(7, 7, 13), Offset = Vector3.new(17, 3.5, 1) },
+        { Size = Vector3.new(25, 10, 20), Offset = Vector3.new(-4, 5, 1) },
+        { Size = Vector3.new(10, 8, 12), Offset = Vector3.new(12, 4, -3) },
+        { Size = Vector3.new(4, 12, 4), Offset = Vector3.new(17, 6, 8) },
     })
 end
 
 local function makeArchiveResearchLodge(parent, name, position, yaw)
     return placeArchitectureBuilding(parent, name, "LumenArchiveLodge", position, yaw, 42, {
-        { Size = Vector3.new(25, 10, 18), Offset = Vector3.new(0, 5, 0) },
-        { Size = Vector3.new(9, 12, 9), Offset = Vector3.new(15, 6, 3) },
+        { Size = Vector3.new(19, 10, 19), Offset = Vector3.new(0, 5, 2) },
+        { Size = Vector3.new(16, 9, 12), Offset = Vector3.new(-12, 4.5, -2) },
+        { Size = Vector3.new(8, 12, 10), Offset = Vector3.new(10, 6, -3) },
     })
 end
 
 local function makeWayfarerInn(parent, name, position, yaw)
     return placeArchitectureBuilding(parent, name, "LumenWayfarerInn", position, yaw, 50, {
-        { Size = Vector3.new(30, 10, 19), Offset = Vector3.new(0, 5, 0) },
-        { Size = Vector3.new(10, 9, 15), Offset = Vector3.new(18, 4.5, 5) },
+        { Size = Vector3.new(26, 12, 18), Offset = Vector3.new(-4, 6, 2) },
+        { Size = Vector3.new(14, 9, 12), Offset = Vector3.new(11, 4.5, -5) },
+        { Size = Vector3.new(10, 11, 10), Offset = Vector3.new(-16, 5.5, -5) },
     })
 end
 
 local function makeHealerApothecary(parent, name, position, yaw)
     return placeArchitectureBuilding(parent, name, "LumenHealerLodge", position, yaw, 38, {
-        { Size = Vector3.new(22, 9, 15), Offset = Vector3.new(0, 4.5, 0) },
+        { Size = Vector3.new(19, 9, 15), Offset = Vector3.new(-5, 4.5, 2) },
+        { Size = Vector3.new(9, 6, 13), Offset = Vector3.new(9, 3, 3) },
     })
 end
 
 local function makeCraftWorkshop(parent, name, position, yaw)
     return placeArchitectureBuilding(parent, name, "LumenCraftWorkshop", position, yaw, 42, {
-        { Size = Vector3.new(29, 9, 5), Offset = Vector3.new(0, 4.5, 8) },
-        { Size = Vector3.new(4, 9, 13), Offset = Vector3.new(-13, 4.5, 2) },
-        { Size = Vector3.new(11, 3, 4), Offset = Vector3.new(5, 1.5, 3) },
+        { Size = Vector3.new(29, 9, 5), Offset = Vector3.new(0, 4.5, 10) },
+        { Size = Vector3.new(8, 7, 10), Offset = Vector3.new(-10, 3.5, 4) },
+        { Size = Vector3.new(7, 5, 5), Offset = Vector3.new(7, 2.5, 5) },
     })
 end
 
 local function makeOpenStable(parent, name, position, yaw)
     return placeArchitectureBuilding(parent, name, "LumenOpenStable", position, yaw, 44, {
-        { Size = Vector3.new(30, 8, 4), Offset = Vector3.new(0, 4, 8) },
-        { Size = Vector3.new(7, 7, 9), Offset = Vector3.new(18, 3.5, 3) },
+        { Size = Vector3.new(28, 10, 10), Offset = Vector3.new(0, 5, 8) },
+        { Size = Vector3.new(7, 7, 15), Offset = Vector3.new(-11, 3.5, -1) },
+        { Size = Vector3.new(7, 7, 15), Offset = Vector3.new(11, 3.5, -1) },
     })
 end
 
 local function makeProvingLodge(parent, name, position, yaw)
     return placeArchitectureBuilding(parent, name, "LumenProvingLodge", position, yaw, 42, {
-        { Size = Vector3.new(28, 9, 16), Offset = Vector3.new(0, 4.5, 0) },
+        { Size = Vector3.new(28, 10, 16), Offset = Vector3.new(0, 5, 3) },
+        { Size = Vector3.new(9, 14, 9), Offset = Vector3.new(11, 7, -4) },
     })
 end
 

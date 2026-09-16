@@ -4,6 +4,9 @@ local registry = fs.readFile("src/server/Content/EnvironmentAssetRegistry.luau")
 local world = fs.readFile("src/server/Services/LumenreachWorldService.luau")
 local manifest = fs.readFile("assets/original/lumenreach_architecture/manifest.json")
 local uploads = fs.readFile("assets/original/lumenreach_architecture/upload_results.json")
+local heroManifest = fs.readFile("assets/original/lumenreach_hero_architecture_v2/manifest.json")
+local heroUploads =
+    fs.readFile("assets/original/lumenreach_hero_architecture_v2/upload_results.json")
 local generator = fs.readFile("scripts/generate_lumenreach_architecture.py")
 assert(
     fs.isFile("assets/original/lumenreach_architecture/lumen_palette.png"),
@@ -15,14 +18,14 @@ assert(
 )
 
 local assets = {
-    { "LumenCivicHall", "133556360685406" },
-    { "LumenQuartermasterDepot", "137239183865764" },
-    { "LumenArchiveLodge", "137267951808879" },
-    { "LumenWayfarerInn", "71957319643364" },
-    { "LumenHealerLodge", "120378183892930" },
-    { "LumenCraftWorkshop", "131833611058968" },
-    { "LumenOpenStable", "85851512665594" },
-    { "LumenProvingLodge", "119304858476581" },
+    { "LumenCivicHall", "139081513944879", "LumenCivicHallV2" },
+    { "LumenQuartermasterDepot", "107132117930894", "LumenQuartermasterDepotV2" },
+    { "LumenArchiveLodge", "121183648834267", "LumenArchiveLodgeV2" },
+    { "LumenWayfarerInn", "86450756988917", "LumenWayfarerInnV2" },
+    { "LumenHealerLodge", "126397764459907", "LumenHealerLodgeV2" },
+    { "LumenCraftWorkshop", "92965358111834", "LumenCraftWorkshopV2" },
+    { "LumenOpenStable", "108271598307427", "LumenOpenStableV2" },
+    { "LumenProvingLodge", "88192788505333", "LumenProvingLodgeV2" },
     { "LumenRoadWayhouse", "98034643639937" },
     { "LumenFarmBarn", "89701830913140" },
     { "LumenCroftCottageA", "132542848015613" },
@@ -48,15 +51,19 @@ for _, spec in assets do
         "wrong/missing asset ID for " .. name
     )
     assert(
-        string.find(registry, 'Source = "Original EverLeaf low-poly architecture"', 1, true),
+        string.find(registry, 'Source = "Original EverLeaf', 1, true),
         "architecture assets must be original EverLeaf work"
     )
+    local heroName = spec[3]
+    local expectedManifest = if heroName then heroManifest else manifest
+    local expectedUploads = if heroName then heroUploads else uploads
+    local manifestName = heroName or name
     assert(
-        string.find(manifest, '"' .. name .. '"', 1, true),
+        string.find(expectedManifest, '"' .. manifestName .. '"', 1, true),
         "generated GLB manifest missing " .. name
     )
     assert(
-        string.find(uploads, '"assetId": ' .. assetId, 1, true),
+        string.find(expectedUploads, '"assetId": ' .. assetId, 1, true),
         "upload manifest missing " .. name
     )
     assert(string.find(world, '"' .. name .. '"', 1, true), "world does not reference " .. name)
@@ -70,4 +77,32 @@ assert(
     string.find(world, "EnvironmentPrefabService.Place", 1, true),
     "architecture must place sanitized prefabs"
 )
+
+for _, token in
+    {
+        "139081513944879",
+        "107132117930894",
+        "121183648834267",
+        "86450756988917",
+        "126397764459907",
+        "92965358111834",
+        "108271598307427",
+        "88192788505333",
+        "individually authored hero architecture V2",
+    }
+do
+    assert(
+        string.find(registry, token, 1, true) ~= nil,
+        "missing V24 hero architecture V2 contract: " .. token
+    )
+end
+assert(
+    fs.isFile("scripts/generate_lumenreach_hero_architecture_v2.py"),
+    "hero architecture V2 generator missing"
+)
+assert(
+    fs.isDir("assets/original/lumenreach_hero_architecture_v2"),
+    "hero architecture V2 source assets missing"
+)
+
 print("Lumenreach MeshPart architecture asset rules tests passed")

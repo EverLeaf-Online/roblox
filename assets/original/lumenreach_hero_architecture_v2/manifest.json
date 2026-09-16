@@ -1,0 +1,42 @@
+{
+  "LumenCivicHallV2": {
+    "file": "assets/original/lumenreach_hero_architecture_v2/LumenCivicHallV2.glb",
+    "triangles": 2368,
+    "vertices": 1298
+  },
+  "LumenQuartermasterDepotV2": {
+    "file": "assets/original/lumenreach_hero_architecture_v2/LumenQuartermasterDepotV2.glb",
+    "triangles": 1248,
+    "vertices": 684
+  },
+  "LumenArchiveLodgeV2": {
+    "file": "assets/original/lumenreach_hero_architecture_v2/LumenArchiveLodgeV2.glb",
+    "triangles": 1232,
+    "vertices": 682
+  },
+  "LumenWayfarerInnV2": {
+    "file": "assets/original/lumenreach_hero_architecture_v2/LumenWayfarerInnV2.glb",
+    "triangles": 1304,
+    "vertices": 716
+  },
+  "LumenHealerLodgeV2": {
+    "file": "assets/original/lumenreach_hero_architecture_v2/LumenHealerLodgeV2.glb",
+    "triangles": 680,
+    "vertices": 380
+  },
+  "LumenCraftWorkshopV2": {
+    "file": "assets/original/lumenreach_hero_architecture_v2/LumenCraftWorkshopV2.glb",
+    "triangles": 544,
+    "vertices": 300
+  },
+  "LumenOpenStableV2": {
+    "file": "assets/original/lumenreach_hero_architecture_v2/LumenOpenStableV2.glb",
+    "triangles": 684,
+    "vertices": 378
+  },
+  "LumenProvingLodgeV2": {
+    "file": "assets/original/lumenreach_hero_architecture_v2/LumenProvingLodgeV2.glb",
+    "triangles": 636,
+    "vertices": 350
+  }
+}

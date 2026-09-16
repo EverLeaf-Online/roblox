@@ -1,0 +1,34 @@
+{
+  "LumenArchiveLodgeV2": {
+    "assetId": 121183648834267,
+    "moderation": "Approved"
+  },
+  "LumenCivicHallV2": {
+    "assetId": 139081513944879,
+    "moderation": "Approved"
+  },
+  "LumenCraftWorkshopV2": {
+    "assetId": 92965358111834,
+    "moderation": "Approved"
+  },
+  "LumenHealerLodgeV2": {
+    "assetId": 126397764459907,
+    "moderation": "Approved"
+  },
+  "LumenOpenStableV2": {
+    "assetId": 108271598307427,
+    "moderation": "Approved"
+  },
+  "LumenProvingLodgeV2": {
+    "assetId": 88192788505333,
+    "moderation": "Approved"
+  },
+  "LumenQuartermasterDepotV2": {
+    "assetId": 107132117930894,
+    "moderation": "Approved"
+  },
+  "LumenWayfarerInnV2": {
+    "assetId": 86450756988917,
+    "moderation": "Approved"
+  }
+}
