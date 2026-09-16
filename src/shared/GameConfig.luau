@@ -40,7 +40,7 @@ GameConfig.Streaming = {
 
 GameConfig.DataStore = {
     Name = "EverLeafPlayerData_v1",
-    SchemaVersion = 3,
+    SchemaVersion = 4,
     AutosaveSeconds = 60,
     SessionLockSeconds = 180,
     MaxAttempts = 4,
@@ -216,7 +216,7 @@ GameConfig.AdminUserIds = {}
 GameConfig.Features = {
     Crafting = true,
     Enhancement = false,
-    Storage = false,
+    Storage = true,
     Trading = false,
 }
 

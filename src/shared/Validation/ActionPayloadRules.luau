@@ -42,6 +42,14 @@ local SCHEMAS = {
         Amount = { Kind = "number", Integer = true, Minimum = 1, Maximum = 10_000, Optional = true },
     },
     ["inventory.use"] = { ItemId = stringField(64, false) },
+    ["storage.deposit"] = {
+        InventoryIndex = integerField(1, 512),
+        Quantity = integerField(1, 9999),
+    },
+    ["storage.withdraw"] = {
+        StorageIndex = integerField(1, 512),
+        Quantity = integerField(1, 9999),
+    },
     ["equipment.equip"] = { InventoryIndex = integerField(1, 512) },
     ["equipment.unequip"] = { Slot = stringField(16, false, EQUIPMENT_SLOTS) },
     ["skill.learn"] = { SkillId = stringField(64, false) },
@@ -98,6 +106,8 @@ local SCHEMAS = {
 local PROFILE_MUTATIONS = table.freeze({
     ["stat.allocate"] = true,
     ["inventory.use"] = true,
+    ["storage.deposit"] = true,
+    ["storage.withdraw"] = true,
     ["equipment.equip"] = true,
     ["equipment.unequip"] = true,
     ["skill.learn"] = true,

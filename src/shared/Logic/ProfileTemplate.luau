@@ -29,6 +29,10 @@ function ProfileTemplate.Build(schemaVersion)
             Capacity = 48,
             Slots = {},
         },
+        Storage = {
+            Capacity = 96,
+            Slots = {},
+        },
         Equipment = {
             Weapon = "",
             Head = "",

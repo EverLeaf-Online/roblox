@@ -1,7 +1,7 @@
 local ProfileMigration = require("../src/shared/Logic/ProfileMigration")
 local ProfileTemplate = require("../src/shared/Logic/ProfileTemplate")
 
-local SCHEMA_VERSION = 3
+local SCHEMA_VERSION = 4
 local template = ProfileTemplate.Build(SCHEMA_VERSION)
 
 -- Fresh profile defaults are complete and isolated between builds.
@@ -19,6 +19,7 @@ assert(
     template.Inventory.Capacity == 48 and #template.Inventory.Slots == 0,
     "fresh inventory defaults"
 )
+assert(template.Storage.Capacity == 96 and #template.Storage.Slots == 0, "fresh storage defaults")
 assert(template.Skills.Learned.beginner_strike == 1, "fresh starter skill")
 assert(template.Skills.Hotbar["1"] == "beginner_strike", "fresh starter hotbar")
 assert(
@@ -59,6 +60,10 @@ profile.Inventory.Slots = {
     { ItemId = "field_tonic", Quantity = 17 },
     { ItemId = "belforge_wayfarer_ring", Quantity = 1 },
     { ItemId = "old_wayfinder_page", Quantity = 1 },
+}
+profile.Storage.Slots = {
+    { ItemId = "lumen_fragment", Quantity = 11 },
+    { ItemId = "small_tonic", Quantity = 4 },
 }
 profile.Equipment.Weapon = "thornrunner_briarbow"
 profile.Equipment.Body = "ashrunner_coat"
@@ -129,6 +134,12 @@ assert(
     rejoined.Inventory.Slots[1].ItemId == "field_tonic"
         and rejoined.Inventory.Slots[1].Quantity == 17,
     "stack survives rejoin"
+)
+assert(#rejoined.Storage.Slots == 2, "storage slot count survives rejoin")
+assert(
+    rejoined.Storage.Slots[1].ItemId == "lumen_fragment"
+        and rejoined.Storage.Slots[1].Quantity == 11,
+    "storage stack survives rejoin"
 )
 assert(rejoined.Equipment.Weapon == "thornrunner_briarbow", "weapon survives rejoin")
 assert(

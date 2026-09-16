@@ -3,6 +3,8 @@ local Rules = require("../src/shared/Validation/ActionPayloadRules")
 local validPayloads = {
     ["stat.allocate"] = { StatName = "Might", Amount = 1 },
     ["inventory.use"] = { ItemId = "field_tonic" },
+    ["storage.deposit"] = { InventoryIndex = 1, Quantity = 2 },
+    ["storage.withdraw"] = { StorageIndex = 1, Quantity = 1 },
     ["equipment.equip"] = { InventoryIndex = 1 },
     ["equipment.unequip"] = { Slot = "Weapon" },
     ["skill.learn"] = { SkillId = "beginner_strike" },
@@ -49,6 +51,8 @@ assert(not Rules.MutatesProfile("social.inspect"), "profile inspection is read-o
 assert(not Rules.MutatesProfile("party.invite"), "party actions do not dirty persistent profile")
 assert(not Rules.MutatesProfile("skill.use"), "runtime skill use does not dirty persistent profile")
 assert(Rules.MutatesProfile("equipment.equip"), "equipment changes dirty persistent profile")
+assert(Rules.MutatesProfile("storage.deposit"), "storage deposits dirty persistent profile")
+assert(Rules.MutatesProfile("storage.withdraw"), "storage withdrawals dirty persistent profile")
 assert(Rules.MutatesProfile("quest.turnin"), "quest turn-in dirties persistent profile")
 
 local abuseCases = {
@@ -57,6 +61,12 @@ local abuseCases = {
     { "stat.allocate", { StatName = "Power", Amount = 1 }, "unknown stat rejected" },
     { "stat.allocate", { StatName = "Might", Amount = 1.5 }, "fractional AP request rejected" },
     { "equipment.equip", { InventoryIndex = 0 }, "zero inventory index rejected" },
+    {
+        "storage.deposit",
+        { InventoryIndex = 0, Quantity = 1 },
+        "zero storage inventory index rejected",
+    },
+    { "storage.withdraw", { StorageIndex = 1, Quantity = 0 }, "zero storage quantity rejected" },
     { "equipment.unequip", { Slot = "Backpack" }, "unknown equipment slot rejected" },
     { "skill.hotbar", { Index = 9, SkillId = "beginner_strike" }, "hotbar overflow rejected" },
     { "skill.hotbar", { Index = 1, SkillId = string.rep("x", 65) }, "oversized skill id rejected" },

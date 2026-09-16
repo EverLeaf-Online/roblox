@@ -23,6 +23,7 @@ local PlayerDamageFeedback = require(script.Parent.Parent.UI.Components.PlayerDa
 local AdvancementOverlay = require(script.Parent.Parent.UI.Components.AdvancementOverlay)
 local CosmeticsPanel = require(script.Parent.Parent.UI.Components.CosmeticsPanel)
 local ShopOverlay = require(script.Parent.Parent.UI.Components.ShopOverlay)
+local StoragePanel = require(script.Parent.Parent.UI.Components.StoragePanel)
 local PremiumShopPanel = require(script.Parent.Parent.UI.Components.PremiumShopPanel)
 local ToastStack = require(script.Parent.Parent.UI.Components.ToastStack)
 local EquipmentEligibilityRules = require(ReplicatedStorage.Shared.Logic.EquipmentEligibilityRules)
@@ -71,6 +72,7 @@ local COLORS = table.freeze({
 local HOTKEYS = table.freeze({
     CHARACTER = "C",
     INVENTORY = "I",
+    STORAGE = "B",
     SKILLS = "K",
     QUESTS = "J",
     COSMETICS = "V",
@@ -2968,6 +2970,7 @@ local function MainMenu(props)
     local tabs = {
         "CHARACTER",
         "INVENTORY",
+        "STORAGE",
         "SKILLS",
         "QUESTS",
         "COSMETICS",
@@ -2999,6 +3002,12 @@ local function MainMenu(props)
             selectedInventoryIndex,
             setSelectedInventoryIndex
         )
+    elseif activeTab == "STORAGE" then
+        content = React.createElement(StoragePanel, {
+            Profile = profile,
+            Catalog = catalog,
+            OnInvoke = invoke,
+        })
     elseif activeTab == "SKILLS" then
         content = SkillsPanel(
             profile,
@@ -3767,6 +3776,7 @@ local function App()
                 local tabByKey = {
                     [Enum.KeyCode.C] = "CHARACTER",
                     [Enum.KeyCode.I] = "INVENTORY",
+                    [Enum.KeyCode.B] = "STORAGE",
                     [Enum.KeyCode.K] = "SKILLS",
                     [Enum.KeyCode.J] = "QUESTS",
                     [Enum.KeyCode.V] = "COSMETICS",

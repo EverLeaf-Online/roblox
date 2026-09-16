@@ -14,6 +14,7 @@ local ShopService = require(script.Parent.ShopService)
 local SocialProfileService = require(script.Parent.SocialProfileService)
 local SkillService = require(script.Parent.SkillService)
 local StatService = require(script.Parent.StatService)
+local StorageService = require(script.Parent.StorageService)
 
 local ActionService = {}
 local handlers = {}
@@ -23,6 +24,12 @@ handlers["stat.allocate"] = function(_, profile, payload)
 end
 handlers["inventory.use"] = function(player, profile, payload)
     return ConsumableService.Use(player, profile, payload.ItemId)
+end
+handlers["storage.deposit"] = function(_, profile, payload)
+    return StorageService.Deposit(profile, payload.InventoryIndex, payload.Quantity)
+end
+handlers["storage.withdraw"] = function(_, profile, payload)
+    return StorageService.Withdraw(profile, payload.StorageIndex, payload.Quantity)
 end
 handlers["equipment.equip"] = function(_, profile, payload)
     return EquipmentService.Equip(profile, payload.InventoryIndex)
