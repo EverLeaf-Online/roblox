@@ -11,6 +11,7 @@
 - Generic Toolbox/Creator Store architecture remains prohibited. Approved external nature assets are scenery only; foliage density is not a substitute for architecture, gameplay content, or environmental storytelling.
 - Lumenreach V11 now uses an explicit proxy-only collision contract: visible environment geometry cannot accidentally become physical, solid world objects receive simple authored blockers, and those blockers participate in camera/LOS queries. This is source-tested but still requires full Studio walk/dodge/camera traversal before acceptance.
 - Functional MMO world activity is now being added on top of the existing systems: gathering, crafting, rest points, persistent caches, additional regional NPCs, and optional side quests. The next acceptance gate is a fresh-player Studio session that actually feels like an MMORPG, not another source-only map milestone.
+- V13 responds directly to Studio screenshots: structural eave collision is separated from visual overhangs, malformed/low forge sheltering is corrected, duplicate ambient NPC placements are removed, foundations seat into uneven terrain, and 20 small authored wayhouses/crofts/watches/ruins fill inter-zone dead space. This is still awaiting player-height Studio acceptance.
 
 ## Development strategy
 

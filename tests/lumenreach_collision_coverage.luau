@@ -80,7 +80,6 @@ for _, required in
         '"MarketCanopyCollision"',
         '"ShelterRoofCollision"',
         '"ArchRoofCollision"',
-        '"ForgeAwningCollision"',
         '"StiltRoofCollision"',
         '"TownGateBeamCollision"',
     }
@@ -90,5 +89,16 @@ do
         "missing rigid-surface collision proxy: " .. required
     )
 end
+
+assert(
+    string.find(source, "local solidHalfRun = math.max(1.5, width * 0.5 - 0.2)", 1, true) ~= nil
+        and string.find(source, '"BuildingRoofCollision"', 1, true) ~= nil,
+    "building roof collision must stop at the wall line instead of blocking the eave overhang"
+)
+assert(
+    string.find(source, '"ForgeAwningCollision"', 1, true) == nil
+        and string.find(source, "base * CFrame.new(0, 8.9, 6.3)", 1, true) ~= nil,
+    "forge cloth awning must stay overhead render-only instead of becoming a low movement blocker"
+)
 
 print("Lumenreach collision coverage tests passed")

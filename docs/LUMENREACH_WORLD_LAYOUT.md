@@ -8,6 +8,8 @@
 
 **V11 collision contract:** rendered geometry is non-colliding by default. Physical architecture/props use explicit simplified `EverLeafCollisionProxy` blockers; imported foliage stays render-only except for deliberate trunk/solid-prop proxies. Collision proxies are queryable so camera, line-of-sight, and projectile raycasts agree with movement collision.
 
+**V13 screenshot correction:** building roof blockers stop at the exterior wall line instead of extending through the eaves; forge cloth awnings are overhead render-only; foundations extend into uneven terrain; duplicate ambient NPCs near functional NPCs are removed; and twenty authored micro-sites fill travel gaps with wayhouses, crofts, watches, shrines, carts, and ruins rather than more trees.
+
 The terrain-first Lumenreach lineage introduced in V7 is a full replacement of the earlier showcase/camp composition. The runtime generator clears the previous generated model and Terrain, rebuilds macro topography from scratch, cuts the road network into the land, and only then places the authored structures, trees, NPCs, bridges, encounter spaces, landmarks, and portal required by gameplay. New work must extend this terrain-first layout; it must not stack scenery over older geometry.
 
 ## Topology

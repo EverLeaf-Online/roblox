@@ -6,7 +6,7 @@ for _, required in
     {
         "local WORLD_WIDTH = 2200",
         "local WORLD_DEPTH = 1250",
-        "local WORLD_DESIGN_VERSION = 12",
+        "local WORLD_DESIGN_VERSION = 13",
         'world:SetAttribute("WorldDesignVersion", WORLD_DESIGN_VERSION)',
         'world:SetAttribute("TerrainFirstMMOLayout", true)',
         "terrain:Clear()",
@@ -435,14 +435,13 @@ for _, requiredProxy in
         '"ShelterRoofCollision"',
         '"ArchBeamCollision"',
         '"ArchRoofCollision"',
-        '"ForgeAwningCollision"',
         '"StiltRoofCollision"',
         '"TownGateBeamCollision"',
     }
 do
     assert(
         string.find(source, requiredProxy, 1, true) ~= nil,
-        "missing V12 collision coverage: " .. requiredProxy
+        "missing V13 collision coverage: " .. requiredProxy
     )
 end
 assert(
@@ -476,6 +475,29 @@ assert(
         and string.find(source, 'part:GetAttribute("EverLeafCollisionProxy") == true', 1, true) ~= nil
         and string.find(source, 'part.Name == "HumanoidRootPart"', 1, true) ~= nil,
     "V12 static NPCs must be nudged away from physical world proxies and other humanoids instead of overlapping"
+)
+
+assert(
+    string.find(source, "local function makeWorldMicroSites", 1, true) ~= nil
+        and string.find(source, "makeWorldMicroSites(parent)", 1, true) ~= nil,
+    "V13 must populate inter-zone acreage with authored micro-sites, not more foliage"
+)
+local microSiteStart = string.find(source, "local function makeWorldMicroSites", 1, true)
+local microSiteEnd =
+    string.find(source, "local function makeTownExpansion", microSiteStart or 1, true)
+assert(microSiteStart and microSiteEnd, "V13 micro-site section must be present")
+local microSiteBody = string.sub(source, microSiteStart, microSiteEnd - 1)
+local microSiteCount = 0
+for _ in string.gmatch(microSiteBody, 'Name = "') do
+    microSiteCount += 1
+end
+assert(microSiteCount >= 20, "V13 must add at least twenty authored micro-sites across Lumenreach")
+assert(
+    string.find(source, 'Name = "Wayfarer Healer"', 1, true) == nil
+        and string.find(source, 'Name = "Glowmere Keeper"', 1, true) == nil
+        and string.find(source, 'Name = "Sunmoss Researcher"', 1, true) == nil
+        and string.find(source, 'Name = "Veilfall Refugee"', 1, true) == nil,
+    "functional regional NPCs must not have overlapping ambient duplicates"
 )
 
 print("Lumenreach terrain-first MMO redesign rules tests passed")

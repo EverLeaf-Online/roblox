@@ -16,7 +16,7 @@ local LumenreachWorldService = {}
 local GENERATED_NAME = "EverLeafGeneratedWorld"
 local WORLD_WIDTH = 2200
 local WORLD_DEPTH = 1250
-local WORLD_DESIGN_VERSION = 12
+local WORLD_DESIGN_VERSION = 13
 
 -- Lumenreach is authored as a terrain-first MMORPG region. The generator below
 -- replaces the previous showcase composition completely: terrain is cleared,
@@ -1200,11 +1200,13 @@ local function makeBuilding(parent, name, center, width, depth, height, yaw, acc
     local wallColor = accent or Color3.fromRGB(116, 121, 101)
     local roofColor = Color3.fromRGB(45, 66, 58)
 
+    -- Sink the foundation into the terrain so houses do not appear to float
+    -- when their footprint straddles small terrain height changes.
     makePart(
         model,
         "StoneFoundation",
-        Vector3.new(width + 1.6, 0.8, depth + 1.6),
-        base * CFrame.new(0, 0.4, 0),
+        Vector3.new(width + 1.6, 3.0, depth + 1.6),
+        base * CFrame.new(0, -0.7, 0),
         Enum.Material.Slate,
         Color3.fromRGB(74, 82, 78)
     )
@@ -1276,7 +1278,7 @@ local function makeBuilding(parent, name, center, width, depth, height, yaw, acc
     local halfRun = width * 0.5 + 1.4
     local slopeLength = halfRun / math.cos(pitch)
     local rise = halfRun * math.tan(pitch)
-    local eaveY = height + 1.0
+    local eaveY = height + 0.72
     for _, side in { -1, 1 } do
         local roof = makePart(
             model,
@@ -1291,7 +1293,21 @@ local function makeBuilding(parent, name, center, width, depth, height, yaw, acc
         roof.CanCollide = false
         roof.CanTouch = false
         roof.CanQuery = false
-        makePartSurfaceCollisionProxy(model, roof, "BuildingRoofCollision")
+
+        -- Only the roof volume directly above the building footprint is solid.
+        -- The visible eaves intentionally overhang the walls, but their collision
+        -- must not create an invisible shoulder-height barrier around the house.
+        local solidHalfRun = math.max(1.5, width * 0.5 - 0.2)
+        local solidSlopeLength = solidHalfRun / math.cos(pitch)
+        local solidRise = solidHalfRun * math.tan(pitch)
+        makeCollisionProxy(
+            model,
+            "BuildingRoofCollision",
+            Vector3.new(solidSlopeLength, 0.66, math.max(2, depth - 0.2)),
+            base
+                * CFrame.new(side * solidHalfRun * 0.5, eaveY + solidRise * 0.5 - 0.18, 0)
+                * CFrame.Angles(0, 0, -side * pitch)
+        )
     end
 
     local ridge = makePart(
@@ -2438,8 +2454,8 @@ local function makeForgeYard(parent, name, position, yaw)
         local post = makePart(
             model,
             "ForgeAwningPost",
-            Vector3.new(0.6, 7.2, 0.6),
-            base * CFrame.new(x, 3.6, 6.1),
+            Vector3.new(0.6, 9.0, 0.6),
+            base * CFrame.new(x, 4.5, 6.7),
             Enum.Material.Wood,
             SIGNATURE.Timber
         )
@@ -2449,19 +2465,13 @@ local function makeForgeYard(parent, name, position, yaw)
         model,
         "ForgeAwning",
         Vector3.new(19, 0.5, 6.5),
-        base * CFrame.new(0, 7.0, 5.7) * CFrame.Angles(math.rad(-7), 0, 0),
+        base * CFrame.new(0, 8.9, 6.3) * CFrame.Angles(math.rad(-7), 0, 0),
         Enum.Material.Fabric,
         Color3.fromRGB(124, 83, 57)
     )
     awning.CanCollide = false
     awning.CanTouch = false
     awning.CanQuery = false
-    makePartSurfaceCollisionProxy(
-        model,
-        awning,
-        "ForgeAwningCollision",
-        Vector3.new(0.1, 0.15, 0.1)
-    )
     makeCollisionProxy(
         model,
         "ForgeBodyCollision",
@@ -4260,6 +4270,241 @@ local function makeLumenreachDistrictNetwork(parent)
     end
 end
 
+local function makeRoadsideMicroSite(parent, spec)
+    local model = Instance.new("Model")
+    model.Name = spec.Name
+    model.Parent = parent
+    local center = spec.Center
+    local yaw = spec.Yaw or 0
+    local accent = spec.Accent or Color3.fromRGB(82, 104, 80)
+
+    Workspace.Terrain:FillBlock(
+        CFrame.new(terrainSurfacePosition(center, -0.28)) * CFrame.Angles(0, yaw, 0),
+        Vector3.new(spec.Width or 44, 0.9, spec.Depth or 34),
+        Enum.Material.Ground
+    )
+
+    if spec.Kind == "croft" then
+        makeCroftPlot(model, spec.Name .. "Field", center, yaw, 30, 23, accent)
+        makeRoadsideShelter(
+            model,
+            spec.Name .. "Shelter",
+            districtPoint(center, yaw, Vector3.new(-22, 0, 16)),
+            yaw + math.rad(20)
+        )
+        makeWayfarerCart(
+            model,
+            spec.Name .. "Cart",
+            districtPoint(center, yaw, Vector3.new(22, 0, -12)),
+            yaw - math.rad(55),
+            true
+        )
+    elseif spec.Kind == "watch" then
+        makeWatchtower(model, districtPoint(center, yaw, Vector3.new(-15, 0, 5)), yaw)
+        makeRoadsideShelter(
+            model,
+            spec.Name .. "Shelter",
+            districtPoint(center, yaw, Vector3.new(15, 0, 4)),
+            yaw + math.rad(180)
+        )
+        makeSupplyStack(model, districtPoint(center, yaw, Vector3.new(18, 0, -14)), yaw, 0.72)
+        makeHearth(model, districtPoint(center, yaw, Vector3.new(0, 0, 14)))
+    elseif spec.Kind == "ruin" then
+        makeRuinWall(model, center, yaw, 34, 6)
+        makeStoneShrine(
+            model,
+            spec.Name .. "Shrine",
+            districtPoint(center, yaw, Vector3.new(15, 0, 13)),
+            yaw + math.rad(22),
+            accent
+        )
+        makeWayfarerCart(
+            model,
+            spec.Name .. "AbandonedCart",
+            districtPoint(center, yaw, Vector3.new(-18, 0, -12)),
+            yaw + math.rad(62),
+            false
+        )
+    else
+        makeBuilding(
+            model,
+            spec.Name .. "Wayhouse",
+            districtPoint(center, yaw, Vector3.new(-10, 0, 2)),
+            25,
+            19,
+            8,
+            yaw + math.rad(8),
+            accent
+        )
+        makeMarketStall(
+            model,
+            districtPoint(center, yaw, Vector3.new(17, 0, -8)),
+            yaw + math.rad(170),
+            accent:Lerp(SIGNATURE.ClothGold, 0.16)
+        )
+        makeLumenWell(
+            model,
+            spec.Name .. "Well",
+            districtPoint(center, yaw, Vector3.new(14, 0, 13)),
+            SIGNATURE.Lumen
+        )
+    end
+
+    makeWaystone(model, districtPoint(center, yaw, Vector3.new(0, 0, -20)), yaw, 0.72)
+    return model
+end
+
+local function makeWorldMicroSites(parent)
+    -- Small authored destinations occupy the gaps between the larger districts.
+    -- These are deliberately structures/activities, not another foliage-density pass.
+    local sites = {
+        {
+            Name = "SouthgateCroft",
+            Kind = "croft",
+            Center = Vector3.new(-1010, 0, -245),
+            Yaw = math.rad(18),
+            Accent = Color3.fromRGB(117, 132, 75),
+        },
+        {
+            Name = "OldWayShelter",
+            Kind = "wayhouse",
+            Center = Vector3.new(-760, 0, 175),
+            Yaw = math.rad(72),
+            Accent = Color3.fromRGB(84, 110, 83),
+        },
+        {
+            Name = "GreenwayNorthCroft",
+            Kind = "croft",
+            Center = Vector3.new(-665, 0, 270),
+            Yaw = math.rad(-18),
+            Accent = Color3.fromRGB(122, 139, 76),
+        },
+        {
+            Name = "LumenwoodWatch",
+            Kind = "watch",
+            Center = Vector3.new(-565, 0, -120),
+            Yaw = math.rad(16),
+            Accent = Color3.fromRGB(74, 99, 78),
+        },
+        {
+            Name = "CrossroadsSouthStop",
+            Kind = "wayhouse",
+            Center = Vector3.new(-445, 0, -110),
+            Yaw = math.rad(-4),
+            Accent = Color3.fromRGB(91, 109, 85),
+        },
+        {
+            Name = "GlowmereReedCamp",
+            Kind = "croft",
+            Center = Vector3.new(-330, 0, 515),
+            Yaw = math.rad(-35),
+            Accent = Color3.fromRGB(93, 132, 106),
+        },
+        {
+            Name = "ReedbridgeWatch",
+            Kind = "watch",
+            Center = Vector3.new(-235, 0, 300),
+            Yaw = math.rad(82),
+            Accent = Color3.fromRGB(70, 103, 92),
+        },
+        {
+            Name = "EastbridgeNorthPost",
+            Kind = "watch",
+            Center = Vector3.new(-105, 0, -35),
+            Yaw = math.rad(110),
+            Accent = Color3.fromRGB(75, 100, 78),
+        },
+        {
+            Name = "GraveboneRoadRuins",
+            Kind = "ruin",
+            Center = Vector3.new(35, 0, -335),
+            Yaw = math.rad(24),
+            Accent = Color3.fromRGB(111, 154, 136),
+        },
+        {
+            Name = "GravebonePilgrimStop",
+            Kind = "wayhouse",
+            Center = Vector3.new(180, 0, -95),
+            Yaw = math.rad(-40),
+            Accent = Color3.fromRGB(87, 102, 86),
+        },
+        {
+            Name = "MossglenWestCamp",
+            Kind = "watch",
+            Center = Vector3.new(-10, 0, 455),
+            Yaw = math.rad(-16),
+            Accent = Color3.fromRGB(69, 102, 72),
+        },
+        {
+            Name = "MossglenCroft",
+            Kind = "croft",
+            Center = Vector3.new(275, 0, 365),
+            Yaw = math.rad(44),
+            Accent = Color3.fromRGB(105, 136, 73),
+        },
+        {
+            Name = "BramblewoodStop",
+            Kind = "wayhouse",
+            Center = Vector3.new(345, 0, 145),
+            Yaw = math.rad(65),
+            Accent = Color3.fromRGB(77, 104, 75),
+        },
+        {
+            Name = "SunmossLowerWatch",
+            Kind = "watch",
+            Center = Vector3.new(430, 0, 285),
+            Yaw = math.rad(-20),
+            Accent = Color3.fromRGB(105, 111, 74),
+        },
+        {
+            Name = "SunmossPilgrimCroft",
+            Kind = "croft",
+            Center = Vector3.new(610, 0, 515),
+            Yaw = math.rad(-62),
+            Accent = Color3.fromRGB(151, 145, 75),
+        },
+        {
+            Name = "VeilfallWestRefuge",
+            Kind = "wayhouse",
+            Center = Vector3.new(250, 0, -455),
+            Yaw = math.rad(30),
+            Accent = Color3.fromRGB(70, 106, 103),
+        },
+        {
+            Name = "VeilfallRoadWatch",
+            Kind = "watch",
+            Center = Vector3.new(535, 0, -260),
+            Yaw = math.rad(-55),
+            Accent = Color3.fromRGB(65, 99, 96),
+        },
+        {
+            Name = "ShatteredRoadStop",
+            Kind = "wayhouse",
+            Center = Vector3.new(690, 0, 255),
+            Yaw = math.rad(-78),
+            Accent = Color3.fromRGB(82, 101, 82),
+        },
+        {
+            Name = "ArchSouthRuins",
+            Kind = "ruin",
+            Center = Vector3.new(820, 0, -155),
+            Yaw = math.rad(72),
+            Accent = Color3.fromRGB(109, 149, 133),
+        },
+        {
+            Name = "ArchNorthWatch",
+            Kind = "watch",
+            Center = Vector3.new(870, 0, 230),
+            Yaw = math.rad(-72),
+            Accent = Color3.fromRGB(73, 98, 80),
+        },
+    }
+
+    for _, spec in sites do
+        makeRoadsideMicroSite(parent, spec)
+    end
+end
+
 local function makeTownExpansion(parent)
     local camp = ZONES.Camp
     makeBuilding(
@@ -5515,14 +5760,6 @@ local AMBIENT_RESIDENTS = table.freeze({
         Cloth = Color3.fromRGB(112, 76, 55),
     }),
     table.freeze({
-        Name = "Wayfarer Healer",
-        Position = ZONES.Camp + Vector3.new(-96, 0, -40),
-        Yaw = math.rad(55),
-        Role = "Guide",
-        HairStyle = "bun",
-        Cloth = Color3.fromRGB(87, 118, 97),
-    }),
-    table.freeze({
         Name = "Wayfarer Traveler",
         Position = ZONES.Camp + Vector3.new(-18, 0, 31),
         Yaw = math.rad(-20),
@@ -5627,14 +5864,6 @@ local AMBIENT_RESIDENTS = table.freeze({
         Cloth = Color3.fromRGB(77, 96, 75),
     }),
     table.freeze({
-        Name = "Glowmere Keeper",
-        Position = ZONES.Glowmere + Vector3.new(-103, 0, -50),
-        Yaw = math.rad(35),
-        Role = "Archivist",
-        HairStyle = "long",
-        Cloth = Color3.fromRGB(67, 101, 93),
-    }),
-    table.freeze({
         Name = "Glowmere Fisher",
         Position = ZONES.Glowmere + Vector3.new(92, 0, 46),
         Yaw = math.rad(-35),
@@ -5675,28 +5904,12 @@ local AMBIENT_RESIDENTS = table.freeze({
         Cloth = Color3.fromRGB(92, 83, 58),
     }),
     table.freeze({
-        Name = "Sunmoss Researcher",
-        Position = ZONES.Sunmoss + Vector3.new(-15, 0, 72),
-        Yaw = math.rad(16),
-        Role = "Archivist",
-        HairStyle = "bun",
-        Cloth = Color3.fromRGB(106, 108, 73),
-    }),
-    table.freeze({
         Name = "Sunmoss Surveyor",
         Position = ZONES.Sunmoss + Vector3.new(70, 0, -32),
         Yaw = math.rad(-70),
         Role = "Scout",
         HairStyle = "short",
         Cloth = Color3.fromRGB(93, 101, 71),
-    }),
-    table.freeze({
-        Name = "Veilfall Refugee",
-        Position = ZONES.Veilfall + Vector3.new(-84, 0, -56),
-        Yaw = math.rad(48),
-        Role = "Guide",
-        HairStyle = "long",
-        Cloth = Color3.fromRGB(70, 99, 94),
     }),
     table.freeze({
         Name = "Veilfall Watcher",
@@ -5885,6 +6098,7 @@ local function makeZoneContent(parent)
     makeWorldSettlements(parent)
     makeSignatureWorldContent(parent)
     makeLumenreachDistrictNetwork(parent)
+    makeWorldMicroSites(parent)
 
     makeBuilding(
         parent,
