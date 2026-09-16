@@ -1,5 +1,8 @@
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local React = require(ReplicatedStorage.Packages.React)
+
+local player = Players.LocalPlayer
 
 local COLORS = table.freeze({
     Panel = Color3.fromRGB(16, 25, 23),
@@ -52,6 +55,16 @@ local function PublicEventHud(props)
     local stage = math.max(1, tonumber(event.Stage) or 1)
     local stageCount = math.max(stage, tonumber(event.StageCount) or stage)
     local alive = math.max(0, tonumber(event.Alive) or 0)
+    local distanceText = ""
+    if typeof(event.Center) == "Vector3" then
+        local character = player.Character
+        local root = character and character:FindFirstChild("HumanoidRootPart")
+        if root and root:IsA("BasePart") then
+            local delta = event.Center - root.Position
+            local planarDistance = Vector3.new(delta.X, 0, delta.Z).Magnitude
+            distanceText = string.format("   ·   %d STUDS", math.floor(planarDistance + 0.5))
+        end
+    end
 
     return React.createElement("Frame", {
         AnchorPoint = Vector2.new(0.5, 0),
@@ -117,7 +130,13 @@ local function PublicEventHud(props)
             Position = UDim2.fromOffset(18, 52),
             Size = UDim2.new(1, -36, 0, 22),
             BackgroundTransparency = 1,
-            Text = string.format("WAVE %d/%d   ·   %d HOSTILES REMAIN", stage, stageCount, alive),
+            Text = string.format(
+                "WAVE %d/%d   ·   %d HOSTILES REMAIN%s",
+                stage,
+                stageCount,
+                alive,
+                distanceText
+            ),
             TextColor3 = COLORS.Muted,
             TextSize = 9,
             Font = Enum.Font.GothamMedium,

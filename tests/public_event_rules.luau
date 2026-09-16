@@ -124,6 +124,10 @@ assert(
 )
 assert(string.find(hud, "HOSTILES REMAIN", 1, true), "public event HUD missing combat progress")
 assert(
+    string.find(hud, "STUDS", 1, true) and string.find(hud, "event.Center - root.Position", 1, true),
+    "public event HUD must show live player-to-event distance"
+)
+assert(
     string.find(hud, "LocalReceivedAt", 1, true),
     "event HUD countdown must be local-time stable"
 )
