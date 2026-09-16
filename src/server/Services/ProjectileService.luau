@@ -32,7 +32,7 @@ local function raycastParams(attackerCharacter)
     local params = RaycastParams.new()
     params.FilterType = Enum.RaycastFilterType.Exclude
     params.FilterDescendantsInstances = excluded
-    params.IgnoreWater = false
+    params.IgnoreWater = true
     return params
 end
 

@@ -629,7 +629,8 @@ local function groundModel(model, requestedPosition, yaw, groundMode)
         rayParams.FilterType = Enum.RaycastFilterType.Include
         rayParams.FilterDescendantsInstances = { terrain }
     end
-    rayParams.IgnoreWater = groundMode == "World"
+    -- All current NPCs are land actors; never ground their feet to a water surface.
+    rayParams.IgnoreWater = true
 
     local rayOrigin =
         Vector3.new(requestedPosition.X, requestedPosition.Y + 100, requestedPosition.Z)

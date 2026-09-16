@@ -29,8 +29,43 @@ local function makePart(parent, name, size, cframe, material, color)
     part.Color = color
     part.TopSurface = Enum.SurfaceType.Smooth
     part.BottomSurface = Enum.SurfaceType.Smooth
+    part.CanCollide = false
+    part.CanTouch = false
+    part.CanQuery = false
     part.Parent = parent
     return part
+end
+
+local function makeCollisionProxy(parent, name, size, cframe)
+    local proxy =
+        makePart(parent, name, size, cframe, Enum.Material.SmoothPlastic, Color3.new(0, 0, 0))
+    proxy.Transparency = 1
+    proxy.CanCollide = true
+    proxy.CanTouch = false
+    proxy.CanQuery = true
+    proxy.CastShadow = false
+    proxy:SetAttribute("EverLeafCollisionProxy", true)
+    return proxy
+end
+
+local function normalizeGeneratedCollisions(world)
+    for _, descendant in world:GetDescendants() do
+        if descendant:IsA("BasePart") then
+            if descendant:GetAttribute("EverLeafCollisionProxy") == true then
+                descendant.Transparency = 1
+                descendant.CanCollide = true
+                descendant.CanTouch = false
+                descendant.CanQuery = true
+                descendant.CastShadow = false
+            else
+                descendant.CanCollide = false
+                descendant.CanTouch = false
+                if descendant:IsA("SpawnLocation") or descendant.Transparency >= 0.95 then
+                    descendant.CanQuery = false
+                end
+            end
+        end
+    end
 end
 
 local function makeLabel(parent, position, text)
@@ -108,6 +143,12 @@ local function makeForgeTower(parent, position, height, seed)
         Color3.fromRGB(60, 56, 52)
     )
     vent.CanCollide = false
+    makeCollisionProxy(
+        model,
+        "ForgeTowerCollision",
+        Vector3.new(14.5, height + 4.2, 14.5),
+        CFrame.new(position + Vector3.new(0, (height + 4.2) * 0.5, 0))
+    )
     local smoke = Instance.new("Smoke")
     smoke.Color = Color3.fromRGB(95, 92, 88)
     smoke.Opacity = 0.18
@@ -157,6 +198,14 @@ local function makeReturnGate(parent, position)
     )
     gate.Transparency = 0.48
     gate.CanCollide = false
+    for _, x in { -8, 8 } do
+        makeCollisionProxy(
+            model,
+            "ReturnGatePillarCollision",
+            Vector3.new(5.2, 17, 5.2),
+            CFrame.new(position + Vector3.new(x, 8.5, 0))
+        )
+    end
     WorldObjectService.Register(gate, "Portal", "brasshaven_to_lumenreach")
 
     local prompt = Instance.new("ProximityPrompt")
@@ -305,7 +354,8 @@ local function makeFoundryVendor(parent, npcId, displayName, position, palette)
         Enum.Material.WoodPlanks,
         Color3.fromRGB(79, 60, 44)
     )
-    counter.CanCollide = true
+    counter.CanCollide = false
+    makeCollisionProxy(model, "VendorCounterCollision", Vector3.new(7.2, 2.8, 2.8), counter.CFrame)
     makePart(
         model,
         "CounterTrim",
@@ -409,7 +459,16 @@ local function makeBelforgeGate(parent, position)
         Enum.Material.DiamondPlate,
         iron
     )
-    door.CanCollide = true
+    door.CanCollide = false
+    for _, z in { -11, 11 } do
+        makeCollisionProxy(
+            model,
+            "BelforgeGatePillarCollision",
+            Vector3.new(9.2, 30, 11.2),
+            CFrame.new(position + Vector3.new(0, 15, z))
+        )
+    end
+    makeCollisionProxy(model, "BelforgeDoorCollision", Vector3.new(3.2, 23, 17), door.CFrame)
     for index = -2, 2 do
         local brace = makePart(
             model,
@@ -546,6 +605,30 @@ local function makeBelforgeAntechamber(parent)
         Enum.Material.Brick,
         stone
     )
+    makeCollisionProxy(
+        model,
+        "AntechamberFloorCollision",
+        Vector3.new(116, 6, 92),
+        CFrame.new(origin + Vector3.new(0, -3, 0))
+    )
+    makeCollisionProxy(
+        model,
+        "AntechamberNorthWallCollision",
+        Vector3.new(116, 24, 5),
+        CFrame.new(origin + Vector3.new(0, 12, -44))
+    )
+    makeCollisionProxy(
+        model,
+        "AntechamberSouthWallCollision",
+        Vector3.new(116, 24, 5),
+        CFrame.new(origin + Vector3.new(0, 12, 44))
+    )
+    makeCollisionProxy(
+        model,
+        "AntechamberFarWallCollision",
+        Vector3.new(5, 24, 92),
+        CFrame.new(origin + Vector3.new(56, 12, 0))
+    )
 
     local innerDoor = makePart(
         model,
@@ -555,7 +638,8 @@ local function makeBelforgeAntechamber(parent)
         Enum.Material.DiamondPlate,
         iron
     )
-    innerDoor.CanCollide = true
+    innerDoor.CanCollide = false
+    makeCollisionProxy(model, "ColossusSealCollision", Vector3.new(4.2, 25, 25), innerDoor.CFrame)
     for index = -2, 2 do
         local band = makePart(
             model,
@@ -717,6 +801,36 @@ local function makeBelforgeArena(parent)
         Enum.Material.Brick,
         stone
     )
+    makeCollisionProxy(
+        model,
+        "ArenaFloorCollision",
+        Vector3.new(210, 7, 170),
+        CFrame.new(origin + Vector3.new(0, -3.5, 0))
+    )
+    makeCollisionProxy(
+        model,
+        "ArenaNorthWallCollision",
+        Vector3.new(210, 30, 6),
+        CFrame.new(origin + Vector3.new(0, 15, -82))
+    )
+    makeCollisionProxy(
+        model,
+        "ArenaSouthWallCollision",
+        Vector3.new(210, 30, 6),
+        CFrame.new(origin + Vector3.new(0, 15, 82))
+    )
+    makeCollisionProxy(
+        model,
+        "ArenaEastWallCollision",
+        Vector3.new(6, 30, 170),
+        CFrame.new(origin + Vector3.new(102, 15, 0))
+    )
+    makeCollisionProxy(
+        model,
+        "ArenaWestWallCollision",
+        Vector3.new(6, 30, 170),
+        CFrame.new(origin + Vector3.new(-102, 15, 0))
+    )
 
     for index = -3, 3 do
         if index ~= 0 then
@@ -728,7 +842,13 @@ local function makeBelforgeArena(parent)
                 Enum.Material.Metal,
                 iron
             )
-            column.CanCollide = true
+            column.CanCollide = false
+            makeCollisionProxy(
+                model,
+                "ArenaColumnCollision",
+                Vector3.new(5.8, 18, 5.8),
+                column.CFrame
+            )
             local band = makePart(
                 model,
                 "ArenaColumnBand" .. tostring(index + 4),
@@ -859,6 +979,12 @@ local function makeScrapPile(parent, position, yaw, scale)
         part.CanCollide = false
         part.CanTouch = false
     end
+    makeCollisionProxy(
+        model,
+        "ScrapPileCollision",
+        Vector3.new(7.0, 3.6, 5.2) * scale,
+        base * CFrame.new(0, 1.8 * scale, 0)
+    )
     return model
 end
 
@@ -921,6 +1047,12 @@ local function dressEncounterAreas(parent)
             Color3.fromRGB(104, 76, 48)
         )
         post.CanCollide = false
+        makeCollisionProxy(
+            parent,
+            "ScrapLanePostCollision",
+            Vector3.new(0.85, 4.2, 0.85),
+            post.CFrame
+        )
     end
 
     local hotworksCenter = ORIGIN + Vector3.new(58, 0, 58)
@@ -965,6 +1097,12 @@ local function dressEncounterAreas(parent)
         )
         wheel.Shape = Enum.PartType.Cylinder
         wheel.CanCollide = false
+        makeCollisionProxy(
+            parent,
+            "GearworksWheelCollision",
+            wheel.Size + Vector3.new(0.25, 0.25, 0.25),
+            wheel.CFrame
+        )
     end
 
     local cinderCenter = ORIGIN + Vector3.new(83, 0, -72)
@@ -984,6 +1122,12 @@ local function dressEncounterAreas(parent)
         )
         pipe.Shape = Enum.PartType.Cylinder
         pipe.CanCollide = false
+        makeCollisionProxy(
+            parent,
+            "CinderPipeCollision",
+            pipe.Size + Vector3.new(0.3, 0.3, 0.3),
+            pipe.CFrame
+        )
     end
 
     local bastionCenter = ORIGIN + Vector3.new(122, 0, -40)
@@ -1000,6 +1144,12 @@ local function dressEncounterAreas(parent)
         )
         regulator.Shape = Enum.PartType.Cylinder
         regulator.CanCollide = false
+        makeCollisionProxy(
+            parent,
+            "RegulatorCollision",
+            regulator.Size + Vector3.new(0.35, 0.2, 0.35),
+            regulator.CFrame
+        )
         local band = makePart(
             parent,
             "RegulatorBand" .. tostring(index + 3),
@@ -1055,6 +1205,12 @@ local function dressEncounterAreas(parent)
             Color3.fromRGB(74, 69, 63)
         )
         locker.CanCollide = false
+        makeCollisionProxy(
+            parent,
+            "DeadShiftLockerCollision",
+            locker.Size + Vector3.new(0.2, 0.1, 0.2),
+            locker.CFrame
+        )
     end
 
     local dynamoCenter = ORIGIN + Vector3.new(64, 0, -148)
@@ -1071,6 +1227,12 @@ local function dressEncounterAreas(parent)
         )
         coil.Shape = Enum.PartType.Cylinder
         coil.CanCollide = false
+        makeCollisionProxy(
+            parent,
+            "DynamoCoilCollision",
+            coil.Size + Vector3.new(0.25, 0.25, 0.25),
+            coil.CFrame
+        )
         local core = makePart(
             parent,
             "DynamoCore" .. tostring(index),
@@ -1147,6 +1309,12 @@ local function dressEncounterAreas(parent)
         lens.Shape = Enum.PartType.Cylinder
         lens.Transparency = 0.22
         lens.CanCollide = false
+        makeCollisionProxy(
+            parent,
+            "BlueglassLensCollision",
+            lens.Size + Vector3.new(0.2, 0.2, 0.2),
+            lens.CFrame
+        )
     end
     makeScrapPile(parent, blueglassCenter + Vector3.new(-18, 0, 13), math.rad(18), 0.85)
 
@@ -1165,6 +1333,12 @@ local function dressEncounterAreas(parent)
             Color3.fromRGB(93, 78, 62)
         )
         arm.CanCollide = false
+        makeCollisionProxy(
+            parent,
+            "MaintenanceArmCollision",
+            arm.Size + Vector3.new(0.25, 0.1, 0.25),
+            arm.CFrame
+        )
     end
 
     local smelterCenter = ORIGIN + Vector3.new(108, 0, 235)
@@ -1183,6 +1357,12 @@ local function dressEncounterAreas(parent)
         )
         crucible.Shape = Enum.PartType.Cylinder
         crucible.CanCollide = false
+        makeCollisionProxy(
+            parent,
+            "CrucibleCollision",
+            crucible.Size + Vector3.new(0.3, 0.2, 0.3),
+            crucible.CFrame
+        )
     end
 
     makeMonsterSpawnTrigger(parent, "EastworksBlueflameSentries", blueglassCenter, {
@@ -1227,6 +1407,12 @@ local function dressEncounterAreas(parent)
         )
         prism.Transparency = 0.2
         prism.CanCollide = false
+        makeCollisionProxy(
+            parent,
+            "FluxPrismCollision",
+            prism.Size + Vector3.new(0.2, 0.2, 0.2),
+            prism.CFrame
+        )
     end
     makeScrapPile(parent, fluxVaultCenter + Vector3.new(-18, 0, 15), math.rad(24), 0.8)
 
@@ -1242,6 +1428,12 @@ local function dressEncounterAreas(parent)
             Color3.fromRGB(68, 65, 61)
         )
         column.CanCollide = false
+        makeCollisionProxy(
+            parent,
+            "AuthorityColumnCollision",
+            column.Size + Vector3.new(0.25, 0.1, 0.25),
+            column.CFrame
+        )
         local band = makePart(
             parent,
             "AuthorityBand" .. tostring(index + 3),
@@ -1283,6 +1475,12 @@ local function dressEncounterAreas(parent)
         )
         tower.Shape = Enum.PartType.Cylinder
         tower.CanCollide = false
+        makeCollisionProxy(
+            parent,
+            "BellowsPistonCollision",
+            tower.Size + Vector3.new(0.3, 0.1, 0.3),
+            tower.CFrame
+        )
     end
     makeHotVent(parent, bellowsCenter + Vector3.new(-18, 0, 13), 1.0)
     makeHotVent(parent, bellowsCenter + Vector3.new(17, 0, 12), 1.0)
@@ -1300,6 +1498,12 @@ local function dressEncounterAreas(parent)
             Color3.fromRGB(72, 68, 63)
         )
         barricade.CanCollide = false
+        makeCollisionProxy(
+            parent,
+            "SentinelBarricadeCollision",
+            barricade.Size + Vector3.new(0.2, 0.2, 0.2),
+            barricade.CFrame
+        )
     end
 
     makeMonsterSpawnTrigger(parent, "BelforgeForgeSpecters", fluxVaultCenter, {
@@ -1368,6 +1572,7 @@ function BrasshavenWorldService.Init()
         Color3.fromRGB(71, 67, 61)
     )
     ground:SetAttribute("RegionId", "brasshaven")
+    makeCollisionProxy(world, "BrasshavenGroundCollision", Vector3.new(360, 8, 900), ground.CFrame)
 
     local road = makePart(
         world,
@@ -1445,6 +1650,30 @@ function BrasshavenWorldService.Init()
         Enum.Material.Brick,
         wallColor
     )
+    makeCollisionProxy(
+        world,
+        "BrasshavenNorthWallCollision",
+        Vector3.new(330, 18, 8),
+        CFrame.new(ORIGIN + Vector3.new(0, 9, -442))
+    )
+    makeCollisionProxy(
+        world,
+        "BrasshavenSouthWallCollision",
+        Vector3.new(330, 18, 8),
+        CFrame.new(ORIGIN + Vector3.new(0, 9, 442))
+    )
+    makeCollisionProxy(
+        world,
+        "BrasshavenEastWallCollision",
+        Vector3.new(8, 18, 884),
+        CFrame.new(ORIGIN + Vector3.new(166, 9, 0))
+    )
+    makeCollisionProxy(
+        world,
+        "BrasshavenWestWallCollision",
+        Vector3.new(8, 18, 884),
+        CFrame.new(ORIGIN + Vector3.new(-166, 9, 0))
+    )
 
     local spawn = Instance.new("SpawnLocation")
     spawn.Name = "BrasshavenSpawn"
@@ -1455,6 +1684,9 @@ function BrasshavenWorldService.Init()
     spawn.Material = Enum.Material.Metal
     spawn.Color = Color3.fromRGB(154, 111, 59)
     spawn.Transparency = 0.2
+    spawn.CanCollide = false
+    spawn.CanTouch = false
+    spawn.CanQuery = false
     spawn.Parent = world
     WorldTravelService.RegisterSpawn("brasshaven_start", spawn)
 
@@ -1492,6 +1724,7 @@ function BrasshavenWorldService.Init()
     makeLabel(world, ORIGIN + Vector3.new(-58, 22, 0), "BRASSHAVEN · FOUNDRY THRESHOLD")
     makeLabel(world, ORIGIN + Vector3.new(112, 25, 395), "BELFORGE EASTWORKS · LEVEL 30 GATE")
 
+    normalizeGeneratedCollisions(world)
     return world
 end
 

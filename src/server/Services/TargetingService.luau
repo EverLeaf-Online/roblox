@@ -7,7 +7,7 @@ local function hasLineOfSight(character, target, origin, targetPosition)
     local params = RaycastParams.new()
     params.FilterType = Enum.RaycastFilterType.Exclude
     params.FilterDescendantsInstances = { character }
-    params.IgnoreWater = false
+    params.IgnoreWater = true
 
     local result = Workspace:Raycast(origin, targetPosition - origin, params)
     return not result or result.Instance:IsDescendantOf(target)

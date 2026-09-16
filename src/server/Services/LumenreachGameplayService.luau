@@ -42,7 +42,7 @@ local function terrainSurface(position, offset)
     local params = RaycastParams.new()
     params.FilterType = Enum.RaycastFilterType.Include
     params.FilterDescendantsInstances = { terrain }
-    params.IgnoreWater = false
+    params.IgnoreWater = true
     local hit = Workspace:Raycast(
         Vector3.new(position.X, position.Y + 160, position.Z),
         Vector3.new(0, -340, 0),

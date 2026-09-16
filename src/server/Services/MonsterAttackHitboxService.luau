@@ -34,7 +34,7 @@ local function hasLineOfSight(monster, targetCharacter, sourcePosition, targetPo
     local params = RaycastParams.new()
     params.FilterType = Enum.RaycastFilterType.Exclude
     params.FilterDescendantsInstances = excluded
-    params.IgnoreWater = false
+    params.IgnoreWater = true
 
     local delta = targetPosition - sourcePosition
     if delta.Magnitude <= 0.01 then

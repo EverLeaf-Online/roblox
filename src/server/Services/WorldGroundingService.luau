@@ -46,7 +46,9 @@ function WorldGroundingService.GroundModel(model, requestedPosition, options)
     local params = RaycastParams.new()
     params.FilterType = Enum.RaycastFilterType.Include
     params.FilterDescendantsInstances = { terrain }
-    params.IgnoreWater = options.IgnoreWater == true
+    -- World grounding treats water as traversable volume, never as a floor.
+    -- Callers that need aquatic placement should provide their own water-specific resolver.
+    params.IgnoreWater = true
 
     local rayOrigin =
         Vector3.new(requestedPosition.X, requestedPosition.Y + 120, requestedPosition.Z)

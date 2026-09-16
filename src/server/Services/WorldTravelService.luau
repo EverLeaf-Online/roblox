@@ -20,7 +20,7 @@ local function resolveSafeSpawnCFrame(spawn, character, humanoid, root)
     local params = RaycastParams.new()
     params.FilterType = Enum.RaycastFilterType.Exclude
     params.FilterDescendantsInstances = { spawn, character }
-    params.IgnoreWater = false
+    params.IgnoreWater = true
 
     local rayOrigin = spawn.Position + Vector3.new(0, SAFE_RAY_UP, 0)
     local hit = Workspace:Raycast(rayOrigin, Vector3.new(0, -SAFE_RAY_DOWN, 0), params)
