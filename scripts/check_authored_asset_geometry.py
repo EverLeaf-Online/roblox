@@ -20,6 +20,7 @@ TARGETS = {
     "creature": [
         ROOT / "assets/original/starter_monsters",
         ROOT / "assets/original/lumenreach_elite_monsters",
+        ROOT / "assets/original/brasshaven_monsters",
     ],
     "npc": [
         ROOT / "assets/original/lumenreach_hero_npcs",

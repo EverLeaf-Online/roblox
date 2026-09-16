@@ -1,0 +1,305 @@
+{
+  "RivetScuttler": {
+    "file": "assets/original/brasshaven_monsters/RivetScuttler.glb",
+    "parts": [
+      "Body",
+      "Head",
+      "FrontLeftLeg",
+      "FrontRightLeg",
+      "BackLeftLeg",
+      "BackRightLeg",
+      "EyeL",
+      "EyeR",
+      "RivetSpike1",
+      "RivetSpike2",
+      "RivetSpike3"
+    ],
+    "triangles": 552
+  },
+  "Slagmite": {
+    "file": "assets/original/brasshaven_monsters/Slagmite.glb",
+    "parts": [
+      "Body",
+      "Head",
+      "EyeL",
+      "EyeR",
+      "SlagSpire1",
+      "SlagSpire2",
+      "SlagSpire3",
+      "FurnaceRing",
+      "HeatCore"
+    ],
+    "triangles": 712
+  },
+  "GearjawHound": {
+    "file": "assets/original/brasshaven_monsters/GearjawHound.glb",
+    "parts": [
+      "Body",
+      "Head",
+      "FrontLeftLeg",
+      "FrontRightLeg",
+      "BackLeftLeg",
+      "BackRightLeg",
+      "Jaw",
+      "Tooth1",
+      "Tooth2",
+      "Tooth3",
+      "Tooth4",
+      "GearCollar",
+      "Tail"
+    ],
+    "triangles": 560
+  },
+  "Cindercoil": {
+    "file": "assets/original/brasshaven_monsters/Cindercoil.glb",
+    "parts": [
+      "Body",
+      "Core",
+      "ArcFin1",
+      "ArcFin2",
+      "ArcFin3",
+      "Tail",
+      "Sensor"
+    ],
+    "triangles": 512
+  },
+  "PressureBastion": {
+    "file": "assets/original/brasshaven_monsters/PressureBastion.glb",
+    "parts": [
+      "Body",
+      "Head",
+      "FrontLeftLeg",
+      "FrontRightLeg",
+      "BackLeftLeg",
+      "BackRightLeg",
+      "PressureTankL",
+      "PressureTankR",
+      "Ram",
+      "Gauge"
+    ],
+    "triangles": 496
+  },
+  "FurnaceHusk": {
+    "file": "assets/original/brasshaven_monsters/FurnaceHusk.glb",
+    "parts": [
+      "Body",
+      "Head",
+      "LeftArm",
+      "RightArm",
+      "LeftLeg",
+      "RightLeg",
+      "FacePlate",
+      "EyeL",
+      "EyeR",
+      "ChestDoor",
+      "FurnaceCore",
+      "BackStack",
+      "RightHand_Clinker"
+    ],
+    "triangles": 656
+  },
+  "ArcSiphon": {
+    "file": "assets/original/brasshaven_monsters/ArcSiphon.glb",
+    "parts": [
+      "Body",
+      "Coil",
+      "Coil2",
+      "Core",
+      "SiphonNeedle1",
+      "SiphonNeedle2",
+      "SiphonNeedle3",
+      "Tail"
+    ],
+    "triangles": 616
+  },
+  "Railbreaker": {
+    "file": "assets/original/brasshaven_monsters/Railbreaker.glb",
+    "parts": [
+      "Body",
+      "Head",
+      "FrontLeftLeg",
+      "FrontRightLeg",
+      "BackLeftLeg",
+      "BackRightLeg",
+      "Cowcatcher",
+      "RailHammer",
+      "WheelL",
+      "WheelR"
+    ],
+    "triangles": 440
+  },
+  "BlueflameSentry": {
+    "file": "assets/original/brasshaven_monsters/BlueflameSentry.glb",
+    "parts": [
+      "Body",
+      "Lens",
+      "GuardRing",
+      "BladeFin1",
+      "BladeFin2",
+      "BladeFin3",
+      "BladeFin4",
+      "BlueFlame"
+    ],
+    "triangles": 536
+  },
+  "FoundryReaver": {
+    "file": "assets/original/brasshaven_monsters/FoundryReaver.glb",
+    "parts": [
+      "Body",
+      "Head",
+      "LeftArm",
+      "RightArm",
+      "LeftLeg",
+      "RightLeg",
+      "HeadMask",
+      "EyeL",
+      "EyeR",
+      "ShoulderL",
+      "RightBlade",
+      "BladeEdge",
+      "BackBoiler"
+    ],
+    "triangles": 612
+  },
+  "SmelterGolem": {
+    "file": "assets/original/brasshaven_monsters/SmelterGolem.glb",
+    "parts": [
+      "Body",
+      "Head",
+      "Face",
+      "Core",
+      "LeftArm",
+      "RightArm",
+      "LeftLeg",
+      "RightLeg",
+      "ShoulderVatL",
+      "ShoulderVatR",
+      "CrownStack"
+    ],
+    "triangles": 640
+  },
+  "ForgeSpecter": {
+    "file": "assets/original/brasshaven_monsters/ForgeSpecter.glb",
+    "parts": [
+      "Body",
+      "Mask",
+      "EyeL",
+      "EyeR",
+      "ChainShard1",
+      "ChainShard2",
+      "ChainShard3",
+      "GhostTail",
+      "Halo"
+    ],
+    "triangles": 680
+  },
+  "IroncladEnforcer": {
+    "file": "assets/original/brasshaven_monsters/IroncladEnforcer.glb",
+    "parts": [
+      "Body",
+      "Head",
+      "LeftArm",
+      "RightArm",
+      "LeftLeg",
+      "RightLeg",
+      "Helmet",
+      "Visor",
+      "ChestPlate",
+      "Shield",
+      "Baton",
+      "AuthorityMark"
+    ],
+    "triangles": 528
+  },
+  "MoltenDrake": {
+    "file": "assets/original/brasshaven_monsters/MoltenDrake.glb",
+    "parts": [
+      "Body",
+      "Head",
+      "FrontLeftLeg",
+      "FrontRightLeg",
+      "BackLeftLeg",
+      "BackRightLeg",
+      "BackHorn1",
+      "BackHorn2",
+      "BackHorn3",
+      "Jaw",
+      "MouthHeat",
+      "Tail"
+    ],
+    "triangles": 676
+  },
+  "BellowsTitan": {
+    "file": "assets/original/brasshaven_monsters/BellowsTitan.glb",
+    "parts": [
+      "Body",
+      "Head",
+      "Core",
+      "LeftArm",
+      "RightArm",
+      "LeftLeg",
+      "RightLeg",
+      "BellowsL1",
+      "BellowsL2",
+      "BellowsL3",
+      "BellowsL4",
+      "ExhaustL",
+      "BellowsR1",
+      "BellowsR2",
+      "BellowsR3",
+      "BellowsR4",
+      "ExhaustR"
+    ],
+    "triangles": 832
+  },
+  "BelforgeSentinel": {
+    "file": "assets/original/brasshaven_monsters/BelforgeSentinel.glb",
+    "parts": [
+      "Body",
+      "Head",
+      "LeftArm",
+      "RightArm",
+      "LeftLeg",
+      "RightLeg",
+      "Helm",
+      "Visor",
+      "Cuirass",
+      "PauldronL",
+      "PauldronR",
+      "LeftShield",
+      "RightHalberd",
+      "HalberdHead",
+      "AuthorityCore"
+    ],
+    "triangles": 716
+  },
+  "BelforgeColossus": {
+    "file": "assets/original/brasshaven_monsters/BelforgeColossus.glb",
+    "parts": [
+      "Body",
+      "Head",
+      "LeftArm",
+      "RightArm",
+      "LeftLeg",
+      "RightLeg",
+      "CrownHelm",
+      "FaceFurnace",
+      "ChestFurnace",
+      "ColossusCore",
+      "LeftArm.001",
+      "RightArm.001",
+      "LeftLeg.001",
+      "RightLeg.001",
+      "ColossusHammerShaft",
+      "ColossusHammerHead",
+      "BackStackL",
+      "StackBandL",
+      "BackStackR",
+      "StackBandR",
+      "CrownFlame1",
+      "CrownFlame2",
+      "CrownFlame3"
+    ],
+    "triangles": 1316
+  }
+}

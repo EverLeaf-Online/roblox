@@ -157,4 +157,79 @@ assert(
     "NPC wave2 assets must be approved"
 )
 
+local brassMonsterAssets = {
+    rivet_scuttler = "97871994968413",
+    slagmite = "131705428502950",
+    gearjaw_hound = "125576505815861",
+    cindercoil = "109914530061009",
+    pressure_bastion = "127542650037760",
+    furnace_husk = "120177022534320",
+    arc_siphon = "123898172409449",
+    railbreaker = "139216980305014",
+    blueflame_sentry = "90377424589475",
+    foundry_reaver = "126561092148414",
+    smelter_golem = "96564260623954",
+    forge_specter = "82089340060817",
+    ironclad_enforcer = "100205514558440",
+    molten_drake = "74284721075950",
+    bellows_titan = "111136314549035",
+    belforge_sentinel = "80262666802637",
+    belforge_colossus = "114482715123081",
+}
+for monsterId, assetId in brassMonsterAssets do
+    assert(
+        string.find(monsterRegistry, monsterId .. " = {", 1, true),
+        "production monster registry missing " .. monsterId
+    )
+    assert(
+        string.find(monsterRegistry, assetId, 1, true),
+        "production monster asset id missing " .. monsterId
+    )
+end
+assert(fs.isFile("scripts/generate_brasshaven_monsters.py"), "Brasshaven monster generator missing")
+assert(fs.isDir("assets/original/brasshaven_monsters"), "Brasshaven monster source assets missing")
+local brassMonsterUploads = fs.readFile("assets/original/brasshaven_monsters/upload_results.json")
+for _, assetId in brassMonsterAssets do
+    assert(
+        string.find(brassMonsterUploads, assetId, 1, true)
+            and string.find(brassMonsterUploads, '"moderation": "Approved"', 1, true),
+        "Brasshaven monster upload must be Roblox-approved: " .. assetId
+    )
+end
+
+local allProductionMonsterIds = {
+    "lumen_mossling",
+    "skeleton",
+    "slime",
+    "peco_peco",
+    "brambleback",
+    "lumen_wisp",
+    "gravebone_captain",
+    "royal_glowcap",
+    "mosswarden",
+    "rivet_scuttler",
+    "slagmite",
+    "gearjaw_hound",
+    "cindercoil",
+    "pressure_bastion",
+    "furnace_husk",
+    "arc_siphon",
+    "railbreaker",
+    "blueflame_sentry",
+    "foundry_reaver",
+    "smelter_golem",
+    "forge_specter",
+    "ironclad_enforcer",
+    "molten_drake",
+    "bellows_titan",
+    "belforge_sentinel",
+    "belforge_colossus",
+}
+for _, monsterId in allProductionMonsterIds do
+    assert(
+        string.find(monsterRegistry, monsterId .. " = {", 1, true),
+        "every non-training production monster must prefer authored art: " .. monsterId
+    )
+end
+
 print("production visual asset pipeline rules tests passed")
