@@ -80,7 +80,7 @@ local function prefabScaleForLongest(prefabName, targetLongest)
 end
 
 local function architectureScaleForLongest(prefabName, targetLongest)
-    return math.clamp(prefabScaleForLongest(prefabName, targetLongest), 0.25, 3.0)
+    return math.clamp(prefabScaleForLongest(prefabName, targetLongest), 0.55, 1.75)
 end
 
 local function placeIndustrialBuilding(

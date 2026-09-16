@@ -74,7 +74,7 @@ assert(
 assert(
     string.find(
         world,
-        "math.clamp(prefabScaleForLongest(prefabName, targetLongest), 0.25, 3.0)",
+        "math.clamp(prefabScaleForLongest(prefabName, targetLongest), 0.55, 1.75)",
         1,
         true
     ),

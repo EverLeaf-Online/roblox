@@ -14,7 +14,7 @@ assert(
     "third-party free loading must be explicit"
 )
 assert(
-    string.find(loader, "AssetService:LoadAssetAsync(entry.AssetId)", 1, true),
+    string.find(loader, "AssetService:LoadAssetAsync(assetId)", 1, true),
     "third-party assets must use the sandboxed modern loader"
 )
 assert(
@@ -82,8 +82,20 @@ assert(
     string.find(registry, "25561936", 1, true) == nil,
     "malformed Bevillia inn must stay retired"
 )
-assert(string.find(registry, "99210238800832", 1, true), "replacement civic structure missing")
-assert(string.find(registry, "82741417148839", 1, true), "replacement Wayfarer inn missing")
+assert(
+    string.find(registry, "99210238800832", 1, true) == nil,
+    "random one-off civic replacement must stay retired"
+)
+assert(string.find(registry, "86710303527267", 1, true), "cohesive free village kit missing")
+assert(string.find(registry, "12007890134", 1, true), "cohesive free landmark kit missing")
+assert(
+    string.find(loader, "SelectModelFromPack", 1, true),
+    "pack entries must extract one architectural model"
+)
+assert(
+    string.find(loader, "refusing whole-pack fallback", 1, true),
+    "dirty pack imports must fail closed"
+)
 
 for _, token in
     {
@@ -117,6 +129,19 @@ assert(
 assert(
     string.find(sanitizer, 'model:SetAttribute("EverLeafSanitizedRemovedCount", removed)', 1, true),
     "sanitized imports must expose how much third-party content was removed"
+)
+
+assert(
+    string.find(sanitizer, "descendant.Transparency >= 0.98", 1, true),
+    "sanitizer must remove invisible imported helper/collision parts"
+)
+assert(
+    string.find(sanitizer, "math.max(size.X, size.Z) >= 180", 1, true),
+    "sanitizer must reject giant imported display/base plates"
+)
+assert(
+    string.find(sanitizer, "pivot.Position.X - boundsCFrame.Position.X", 1, true),
+    "placement must recenter imported models from visible bounds instead of dirty pivots"
 )
 
 print("Creator Store asset security rules tests passed")

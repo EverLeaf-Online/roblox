@@ -6,8 +6,208 @@ local EnvironmentAssetRegistry = require(script.Parent.Parent.Content.Environmen
 local EnvironmentPrefabService = require(script.Parent.EnvironmentPrefabService)
 
 local StudioEnvironmentAssetService = {}
+local assetContainerCache = {}
 
-local function chooseVisualRoot(container)
+local BUILDING_TOKENS = table.freeze({
+    "house",
+    "home",
+    "building",
+    "cottage",
+    "hut",
+    "barn",
+    "stable",
+    "shop",
+    "hall",
+    "inn",
+    "tower",
+    "gate",
+    "castle",
+    "keep",
+    "ruin",
+    "tomb",
+    "crypt",
+    "shrine",
+    "chapel",
+    "temple",
+    "arch",
+})
+
+local PROP_TOKENS = table.freeze({
+    "tree",
+    "bush",
+    "grass",
+    "flower",
+    "rock",
+    "crate",
+    "barrel",
+    "fence",
+    "lamp",
+    "lantern",
+    "cart",
+    "wagon",
+    "well",
+    "bench",
+    "chair",
+    "table",
+    "sign",
+    "road",
+    "path",
+    "ground",
+    "terrain",
+})
+
+local function countBaseParts(instance)
+    local count = if instance:IsA("BasePart") then 1 else 0
+    for _, descendant in instance:GetDescendants() do
+        if descendant:IsA("BasePart") then
+            count += 1
+        end
+    end
+    return count
+end
+
+local function boundsSize(instance)
+    if instance:IsA("Model") then
+        local ok, _, size = pcall(function()
+            local cframe, extents = instance:GetBoundingBox()
+            return cframe, extents
+        end)
+        return if ok then size else nil
+    elseif instance:IsA("BasePart") then
+        return instance.Size
+    end
+    return nil
+end
+
+local function containsToken(text, tokens)
+    local lower = string.lower(text)
+    for _, token in tokens do
+        if string.find(lower, string.lower(token), 1, true) then
+            return true
+        end
+    end
+    return false
+end
+
+local function architectureCandidateScore(instance, entry)
+    local size = boundsSize(instance)
+    if not size then
+        return nil
+    end
+    local horizontalLongest = math.max(size.X, size.Z)
+    local horizontalShortest = math.min(size.X, size.Z)
+    if size.Y < 3.5 or size.Y > 140 or horizontalLongest < 5 or horizontalLongest > 180 then
+        return nil
+    end
+    if horizontalShortest < 1.8 then
+        return nil
+    end
+
+    local name = instance:GetFullName()
+    local selectedTokens = entry.SelectTokens or {}
+    local selectedMatch = containsToken(name, selectedTokens)
+    local buildingMatch = containsToken(name, BUILDING_TOKENS)
+    local propMatch = containsToken(name, PROP_TOKENS)
+    if propMatch and not selectedMatch then
+        return nil
+    end
+
+    local parts = countBaseParts(instance)
+    if parts < 2 and not instance:IsA("MeshPart") then
+        return nil
+    end
+
+    -- Prefer named building variants, but still allow well-sized unnamed models
+    -- from packs that use generic labels like Model01/Model02.
+    local score = 0
+    for _, token in selectedTokens do
+        if string.find(string.lower(name), string.lower(token), 1, true) then
+            score += 120
+        end
+    end
+    if buildingMatch then
+        score += 45
+    end
+    score += math.min(parts, 50) * 0.6
+    score += math.min(horizontalLongest, 70) * 0.25
+    score += math.min(size.Y, 45) * 0.2
+    if not buildingMatch and parts < 6 then
+        score -= 40
+    end
+    return score
+end
+
+local function collectArchitectureCandidates(container, entry)
+    local contentRoot = container
+    local children = container:GetChildren()
+    if #children == 1 and (children[1]:IsA("Model") or children[1]:IsA("Folder")) then
+        contentRoot = children[1]
+    end
+
+    local candidates = {}
+    local function consider(instance)
+        if not (instance:IsA("Model") or instance:IsA("BasePart")) then
+            return
+        end
+        local score = architectureCandidateScore(instance, entry)
+        if score then
+            table.insert(candidates, { Instance = instance, Score = score })
+        end
+    end
+
+    -- Pack authors normally place complete buildings as direct children or one
+    -- folder below the pack root. Do not descend into roof/wall submodels first.
+    for _, child in contentRoot:GetChildren() do
+        if child:IsA("Folder") then
+            for _, grandchild in child:GetChildren() do
+                consider(grandchild)
+            end
+        else
+            consider(child)
+        end
+    end
+
+    if #candidates == 0 then
+        for _, descendant in contentRoot:GetDescendants() do
+            if descendant:IsA("Model") and countBaseParts(descendant) >= 4 then
+                consider(descendant)
+            end
+        end
+    end
+
+    table.sort(candidates, function(a, b)
+        if math.abs(a.Score - b.Score) > 0.001 then
+            return a.Score > b.Score
+        end
+        return a.Instance:GetFullName() < b.Instance:GetFullName()
+    end)
+    return candidates
+end
+
+local function chooseVisualRoot(container, entry)
+    if entry.SelectModelFromPack == true then
+        local candidates = collectArchitectureCandidates(container, entry)
+        if #candidates > 0 then
+            local ordinal = math.max(1, math.floor(tonumber(entry.VariantOrdinal) or 1))
+            local selected = candidates[((ordinal - 1) % #candidates) + 1].Instance:Clone()
+            selected.Name = entry.PrefabName or selected.Name
+            selected:SetAttribute("CreatorStorePackSelection", true)
+            selected:SetAttribute("CreatorStoreCandidateCount", #candidates)
+            selected:SetAttribute("CreatorStoreVariantOrdinal", ordinal)
+            container:Destroy()
+            return selected
+        end
+        warn(
+            string.format(
+                "[StudioEnvironmentAssetService] No architectural candidate found in pack %s (%s); refusing whole-pack fallback",
+                tostring(entry.Name),
+                tostring(entry.AssetId)
+            )
+        )
+        container:Destroy()
+        return nil
+    end
+
     local children = container:GetChildren()
     if #children == 1 and (children[1]:IsA("Model") or children[1]:IsA("BasePart")) then
         local child = children[1]
@@ -27,16 +227,6 @@ local function chooseVisualRoot(container)
     end
     container:Destroy()
     return model
-end
-
-local function countBaseParts(instance)
-    local count = if instance:IsA("BasePart") then 1 else 0
-    for _, descendant in instance:GetDescendants() do
-        if descendant:IsA("BasePart") then
-            count += 1
-        end
-    end
-    return count
 end
 
 local function hasVisualModelChild(model)
@@ -71,8 +261,6 @@ local function collectVariantCandidates(container)
         contentRoot = children[1]
     end
 
-    -- Prefer leaf visual models. This prevents a pack-level wrapper containing
-    -- many trees from being registered as one enormous repeated prefab.
     for _, descendant in contentRoot:GetDescendants() do
         if
             descendant:IsA("Model")
@@ -97,6 +285,22 @@ local function collectVariantCandidates(container)
         return a:GetFullName() < b:GetFullName()
     end)
     return candidates
+end
+
+local function loadAssetContainer(assetId)
+    local cached = assetContainerCache[assetId]
+    if cached and cached.Parent == nil then
+        return cached:Clone()
+    end
+
+    local ok, containerOrError = pcall(function()
+        return AssetService:LoadAssetAsync(assetId)
+    end)
+    if not ok then
+        return nil, containerOrError
+    end
+    assetContainerCache[assetId] = containerOrError
+    return containerOrError:Clone()
 end
 
 local function findManualStudioSource(entry)
@@ -176,16 +380,14 @@ local function importVariantAsset(entry)
         return true
     end
 
-    local ok, containerOrError = pcall(function()
-        return AssetService:LoadAssetAsync(entry.AssetId)
-    end)
-    if not ok then
+    local containerOrError, loadError = loadAssetContainer(entry.AssetId)
+    if not containerOrError then
         warn(
             string.format(
                 "[StudioEnvironmentAssetService] Could not load variant pack %s (%s): %s",
                 entry.Name,
                 tostring(entry.AssetId),
-                tostring(containerOrError)
+                tostring(loadError)
             )
         )
         return false
@@ -237,22 +439,23 @@ local function importAsset(entry)
         return true
     end
 
-    local ok, containerOrError = pcall(function()
-        return AssetService:LoadAssetAsync(entry.AssetId)
-    end)
-    if not ok then
+    local containerOrError, loadError = loadAssetContainer(entry.AssetId)
+    if not containerOrError then
         warn(
             string.format(
                 "[StudioEnvironmentAssetService] Could not load %s (%s): %s",
                 entry.Name,
                 tostring(entry.AssetId),
-                tostring(containerOrError)
+                tostring(loadError)
             )
         )
         return false
     end
 
-    local visualRoot = chooseVisualRoot(containerOrError)
+    local visualRoot = chooseVisualRoot(containerOrError, entry)
+    if not visualRoot then
+        return false
+    end
     local registered, reason =
         EnvironmentPrefabService.Register(entry.PrefabName, visualRoot, entry.AssetId, {
             AutoUpright = entry.AutoUpright == true,
@@ -300,6 +503,13 @@ function StudioEnvironmentAssetService.Init()
                 end
             end
         end
+    end
+
+    for assetId, container in assetContainerCache do
+        if container then
+            container:Destroy()
+        end
+        assetContainerCache[assetId] = nil
     end
 end
 

@@ -433,7 +433,7 @@ local function architectureScaleForLongest(prefabName, targetLongest)
     -- Free Creator Store models use wildly different source units. Keep one bad
     -- source asset from becoming a 100-stud giant (or microscopic) while still
     -- normalizing ordinary Roblox-scale buildings to their authored district role.
-    return math.clamp(prefabScaleForLongest(prefabName, targetLongest), 0.25, 3.0)
+    return math.clamp(prefabScaleForLongest(prefabName, targetLongest), 0.55, 1.75)
 end
 
 local function placeDressingPrefab(parent, prefabName, position, yaw, targetLongest)

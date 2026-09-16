@@ -41,30 +41,20 @@ These models are EverLeaf-owned Roblox uploads derived from CC0 source files. Th
 
 ### Curated free Creator Store architecture — active replacement
 
-The previous generated Blender architecture is **retired from production**. Those source files remain only as historical project artifacts; the runtime registry no longer points at them and the production GLB QA gate no longer counts them as active architecture.
+The previous generated Blender architecture remains retired from production. The first Creator Store pass also proved wrong in Studio because it mixed unrelated one-off models, imported whole packs as buildings, trusted dirty source pivots, and retained giant helper/display geometry. That mixed library is retired too.
 
-Lumenreach now resolves its logical building roles through curated free Creator Store models. Reusing a logical role keeps the world-layout/collision code stable while the visible prefab changes.
+Lumenreach V28 now uses **two cohesive free source families** instead of a random assortment:
 
-| EverLeaf prefab role | Creator Store asset | ID | Creator / notes |
+| Family | Creator Store asset | ID | Use |
 |---|---|---:|---|
-| `LumenCivicHall` | Inn | `25561936` | @bevillia |
-| `LumenQuartermasterDepot` / `LumenCraftWorkshop` / `LumenForgeYard` | Blacksmith Shop | `125612298` | @pielovingboy |
-| `LumenArchiveLodge` / `LumenCroftCottageA` | Low Poly Medieval House | `4989402992` | @anomon — creator requests credit |
-| `LumenWayfarerInn` | Medieval House | `1819167267` | @VicyX |
-| `LumenHealerLodge` / `LumenCroftCottageB` | Medieval House | `2914202068` | @iiLuxIV |
-| `LumenOpenStable` | Barn | `506010511` | @Q_Q; bundled script is stripped |
-| `LumenProvingLodge` | Medieval House Knight Medieval Fantasy Kingdom | `103444669708339` | @KairoNull; bundled script is stripped |
-| `LumenRoadWayhouse` | Medieval House 1 | `254849325` | @Naperin |
-| `LumenFarmBarn` | barn | `13902499907` | @PBJohns; bundled script is stripped |
-| `LumenGlowmereStiltHouse` | old house | `15413223952` | @use251name |
-| `LumenMossglenRangerHall` | Medieval House | `16421571` | @Drackore |
-| `LumenFrontierGatehouse` | Medieval Entrance | `4455026229` | @Canyski — creator requests credit |
-| `LumenRuinedHall` | Ruins | `49387516` | @Quenty |
-| `LumenGraveboneMausoleum` | Tomb | `1115559295` | @CourageousKyran; bundled scripts are stripped |
-| `LumenSunmossObservatory` / `LumenShatteredFortressTower` | tower medieval | `28483443` | @sourtreemagician |
-| `LumenVeilfallSanctuary` / `LumenStoneShrine` | Shrine | `270668855` | @VocSG; bundled behavior is stripped |
+| Village architecture | Low poly village kit houses props trees RP | `86710303527267` | @SparklyBlockLion2006 — houses, cottages, barns, workshop/service buildings |
+| Landmark/fortification architecture | Castle/Medieval Asset Pack | `12007890134` | @Tridgery — gates, towers, ruins, shrine/fortification landmarks |
 
-Additional approved free Lumenreach dressing sources are `Medieval Market Stalls` (`16263631766`, @Scripted_Kool) and `Medieval Asset Pack` (`74849899553864`, @KickPlayer_80). They are geometry sources only; EverLeaf owns placement, collision, interactions, and gameplay behavior.
+Each EverLeaf logical building role still has its own prefab name, but `StudioEnvironmentAssetService` now extracts **one compact architectural candidate** from the source pack using role tokens and a deterministic variant ordinal. It caches each pack once, refuses to fall back to placing the entire pack if extraction fails, then sends the selected model through the static-visual sanitizer.
+
+The sanitizer removes code, remotes, UI/messages, VFX/lights, joints/constraints, tools/humanoids, invisible helper/collision parts, and giant imported display/base plates. Placement then recenters the visible bounding box horizontally, grounds its visible bottom, and clamps architecture normalization to `0.55x–1.75x` so dirty pivots or odd source units cannot create the giant/tilted/floating buildings shown in the failed Studio pass.
+
+Additional approved free Lumenreach dressing sources remain `Medieval Market Stalls` (`16263631766`, @Scripted_Kool) and `Medieval Asset Pack` (`74849899553864`, @KickPlayer_80); they are visual geometry sources only.
 
 ### Original in-project environment props
 

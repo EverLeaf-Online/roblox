@@ -62,9 +62,22 @@ local function sanitize(instance)
             removed += 1
             descendant:Destroy()
         elseif descendant:IsA("BasePart") then
-            descendant.Anchored = true
-            descendant.CanTouch = false
-            descendant.CanQuery = true
+            local size = descendant.Size
+            local helperPlate = descendant.Transparency >= 0.98
+                or (
+                    not descendant:IsA("MeshPart")
+                    and math.max(size.X, size.Z) >= 180
+                    and size.Y <= 8
+                )
+            if helperPlate then
+                removed += 1
+                descendant:Destroy()
+            else
+                descendant.Anchored = true
+                descendant.CanTouch = false
+                descendant.CanQuery = true
+                descendant.CanCollide = false
+            end
         end
     end
     return removed
@@ -201,14 +214,18 @@ local function normalizeModel(model)
     setCollision(model)
 
     if model:IsA("Model") then
-        -- Never promote an arbitrary imported part to PrimaryPart. Creator Store
-        -- buildings often enumerate a roof, beam, or decoration first; using that
-        -- rotated part as the model pivot was tilting whole buildings when PivotTo
-        -- aligned the prefab in the world. Static environment models use a neutral
-        -- WorldPivot instead.
+        -- Imported PrimaryParts and WorldPivot rotations are not trusted. Creator
+        -- Store packs frequently use a roof/beam/display helper as the pivot, which
+        -- can rotate or offset the entire building during placement.
         model.PrimaryPart = nil
         local sourcePivot = model:GetPivot()
         model:PivotTo(CFrame.new(sourcePivot.Position))
+        local boundsCFrame, boundsSize = model:GetBoundingBox()
+        model:SetAttribute("EverLeafSourceBoundsX", boundsSize.X)
+        model:SetAttribute("EverLeafSourceBoundsY", boundsSize.Y)
+        model:SetAttribute("EverLeafSourceBoundsZ", boundsSize.Z)
+        model:SetAttribute("EverLeafSourceBoundsCenterX", boundsCFrame.Position.X)
+        model:SetAttribute("EverLeafSourceBoundsCenterZ", boundsCFrame.Position.Z)
     end
 
     model:SetAttribute("EverLeafSanitizedEnvironmentAsset", true)
@@ -339,12 +356,21 @@ function EnvironmentPrefabService.Place(prefabName, parent, pivot, scale)
             clone:ScaleTo(scale)
         end)
         clone:PivotTo(pivot)
-        if clone:GetAttribute("GroundToPivot") == true then
-            local boundsCFrame, boundsSize = clone:GetBoundingBox()
-            local bottomY = boundsCFrame.Position.Y - boundsSize.Y * 0.5
-            local verticalOffset = pivot.Position.Y - bottomY
-            clone:PivotTo(CFrame.new(0, verticalOffset, 0) * clone:GetPivot())
-        end
+
+        -- Placement is authored from the visible bounding box, not the imported
+        -- model pivot. This keeps off-center/dirty Store pivots from shifting a
+        -- house into roads or leaving it floating beside its collision proxies.
+        local boundsCFrame, boundsSize = clone:GetBoundingBox()
+        local bottomY = boundsCFrame.Position.Y - boundsSize.Y * 0.5
+        local verticalTarget = if clone:GetAttribute("GroundToPivot") == true
+            then pivot.Position.Y
+            else bottomY
+        local translation = Vector3.new(
+            pivot.Position.X - boundsCFrame.Position.X,
+            verticalTarget - bottomY,
+            pivot.Position.Z - boundsCFrame.Position.Z
+        )
+        clone:PivotTo(CFrame.new(translation) * clone:GetPivot())
     elseif clone:IsA("BasePart") then
         clone.Size *= scale
         clone.CFrame = pivot

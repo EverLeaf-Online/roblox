@@ -433,3 +433,5 @@ The rebuild has moved beyond roadmap classification. Production monster and NPC 
 - 2026-09-16 Brasshaven public-event expansion: added canonical Brasshaven encounter anchors plus three level-gated rotating events (Foundry Scrap Surge, Eastworks Grid Break, Upper Foundry Lockdown). Public-event rotation now skips regions without eligible players, parents event runtime folders to the correct generated world, and can ground enemies against an explicit authored floor collision surface instead of requiring Terrain.
 
 - 2026-09-16 architecture sourcing correction: the generated Blender building kits did not meet the visual bar and are no longer production architecture. The project now uses a curated-free-Creator-Store strategy with sandboxed loading, aggressive behavior stripping, provenance tracking, and player-height Studio acceptance before any individual asset is considered final.
+
+- 2026-09-16 visual QA correction: mixed one-off Creator Store architecture failed player-height review and is retired. Lumenreach now uses two cohesive free packs with deterministic submodel extraction and fail-closed sanitization; Studio screenshots remain the acceptance gate.
