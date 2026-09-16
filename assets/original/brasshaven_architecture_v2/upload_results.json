@@ -1,0 +1,34 @@
+{
+  "BrassBoilerStationV2": {
+    "assetId": 104828075505604,
+    "moderation": "Approved"
+  },
+  "BrassFoundryAdminHallV2": {
+    "assetId": 124973222924746,
+    "moderation": "Approved"
+  },
+  "BrassIndustrialGatehouseV2": {
+    "assetId": 76713540788976,
+    "moderation": "Approved"
+  },
+  "BrassLoadingDepotV2": {
+    "assetId": 80090386975748,
+    "moderation": "Approved"
+  },
+  "BrassMachinistWorkshopV2": {
+    "assetId": 138267838471833,
+    "moderation": "Approved"
+  },
+  "BrassRefineryTowerV2": {
+    "assetId": 83172229593216,
+    "moderation": "Approved"
+  },
+  "BrassSmelterHouseV2": {
+    "assetId": 120967242976120,
+    "moderation": "Approved"
+  },
+  "BrassWorkerBarracksV2": {
+    "assetId": 136478312344800,
+    "moderation": "Approved"
+  }
+}

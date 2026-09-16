@@ -2,12 +2,12 @@ local fs = require("@lune/fs")
 
 local registry = fs.readFile("src/server/Content/EnvironmentAssetRegistry.luau")
 local world = fs.readFile("src/server/Services/BrasshavenWorldService.luau")
-local manifest = fs.readFile("assets/original/brasshaven_architecture/manifest.json")
-local uploads = fs.readFile("assets/original/brasshaven_architecture/upload_results.json")
-local generator = fs.readFile("scripts/generate_brasshaven_architecture.py")
+local manifest = fs.readFile("assets/original/brasshaven_architecture_v2/manifest.json")
+local uploads = fs.readFile("assets/original/brasshaven_architecture_v2/upload_results.json")
+local generator = fs.readFile("scripts/generate_brasshaven_architecture_v2.py")
 
 assert(
-    fs.isFile("assets/original/brasshaven_architecture/brass_palette.png"),
+    fs.isFile("assets/original/brasshaven_architecture_v2/brass_v2_palette.png"),
     "Brasshaven architecture palette is missing"
 )
 assert(
@@ -16,14 +16,14 @@ assert(
 )
 
 local assets = {
-    { "BrassFoundryAdminHall", "85296622746361" },
-    { "BrassMachinistWorkshop", "133204573945623" },
-    { "BrassSmelterHouse", "110764557535204" },
-    { "BrassBoilerStation", "130754611285486" },
-    { "BrassWorkerBarracks", "132013178216030" },
-    { "BrassLoadingDepot", "103716454867226" },
-    { "BrassIndustrialGatehouse", "123786283006636" },
-    { "BrassRefineryTower", "93415297640992" },
+    { "BrassFoundryAdminHall", "124973222924746", "BrassFoundryAdminHallV2" },
+    { "BrassMachinistWorkshop", "138267838471833", "BrassMachinistWorkshopV2" },
+    { "BrassSmelterHouse", "120967242976120", "BrassSmelterHouseV2" },
+    { "BrassBoilerStation", "104828075505604", "BrassBoilerStationV2" },
+    { "BrassWorkerBarracks", "136478312344800", "BrassWorkerBarracksV2" },
+    { "BrassLoadingDepot", "80090386975748", "BrassLoadingDepotV2" },
+    { "BrassIndustrialGatehouse", "76713540788976", "BrassIndustrialGatehouseV2" },
+    { "BrassRefineryTower", "83172229593216", "BrassRefineryTowerV2" },
 }
 for _, spec in assets do
     local name = spec[1]
@@ -33,7 +33,8 @@ for _, spec in assets do
         string.find(registry, "AssetId = " .. assetId, 1, true),
         "wrong/missing asset ID for " .. name
     )
-    assert(string.find(manifest, '"' .. name .. '"', 1, true), "manifest missing " .. name)
+    local manifestName = spec[3] or name
+    assert(string.find(manifest, '"' .. manifestName .. '"', 1, true), "manifest missing " .. name)
     assert(
         string.find(uploads, '"assetId": ' .. assetId, 1, true),
         "upload results missing " .. name

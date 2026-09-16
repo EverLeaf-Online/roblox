@@ -1832,7 +1832,7 @@ function BrasshavenWorldService.Init()
 
     local world = Instance.new("Model")
     world.Name = GENERATED_NAME
-    world:SetAttribute("WorldDesignVersion", 3)
+    world:SetAttribute("WorldDesignVersion", 4)
     world:SetAttribute("MMOBuildingLayoutPass", true)
     world.Parent = Workspace
 

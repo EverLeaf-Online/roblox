@@ -10,7 +10,7 @@ TARGETS = {
     "architecture": [
         ROOT / "assets/original/lumenreach_hero_architecture_v2",
         ROOT / "assets/original/lumenreach_district_architecture_v2",
-        ROOT / "assets/original/brasshaven_architecture",
+        ROOT / "assets/original/brasshaven_architecture_v2",
     ],
     "creature": [ROOT / "assets/original/starter_monsters"],
     "npc": [ROOT / "assets/original/lumenreach_hero_npcs"],

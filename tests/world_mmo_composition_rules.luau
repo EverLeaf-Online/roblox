@@ -48,7 +48,7 @@ assert(
     "Brasshaven actual industrial building layout pass must be wired"
 )
 assert(
-    string.find(brass, 'world:SetAttribute("WorldDesignVersion", 3)', 1, true)
+    string.find(brass, 'world:SetAttribute("WorldDesignVersion", 4)', 1, true)
         and string.find(brass, 'world:SetAttribute("MMOBuildingLayoutPass", true)', 1, true),
     "Brasshaven generated world must advertise the real building-layout pass"
 )

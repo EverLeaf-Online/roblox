@@ -79,13 +79,13 @@ These are original EverLeaf-authored stylized low-poly industrial MeshParts gene
 
 | Prefab | Roblox asset ID | Purpose |
 |---|---:|---|
-| `BrassFoundryAdminHall` | `85296622746361` | civic/foundry administration |
-| `BrassMachinistWorkshop` | `133204573945623` | machine/workshop block |
-| `BrassSmelterHouse` | `110764557535204` | smelter/furnace building |
-| `BrassBoilerStation` | `130754611285486` | boiler/maintenance station |
-| `BrassWorkerBarracks` | `132013178216030` | worker housing/shift block |
-| `BrassLoadingDepot` | `103716454867226` | freight/loading depot |
-| `BrassIndustrialGatehouse` | `123786283006636` | industrial gate/control block |
-| `BrassRefineryTower` | `93415297640992` | refinery/power landmark |
+| `BrassFoundryAdminHall` | `124973222924746` | civic/foundry administration |
+| `BrassMachinistWorkshop` | `138267838471833` | machine/workshop block |
+| `BrassSmelterHouse` | `120967242976120` | smelter/furnace building |
+| `BrassBoilerStation` | `104828075505604` | boiler/maintenance station |
+| `BrassWorkerBarracks` | `136478312344800` | worker housing/shift block |
+| `BrassLoadingDepot` | `80090386975748` | freight/loading depot |
+| `BrassIndustrialGatehouse` | `76713540788976` | industrial gate/control block |
+| `BrassRefineryTower` | `83172229593216` | refinery/power landmark |
 
 All eight returned Roblox moderation state `Approved` on upload. Source GLBs, palette, manifest and upload results are under `assets/original/brasshaven_architecture/`; canonical IDs are in `assets/roblox/brasshaven_architecture_asset_ids.json`.
