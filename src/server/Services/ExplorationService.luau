@@ -3,7 +3,7 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
 local PlayerDataService = require(script.Parent.PlayerDataService)
-local QuestService = require(script.Parent.QuestService)
+local QuestObjectiveService = require(script.Parent.QuestObjectiveService)
 
 local ExplorationService = {}
 local triggers = {}
@@ -51,7 +51,7 @@ local function processTrigger(player, trigger)
         local profile = PlayerDataService.Get(player)
         if profile then
             local landmarkId = trigger:GetAttribute("LandmarkId")
-            local changed = QuestService.Record(profile, "Explore", landmarkId, 1)
+            local changed = QuestObjectiveService.Record(profile, "Explore", landmarkId, 1)
             if changed then
                 PlayerDataService.NotifyChanged(player)
             end

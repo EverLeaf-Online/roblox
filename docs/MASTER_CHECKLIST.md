@@ -1,3 +1,4 @@
+- [x] Whole-game foundation rebuild: asset-first monster/NPC visual contracts, extensible quest objective bus, and source backup cleanup are now enforced by regression tests. Legacy procedural creatures/R15 styling remain fallback until reviewed authored models replace them.
 # EverLeaf Roblox — Master Checklist
 
 **Canonical status:** 2026-09-15

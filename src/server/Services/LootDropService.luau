@@ -6,7 +6,7 @@ local DropTableDefinitions = require(script.Parent.Parent.Content.DropTableDefin
 local ItemDefinitions = require(script.Parent.Parent.Content.ItemDefinitions)
 local InventoryService = require(script.Parent.InventoryService)
 local PlayerDataService = require(script.Parent.PlayerDataService)
-local QuestService = require(script.Parent.QuestService)
+local QuestObjectiveService = require(script.Parent.QuestObjectiveService)
 
 local LootDropService = {}
 local rng = Random.new()
@@ -125,7 +125,7 @@ local function makeDrop(itemId, quantity, position, ownerPlayer)
 
         claimed = true
         prompt.Enabled = false
-        QuestService.Record(profile, "Collect", itemId, quantity)
+        QuestObjectiveService.Record(profile, "Collect", itemId, quantity)
         PlayerDataService.NotifyChanged(player)
         TweenService:Create(
             orb,

@@ -391,3 +391,7 @@ A system can be **source-complete** without being **game-complete**. Production-
 - release → deploy/rollback exercise.
 
 No future checklist item should use plain “complete” when only source implementation has been verified.
+
+## Rebuild execution update — 2026-09-16
+
+The rebuild has moved beyond roadmap classification. Production monster and NPC factories now prefer explicitly reviewed authored templates and tag procedural/generated models as fallback-only. Quest progress is routed through a common objective bus supporting Defeat, Collect, Explore, Interact, Craft, Use, Reach, Escort, and Survive. Source-tree iterative `.bak` snapshots were removed and ignored so the repository reflects production source rather than editing debris. The next visual milestone is replacing fallback monster/NPC visuals with reviewed original assets and continuing district/hero-architecture replacement under player-height Studio QA.

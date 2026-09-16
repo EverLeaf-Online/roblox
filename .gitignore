@@ -17,3 +17,4 @@ __pycache__/
 
 # Generated from production GLBs by extract_environment_surface_maps.py.
 assets/polyhaven/surface_maps/
+src/**/*.bak.*

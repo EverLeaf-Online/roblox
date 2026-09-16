@@ -1,8 +1,10 @@
 local Players = game:GetService("Players")
+local ServerStorage = game:GetService("ServerStorage")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
 local StylizedNpcFactory = {}
+local NpcAssetRegistry = require(script.Parent.Parent.Content.NpcAssetRegistry)
 local NpcGroundingRules = require(script.Parent.NpcGroundingRules)
 
 local R15_IDLE_ANIMATION = "rbxassetid://507766666"
@@ -660,7 +662,43 @@ local function groundModel(model, requestedPosition, yaw, groundMode)
     return true
 end
 
+local function cloneAuthoredNpc(spec)
+    local npcId = spec.NpcId
+    local assetSpec = npcId and NpcAssetRegistry[npcId]
+    if not assetSpec or assetSpec.Status ~= "reviewed" then
+        return nil
+    end
+    local folder = ServerStorage:FindFirstChild("AuthoredNpcTemplates")
+    if not folder then
+        return nil
+    end
+    local source = folder:FindFirstChild(assetSpec.TemplateName or npcId)
+    if not source or not source:IsA("Model") then
+        return nil
+    end
+    local model = source:Clone()
+    local humanoid = model:FindFirstChildOfClass("Humanoid")
+    local root = model:FindFirstChild("HumanoidRootPart")
+    local head = model:FindFirstChild("Head")
+    if not humanoid or not root or not head then
+        model:Destroy()
+        return nil
+    end
+    model.Name = spec.Name or npcId or source.Name
+    model:SetAttribute("VisualSource", "authored")
+    return model, root, head
+end
+
 function StylizedNpcFactory.Create(parent, spec)
+    local authored, authoredRoot, authoredHead = cloneAuthoredNpc(spec)
+    if authored then
+        authored.Parent = parent
+        groundModel(authored, spec.Position, spec.Yaw or 0, spec.GroundMode)
+        startIdleAnimation(authored)
+        authored.PrimaryPart = authoredRoot
+        return authored, authoredRoot, authoredHead
+    end
+
     local palette = spec.Palette or {}
     palette.Cloth = palette.Cloth or Color3.fromRGB(63, 91, 77)
     palette.Accent = palette.Accent or Color3.fromRGB(103, 152, 119)
@@ -688,6 +726,7 @@ function StylizedNpcFactory.Create(parent, spec)
     end
 
     local model = modelOrError
+    model:SetAttribute("VisualSource", "generated_r15_fallback")
     model.Name = spec.Name or spec.NpcId or "EverLeafNpc"
     model.Parent = parent
     local root, head = configureRig(model)

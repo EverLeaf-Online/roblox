@@ -1,3 +1,4 @@
+- Whole-game foundation rebuild: introduced asset-first production visual pipelines for monsters and NPCs (reviewed authored models preferred, procedural/generated visuals explicitly fallback-only), centralized quest objective progress through an extensible objective bus, and removed source-tree backup artifacts so production code is no longer mixed with iterative snapshots.
 # EverLeaf Roblox Roadmap
 
 **Canonical status:** 2026-09-15

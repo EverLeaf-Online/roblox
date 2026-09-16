@@ -11,7 +11,7 @@ local LootDropService = require(script.Parent.LootDropService)
 local MonsterCombat = require(script.Parent.MonsterCombat)
 local MonsterThreatService = require(script.Parent.MonsterThreatService)
 local PlayerDataService = require(script.Parent.PlayerDataService)
-local QuestService = require(script.Parent.QuestService)
+local QuestObjectiveService = require(script.Parent.QuestObjectiveService)
 local RewardService = require(script.Parent.RewardService)
 
 local EnemyService = {}
@@ -114,7 +114,7 @@ function EnemyService.Register(enemy, enemyId, onDeath)
                     local rewarded = RewardService.Grant(profile, rewardShare)
                     changed = rewarded or changed
                 end
-                local questChanged = QuestService.Record(profile, "Defeat", enemyId, 1)
+                local questChanged = QuestObjectiveService.Record(profile, "Defeat", enemyId, 1)
                 changed = questChanged or changed
                 local achievementChanged =
                     AchievementService.UnlockAndAward(recipient, profile, "first_victory")

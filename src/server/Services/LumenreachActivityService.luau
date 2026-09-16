@@ -6,7 +6,7 @@ local ItemDefinitions = require(script.Parent.Parent.Content.ItemDefinitions)
 local PlayerDataService = require(script.Parent.PlayerDataService)
 local ProfileTransaction =
     require(game:GetService("ReplicatedStorage").Shared.Logic.ProfileTransaction)
-local QuestService = require(script.Parent.QuestService)
+local QuestObjectiveService = require(script.Parent.QuestObjectiveService)
 local ResourceService = require(script.Parent.ResourceService)
 local RewardService = require(script.Parent.RewardService)
 local WorldNoticeService = require(script.Parent.WorldNoticeService)
@@ -71,7 +71,7 @@ local function gather(player, spec)
     if not ok then
         return false, reason
     end
-    QuestService.Record(profile, "Collect", spec.ItemId, spec.Quantity or 1)
+    QuestObjectiveService.Record(profile, "Collect", spec.ItemId, spec.Quantity or 1)
     PlayerDataService.NotifyChanged(player)
     local item = ItemDefinitions[spec.ItemId]
     notice(

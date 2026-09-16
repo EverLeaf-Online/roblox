@@ -45,7 +45,7 @@ assert(
     "one-time caches must be transactional and persistent"
 )
 assert(
-    string.find(activity, 'QuestService.Record(profile, "Collect"', 1, true) ~= nil,
+    string.find(activity, 'QuestObjectiveService.Record(profile, "Collect"', 1, true) ~= nil,
     "gathering must progress Collect quest objectives"
 )
 assert(

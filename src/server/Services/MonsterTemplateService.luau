@@ -1,5 +1,6 @@
 local ServerStorage = game:GetService("ServerStorage")
 
+local MonsterAssetRegistry = require(script.Parent.Parent.Content.MonsterAssetRegistry)
 local MonsterConfig = require(script.Parent.Parent.Content.MonsterConfig)
 
 local MonsterTemplateService = {}
@@ -2033,8 +2034,24 @@ function MonsterTemplateService.Init()
     folder.Name = "Monsters"
     folder.Parent = ServerStorage
 
+    local authoredFolder = ServerStorage:FindFirstChild("AuthoredMonsterTemplates")
     for monsterId, builder in builders do
-        local model = builder()
+        local definition = MonsterConfig.Get(monsterId)
+        local assetSpec = MonsterAssetRegistry[monsterId]
+        local authored = nil
+        if authoredFolder and definition and assetSpec and assetSpec.Status == "reviewed" then
+            authored =
+                authoredFolder:FindFirstChild(assetSpec.TemplateName or definition.TemplateName)
+        end
+
+        local model
+        if authored and authored:IsA("Model") and authored:FindFirstChildOfClass("Humanoid") then
+            model = authored:Clone()
+            model:SetAttribute("VisualSource", "authored")
+        else
+            model = builder()
+            model:SetAttribute("VisualSource", "legacy_procedural_fallback")
+        end
         model:SetAttribute("MonsterId", monsterId)
         model.Parent = folder
     end
