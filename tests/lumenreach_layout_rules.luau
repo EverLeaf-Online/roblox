@@ -6,7 +6,7 @@ for _, required in
     {
         "local WORLD_WIDTH = 2200",
         "local WORLD_DEPTH = 1250",
-        "local WORLD_DESIGN_VERSION = 22",
+        "local WORLD_DESIGN_VERSION = 23",
         'world:SetAttribute("WorldDesignVersion", WORLD_DESIGN_VERSION)',
         'world:SetAttribute("TerrainFirstMMOLayout", true)',
         "terrain:Clear()",
@@ -500,7 +500,7 @@ assert(
         and string.find(source, "local function makeRoadWayhouse", 1, true) ~= nil
         and string.find(source, "local function makeFarmBarn", 1, true) ~= nil
         and string.find(source, "local function makeCroftCottage", 1, true) ~= nil,
-    "V22 must preserve explicit frontier architecture archetypes while moving major buildings to authored MeshParts"
+    "V23 must preserve explicit frontier architecture archetypes while moving major buildings to authored MeshParts"
 )
 
 local genericBuildingCallCount = 0
@@ -532,7 +532,7 @@ for _, namedBuilding in
 do
     assert(
         string.find(source, namedBuilding, 1, true) ~= nil,
-        "missing V22 architecture conversion: " .. namedBuilding
+        "missing V23 architecture conversion: " .. namedBuilding
     )
 end
 
@@ -550,7 +550,7 @@ for _, token in
 do
     assert(
         string.find(source, token, 1, true) ~= nil,
-        "missing V22 Wayfarer MMO-hub content: " .. token
+        "missing V23 Wayfarer MMO-hub content: " .. token
     )
 end
 
@@ -572,13 +572,13 @@ for _, token in
 do
     assert(
         string.find(source, token, 1, true) ~= nil,
-        "missing V22 whole-map building layout: " .. token
+        "missing V23 whole-map building layout: " .. token
     )
 end
 assert(
     string.find(source, "local function makeWorldMMOComposition", 1, true) == nil
         and string.find(source, "makeWorldMMOComposition(parent)", 1, true) == nil,
-    "V22 must remove the V21 clutter-overlay court pass instead of stacking it on the real settlements"
+    "V23 must remove the V21 clutter-overlay court pass instead of stacking it on the real settlements"
 )
 
 print("Lumenreach terrain-first MMO redesign rules tests passed")

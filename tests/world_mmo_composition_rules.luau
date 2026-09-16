@@ -4,8 +4,8 @@ local lumen = fs.readFile("src/server/Services/LumenreachWorldService.luau")
 local brass = fs.readFile("src/server/Services/BrasshavenWorldService.luau")
 
 assert(
-    string.find(lumen, "local WORLD_DESIGN_VERSION = 22", 1, true),
-    "Lumenreach building-layout pass must be V22"
+    string.find(lumen, "local WORLD_DESIGN_VERSION = 23", 1, true),
+    "Lumenreach building-layout pass must be V23"
 )
 assert(
     string.find(lumen, "local function makeWorldMMOComposition", 1, true) == nil,

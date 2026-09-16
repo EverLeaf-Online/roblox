@@ -16,7 +16,7 @@ local LumenreachWorldService = {}
 local GENERATED_NAME = "EverLeafGeneratedWorld"
 local WORLD_WIDTH = 2200
 local WORLD_DEPTH = 1250
-local WORLD_DESIGN_VERSION = 22
+local WORLD_DESIGN_VERSION = 23
 
 -- Lumenreach is authored as a terrain-first MMORPG region. The generator below
 -- replaces the previous showcase composition completely: terrain is cleared,
@@ -510,17 +510,36 @@ end
 
 local function carveGorge(points)
     local terrain = Workspace.Terrain
+    local samplesBySegment = {}
+
+    -- Carve and line the gorge first. Water used to be written inside this same
+    -- loop, so the next overlapping rock sample overwrote most of the previous
+    -- water sphere. From above that produced a dry boulder trench.
     for index = 1, #points - 1 do
         local a = points[index]
         local b = points[index + 1]
         local length = (b - a).Magnitude
-        local samples = math.max(2, math.ceil(length / 26))
+        local samples = math.max(2, math.ceil(length / 18))
+        samplesBySegment[index] = samples
         for step = 0, samples do
             local alpha = step / samples
             local point = a:Lerp(b, alpha)
             terrain:FillBall(point + Vector3.new(0, 9, 0), 43, Enum.Material.Air)
             terrain:FillBall(point + Vector3.new(0, -18, 0), 28, Enum.Material.Rock)
-            terrain:FillBall(point + Vector3.new(0, -8, 0), 15, Enum.Material.Water)
+        end
+    end
+
+    -- Cut one continuous inner channel after every rock operation has finished,
+    -- then fill water as the final material pass so nothing can overwrite it.
+    for index = 1, #points - 1 do
+        local a = points[index]
+        local b = points[index + 1]
+        local samples = samplesBySegment[index]
+        for step = 0, samples do
+            local alpha = step / samples
+            local point = a:Lerp(b, alpha)
+            terrain:FillBall(point + Vector3.new(0, -4, 0), 19, Enum.Material.Air)
+            terrain:FillBall(point + Vector3.new(0, -8, 0), 16, Enum.Material.Water)
         end
     end
 end

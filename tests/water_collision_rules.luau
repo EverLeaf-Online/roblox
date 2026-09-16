@@ -49,4 +49,20 @@ assert(
     "current movement code must not disable or override Roblox swimming state"
 )
 
+local lumen = fs.readFile("src/server/Services/LumenreachWorldService.luau")
+local gorgeStart = assert(string.find(lumen, "local function carveGorge", 1, true))
+local gorgeEnd = assert(string.find(lumen, "\nlocal function ", gorgeStart + 1, true))
+local gorge = string.sub(lumen, gorgeStart, gorgeEnd - 1)
+local rockAt = assert(string.find(gorge, "Enum.Material.Rock", 1, true))
+local waterAt = assert(string.find(gorge, "Enum.Material.Water", 1, true))
+assert(rockAt < waterAt, "gorge rock lining must be completed before the final water pass")
+assert(
+    string.find(gorge, "samplesBySegment", 1, true) ~= nil,
+    "gorge must retain samples for a separate final water pass"
+)
+assert(
+    string.find(gorge, "Vector3.new(0, -4, 0), 19, Enum.Material.Air", 1, true) ~= nil,
+    "gorge must recut a continuous inner channel before refilling water"
+)
+
 print("water collision rules tests passed")
