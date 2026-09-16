@@ -202,6 +202,7 @@ Status: ACTIVE — current generic/box architecture is temporary until replaced 
 - [x] V16: switched the first eight major Lumenreach archetypes from visible Part-built shells to original EverLeaf GLB/MeshPart assets produced in Blender and uploaded as approved Roblox model assets.
 - [x] V16: major MeshPart architecture uses render-only imported geometry plus explicit simplified server collision proxies.
 - [x] V16: added a reproducible original-asset generator and committed source GLBs/upload manifests so architecture is not dependent on generic Marketplace packs.
+- [x] V17: converted district-scale wayhouses, barns, crofts (2 silhouettes), Glowmere stilt houses, Mossglen ranger halls, frontier gatehouses, and ruined halls to original approved MeshPart assets with separate collision proxies.
 - [x] Introduce explicit Lumenreach archetype builders instead of direct generic `makeBuilding` use for named structures.
 - [ ] Introduce explicit Brasshaven industrial building builders.
 - [x] Add tests that reject new named service buildings built only through the generic box builder.

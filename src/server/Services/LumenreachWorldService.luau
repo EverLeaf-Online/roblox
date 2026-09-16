@@ -16,7 +16,7 @@ local LumenreachWorldService = {}
 local GENERATED_NAME = "EverLeafGeneratedWorld"
 local WORLD_WIDTH = 2200
 local WORLD_DEPTH = 1250
-local WORLD_DESIGN_VERSION = 16
+local WORLD_DESIGN_VERSION = 17
 
 -- Lumenreach is authored as a terrain-first MMORPG region. The generator below
 -- replaces the previous showcase composition completely: terrain is cleared,
@@ -855,6 +855,60 @@ local function placeDressingPrefab(parent, prefabName, position, yaw, targetLong
         end
     end
     return placed
+end
+
+local function placeArchitecturePrefabBuilding(
+    parent,
+    name,
+    prefabName,
+    position,
+    yaw,
+    targetLongest,
+    collisionSpecs
+)
+    local ground = terrainSurfacePosition(position, 0)
+    local wrapper = Instance.new("Model")
+    wrapper.Name = name
+    wrapper:SetAttribute("EverLeafArchitecture", true)
+    wrapper:SetAttribute("ArchitecturePrefab", prefabName)
+    wrapper.Parent = parent
+
+    local prefab = EnvironmentPrefabService.Get(prefabName)
+    if not prefab then
+        wrapper:SetAttribute("ArchitecturePrefabMissing", true)
+        warn(
+            string.format(
+                "[LumenreachWorldService] Missing architecture prefab %s for %s",
+                prefabName,
+                name
+            )
+        )
+        return wrapper
+    end
+
+    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+    local visual = EnvironmentPrefabService.Place(
+        prefabName,
+        wrapper,
+        base,
+        prefabScaleForLongest(prefabName, targetLongest)
+    )
+    if not visual then
+        wrapper:SetAttribute("ArchitecturePrefabMissing", true)
+        return wrapper
+    end
+    visual.Name = "ArchitectureVisual"
+    setRenderOnly(visual)
+
+    for index, spec in collisionSpecs do
+        makeCollisionProxy(
+            wrapper,
+            "ArchitectureCollision" .. index,
+            spec.Size,
+            base * CFrame.new(spec.Offset)
+        )
+    end
+    return wrapper
 end
 
 local function makeFernDressing(parent, position, yaw, scale)
@@ -1843,93 +1897,35 @@ local function makeStoneShrine(parent, name, position, yaw, accent)
 end
 
 local function makeRuinedHall(parent, name, center, width, depth, yaw)
-    local ground = terrainSurfacePosition(center, 0)
-    local model = Instance.new("Model")
-    model.Name = name
-    model.Parent = parent
-    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
-    local stone = Color3.fromRGB(72, 80, 78)
-    makePart(
-        model,
-        "RuinFloor",
-        Vector3.new(width, 0.8, depth),
-        base * CFrame.new(0, 0.4, 0),
-        Enum.Material.Slate,
-        stone
-    )
-    makeRuinWall(model, center + (base.RightVector * (-width * 0.44)), yaw + math.rad(90), depth, 8)
-    makeRuinWall(
-        model,
-        center + (base.RightVector * (width * 0.44)),
-        yaw + math.rad(90),
-        depth * 0.72,
-        7
-    )
-    makeRuinWall(model, center + (base.LookVector * (depth * 0.44)), yaw, width * 0.8, 9)
-    makeCollisionProxy(
-        model,
-        "RuinFloorCollision",
-        Vector3.new(width, 0.9, depth),
-        base * CFrame.new(0, 0.45, 0)
-    )
-    for _, offset in
-        { Vector3.new(-width * 0.28, 0, -depth * 0.2), Vector3.new(width * 0.23, 0, depth * 0.14) }
-    do
-        local pillarGround = terrainSurfacePosition(center + base:VectorToWorldSpace(offset), 0)
-        makePart(
-            model,
-            "BrokenPillar",
-            Vector3.new(3, 8, 3),
-            CFrame.new(pillarGround + Vector3.new(0, 4, 0)),
-            Enum.Material.Slate,
-            stone
-        )
-        makeCollisionProxy(
-            model,
-            "BrokenPillarCollision",
-            Vector3.new(3.2, 8, 3.2),
-            CFrame.new(pillarGround + Vector3.new(0, 4, 0))
-        )
-    end
-    return model
+    local longest = math.max(width or 30, depth or 22) + 4
+    return placeArchitecturePrefabBuilding(parent, name, "LumenRuinedHall", center, yaw, longest, {
+        { Size = Vector3.new(width or 30, 1.2, depth or 22), Offset = Vector3.new(0, 0.6, 0) },
+        {
+            Size = Vector3.new((width or 30) * 0.72, 9, 2),
+            Offset = Vector3.new(-2, 4.5, (depth or 22) * 0.43),
+        },
+        {
+            Size = Vector3.new(2, 8, (depth or 22) * 0.68),
+            Offset = Vector3.new(-(width or 30) * 0.46, 4, 2),
+        },
+    })
 end
 
 local function makeGatehouse(parent, name, position, yaw, width)
-    local ground = terrainSurfacePosition(position, 0)
-    local model = Instance.new("Model")
-    model.Name = name
-    model.Parent = parent
-    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
-    width = width or 28
-    local stone = Color3.fromRGB(73, 82, 79)
-    for _, side in { -1, 1 } do
-        makePart(
-            model,
-            "GateTower",
-            Vector3.new(8, 17, 10),
-            base * CFrame.new(side * width * 0.5, 8.5, 0),
-            Enum.Material.Slate,
-            stone
-        )
-    end
-    local beam = makePart(
-        model,
-        "GateLintel",
-        Vector3.new(width - 8, 4, 8),
-        base * CFrame.new(0, 15, 0),
-        Enum.Material.Slate,
-        Color3.fromRGB(62, 72, 69)
+    width = width or 30
+    return placeArchitecturePrefabBuilding(
+        parent,
+        name,
+        "LumenFrontierGatehouse",
+        position,
+        yaw,
+        width + 16,
+        {
+            { Size = Vector3.new(9, 18, 11), Offset = Vector3.new(-width * 0.5, 9, 0) },
+            { Size = Vector3.new(9, 18, 11), Offset = Vector3.new(width * 0.5, 9, 0) },
+            { Size = Vector3.new(math.max(8, width - 9), 4, 8), Offset = Vector3.new(0, 15, 0) },
+        }
     )
-    beam.CanCollide = false
-    for _, side in { -1, 1 } do
-        makeCollisionProxy(
-            model,
-            "GateTowerCollision",
-            Vector3.new(8.2, 17, 10.2),
-            base * CFrame.new(side * width * 0.5, 8.5, 0)
-        )
-    end
-    return model
 end
 
 local SIGNATURE = table.freeze({
@@ -2421,119 +2417,23 @@ local function makeTrainingGround(parent, name, position, yaw)
     return model
 end
 
-local function makeGlowmereStiltHouse(parent, name, position, yaw, accent)
-    local ground = terrainSurfacePosition(position, 0)
-    local model = Instance.new("Model")
-    model.Name = name
-    model.Parent = parent
-    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
-    local floorY = 5.6
-    for _, x in { -6.5, 6.5 } do
-        for _, z in { -5.0, 5.0 } do
-            local stilt = makePart(
-                model,
-                "Stilt",
-                Vector3.new(0.9, 8.0, 0.9),
-                base * CFrame.new(x, 4.0, z),
-                Enum.Material.Wood,
-                SIGNATURE.Timber
-            )
-            stilt.CanCollide = false
-        end
-    end
-    makePart(
-        model,
-        "StiltFloor",
-        Vector3.new(15.5, 0.8, 12.5),
-        base * CFrame.new(0, floorY, 0),
-        Enum.Material.WoodPlanks,
-        SIGNATURE.TimberLight
+local function makeGlowmereStiltHouse(parent, name, position, yaw, _accent)
+    return placeArchitecturePrefabBuilding(
+        parent,
+        name,
+        "LumenGlowmereStiltHouse",
+        position,
+        yaw,
+        36,
+        {
+            { Size = Vector3.new(15, 1, 12), Offset = Vector3.new(0, 5.8, 0) },
+            { Size = Vector3.new(1, 8, 1), Offset = Vector3.new(-6.5, 4, -5) },
+            { Size = Vector3.new(1, 8, 1), Offset = Vector3.new(6.5, 4, -5) },
+            { Size = Vector3.new(1, 8, 1), Offset = Vector3.new(-6.5, 4, 5) },
+            { Size = Vector3.new(1, 8, 1), Offset = Vector3.new(6.5, 4, 5) },
+            { Size = Vector3.new(10, 1, 5.5), Offset = Vector3.new(0, 5.8, -8.3) },
+        }
     )
-    makePart(
-        model,
-        "StiltBackWall",
-        Vector3.new(15.5, 7.0, 0.8),
-        base * CFrame.new(0, floorY + 3.5, 5.8),
-        Enum.Material.WoodPlanks,
-        Color3.fromRGB(86, 112, 92)
-    )
-    for _, x in { -7.0, 7.0 } do
-        makePart(
-            model,
-            "StiltSideWall",
-            Vector3.new(0.8, 7.0, 12.0),
-            base * CFrame.new(x, floorY + 3.5, 0),
-            Enum.Material.WoodPlanks,
-            Color3.fromRGB(86, 112, 92)
-        )
-    end
-    for _, side in { -1, 1 } do
-        local roof = makePart(
-            model,
-            "StiltRoof",
-            Vector3.new(9.0, 0.65, 14.5),
-            base
-                * CFrame.new(side * 3.9, floorY + 8.7, 0)
-                * CFrame.Angles(0, 0, math.rad(-side * 20)),
-            Enum.Material.WoodPlanks,
-            Color3.fromRGB(44, 67, 59)
-        )
-        roof.CanCollide = false
-        makePartSurfaceCollisionProxy(model, roof, "StiltRoofCollision", Vector3.new(0.1, 0.1, 0.1))
-    end
-    local porch = makePart(
-        model,
-        "StiltPorch",
-        Vector3.new(10, 0.7, 5.5),
-        base * CFrame.new(0, floorY, -8.3),
-        Enum.Material.WoodPlanks,
-        SIGNATURE.TimberLight
-    )
-    porch.CanCollide = false
-    makeSignatureCrystal(
-        model,
-        "WetlandLantern",
-        base * CFrame.new(0, floorY + 0.4, -10.1),
-        2.2,
-        accent or Color3.fromRGB(112, 226, 211)
-    )
-    for _, x in { -6.5, 6.5 } do
-        for _, z in { -5.0, 5.0 } do
-            makeCollisionProxy(
-                model,
-                "StiltCollision",
-                Vector3.new(1.15, 8.0, 1.15),
-                base * CFrame.new(x, 4.0, z)
-            )
-        end
-    end
-    makeCollisionProxy(
-        model,
-        "StiltFloorCollision",
-        Vector3.new(15.5, 0.9, 12.5),
-        base * CFrame.new(0, floorY, 0)
-    )
-    makeCollisionProxy(
-        model,
-        "StiltBackWallCollision",
-        Vector3.new(15.5, 7.0, 1.0),
-        base * CFrame.new(0, floorY + 3.5, 5.8)
-    )
-    for _, x in { -7.0, 7.0 } do
-        makeCollisionProxy(
-            model,
-            "StiltSideWallCollision",
-            Vector3.new(1.0, 7.0, 12.0),
-            base * CFrame.new(x, floorY + 3.5, 0)
-        )
-    end
-    makeCollisionProxy(
-        model,
-        "StiltPorchCollision",
-        Vector3.new(10, 0.8, 5.5),
-        base * CFrame.new(0, floorY, -8.3)
-    )
-    return model
 end
 
 local function makeReedDock(parent, name, position, yaw, length)
@@ -2662,140 +2562,18 @@ local function makeGraveboneMausoleum(parent, name, position, yaw)
 end
 
 local function makeMossglenRangerHall(parent, name, position, yaw)
-    local ground = terrainSurfacePosition(position, 0)
-    local model = Instance.new("Model")
-    model.Name = name
-    model.Parent = parent
-    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
-    local wall = Color3.fromRGB(73, 108, 78)
-    local stone = Color3.fromRGB(72, 78, 68)
-
-    makePart(
-        model,
-        "RangerFoundation",
-        Vector3.new(36, 3, 26),
-        base * CFrame.new(0, -0.7, 0),
-        Enum.Material.Slate,
-        stone
-    )
-    makeCollisionProxy(
-        model,
-        "RangerFoundationCollision",
-        Vector3.new(35, 3, 25),
-        base * CFrame.new(0, -0.7, 0)
-    )
-
-    for _, spec in
+    return placeArchitecturePrefabBuilding(
+        parent,
+        name,
+        "LumenMossglenRangerHall",
+        position,
+        yaw,
+        52,
         {
-            { "RangerBack", Vector3.new(34, 9, 1), Vector3.new(0, 5.3, 12) },
-            { "RangerLeft", Vector3.new(1, 9, 24), Vector3.new(-17, 5.3, 0) },
-            { "RangerRight", Vector3.new(1, 9, 24), Vector3.new(17, 5.3, 0) },
-            { "RangerFrontLeft", Vector3.new(11, 9, 1), Vector3.new(-11.5, 5.3, -12) },
-            { "RangerFrontRight", Vector3.new(11, 9, 1), Vector3.new(11.5, 5.3, -12) },
+            { Size = Vector3.new(34, 10, 22), Offset = Vector3.new(0, 5, 0) },
+            { Size = Vector3.new(9, 8, 9), Offset = Vector3.new(21, 4, 2) },
         }
-    do
-        makePart(
-            model,
-            spec[1],
-            spec[2],
-            base * CFrame.new(spec[3]),
-            Enum.Material.WoodPlanks,
-            wall
-        )
-        makeCollisionProxy(
-            model,
-            spec[1] .. "Collision",
-            spec[2] + Vector3.new(0.08, 0, 0.08),
-            base * CFrame.new(spec[3])
-        )
-    end
-
-    local pitch = math.rad(31)
-    local halfRun = 18
-    local slopeLength = halfRun / math.cos(pitch)
-    local rise = halfRun * math.tan(pitch)
-    for _, side in { -1, 1 } do
-        local roof = makePart(
-            model,
-            "RangerRoof",
-            Vector3.new(slopeLength + 0.15, 0.65, 26),
-            base
-                * CFrame.new(side * halfRun * 0.5, 9.8 + rise * 0.5, 0)
-                * CFrame.Angles(0, 0, -side * pitch),
-            Enum.Material.WoodPlanks,
-            Color3.fromRGB(43, 64, 50)
-        )
-        roof.CanCollide = false
-        local solidHalfRun = 16.7
-        local solidSlopeLength = solidHalfRun / math.cos(pitch)
-        local solidRise = solidHalfRun * math.tan(pitch)
-        makeCollisionProxy(
-            model,
-            "RangerRoofCollision",
-            Vector3.new(solidSlopeLength, 0.58, 23.6),
-            base
-                * CFrame.new(side * solidHalfRun * 0.5, 9.8 + solidRise * 0.5 - 0.16, 0)
-                * CFrame.Angles(0, 0, -side * pitch)
-        )
-    end
-
-    local porch = makePart(
-        model,
-        "RangerPorch",
-        Vector3.new(28, 0.7, 8),
-        base * CFrame.new(0, 0.8, -16),
-        Enum.Material.WoodPlanks,
-        SIGNATURE.TimberLight
     )
-    porch.CanCollide = false
-    makeCollisionProxy(model, "RangerPorchCollision", Vector3.new(28, 0.8, 8), porch.CFrame)
-    for _, x in { -10, 0, 10 } do
-        makePart(
-            model,
-            "RangerRack",
-            Vector3.new(0.6, 6.0, 0.6),
-            base * CFrame.new(x, 3.0, -19),
-            Enum.Material.Wood,
-            SIGNATURE.Timber
-        )
-        local bow = makePart(
-            model,
-            "RangerBow",
-            Vector3.new(0.28, 4.8, 0.28),
-            base * CFrame.new(x + 0.6, 3.3, -19.4) * CFrame.Angles(0, 0, math.rad(18)),
-            Enum.Material.Wood,
-            Color3.fromRGB(117, 82, 48)
-        )
-        bow.CanCollide = false
-    end
-
-    local deck = makePart(
-        model,
-        "RangerLookoutDeck",
-        Vector3.new(9, 0.7, 9),
-        base * CFrame.new(21, 6.2, 4),
-        Enum.Material.WoodPlanks,
-        SIGNATURE.TimberLight
-    )
-    deck.CanCollide = false
-    makeCollisionProxy(model, "RangerLookoutDeckCollision", Vector3.new(9, 0.8, 9), deck.CFrame)
-    for _, z in { 0, 8 } do
-        makePart(
-            model,
-            "RangerLookoutPost",
-            Vector3.new(0.8, 6, 0.8),
-            base * CFrame.new(21, 3, z),
-            Enum.Material.Wood,
-            SIGNATURE.Timber
-        )
-        makeCollisionProxy(
-            model,
-            "RangerLookoutPostCollision",
-            Vector3.new(1, 6, 1),
-            base * CFrame.new(21, 3, z)
-        )
-    end
-    return model
 end
 
 local function makeSunmossObservatory(parent, name, position, yaw)
@@ -3667,228 +3445,6 @@ local function makeCroftPlot(parent, name, position, yaw, width, depth, accent)
     return model
 end
 
-local function makeFrontierFoundation(model, base, width, depth, stoneColor)
-    makePart(
-        model,
-        "Foundation",
-        Vector3.new(width + 2, 3.2, depth + 2),
-        base * CFrame.new(0, -0.8, 0),
-        Enum.Material.Slate,
-        stoneColor or SIGNATURE.Slate
-    )
-    makeCollisionProxy(
-        model,
-        "FoundationCollision",
-        Vector3.new(width + 1.4, 3.0, depth + 1.4),
-        base * CFrame.new(0, -0.75, 0)
-    )
-end
-
-local function makeFrontierWall(model, name, size, cframe, color, collisionName)
-    makePart(model, name, size, cframe, Enum.Material.WoodPlanks, color)
-    makeCollisionProxy(
-        model,
-        collisionName or (name .. "Collision"),
-        size + Vector3.new(0.08, 0, 0.08),
-        cframe
-    )
-end
-
-local function makeFrontierRoofPair(
-    model,
-    base,
-    name,
-    width,
-    depth,
-    eaveY,
-    pitchDegrees,
-    color,
-    collision
-)
-    local pitch = math.rad(pitchDegrees or 24)
-    local halfRun = width * 0.5 + 1.0
-    local slopeLength = halfRun / math.cos(pitch)
-    local rise = halfRun * math.tan(pitch)
-    for _, side in { -1, 1 } do
-        local roofFrame = base
-            * CFrame.new(side * halfRun * 0.5, eaveY + rise * 0.5, 0)
-            * CFrame.Angles(0, 0, -side * pitch)
-        local roof = makePart(
-            model,
-            name .. "Roof",
-            Vector3.new(slopeLength + 0.15, 0.65, depth + 2.0),
-            roofFrame,
-            Enum.Material.WoodPlanks,
-            color or SIGNATURE.SlateDark
-        )
-        roof.CanCollide = false
-        roof.CanTouch = false
-        roof.CanQuery = false
-        if collision ~= false then
-            local solidHalfRun = math.max(1.5, width * 0.5 - 0.25)
-            local solidSlopeLength = solidHalfRun / math.cos(pitch)
-            local solidRise = solidHalfRun * math.tan(pitch)
-            makeCollisionProxy(
-                model,
-                name .. "RoofCollision",
-                Vector3.new(solidSlopeLength, 0.58, math.max(2, depth - 0.3)),
-                base
-                    * CFrame.new(side * solidHalfRun * 0.5, eaveY + solidRise * 0.5 - 0.16, 0)
-                    * CFrame.Angles(0, 0, -side * pitch)
-            )
-        end
-    end
-    local ridge = makePart(
-        model,
-        name .. "Ridge",
-        Vector3.new(0.75, 0.75, depth + 2.2),
-        base * CFrame.new(0, eaveY + rise, 0),
-        Enum.Material.Wood,
-        SIGNATURE.Timber
-    )
-    ridge.CanCollide = false
-    ridge.CanTouch = false
-    ridge.CanQuery = false
-end
-
-local function makeFrontierTruss(model, base, name, width, wallTopY, rise, frontZ, color)
-    color = color or SIGNATURE.Timber
-    local half = width * 0.5
-    local slopeLength = math.sqrt(half * half + rise * rise)
-    local angle = math.atan2(rise, half)
-    for _, side in { -1, 1 } do
-        local beam = makePart(
-            model,
-            name .. "TrussSlope",
-            Vector3.new(slopeLength, 0.55, 0.55),
-            base
-                * CFrame.new(side * half * 0.5, wallTopY + rise * 0.5, frontZ)
-                * CFrame.Angles(0, 0, -side * angle),
-            Enum.Material.Wood,
-            color
-        )
-        beam.CanCollide = false
-        beam.CanTouch = false
-        beam.CanQuery = false
-    end
-    local tie = makePart(
-        model,
-        name .. "TrussTie",
-        Vector3.new(width, 0.55, 0.55),
-        base * CFrame.new(0, wallTopY, frontZ),
-        Enum.Material.Wood,
-        color
-    )
-    tie.CanCollide = false
-    tie.CanTouch = false
-    tie.CanQuery = false
-    local king = makePart(
-        model,
-        name .. "TrussKingPost",
-        Vector3.new(0.55, rise, 0.55),
-        base * CFrame.new(0, wallTopY + rise * 0.5, frontZ),
-        Enum.Material.Wood,
-        color
-    )
-    king.CanCollide = false
-    king.CanTouch = false
-    king.CanQuery = false
-end
-
-local function makeFrontierDoorCanopy(model, base, name, width, frontZ, height, color)
-    color = color or SIGNATURE.Timber
-    for _, x in { -width * 0.5, width * 0.5 } do
-        local post = makePart(
-            model,
-            name .. "DoorPost",
-            Vector3.new(0.65, height, 0.65),
-            base * CFrame.new(x, height * 0.5 + 0.8, frontZ),
-            Enum.Material.Wood,
-            color
-        )
-        post.CanCollide = false
-        post.CanTouch = false
-        post.CanQuery = false
-    end
-    local lintel = makePart(
-        model,
-        name .. "DoorLintel",
-        Vector3.new(width + 1.1, 0.7, 0.75),
-        base * CFrame.new(0, height + 0.8, frontZ),
-        Enum.Material.Wood,
-        color
-    )
-    lintel.CanCollide = false
-    lintel.CanTouch = false
-    lintel.CanQuery = false
-    local hood = makePart(
-        model,
-        name .. "DoorHood",
-        Vector3.new(width + 3.0, 0.45, 3.4),
-        base * CFrame.new(0, height + 1.35, frontZ - 1.35) * CFrame.Angles(math.rad(-8), 0, 0),
-        Enum.Material.WoodPlanks,
-        Color3.fromRGB(47, 66, 56)
-    )
-    hood.CanCollide = false
-    hood.CanTouch = false
-    hood.CanQuery = false
-end
-
-local function makeFrontierFacadeFrames(model, base, name, width, wallHeight, frontZ, color)
-    color = color or SIGNATURE.Timber
-    for _, x in { -width * 0.5 + 1.0, -width * 0.25, width * 0.25, width * 0.5 - 1.0 } do
-        local post = makePart(
-            model,
-            name .. "FacadePost",
-            Vector3.new(0.55, wallHeight, 0.45),
-            base * CFrame.new(x, wallHeight * 0.5 + 0.8, frontZ - 0.58),
-            Enum.Material.Wood,
-            color
-        )
-        post.CanCollide = false
-        post.CanTouch = false
-        post.CanQuery = false
-    end
-    for _, y in { 3.2, wallHeight - 1.2 } do
-        local beam = makePart(
-            model,
-            name .. "FacadeBeam",
-            Vector3.new(width - 1.5, 0.5, 0.45),
-            base * CFrame.new(0, y + 0.8, frontZ - 0.58),
-            Enum.Material.Wood,
-            color
-        )
-        beam.CanCollide = false
-        beam.CanTouch = false
-        beam.CanQuery = false
-    end
-end
-
-local function makeFrontierChimney(model, base, name, offset, height)
-    local body = makePart(
-        model,
-        name .. "Chimney",
-        Vector3.new(2.6, height, 2.6),
-        base * CFrame.new(offset.X, height * 0.5 + offset.Y, offset.Z),
-        Enum.Material.Brick,
-        Color3.fromRGB(71, 70, 65)
-    )
-    body.CanCollide = false
-    body.CanTouch = false
-    body.CanQuery = false
-    local cap = makePart(
-        model,
-        name .. "ChimneyCap",
-        Vector3.new(3.2, 0.8, 3.2),
-        base * CFrame.new(offset.X, height + offset.Y, offset.Z),
-        Enum.Material.Slate,
-        Color3.fromRGB(57, 61, 59)
-    )
-    cap.CanCollide = false
-    cap.CanTouch = false
-    cap.CanQuery = false
-end
-
 local function placeArchitectureBuilding(
     parent,
     name,
@@ -3898,49 +3454,15 @@ local function placeArchitectureBuilding(
     targetLongest,
     collisionSpecs
 )
-    local ground = terrainSurfacePosition(position, 0)
-    local wrapper = Instance.new("Model")
-    wrapper.Name = name
-    wrapper:SetAttribute("EverLeafArchitecture", true)
-    wrapper:SetAttribute("ArchitecturePrefab", prefabName)
-    wrapper.Parent = parent
-
-    local prefab = EnvironmentPrefabService.Get(prefabName)
-    if not prefab then
-        wrapper:SetAttribute("ArchitecturePrefabMissing", true)
-        warn(
-            string.format(
-                "[LumenreachWorldService] Missing architecture prefab %s for %s",
-                prefabName,
-                name
-            )
-        )
-        return wrapper
-    end
-
-    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
-    local visual = EnvironmentPrefabService.Place(
+    return placeArchitecturePrefabBuilding(
+        parent,
+        name,
         prefabName,
-        wrapper,
-        base,
-        prefabScaleForLongest(prefabName, targetLongest)
+        position,
+        yaw,
+        targetLongest,
+        collisionSpecs
     )
-    if not visual then
-        wrapper:SetAttribute("ArchitecturePrefabMissing", true)
-        return wrapper
-    end
-    visual.Name = "ArchitectureVisual"
-    setRenderOnly(visual)
-
-    for index, spec in collisionSpecs do
-        makeCollisionProxy(
-            wrapper,
-            "ArchitectureCollision" .. index,
-            spec.Size,
-            base * CFrame.new(spec.Offset)
-        )
-    end
-    return wrapper
 end
 
 local function makeWayfarerCivicHall(parent, name, position, yaw)
@@ -3999,230 +3521,30 @@ local function makeProvingLodge(parent, name, position, yaw)
     })
 end
 
-local function makeRoadWayhouse(parent, name, position, yaw, accent)
-    local ground = terrainSurfacePosition(position, 0)
-    local model = Instance.new("Model")
-    model.Name = name
-    model.Parent = parent
-    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
-    local wall = accent or Color3.fromRGB(87, 108, 86)
-    -- Enclosed service room offset to one side.
-    makeFrontierFoundation(model, base * CFrame.new(-6, 0, 0), 15, 15, Color3.fromRGB(73, 80, 74))
-    makeFrontierWall(
-        model,
-        "WayhouseBack",
-        Vector3.new(15, 7, 1),
-        base * CFrame.new(-6, 4.3, 7.5),
-        wall
-    )
-    makeFrontierWall(
-        model,
-        "WayhouseLeft",
-        Vector3.new(1, 7, 15),
-        base * CFrame.new(-13.5, 4.3, 0),
-        wall
-    )
-    makeFrontierWall(
-        model,
-        "WayhouseFront",
-        Vector3.new(15, 7, 1),
-        base * CFrame.new(-6, 4.3, -7.5),
-        wall
-    )
-    local roof = makePart(
-        model,
-        "WayhouseLeanRoof",
-        Vector3.new(31, 0.6, 19),
-        base * CFrame.new(2, 8.7, 0) * CFrame.Angles(0, 0, math.rad(-7)),
-        Enum.Material.WoodPlanks,
-        Color3.fromRGB(48, 68, 58)
-    )
-    roof.CanCollide = false
-    for _, x in { 2, 12 } do
-        makePart(
-            model,
-            "WayhouseOpenPost",
-            Vector3.new(0.75, 8, 0.75),
-            base * CFrame.new(x, 4, -5),
-            Enum.Material.Wood,
-            SIGNATURE.Timber
-        )
-        makeCollisionProxy(
-            model,
-            "WayhouseOpenPostCollision",
-            Vector3.new(0.95, 8, 0.95),
-            base * CFrame.new(x, 4, -5)
-        )
-    end
-    makeBench(model, districtPoint(position, yaw, Vector3.new(7, 0, 2)), yaw or 0)
-    makeSupplyStack(model, districtPoint(position, yaw, Vector3.new(11, 0, 5)), yaw or 0, 0.65)
-    makeFrontierTruss(
-        model,
-        base * CFrame.new(-6, 0, 0),
-        "Wayhouse",
-        15,
-        7.8,
-        3.8,
-        -8.0,
-        SIGNATURE.Timber
-    )
-    makeFrontierDoorCanopy(
-        model,
-        base * CFrame.new(-6, 0, 0),
-        "Wayhouse",
-        5.0,
-        -8.0,
-        5.7,
-        SIGNATURE.Timber
-    )
-    return model
+local function makeRoadWayhouse(parent, name, position, yaw, _accent)
+    return placeArchitecturePrefabBuilding(parent, name, "LumenRoadWayhouse", position, yaw, 34, {
+        { Size = Vector3.new(14, 8, 13), Offset = Vector3.new(-5, 4, 1) },
+        { Size = Vector3.new(2, 7, 2), Offset = Vector3.new(4, 3.5, -5) },
+        { Size = Vector3.new(2, 7, 2), Offset = Vector3.new(14, 3.5, -5) },
+    })
 end
 
-local function makeFarmBarn(parent, name, position, yaw, accent)
-    local ground = terrainSurfacePosition(position, 0)
-    local model = Instance.new("Model")
-    model.Name = name
-    model.Parent = parent
-    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
-    local wall = accent or Color3.fromRGB(111, 95, 65)
-    makeFrontierFoundation(model, base, 27, 19, Color3.fromRGB(77, 73, 64))
-    makeFrontierWall(model, "BarnBack", Vector3.new(27, 9, 1), base * CFrame.new(0, 5.3, 9.5), wall)
-    makeFrontierWall(
-        model,
-        "BarnLeft",
-        Vector3.new(1, 9, 19),
-        base * CFrame.new(-13.5, 5.3, 0),
-        wall
-    )
-    makeFrontierWall(
-        model,
-        "BarnRight",
-        Vector3.new(1, 9, 19),
-        base * CFrame.new(13.5, 5.3, 0),
-        wall
-    )
-    makeFrontierRoofPair(model, base, "Barn", 27, 19, 9.7, 33, Color3.fromRGB(60, 66, 52), true)
-    -- Side lean-to storage breaks the repeated cottage silhouette.
-    local lean = makePart(
-        model,
-        "BarnLeanTo",
-        Vector3.new(10, 0.55, 15),
-        base * CFrame.new(17, 6.5, 1) * CFrame.Angles(0, 0, math.rad(9)),
-        Enum.Material.WoodPlanks,
-        Color3.fromRGB(70, 69, 53)
-    )
-    lean.CanCollide = false
-    for _, z in { -5, 5 } do
-        makePart(
-            model,
-            "BarnLeanPost",
-            Vector3.new(0.7, 6, 0.7),
-            base * CFrame.new(18.5, 3, z),
-            Enum.Material.Wood,
-            SIGNATURE.Timber
-        )
-        makeCollisionProxy(
-            model,
-            "BarnLeanPostCollision",
-            Vector3.new(0.9, 6, 0.9),
-            base * CFrame.new(18.5, 3, z)
-        )
-    end
-    makeFrontierTruss(model, base, "BarnFront", 27, 9.8, 8.2, -10.05, SIGNATURE.Timber)
-    local loftDoor = makePart(
-        model,
-        "BarnLoftDoor",
-        Vector3.new(6, 5.5, 0.45),
-        base * CFrame.new(0, 8.2, -9.55),
-        Enum.Material.Wood,
-        SIGNATURE.Timber
-    )
-    loftDoor.CanCollide = false
-    makeFrontierDoorCanopy(model, base, "Barn", 8.5, -10.0, 6.7, SIGNATURE.Timber)
-    return model
+local function makeFarmBarn(parent, name, position, yaw, _accent)
+    return placeArchitecturePrefabBuilding(parent, name, "LumenFarmBarn", position, yaw, 42, {
+        { Size = Vector3.new(27, 11, 19), Offset = Vector3.new(0, 5.5, 0) },
+        { Size = Vector3.new(8, 7, 13), Offset = Vector3.new(18, 3.5, 2) },
+    })
 end
 
-local function makeCroftCottage(parent, name, position, yaw, accent, mirror)
-    local ground = terrainSurfacePosition(position, 0)
-    local model = Instance.new("Model")
-    model.Name = name
-    model.Parent = parent
-    local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
-    local wall = accent or Color3.fromRGB(96, 112, 82)
-    local side = if mirror == true then -1 else 1
-
-    -- Compact asymmetrical home: main room plus offset storage lean-to.
-    makeFrontierFoundation(model, base, 22, 17, Color3.fromRGB(74, 79, 70))
-    makeFrontierWall(
-        model,
-        "CottageBack",
-        Vector3.new(22, 8, 1),
-        base * CFrame.new(0, 4.8, 8.5),
-        wall
-    )
-    makeFrontierWall(
-        model,
-        "CottageOuter",
-        Vector3.new(1, 8, 17),
-        base * CFrame.new(-11 * side, 4.8, 0),
-        wall
-    )
-    makeFrontierWall(
-        model,
-        "CottageFrontL",
-        Vector3.new(6, 8, 1),
-        base * CFrame.new(-7, 4.8, -8.5),
-        wall
-    )
-    makeFrontierWall(
-        model,
-        "CottageFrontR",
-        Vector3.new(6, 8, 1),
-        base * CFrame.new(7, 4.8, -8.5),
-        wall
-    )
-    makeFrontierRoofPair(model, base, "Cottage", 22, 17, 8.5, 28, Color3.fromRGB(49, 67, 55), true)
-
-    local leanBase = base * CFrame.new(13 * side, 0, 2)
-    makeFrontierFoundation(model, leanBase, 8, 11, Color3.fromRGB(75, 76, 65))
-    makeFrontierWall(
-        model,
-        "LeanToBack",
-        Vector3.new(8, 5.5, 1),
-        leanBase * CFrame.new(0, 3.55, 5.5),
-        wall:Lerp(Color3.fromRGB(124, 95, 65), 0.24)
-    )
-    makeFrontierWall(
-        model,
-        "LeanToOuter",
-        Vector3.new(1, 5.5, 11),
-        leanBase * CFrame.new(4 * side, 3.55, 0),
-        wall:Lerp(Color3.fromRGB(124, 95, 65), 0.24)
-    )
-    local leanRoof = makePart(
-        model,
-        "LeanToRoof",
-        Vector3.new(10, 0.5, 13),
-        leanBase * CFrame.new(0.6 * side, 6.6, 0) * CFrame.Angles(0, 0, math.rad(8 * side)),
-        Enum.Material.WoodPlanks,
-        Color3.fromRGB(57, 66, 53)
-    )
-    leanRoof.CanCollide = false
-    local porch = makePart(
-        model,
-        "CottagePorch",
-        Vector3.new(10, 0.65, 5),
-        base * CFrame.new(0, 0.65, -11),
-        Enum.Material.WoodPlanks,
-        SIGNATURE.TimberLight
-    )
-    porch.CanCollide = false
-    makeCollisionProxy(model, "CottagePorchCollision", Vector3.new(10, 0.75, 5), porch.CFrame)
-    makeFrontierFacadeFrames(model, base, "Cottage", 22, 8, -8.5, SIGNATURE.Timber)
-    makeFrontierTruss(model, base, "CottageFront", 22, 8.8, 5.2, -9.05, SIGNATURE.Timber)
-    makeFrontierDoorCanopy(model, base, "Cottage", 5.4, -9.0, 6.2, SIGNATURE.Timber)
-    makeFrontierChimney(model, base, "Cottage", Vector3.new(7 * side, 7.8, 3.5), 7.5)
-    return model
+local function makeCroftCottage(parent, name, position, yaw, _accent, mirror)
+    local prefabName = if mirror == true then "LumenCroftCottageB" else "LumenCroftCottageA"
+    return placeArchitecturePrefabBuilding(parent, name, prefabName, position, yaw, 34, {
+        { Size = Vector3.new(21, 10, 16), Offset = Vector3.new(0, 5, 0) },
+        {
+            Size = Vector3.new(7, 7, 10),
+            Offset = Vector3.new(if mirror == true then -13 else 13, 3.5, 1),
+        },
+    })
 end
 
 local function makeOccupiedHamlet(parent, name, center, yaw, accent, cropAccent)

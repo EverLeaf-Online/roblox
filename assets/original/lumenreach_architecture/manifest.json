@@ -46,5 +46,53 @@
     "triangles": 1520,
     "vertices": 830,
     "materials": 8
+  },
+  "LumenRoadWayhouse": {
+    "file": "assets/original/lumenreach_architecture/LumenRoadWayhouse.glb",
+    "triangles": 868,
+    "vertices": 474,
+    "materials": 7
+  },
+  "LumenFarmBarn": {
+    "file": "assets/original/lumenreach_architecture/LumenFarmBarn.glb",
+    "triangles": 912,
+    "vertices": 498,
+    "materials": 7
+  },
+  "LumenCroftCottageA": {
+    "file": "assets/original/lumenreach_architecture/LumenCroftCottageA.glb",
+    "triangles": 1440,
+    "vertices": 786,
+    "materials": 8
+  },
+  "LumenCroftCottageB": {
+    "file": "assets/original/lumenreach_architecture/LumenCroftCottageB.glb",
+    "triangles": 1472,
+    "vertices": 804,
+    "materials": 8
+  },
+  "LumenGlowmereStiltHouse": {
+    "file": "assets/original/lumenreach_architecture/LumenGlowmereStiltHouse.glb",
+    "triangles": 1220,
+    "vertices": 666,
+    "materials": 6
+  },
+  "LumenMossglenRangerHall": {
+    "file": "assets/original/lumenreach_architecture/LumenMossglenRangerHall.glb",
+    "triangles": 1748,
+    "vertices": 954,
+    "materials": 7
+  },
+  "LumenFrontierGatehouse": {
+    "file": "assets/original/lumenreach_architecture/LumenFrontierGatehouse.glb",
+    "triangles": 560,
+    "vertices": 306,
+    "materials": 6
+  },
+  "LumenRuinedHall": {
+    "file": "assets/original/lumenreach_architecture/LumenRuinedHall.glb",
+    "triangles": 440,
+    "vertices": 240,
+    "materials": 3
   }
 }

@@ -7,9 +7,6 @@ local builders = {
     "makeWaystone",
     "makeLantern",
     "makeSign",
-    "makeFrontierFoundation",
-    "makeFrontierWall",
-    "makeFrontierRoofPair",
     "makeRoadWayhouse",
     "makeFarmBarn",
     "makeCroftCottage",
@@ -63,15 +60,36 @@ local function functionBody(name)
     return string.sub(source, startAt, nextAt - 1)
 end
 
+local meshArchitectureBuilders = {
+    makeWayfarerCivicHall = true,
+    makeQuartermasterDepot = true,
+    makeArchiveResearchLodge = true,
+    makeWayfarerInn = true,
+    makeHealerApothecary = true,
+    makeCraftWorkshop = true,
+    makeOpenStable = true,
+    makeProvingLodge = true,
+    makeRoadWayhouse = true,
+    makeFarmBarn = true,
+    makeCroftCottage = true,
+    makeGlowmereStiltHouse = true,
+    makeMossglenRangerHall = true,
+    makeRuinedHall = true,
+    makeGatehouse = true,
+}
+
 for _, name in builders do
     local body = functionBody(name)
+    local ownsProxy = string.find(body, "makeCollisionProxy(", 1, true) ~= nil
+    local delegatesToMeshProxy = meshArchitectureBuilders[name] == true
+        and string.find(body, "placeArchitecturePrefabBuilding", 1, true) ~= nil
     assert(
-        string.find(body, "makeCollisionProxy(", 1, true) ~= nil,
+        ownsProxy or delegatesToMeshProxy,
         name .. " creates physical world geometry without an explicit collision proxy"
     )
 end
 
-local architecturePlacement = functionBody("placeArchitectureBuilding")
+local architecturePlacement = functionBody("placeArchitecturePrefabBuilding")
 assert(
     string.find(architecturePlacement, "makeCollisionProxy(", 1, true) ~= nil
         and string.find(architecturePlacement, '"ArchitectureCollision" .. index', 1, true)
@@ -92,7 +110,6 @@ for _, required in
         '"MarketCanopyCollision"',
         '"ShelterRoofCollision"',
         '"ArchRoofCollision"',
-        '"StiltRoofCollision"',
         '"TownGateBeamCollision"',
     }
 do
@@ -103,9 +120,9 @@ do
 end
 
 assert(
-    string.find(source, "local solidHalfRun = math.max(1.5, width * 0.5 - 0.25)", 1, true) ~= nil
-        and string.find(source, 'name .. "RoofCollision"', 1, true) ~= nil,
-    "frontier archetype roof collision must stop inside the wall line instead of blocking visible eaves"
+    string.find(source, "placeArchitecturePrefabBuilding", 1, true) ~= nil
+        and string.find(source, '"ArchitectureCollision" .. index', 1, true) ~= nil,
+    "MeshPart architecture must keep visible geometry render-only and use explicit simple collision proxies"
 )
 assert(
     string.find(source, '"ForgeAwningCollision"', 1, true) == nil

@@ -48,16 +48,24 @@ for _, token in
         '"LumenCraftWorkshop"',
         '"LumenOpenStable"',
         '"LumenProvingLodge"',
+        '"LumenRoadWayhouse"',
+        '"LumenFarmBarn"',
+        '"LumenCroftCottageA"',
+        '"LumenCroftCottageB"',
+        '"LumenGlowmereStiltHouse"',
+        '"LumenMossglenRangerHall"',
+        '"LumenFrontierGatehouse"',
+        '"LumenRuinedHall"',
     }
 do
     assert(
         string.find(source, token, 1, true) ~= nil,
-        "missing V16 MeshPart architecture contract " .. token
+        "missing V17 MeshPart architecture contract " .. token
     )
 end
 
 assert(
-    string.find(source, "local WORLD_DESIGN_VERSION = 16", 1, true) ~= nil,
+    string.find(source, "local WORLD_DESIGN_VERSION = 17", 1, true) ~= nil,
     "architecture conversion must bump world design version"
 )
 
@@ -72,7 +80,7 @@ for _, token in
 do
     assert(
         string.find(source, token, 1, true) ~= nil,
-        "missing V16 mesh architecture/placement contract: " .. token
+        "missing V17 mesh architecture/placement contract: " .. token
     )
 end
 

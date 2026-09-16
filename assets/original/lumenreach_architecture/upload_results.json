@@ -30,5 +30,37 @@
   "LumenProvingLodge": {
     "assetId": 97764957110691,
     "moderation": "Approved"
+  },
+  "LumenRoadWayhouse": {
+    "assetId": 104717310952590,
+    "moderation": "Approved"
+  },
+  "LumenFarmBarn": {
+    "assetId": 74150114579140,
+    "moderation": "Approved"
+  },
+  "LumenCroftCottageA": {
+    "assetId": 134706181384015,
+    "moderation": "Approved"
+  },
+  "LumenCroftCottageB": {
+    "assetId": 128457775419453,
+    "moderation": "Approved"
+  },
+  "LumenGlowmereStiltHouse": {
+    "assetId": 98647766328538,
+    "moderation": "Approved"
+  },
+  "LumenMossglenRangerHall": {
+    "assetId": 105347638360093,
+    "moderation": "Approved"
+  },
+  "LumenFrontierGatehouse": {
+    "assetId": 90751638251875,
+    "moderation": "Approved"
+  },
+  "LumenRuinedHall": {
+    "assetId": 133702935578347,
+    "moderation": "Approved"
   }
 }

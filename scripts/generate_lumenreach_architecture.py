@@ -266,7 +266,114 @@ def proving():
         add_box('Rack',(16,y,3.8),(0.5,4.5,5.2),'wood_light',0.05)
     return join_and_export('LumenProvingLodge')
 
-builders=[civic_hall,quartermaster,archive,inn,healer,workshop,stable,proving]
+
+
+def road_wayhouse():
+    foundation(25,16)
+    add_box('ServiceRoom',(-5,1,5.2),(14,14,8.0),'plaster',0.12)
+    add_gable('ServiceRoof',(-5,1,0),15,15,9.0,4.8,'roof_alt',0.7)
+    add_box('OpenDeck',(9,-1,1.25),(13,14,0.6),'wood_light',0.08)
+    for x in (4,14):
+        add_box('WayhousePost',(x,-6.5,4.8),(0.42,0.42,7.2),'wood',0.05)
+        add_box('WayhouseRearPost',(x,5.0,4.8),(0.42,0.42,7.2),'wood',0.05)
+    add_box('Canopy',(9,-0.5,8.4),(14.5,15.5,0.42),'roof',0.06,rot=(0,math.radians(-7),0))
+    door(-5,-6.25,3.5,2.8,4.3)
+    window(-8.5,-6.26,5.0,1.8,2.4)
+    add_box('NoticeBoard',(9,-7.2,4.2),(5.2,0.28,3.2),'wood_light',0.06)
+    add_box('SupplyBench',(9,4.0,2.1),(7.5,2.3,1.6),'wood_light',0.08)
+    return join_and_export('LumenRoadWayhouse')
+
+def farm_barn():
+    foundation(28,20)
+    wall_shell(28,20,9,'plaster_warm',front_windows=False)
+    add_gable('BarnRoof',(0,0,0),28,20,10.2,8.4,'roof',1.0)
+    add_box('LoftDoor',(0,-10.3,9.2),(6.5,0.25,5.3),'wood_light',0.05)
+    add_box('LeanDeck',(18,2,1.25),(8,14,0.6),'wood_light',0.08)
+    for y in (-4,6): add_box('LeanPost',(21,y,4.1),(0.42,0.42,6.2),'wood',0.05)
+    add_box('LeanRoof',(18,2,7.2),(10,16,0.38),'roof_alt',0.06,rot=(0,math.radians(9),0))
+    add_box('HayLoftVent',(0,-10.45,13.2),(4.0,0.22,2.3),'window',0.04)
+    return join_and_export('LumenFarmBarn')
+
+def croft_cottage_a():
+    foundation(22,17); wall_shell(22,17,8,'plaster')
+    add_gable('CottageRoof',(0,0,0),22,17,9.2,5.3,'roof_alt',0.8)
+    add_box('LeanBody',(14,2,4.1),(8,11,6.0),'plaster_warm',0.10)
+    add_box('LeanRoof',(14,2,7.4),(10,13,0.35),'roof',0.05,rot=(0,math.radians(9),0))
+    porch(10,4.5,-10.2,6.6,2)
+    chimney(7,4,6.5)
+    return join_and_export('LumenCroftCottageA')
+
+def croft_cottage_b():
+    foundation(20,18); wall_shell(20,18,7.5,'plaster_warm')
+    add_gable('CottageRoof',(0,0,0),20,18,8.7,6.6,'roof',0.9)
+    add_box('SideBay',(-13,-1,4.2),(7,10,6.2),'plaster',0.10)
+    add_gable('BayRoof',(-13,-1,0),8,11,7.4,3.3,'roof_alt',0.5)
+    porch(12,5,-11.1,6.3,2)
+    chimney(6,4,6.0)
+    add_box('WoodRack',(12,6,2.4),(5.5,2.0,3.0),'wood_light',0.06)
+    return join_and_export('LumenCroftCottageB')
+
+def glowmere_stilt_house():
+    # Entire occupied volume is raised above wet ground/water.
+    for x in (-7,7):
+        for y in (-5,5): add_box('Stilt',(x,y,4.0),(0.6,0.6,8.0),'wood',0.05)
+    add_box('RaisedFloor',(0,0,5.8),(16,13,0.7),'wood_light',0.08)
+    add_box('BackWall',(0,5.8,9.4),(16,0.5,6.8),'plaster',0.09)
+    add_box('LeftWall',(-7.8,0,9.4),(0.5,12,6.8),'plaster',0.09)
+    add_box('RightWall',(7.8,0,9.4),(0.5,12,6.8),'plaster',0.09)
+    add_box('FrontL',(-5.2,-5.8,9.4),(5.5,0.5,6.8),'plaster',0.09)
+    add_box('FrontR',(5.2,-5.8,9.4),(5.5,0.5,6.8),'plaster',0.09)
+    add_gable('StiltRoof',(0,0,0),16,13,12.8,4.7,'roof_alt',1.0)
+    add_box('FrontDeck',(0,-9.0,5.8),(12,6,0.65),'wood_light',0.07)
+    add_box('DockRamp',(0,-14.0,5.0),(5.5,8.5,0.5),'wood_light',0.06,rot=(math.radians(-8),0,0))
+    add_box('ReedAwning',(8,-8,9.0),(8,7,0.35),'cloth',0.05,rot=(math.radians(5),0,0))
+    door(0,-6.1,8.0,2.6,4.0)
+    window(-4.5,-6.1,9.5,1.8,2.2)
+    window(4.5,-6.1,9.5,1.8,2.2)
+    return join_and_export('LumenGlowmereStiltHouse')
+
+def mossglen_ranger_hall():
+    foundation(34,23); wall_shell(34,23,8.5,'plaster')
+    add_gable('RangerRoof',(0,0,0),34,23,9.7,7.3,'roof',1.0)
+    porch(25,6,-14.3,7.2,4)
+    # raised lookout wing
+    for y in (-2,6): add_box('LookoutPost',(21,y,4.0),(0.55,0.55,8.0),'wood',0.05)
+    add_box('LookoutDeck',(21,2,8.0),(10,10,0.7),'wood_light',0.08)
+    add_box('LookoutRoof',(21,2,13.2),(11,11,0.45),'roof_alt',0.06,rot=(0,math.radians(-5),0))
+    add_box('DryingRack',(-14,-15.5,4.0),(8,0.35,5.5),'wood',0.04)
+    for x in (-16,-12): add_box('RackPost',(x,-15.5,3.5),(0.3,0.3,6.0),'wood',0.03)
+    chimney(10,5,7.0)
+    return join_and_export('LumenMossglenRangerHall')
+
+def frontier_gatehouse():
+    add_box('LeftTower',(-15,0,8.5),(9,12,17),'stone',0.18)
+    add_box('RightTower',(15,0,8.5),(9,12,17),'stone',0.18)
+    add_box('GateLintel',(0,0,15.0),(21,8,4.0),'stone',0.15)
+    add_box('LeftPlatform',(-15,0,17.8),(11,14,1.0),'wood_light',0.08)
+    add_box('RightPlatform',(15,0,17.8),(11,14,1.0),'wood_light',0.08)
+    for x in (-19,-11,11,19): add_box('Parapet',(x,-6.0,20.0),(2.5,2.0,4.0),'stone',0.08)
+    add_box('ControlHut',(20,4,6.0),(7,8,10),'plaster_warm',0.12)
+    add_gable('ControlRoof',(20,4,0),8,9,11.0,3.3,'roof_alt',0.5)
+    add_box('BannerL',(-15,-6.2,11.0),(3.0,0.25,6.0),'cloth',0.04)
+    add_box('BannerR',(15,-6.2,11.0),(3.0,0.25,6.0),'cloth_gold',0.04)
+    return join_and_export('LumenFrontierGatehouse')
+
+def ruined_hall():
+    add_box('RuinFloor',(0,0,0.6),(30,22,1.2),'stone',0.12)
+    add_box('BackWall',(-3,10.5,5.0),(23,1.0,10.0),'stone',0.14)
+    add_box('LeftWall',(-14.5,2.0,4.0),(1.0,15.0,8.0),'stone',0.14)
+    add_box('RightStub',(14.5,6.0,2.8),(1.0,8.0,5.5),'stone',0.14)
+    add_box('BrokenFrontL',(-10,-10.5,3.2),(9,1.0,6.2),'stone',0.14)
+    add_box('BrokenFrontR',(11,-10.5,2.3),(7,1.0,4.5),'stone',0.14)
+    # collapsed roof fragments and broken rafters
+    add_box('RoofFragment',(-5,4,10.5),(13,8,0.6),'roof',0.06,rot=(0,math.radians(16),0))
+    add_box('FallenBeam',(5,-1,1.5),(0.55,14,0.55),'wood',0.04,rot=(math.radians(82),0,math.radians(12)))
+    add_box('BrokenPillar',(-7,-3,4.0),(2.2,2.2,8.0),'stone',0.12)
+    add_box('BrokenPillar',(8,4,3.0),(2.2,2.2,6.0),'stone',0.12)
+    return join_and_export('LumenRuinedHall')
+
+
+builders=[civic_hall,quartermaster,archive,inn,healer,workshop,stable,proving,road_wayhouse,farm_barn,croft_cottage_a,croft_cottage_b,glowmere_stilt_house,mossglen_ranger_hall,frontier_gatehouse,ruined_hall]
 manifest={}
 for fn in builders:
     clear(); M=materials(); globals()['M']=M
