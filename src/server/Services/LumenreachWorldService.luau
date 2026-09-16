@@ -16,7 +16,7 @@ local LumenreachWorldService = {}
 local GENERATED_NAME = "EverLeafGeneratedWorld"
 local WORLD_WIDTH = 2200
 local WORLD_DEPTH = 1250
-local WORLD_DESIGN_VERSION = 20
+local WORLD_DESIGN_VERSION = 21
 
 -- Lumenreach is authored as a terrain-first MMORPG region. The generator below
 -- replaces the previous showcase composition completely: terrain is cleared,
@@ -3939,6 +3939,261 @@ local function makeWorldMicroSites(parent)
     end
 end
 
+local function makeDistrictCourt(parent, spec)
+    local model = Instance.new("Model")
+    model.Name = spec.Name .. "MMOCourt"
+    model:SetAttribute("MMOComposition", true)
+    model.Parent = parent
+
+    local center = spec.Center
+    local yaw = spec.Yaw or 0
+    local court = terrainSurfacePosition(center, 0)
+    local width = spec.Width or 72
+    local depth = spec.Depth or 50
+    local accent = spec.Accent or SIGNATURE.Lumen
+
+    Workspace.Terrain:FillBlock(
+        CFrame.new(court + Vector3.new(0, -0.45, 0)) * CFrame.Angles(0, yaw, 0),
+        Vector3.new(width, 1.1, depth),
+        spec.Material or Enum.Material.Slate
+    )
+
+    local forward = districtPoint(center, yaw, Vector3.new(0, 0, -depth * 0.68))
+    local back = districtPoint(center, yaw, Vector3.new(0, 0, depth * 0.68))
+    local left = districtPoint(center, yaw, Vector3.new(-width * 0.62, 0, 0))
+    local right = districtPoint(center, yaw, Vector3.new(width * 0.62, 0, 0))
+    fillTerrainRoute({ forward, center, back }, spec.RoadWidth or 10, Enum.Material.Ground)
+    fillTerrainRoute({ left, center, right }, spec.RoadWidth or 10, Enum.Material.Ground)
+
+    makeWayfarerStreetArch(
+        model,
+        spec.Name .. "ApproachArch",
+        districtPoint(center, yaw, Vector3.new(0, 0, -depth * 0.58)),
+        yaw,
+        spec.ArchWidth or 18,
+        accent
+    )
+    makeWaystone(model, districtPoint(center, yaw, Vector3.new(0, 0, -depth * 0.32)), yaw, 0.8)
+
+    for _, offset in
+        {
+            Vector3.new(-width * 0.34, 0, -depth * 0.30),
+            Vector3.new(width * 0.34, 0, -depth * 0.30),
+            Vector3.new(-width * 0.34, 0, depth * 0.30),
+            Vector3.new(width * 0.34, 0, depth * 0.30),
+        }
+    do
+        makeLantern(model, districtPoint(center, yaw, offset), yaw)
+    end
+
+    if spec.Kind == "market" then
+        makeMarketStall(
+            model,
+            districtPoint(center, yaw, Vector3.new(-22, 0, 10)),
+            yaw + math.rad(90),
+            accent
+        )
+        makeMarketStall(
+            model,
+            districtPoint(center, yaw, Vector3.new(22, 0, 10)),
+            yaw - math.rad(90),
+            accent:Lerp(SIGNATURE.ClothGold, 0.25)
+        )
+        makeWayfarerCart(
+            model,
+            spec.Name .. "TradeCart",
+            districtPoint(center, yaw, Vector3.new(30, 0, -12)),
+            yaw + math.rad(70),
+            true
+        )
+        makeBench(model, districtPoint(center, yaw, Vector3.new(-12, 0, -4)), yaw + math.rad(90))
+        makeBench(model, districtPoint(center, yaw, Vector3.new(12, 0, -4)), yaw - math.rad(90))
+    elseif spec.Kind == "wetland" then
+        makeBoardwalk(model, spec.Name .. "CrosswalkA", left, right, 8)
+        makeBoardwalk(model, spec.Name .. "CrosswalkB", forward, back, 7)
+        makeReedDock(
+            model,
+            spec.Name .. "PublicDock",
+            districtPoint(center, yaw, Vector3.new(width * 0.44, 0, depth * 0.24)),
+            yaw + math.rad(90),
+            22
+        )
+        makeSupplyStack(model, districtPoint(center, yaw, Vector3.new(-24, 0, 12)), yaw, 0.75)
+    elseif spec.Kind == "fort" then
+        makeFenceLine(
+            model,
+            spec.Name .. "NorthWall",
+            districtPoint(center, yaw, Vector3.new(-width * 0.48, 0, depth * 0.44)),
+            districtPoint(center, yaw, Vector3.new(width * 0.48, 0, depth * 0.44)),
+            8,
+            5.5
+        )
+        makeFenceLine(
+            model,
+            spec.Name .. "SouthWall",
+            districtPoint(center, yaw, Vector3.new(-width * 0.48, 0, -depth * 0.44)),
+            districtPoint(center, yaw, Vector3.new(width * 0.48, 0, -depth * 0.44)),
+            8,
+            5.5
+        )
+        makeSupplyStack(model, districtPoint(center, yaw, Vector3.new(-24, 0, 14)), yaw, 0.9)
+        makeSupplyStack(model, districtPoint(center, yaw, Vector3.new(24, 0, 14)), yaw, 0.9)
+        makeHearth(model, districtPoint(center, yaw, Vector3.new(0, 0, 10)))
+    elseif spec.Kind == "ruin" then
+        makeRuinWall(
+            model,
+            districtPoint(center, yaw, Vector3.new(-22, 0, 8)),
+            yaw + math.rad(90),
+            34,
+            7
+        )
+        makeRuinWall(model, districtPoint(center, yaw, Vector3.new(20, 0, -4)), yaw, 30, 6)
+        makeStoneShrine(
+            model,
+            spec.Name .. "CourtShrine",
+            districtPoint(center, yaw, Vector3.new(0, 0, 14)),
+            yaw + math.rad(180),
+            accent
+        )
+        makeWayfarerCart(
+            model,
+            spec.Name .. "BrokenWagon",
+            districtPoint(center, yaw, Vector3.new(27, 0, -15)),
+            yaw + math.rad(38),
+            false
+        )
+    elseif spec.Kind == "research" then
+        makeStoneShrine(
+            model,
+            spec.Name .. "StudyShrine",
+            districtPoint(center, yaw, Vector3.new(0, 0, 12)),
+            yaw + math.rad(180),
+            accent
+        )
+        makeBench(model, districtPoint(center, yaw, Vector3.new(-18, 0, 3)), yaw + math.rad(90))
+        makeBench(model, districtPoint(center, yaw, Vector3.new(18, 0, 3)), yaw - math.rad(90))
+        makeSupplyStack(model, districtPoint(center, yaw, Vector3.new(26, 0, -13)), yaw, 0.7)
+    elseif spec.Kind == "ranger" then
+        makeHearth(model, districtPoint(center, yaw, Vector3.new(0, 0, 9)))
+        makeSupplyStack(model, districtPoint(center, yaw, Vector3.new(-25, 0, 12)), yaw, 0.8)
+        makeWayfarerCart(
+            model,
+            spec.Name .. "RangerCart",
+            districtPoint(center, yaw, Vector3.new(25, 0, -13)),
+            yaw - math.rad(65),
+            true
+        )
+        makeBench(model, districtPoint(center, yaw, Vector3.new(-14, 0, -5)), yaw + math.rad(90))
+    else
+        makeHearth(model, districtPoint(center, yaw, Vector3.new(0, 0, 8)))
+        makeBench(model, districtPoint(center, yaw, Vector3.new(-15, 0, -3)), yaw + math.rad(90))
+        makeBench(model, districtPoint(center, yaw, Vector3.new(15, 0, -3)), yaw - math.rad(90))
+    end
+
+    return model
+end
+
+local function makeWorldMMOComposition(parent)
+    local courts = {
+        {
+            Name = "Greenway",
+            Center = ZONES.Greenway + Vector3.new(0, 0, -28),
+            Yaw = math.rad(2),
+            Kind = "market",
+            Width = 86,
+            Depth = 54,
+            Accent = Color3.fromRGB(113, 159, 91),
+            Material = Enum.Material.Ground,
+        },
+        {
+            Name = "Crossroads",
+            Center = ZONES.Crossroads + Vector3.new(0, 0, 4),
+            Yaw = 0,
+            Kind = "market",
+            Width = 82,
+            Depth = 62,
+            Accent = SIGNATURE.Lumen,
+        },
+        {
+            Name = "Glowmere",
+            Center = ZONES.Glowmere + Vector3.new(0, 0, 18),
+            Yaw = math.rad(-10),
+            Kind = "wetland",
+            Width = 92,
+            Depth = 60,
+            Accent = Color3.fromRGB(112, 226, 211),
+            Material = Enum.Material.Ground,
+        },
+        {
+            Name = "Eastbridge",
+            Center = ZONES.EastLanding + Vector3.new(5, 0, 2),
+            Yaw = math.rad(90),
+            Kind = "fort",
+            Width = 94,
+            Depth = 62,
+            Accent = Color3.fromRGB(108, 220, 180),
+        },
+        {
+            Name = "Gravebone",
+            Center = ZONES.Gravebone + Vector3.new(0, 0, 2),
+            Yaw = math.rad(8),
+            Kind = "ruin",
+            Width = 90,
+            Depth = 66,
+            Accent = Color3.fromRGB(142, 198, 172),
+        },
+        {
+            Name = "Mossglen",
+            Center = ZONES.Mossglen + Vector3.new(-18, 0, -18),
+            Yaw = math.rad(-8),
+            Kind = "ranger",
+            Width = 98,
+            Depth = 64,
+            Accent = Color3.fromRGB(107, 173, 103),
+            Material = Enum.Material.Ground,
+        },
+        {
+            Name = "Sunmoss",
+            Center = ZONES.Sunmoss + Vector3.new(0, 0, 5),
+            Yaw = math.rad(-18),
+            Kind = "research",
+            Width = 82,
+            Depth = 58,
+            Accent = Color3.fromRGB(207, 217, 113),
+        },
+        {
+            Name = "Veilfall",
+            Center = ZONES.Veilfall + Vector3.new(-5, 0, 0),
+            Yaw = math.rad(20),
+            Kind = "research",
+            Width = 76,
+            Depth = 54,
+            Accent = Color3.fromRGB(114, 222, 226),
+        },
+        {
+            Name = "ShatteredArch",
+            Center = ZONES.Ruins + Vector3.new(-18, 0, 4),
+            Yaw = math.rad(90),
+            Kind = "fort",
+            Width = 104,
+            Depth = 72,
+            Accent = Color3.fromRGB(96, 229, 193),
+        },
+        {
+            Name = "Proving",
+            Center = ZONES.Proving + Vector3.new(0, 0, 8),
+            Yaw = math.rad(180),
+            Kind = "fort",
+            Width = 88,
+            Depth = 60,
+            Accent = Color3.fromRGB(111, 235, 188),
+        },
+    }
+    for _, spec in courts do
+        makeDistrictCourt(parent, spec)
+    end
+end
+
 local function makeWorldSettlements(parent)
     -- Greenway settlement edge: visible habitation immediately outside town.
     makeRoadWayhouse(
@@ -5492,6 +5747,7 @@ end
 local function makeZoneContent(parent)
     makeTown(parent)
     makeWorldSettlements(parent)
+    makeWorldMMOComposition(parent)
     makeSignatureWorldContent(parent)
     makeLumenreachDistrictNetwork(parent)
     makeWorldMicroSites(parent)

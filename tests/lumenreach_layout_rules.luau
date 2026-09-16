@@ -6,7 +6,7 @@ for _, required in
     {
         "local WORLD_WIDTH = 2200",
         "local WORLD_DEPTH = 1250",
-        "local WORLD_DESIGN_VERSION = 20",
+        "local WORLD_DESIGN_VERSION = 21",
         'world:SetAttribute("WorldDesignVersion", WORLD_DESIGN_VERSION)',
         'world:SetAttribute("TerrainFirstMMOLayout", true)',
         "terrain:Clear()",
@@ -500,7 +500,7 @@ assert(
         and string.find(source, "local function makeRoadWayhouse", 1, true) ~= nil
         and string.find(source, "local function makeFarmBarn", 1, true) ~= nil
         and string.find(source, "local function makeCroftCottage", 1, true) ~= nil,
-    "V20 must preserve explicit frontier architecture archetypes while moving major buildings to authored MeshParts"
+    "V21 must preserve explicit frontier architecture archetypes while moving major buildings to authored MeshParts"
 )
 
 local genericBuildingCallCount = 0
@@ -532,7 +532,7 @@ for _, namedBuilding in
 do
     assert(
         string.find(source, namedBuilding, 1, true) ~= nil,
-        "missing V20 architecture conversion: " .. namedBuilding
+        "missing V21 architecture conversion: " .. namedBuilding
     )
 end
 
@@ -550,7 +550,29 @@ for _, token in
 do
     assert(
         string.find(source, token, 1, true) ~= nil,
-        "missing V20 Wayfarer MMO-hub content: " .. token
+        "missing V21 Wayfarer MMO-hub content: " .. token
+    )
+end
+
+for _, token in
+    {
+        "local function makeWorldMMOComposition",
+        "makeWorldMMOComposition(parent)",
+        'Name = "Greenway"',
+        'Name = "Crossroads"',
+        'Name = "Glowmere"',
+        'Name = "Eastbridge"',
+        'Name = "Gravebone"',
+        'Name = "Mossglen"',
+        'Name = "Sunmoss"',
+        'Name = "Veilfall"',
+        'Name = "ShatteredArch"',
+        'Name = "Proving"',
+    }
+do
+    assert(
+        string.find(source, token, 1, true) ~= nil,
+        "missing V21 whole-map MMO composition: " .. token
     )
 end
 

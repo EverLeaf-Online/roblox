@@ -1553,6 +1553,275 @@ local function dressEncounterAreas(parent)
     })
 end
 
+local function makeIndustrialDistrictCourt(parent, spec)
+    local model = Instance.new("Model")
+    model.Name = spec.Name .. "DistrictCourt"
+    model:SetAttribute("MMOComposition", true)
+    model.Parent = parent
+
+    local center = ORIGIN + spec.Offset
+    local yaw = spec.Yaw or 0
+    local base = CFrame.new(center) * CFrame.Angles(0, yaw, 0)
+    local width = spec.Width or 76
+    local depth = spec.Depth or 52
+    local stone = Color3.fromRGB(64, 60, 56)
+    local iron = Color3.fromRGB(75, 72, 68)
+    local brass = spec.Accent or Color3.fromRGB(151, 100, 48)
+
+    local floor = makePart(
+        model,
+        spec.Name .. "CourtFloor",
+        Vector3.new(width, 0.65, depth),
+        base * CFrame.new(0, 0.35, 0),
+        Enum.Material.Cobblestone,
+        stone
+    )
+    floor.CanCollide = false
+
+    local lane = makePart(
+        model,
+        spec.Name .. "ServiceLane",
+        Vector3.new(14, 0.32, depth + 30),
+        base * CFrame.new(0, 0.72, 0),
+        Enum.Material.Metal,
+        iron
+    )
+    lane.CanCollide = false
+
+    for _, side in { -1, 1 } do
+        local x = side * (width * 0.42)
+        for _, z in { -depth * 0.34, depth * 0.34 } do
+            local post = makePart(
+                model,
+                spec.Name .. "FramePost",
+                Vector3.new(1.2, 11, 1.2),
+                base * CFrame.new(x, 5.5, z),
+                Enum.Material.Metal,
+                iron
+            )
+            makeCollisionProxy(
+                model,
+                spec.Name .. "FramePostCollision",
+                Vector3.new(1.45, 11, 1.45),
+                post.CFrame
+            )
+        end
+    end
+
+    local overhead = makePart(
+        model,
+        spec.Name .. "OverheadGantry",
+        Vector3.new(width * 0.84, 1.2, 3.0),
+        base * CFrame.new(0, 10.5, -depth * 0.34),
+        Enum.Material.DiamondPlate,
+        brass
+    )
+    overhead.CanCollide = false
+    makeCollisionProxy(
+        model,
+        spec.Name .. "OverheadGantryCollision",
+        Vector3.new(width * 0.84, 1.35, 3.2),
+        overhead.CFrame
+    )
+
+    local canopy = makePart(
+        model,
+        spec.Name .. "LoadingCanopy",
+        Vector3.new(width * 0.42, 0.7, 12),
+        base * CFrame.new(-width * 0.24, 7.2, depth * 0.31),
+        Enum.Material.Metal,
+        Color3.fromRGB(88, 75, 62)
+    )
+    canopy.CanCollide = false
+    for _, xoff in { -width * 0.38, -width * 0.10 } do
+        local post = makePart(
+            model,
+            spec.Name .. "CanopyPost",
+            Vector3.new(0.8, 7, 0.8),
+            base * CFrame.new(xoff, 3.5, depth * 0.31),
+            Enum.Material.Metal,
+            iron
+        )
+        makeCollisionProxy(
+            model,
+            spec.Name .. "CanopyPostCollision",
+            Vector3.new(1.0, 7, 1.0),
+            post.CFrame
+        )
+    end
+
+    for _, xoff in { -width * 0.35, width * 0.35 } do
+        local lamp = makePart(
+            model,
+            spec.Name .. "FurnaceLamp",
+            Vector3.new(1.0, 6.5, 1.0),
+            base * CFrame.new(xoff, 3.25, -depth * 0.08),
+            Enum.Material.Metal,
+            iron
+        )
+        makeCollisionProxy(
+            model,
+            spec.Name .. "LampCollision",
+            Vector3.new(1.2, 6.5, 1.2),
+            lamp.CFrame
+        )
+        local glow = makePart(
+            model,
+            spec.Name .. "FurnaceLampGlow",
+            Vector3.new(1.8, 1.8, 1.8),
+            base * CFrame.new(xoff, 6.7, -depth * 0.08),
+            Enum.Material.Neon,
+            brass
+        )
+        glow.Shape = Enum.PartType.Ball
+        glow.CanCollide = false
+        glow.CanTouch = false
+        local light = Instance.new("PointLight")
+        light.Color = brass
+        light.Brightness = 1.2
+        light.Range = 18
+        light.Parent = glow
+    end
+
+    makeScrapPile(
+        model,
+        center + base.RightVector * (width * 0.31) + base.LookVector * (depth * 0.27),
+        yaw + math.rad(20),
+        0.72
+    )
+    if spec.Hot then
+        makeHotVent(
+            model,
+            center - base.RightVector * (width * 0.28) + base.LookVector * (depth * 0.05),
+            0.75
+        )
+    end
+
+    makeLabel(model, center + Vector3.new(0, 17, 0), spec.Label)
+    return model
+end
+
+local function makeBrasshavenMMOComposition(parent)
+    local districts = {
+        {
+            Name = "Threshold",
+            Label = "FOUNDRY THRESHOLD · TRADE COURT",
+            Offset = Vector3.new(-58, 0, 12),
+            Yaw = math.rad(90),
+            Width = 90,
+            Depth = 58,
+            Accent = Color3.fromRGB(171, 118, 58),
+        },
+        {
+            Name = "Gearworks",
+            Label = "GEARWORKS · MACHINE COURT",
+            Offset = Vector3.new(-78, 0, 76),
+            Yaw = math.rad(10),
+            Width = 84,
+            Depth = 56,
+            Accent = Color3.fromRGB(144, 99, 53),
+        },
+        {
+            Name = "Cinder",
+            Label = "CINDER DUCTS · MAINTENANCE COURT",
+            Offset = Vector3.new(83, 0, -72),
+            Yaw = math.rad(-12),
+            Width = 82,
+            Depth = 54,
+            Accent = Color3.fromRGB(205, 103, 46),
+            Hot = true,
+        },
+        {
+            Name = "Sootworks",
+            Label = "SOOTWORKS · SHIFT YARD",
+            Offset = Vector3.new(-58, 0, 145),
+            Yaw = math.rad(8),
+            Width = 88,
+            Depth = 58,
+            Accent = Color3.fromRGB(139, 91, 48),
+            Hot = true,
+        },
+        {
+            Name = "Dynamo",
+            Label = "DYNAMO GALLERY · POWER COURT",
+            Offset = Vector3.new(64, 0, -148),
+            Yaw = math.rad(-8),
+            Width = 84,
+            Depth = 56,
+            Accent = Color3.fromRGB(90, 174, 220),
+        },
+        {
+            Name = "Rail",
+            Label = "EASTWORKS RAIL YARD · LOADING COURT",
+            Offset = Vector3.new(108, 0, 145),
+            Yaw = math.rad(90),
+            Width = 92,
+            Depth = 62,
+            Accent = Color3.fromRGB(164, 109, 52),
+        },
+        {
+            Name = "Blueglass",
+            Label = "BLUEGLASS ANNEX · RESEARCH COURT",
+            Offset = Vector3.new(-72, 0, 235),
+            Yaw = math.rad(6),
+            Width = 82,
+            Depth = 56,
+            Accent = Color3.fromRGB(86, 177, 219),
+        },
+        {
+            Name = "Smelter",
+            Label = "SMELTER CRUCIBLE · WORKS COURT",
+            Offset = Vector3.new(108, 0, 235),
+            Yaw = math.rad(-6),
+            Width = 86,
+            Depth = 60,
+            Accent = Color3.fromRGB(225, 105, 42),
+            Hot = true,
+        },
+        {
+            Name = "Authority",
+            Label = "AUTHORITY HALL · SECURITY COURT",
+            Offset = Vector3.new(-12, 0, 325),
+            Yaw = 0,
+            Width = 88,
+            Depth = 60,
+            Accent = Color3.fromRGB(170, 115, 55),
+        },
+        {
+            Name = "Runoff",
+            Label = "MOLTEN RUNOFF · CONTROL COURT",
+            Offset = Vector3.new(88, 0, 325),
+            Yaw = 0,
+            Width = 84,
+            Depth = 58,
+            Accent = Color3.fromRGB(232, 91, 35),
+            Hot = true,
+        },
+        {
+            Name = "Bellows",
+            Label = "UPPER BELLOWS · FORGE COURT",
+            Offset = Vector3.new(-58, 0, 395),
+            Yaw = 0,
+            Width = 90,
+            Depth = 60,
+            Accent = Color3.fromRGB(192, 105, 45),
+            Hot = true,
+        },
+        {
+            Name = "Sentinel",
+            Label = "BELFORGE SENTINEL · MUSTER COURT",
+            Offset = Vector3.new(92, 0, 395),
+            Yaw = 0,
+            Width = 92,
+            Depth = 62,
+            Accent = Color3.fromRGB(190, 119, 53),
+        },
+    }
+    for _, spec in districts do
+        makeIndustrialDistrictCourt(parent, spec)
+    end
+end
+
 function BrasshavenWorldService.Init()
     local previous = Workspace:FindFirstChild(GENERATED_NAME)
     if previous then
@@ -1561,6 +1830,8 @@ function BrasshavenWorldService.Init()
 
     local world = Instance.new("Model")
     world.Name = GENERATED_NAME
+    world:SetAttribute("WorldDesignVersion", 2)
+    world:SetAttribute("MMOCompositionPass", true)
     world.Parent = Workspace
 
     local ground = makePart(
@@ -1616,6 +1887,7 @@ function BrasshavenWorldService.Init()
     makeForgeTower(world, ORIGIN + Vector3.new(112, 0, 350), 38, 5)
 
     dressEncounterAreas(world)
+    makeBrasshavenMMOComposition(world)
 
     local wallColor = Color3.fromRGB(81, 73, 65)
     makePart(
