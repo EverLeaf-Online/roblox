@@ -1,4 +1,5 @@
 local Players = game:GetService("Players")
+local InsertService = game:GetService("InsertService")
 local ServerStorage = game:GetService("ServerStorage")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
@@ -662,31 +663,169 @@ local function groundModel(model, requestedPosition, yaw, groundMode)
     return true
 end
 
+local AUTHORED_R15_PARTS = table.freeze({
+    Head = true,
+    UpperTorso = true,
+    LowerTorso = true,
+    LeftUpperArm = true,
+    RightUpperArm = true,
+    LeftLowerArm = true,
+    RightLowerArm = true,
+    LeftHand = true,
+    RightHand = true,
+    LeftUpperLeg = true,
+    RightUpperLeg = true,
+    LeftLowerLeg = true,
+    RightLowerLeg = true,
+    LeftFoot = true,
+    RightFoot = true,
+})
+
+local BLOCKED_AUTHORED_CLASSES = table.freeze({
+    Script = true,
+    LocalScript = true,
+    ModuleScript = true,
+    RemoteEvent = true,
+    RemoteFunction = true,
+    BindableEvent = true,
+    BindableFunction = true,
+})
+
+local function authoredAnchorName(partName)
+    if AUTHORED_R15_PARTS[partName] then
+        return partName
+    end
+    local prefix = string.match(partName, "^([^_]+)_")
+    if prefix and AUTHORED_R15_PARTS[prefix] then
+        return prefix
+    end
+    return "UpperTorso"
+end
+
+local function loadAuthoredNpcAsset(spec, assetSpec)
+    if not assetSpec.AssetId then
+        return nil
+    end
+    local ok, container = pcall(InsertService.LoadAsset, InsertService, assetSpec.AssetId)
+    if not ok or not container then
+        warn(
+            string.format(
+                "[StylizedNpcFactory] Could not load authored NPC asset %s for %s",
+                tostring(assetSpec.AssetId),
+                tostring(spec.NpcId)
+            )
+        )
+        return nil
+    end
+
+    for _, descendant in container:GetDescendants() do
+        if BLOCKED_AUTHORED_CLASSES[descendant.ClassName] then
+            descendant:Destroy()
+        elseif descendant:IsA("BasePart") then
+            descendant.Anchored = false
+            descendant.CanCollide = false
+            descendant.CanTouch = false
+            descendant.CanQuery = false
+            descendant.Massless = true
+        end
+    end
+
+    local imported = container:FindFirstChildOfClass("Model") or container
+    local sourceParts = {}
+    local sourceFrames = {}
+    for _, descendant in imported:GetDescendants() do
+        if descendant:IsA("BasePart") then
+            table.insert(sourceParts, descendant)
+            if AUTHORED_R15_PARTS[descendant.Name] then
+                sourceFrames[descendant.Name] = descendant.CFrame
+            end
+        end
+    end
+    if #sourceParts == 0 then
+        container:Destroy()
+        return nil
+    end
+
+    local description = Instance.new("HumanoidDescription")
+    local rigOk, modelOrError = pcall(function()
+        return Players:CreateHumanoidModelFromDescriptionAsync(
+            description,
+            Enum.HumanoidRigType.R15
+        )
+    end)
+    description:Destroy()
+    if not rigOk or not modelOrError then
+        container:Destroy()
+        return nil
+    end
+
+    local model = modelOrError
+    local root, head = configureRig(model)
+    if not root or not head then
+        model:Destroy()
+        container:Destroy()
+        return nil
+    end
+
+    -- Keep Roblox's proven R15 joint/animation skeleton but make its stock body
+    -- invisible. Authored MeshParts are welded to those animated segments.
+    for _, descendant in model:GetDescendants() do
+        if descendant:IsA("BasePart") and descendant ~= root then
+            descendant.Transparency = 1
+        end
+    end
+
+    for _, visual in sourceParts do
+        local originalName = visual.Name
+        local anchorName = authoredAnchorName(originalName)
+        local anchor = bodyPart(model, anchorName) or bodyPart(model, "UpperTorso")
+        if anchor then
+            if AUTHORED_R15_PARTS[originalName] then
+                visual.CFrame = anchor.CFrame
+            else
+                local sourceAnchor = sourceFrames[anchorName]
+                local offset = if sourceAnchor
+                    then sourceAnchor:ToObjectSpace(visual.CFrame)
+                    else CFrame.new()
+                visual.CFrame = anchor.CFrame * offset
+            end
+            visual.Name = "Visual_" .. originalName
+            weldPart(model, anchor, visual)
+        end
+    end
+    container:Destroy()
+    model.Name = spec.Name or spec.NpcId or assetSpec.TemplateName or "EverLeafNpc"
+    model:SetAttribute("VisualSource", "authored_asset")
+    model:SetAttribute("VisualAssetId", assetSpec.AssetId)
+    return model, root, head
+end
+
 local function cloneAuthoredNpc(spec)
     local npcId = spec.NpcId
     local assetSpec = npcId and NpcAssetRegistry[npcId]
     if not assetSpec or assetSpec.Status ~= "reviewed" then
         return nil
     end
+
+    -- Studio/local authored templates remain the first choice for iteration.
     local folder = ServerStorage:FindFirstChild("AuthoredNpcTemplates")
-    if not folder then
-        return nil
+    if folder then
+        local source = folder:FindFirstChild(assetSpec.TemplateName or npcId)
+        if source and source:IsA("Model") then
+            local model = source:Clone()
+            local humanoid = model:FindFirstChildOfClass("Humanoid")
+            local root = model:FindFirstChild("HumanoidRootPart")
+            local head = model:FindFirstChild("Head")
+            if humanoid and root and head then
+                model.Name = spec.Name or npcId or source.Name
+                model:SetAttribute("VisualSource", "authored_serverstorage")
+                return model, root, head
+            end
+            model:Destroy()
+        end
     end
-    local source = folder:FindFirstChild(assetSpec.TemplateName or npcId)
-    if not source or not source:IsA("Model") then
-        return nil
-    end
-    local model = source:Clone()
-    local humanoid = model:FindFirstChildOfClass("Humanoid")
-    local root = model:FindFirstChild("HumanoidRootPart")
-    local head = model:FindFirstChild("Head")
-    if not humanoid or not root or not head then
-        model:Destroy()
-        return nil
-    end
-    model.Name = spec.Name or npcId or source.Name
-    model:SetAttribute("VisualSource", "authored")
-    return model, root, head
+
+    return loadAuthoredNpcAsset(spec, assetSpec)
 end
 
 function StylizedNpcFactory.Create(parent, spec)

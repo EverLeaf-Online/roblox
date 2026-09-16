@@ -35,21 +35,45 @@ assert(
     "NPC authored visuals require review state"
 )
 assert(
-    string.find(npcs, 'VisualSource", "authored"', 1, true),
-    "NPC authored visuals must be tagged"
+    string.find(npcs, 'VisualSource", "authored_serverstorage"', 1, true),
+    "NPC authored ServerStorage visuals must be tagged"
+)
+assert(
+    string.find(npcs, 'VisualSource", "authored_asset"', 1, true),
+    "runtime authored NPC asset source tag missing"
 )
 assert(
     string.find(npcs, 'VisualSource", "generated_r15_fallback"', 1, true),
     "generated R15 NPCs must be explicit fallback"
 )
 assert(
-    string.find(
-        npcRegistry,
-        "Production NPC visuals should be reviewed authored R15 models",
-        1,
-        true
-    ),
+    string.find(npcRegistry, "Canonical production NPC visual registry", 1, true),
     "NPC visual registry policy missing"
+)
+for _, token in
+    {
+        "106620969880813",
+        "72467646496046",
+        "120296033309062",
+        "74873617387258",
+        "71702053408362",
+    }
+do
+    assert(string.find(npcRegistry, token, 1, true), "hero authored NPC asset missing " .. token)
+end
+assert(
+    string.find(npcs, "InsertService.LoadAsset", 1, true),
+    "reviewed NPC model assets must load through InsertService"
+)
+assert(
+    string.find(npcs, "AUTHORED_R15_PARTS", 1, true),
+    "authored NPC visuals must attach to the R15 animation skeleton"
+)
+assert(fs.isFile("scripts/generate_lumenreach_hero_npcs.py"), "hero NPC generator missing")
+assert(fs.isFile("assets/original/lumenreach_hero_npcs/manifest.json"), "hero NPC manifest missing")
+assert(
+    fs.isFile("assets/original/lumenreach_hero_npcs/upload_results.json"),
+    "hero NPC uploads missing"
 )
 
 for _, token in

@@ -771,3 +771,5 @@ Do **not** call M1 complete until a fresh player can enter Studio and, without d
 - V25 district architecture replacement: replaced the remaining 14 Lumenreach district/landmark production meshes with individually authored V2 assets (wayhouse, barn, two crofts, Glowmere stilt house, ranger hall, gatehouse, ruined hall, forge yard, mausoleum, observatory, sanctuary, fortress tower, shrine). All uploaded assets are Roblox-approved; Studio player-height acceptance is still required.
 
 - Quest experience rebuild: live gameplay now records Interact, Craft, Use, and Reach objectives in addition to Defeat/Collect/Explore; early Lumenreach quests use the new objective vocabulary and the HUD renders player-facing verbs instead of raw objective type names.
+
+- Hero NPC visual replacement: Ilyra, Orin, Tovin, Maela, and Seren now have original reviewed model assets loaded onto a hidden Roblox R15 animation skeleton. The generated R15 character factory remains only as a fallback for NPCs without authored production art. Studio visual/animation acceptance is still required.
