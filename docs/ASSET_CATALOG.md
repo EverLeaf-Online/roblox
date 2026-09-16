@@ -1,6 +1,6 @@
 # EverLeaf Environment Asset Catalog
 
-This catalog tracks third-party environment assets before they are allowed into production. Untrusted marketplace assets are never loaded dynamically during live gameplay. EverLeaf-owned assets produced from reviewed CC0 source files may be runtime-loaded from Roblox by asset ID after sanitization. Every production dependency must have source/license provenance and a bounded import path.
+This catalog tracks third-party environment assets before they are allowed into production. EverLeaf now deliberately uses a curated set of **free Roblox Creator Store 3D models** for production architecture. Public free models are loaded with `AssetService:LoadAssetAsync()` only when the place has `Allow Loading Third Party Assets` enabled; Roblox returns them sandboxed, then EverLeaf strips scripts, remotes, bindables, sounds, joints/constraints, prompts, tools, humanoids/animators, package links and other behavior before registering geometry as a prefab. Every production dependency keeps source/provenance metadata and explicit collision remains server-authored.
 
 ## Current candidates
 
@@ -12,12 +12,13 @@ This catalog tracks third-party environment assets before they are allowed into 
 
 ## Import rules
 
-1. Insert through Studio/Creator Store into an isolated inspection place or folder.
-2. Remove every Script, LocalScript, ModuleScript, remote, loader, analytics object, or unexpected dependency unless explicitly reviewed and approved.
-3. Check triangle count, material count, texture resolution, collisions, pivots, scale, and streaming behavior.
-4. Prefer reusable modular pieces over giant combined meshes.
-5. Record attribution/license requirements before shipping.
-6. Never call `InsertService:LoadAsset()` for marketplace environment content during live gameplay.
+1. Only use assets whose Creator Store page shows **Get Model** / free distribution; preserve the source URL and creator in the registry.
+2. Load through `AssetService:LoadAssetAsync()` so third-party content arrives sandboxed; never use the legacy `InsertService:LoadAsset()` marketplace path.
+3. Strip every executable or behavioral descendant before prefab registration: scripts, remotes/bindables, sounds, tools, humanoids/animators, joints/constraints, prompts, package links, and unexpected runtime systems.
+4. Retain curated static visual data (parts, meshes, SurfaceAppearance, decals/textures) so sanitization does not destroy the asset that was selected.
+5. Use EverLeaf-authored collision proxies and gameplay interactions; Creator Store models never own authority, scripts, combat, quests, doors, shops, or triggers.
+6. Check scale, pivots, triangle/part count, streaming behavior, and player-height appearance in Studio before visual acceptance.
+7. Prefer several coherent assets from a small approved library over random Toolbox insertion. Record attribution/credit requirements before shipping.
 
 ## Phase 1 forest kit — active
 
@@ -38,54 +39,50 @@ Primary source: Poly Haven CC0 forest assets, including the **Pine Forest** coll
 
 These models are EverLeaf-owned Roblox uploads derived from CC0 source files. The loader sanitizes every imported model before prefab registration. The old broken Creator Store tree `580221169` is not an active Lumenreach dependency. Procedural geometry remains as a fail-safe where practical.
 
-### Original EverLeaf Lumenreach architecture kit — active
+### Curated free Creator Store architecture — active replacement
 
-These are **original EverLeaf-authored stylized low-poly meshes**, generated from the reproducible Blender source script `scripts/generate_lumenreach_architecture.py`, exported as GLB, uploaded to the EverLeaf Roblox creator account, and sanitized before placement. They replace Part-built block shells for major Lumenreach buildings while retaining simple server-authored collision proxies.
+The previous generated Blender architecture is **retired from production**. Those source files remain only as historical project artifacts; the runtime registry no longer points at them and the production GLB QA gate no longer counts them as active architecture.
 
-| Prefab | Roblox asset ID | Approx source tris | Purpose |
-|---|---:|---:|---|
-| `LumenCivicHall` | `133556360685406` | 1,768 | Wayfarer civic/quest landmark |
-| `LumenQuartermasterDepot` | `137239183865764` | 1,652 | storehouse/loading depot |
-| `LumenArchiveLodge` | `137267951808879` | 1,468 | archive/research lodge |
-| `LumenWayfarerInn` | `71957319643364` | 1,736 | inn/social building |
-| `LumenHealerLodge` | `120378183892930` | 1,792 | healer/apothecary |
-| `LumenCraftWorkshop` | `131833611058968` | 680 | open craft workshop |
-| `LumenOpenStable` | `85851512665594` | 548 | open stable |
-| `LumenProvingLodge` | `119304858476581` | 1,520 | training/proving lodge |
-| `LumenRoadWayhouse` | `98034643639937` | 868 | road-service shelter |
-| `LumenFarmBarn` | `89701830913140` | 912 | farm storage/barn |
-| `LumenCroftCottageA` | `132542848015613` | 1,440 | croft cottage variant A |
-| `LumenCroftCottageB` | `116174241850482` | 1,472 | croft cottage variant B |
-| `LumenGlowmereStiltHouse` | `139234768601269` | 1,220 | wetland stilt-house |
-| `LumenMossglenRangerHall` | `106301394317624` | 1,748 | ranger/hunter hall |
-| `LumenFrontierGatehouse` | `120621904681287` | 560 | frontier defensive gatehouse |
-| `LumenRuinedHall` | `70784355192049` | 440 | recognizable ruined hall |
-| `LumenForgeYard` | `123625015286607` | 484 | open forge/smithy |
-| `LumenGraveboneMausoleum` | `84123705929702` | 324 | Gravebone tomb structure |
-| `LumenSunmossObservatory` | `106886408516548` | 652 | highland observatory landmark |
-| `LumenVeilfallSanctuary` | `136210017750290` | 524 | ravine sanctuary landmark |
-| `LumenShatteredFortressTower` | `111947348903814` | 572 | Shattered Arch fortress landmark |
-| `LumenStoneShrine` | `120864356034791` | 264 | route/shrine landmark |
+Lumenreach now resolves its logical building roles through curated free Creator Store models. Reusing a logical role keeps the world-layout/collision code stable while the visible prefab changes.
 
-All 22 current architecture assets returned Roblox moderation state `Approved` on the V19 upload. The V19 GLBs bake the stylized flat-color palette into an embedded texture atlas so Roblox does not collapse the authored materials to pale/white surfaces. Source GLBs and generation metadata live under `assets/original/lumenreach_architecture/`; canonical uploaded IDs live in `assets/roblox/lumenreach_architecture_asset_ids.json`.
+| EverLeaf prefab role | Creator Store asset | ID | Creator / notes |
+|---|---|---:|---|
+| `LumenCivicHall` | Inn | `25561936` | @bevillia |
+| `LumenQuartermasterDepot` / `LumenCraftWorkshop` / `LumenForgeYard` | Blacksmith Shop | `125612298` | @pielovingboy |
+| `LumenArchiveLodge` / `LumenCroftCottageA` | Low Poly Medieval House | `4989402992` | @anomon — creator requests credit |
+| `LumenWayfarerInn` | Medieval House | `1819167267` | @VicyX |
+| `LumenHealerLodge` / `LumenCroftCottageB` | Medieval House | `2914202068` | @iiLuxIV |
+| `LumenOpenStable` | Barn | `506010511` | @Q_Q; bundled script is stripped |
+| `LumenProvingLodge` | Medieval House Knight Medieval Fantasy Kingdom | `103444669708339` | @KairoNull; bundled script is stripped |
+| `LumenRoadWayhouse` | Medieval House 1 | `254849325` | @Naperin |
+| `LumenFarmBarn` | barn | `13902499907` | @PBJohns; bundled script is stripped |
+| `LumenGlowmereStiltHouse` | old house | `15413223952` | @use251name |
+| `LumenMossglenRangerHall` | Medieval House | `16421571` | @Drackore |
+| `LumenFrontierGatehouse` | Medieval Entrance | `4455026229` | @Canyski — creator requests credit |
+| `LumenRuinedHall` | Ruins | `49387516` | @Quenty |
+| `LumenGraveboneMausoleum` | Tomb | `1115559295` | @CourageousKyran; bundled scripts are stripped |
+| `LumenSunmossObservatory` / `LumenShatteredFortressTower` | tower medieval | `28483443` | @sourtreemagician |
+| `LumenVeilfallSanctuary` / `LumenStoneShrine` | Shrine | `270668855` | @VocSG; bundled behavior is stripped |
+
+Additional approved free Lumenreach dressing sources are `Medieval Market Stalls` (`16263631766`, @Scripted_Kool) and `Medieval Asset Pack` (`74849899553864`, @KickPlayer_80). They are geometry sources only; EverLeaf owns placement, collision, interactions, and gameplay behavior.
 
 ### Original in-project environment props
 
 Lumenreach also includes code-built props that have no external asset dependency: wildflower patches, grass/bush fallbacks, mushroom clusters, cattail clusters, Lumen waystones, crystals, camp furniture, lanterns, bridge pieces, ruins, fireflies, and fallback deadwood/rock geometry. These are intentionally lightweight and keep the map readable if a remote prefab fails to load.
 
-### Original EverLeaf Brasshaven industrial architecture kit — active
+### Curated free Creator Store Brasshaven architecture — active replacement
 
-These are original EverLeaf-authored stylized low-poly industrial MeshParts generated by `scripts/generate_brasshaven_architecture.py`. They use an embedded flat-color atlas and separate simple collision proxies.
+The generated Brasshaven V2 building kit is also **retired from production**. Current logical industrial prefabs now resolve to a small free Creator Store library and remain wrapped by EverLeaf-authored district placement/collision code.
 
-| Prefab | Roblox asset ID | Purpose |
-|---|---:|---|
-| `BrassFoundryAdminHall` | `124973222924746` | civic/foundry administration |
-| `BrassMachinistWorkshop` | `138267838471833` | machine/workshop block |
-| `BrassSmelterHouse` | `120967242976120` | smelter/furnace building |
-| `BrassBoilerStation` | `104828075505604` | boiler/maintenance station |
-| `BrassWorkerBarracks` | `136478312344800` | worker housing/shift block |
-| `BrassLoadingDepot` | `80090386975748` | freight/loading depot |
-| `BrassIndustrialGatehouse` | `76713540788976` | industrial gate/control block |
-| `BrassRefineryTower` | `83172229593216` | refinery/power landmark |
+| EverLeaf prefab role | Creator Store asset | ID | Creator / notes |
+|---|---|---:|---|
+| `BrassFoundryAdminHall` / `BrassBoilerStation` | Industrial Buildings | `2195158233` | @Azynus |
+| `BrassMachinistWorkshop` | factory thing | `4729280834` | @ImaginaryWisp; bundled behavior stripped |
+| `BrassSmelterHouse` / `BrassLoadingDepot` | Warehouse | `10694469551` | Marvel Advanced Universe |
+| `BrassWorkerBarracks` | Warehouse | `655063599` | @NovaKeinPlays |
+| `BrassIndustrialGatehouse` | Gate | `5037991647` | @hatortot |
+| `BrassRefineryTower` | Smokestack v2 | `272953704` | @rbadam; bundled script stripped |
 
-All eight returned Roblox moderation state `Approved` on upload. Source GLBs, palette, manifest and upload results are under `assets/original/brasshaven_architecture/`; canonical IDs are in `assets/roblox/brasshaven_architecture_asset_ids.json`.
+Approved industrial dressing sources: `Factory Assets - v0.8` (`8312679976`, @SilvixBtw) and `Pipes` (`14960685595`, @alchemist1995).
+
+**Acceptance rule:** these selections are production *candidates wired into source*, not visual acceptance. Any model that looks wrong at player height is replaced with another free Store candidate; we do not patch a bad asset with clutter.

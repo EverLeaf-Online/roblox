@@ -245,6 +245,21 @@ local function makeForgeTower(parent, position, height, seed)
     local model = Instance.new("Model")
     model.Name = "ForgeTower" .. tostring(seed)
     model.Parent = parent
+
+    local scale = prefabScaleForLongest("BrassRefineryTower", height + 12)
+    local creatorVisual =
+        EnvironmentPrefabService.Place("BrassRefineryTower", model, CFrame.new(position), scale)
+    if creatorVisual then
+        creatorVisual.Name = "CreatorStoreSmokestack"
+        setIndustrialVisual(creatorVisual)
+        makeCollisionProxy(
+            model,
+            "ForgeTowerCollision",
+            Vector3.new(13, height + 8, 13),
+            CFrame.new(position + Vector3.new(0, (height + 8) * 0.5, 0))
+        )
+        return model
+    end
     local stone = Color3.fromRGB(74, 69, 62)
     local metal = Color3.fromRGB(82, 76, 68)
     makePart(
@@ -1834,8 +1849,9 @@ function BrasshavenWorldService.Init()
 
     local world = Instance.new("Model")
     world.Name = GENERATED_NAME
-    world:SetAttribute("WorldDesignVersion", 4)
+    world:SetAttribute("WorldDesignVersion", 5)
     world:SetAttribute("MMOBuildingLayoutPass", true)
+    world:SetAttribute("CreatorStoreArchitecture", true)
     world.Parent = Workspace
 
     local ground = makePart(

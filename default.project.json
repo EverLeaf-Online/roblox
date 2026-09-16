@@ -237,6 +237,12 @@
           "MaterialPattern": "Organic"
         }
       }
+    },
+    "AssetService": {
+      "$className": "AssetService",
+      "$properties": {
+        "AllowInsertFreeAssets": true
+      }
     }
   }
 }

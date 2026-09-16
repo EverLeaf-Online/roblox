@@ -5,7 +5,7 @@ local worldConfig = fs.readFile("src/server/Content/LumenreachWorldConfig.luau")
 local brass = fs.readFile("src/server/Services/BrasshavenWorldService.luau")
 
 assert(
-    string.find(worldConfig, "DesignVersion = 25", 1, true),
+    string.find(worldConfig, "DesignVersion = 26", 1, true),
     "Lumenreach building-layout pass must be V25"
 )
 assert(
@@ -49,7 +49,7 @@ assert(
     "Brasshaven actual industrial building layout pass must be wired"
 )
 assert(
-    string.find(brass, 'world:SetAttribute("WorldDesignVersion", 4)', 1, true)
+    string.find(brass, 'world:SetAttribute("WorldDesignVersion", 5)', 1, true)
         and string.find(brass, 'world:SetAttribute("MMOBuildingLayoutPass", true)', 1, true),
     "Brasshaven generated world must advertise the real building-layout pass"
 )

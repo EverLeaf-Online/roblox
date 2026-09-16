@@ -1,4 +1,4 @@
-local InsertService = game:GetService("InsertService")
+local AssetService = game:GetService("AssetService")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
@@ -177,7 +177,7 @@ local function importVariantAsset(entry)
     end
 
     local ok, containerOrError = pcall(function()
-        return InsertService:LoadAsset(entry.AssetId)
+        return AssetService:LoadAssetAsync(entry.AssetId)
     end)
     if not ok then
         warn(
@@ -238,7 +238,7 @@ local function importAsset(entry)
     end
 
     local ok, containerOrError = pcall(function()
-        return InsertService:LoadAsset(entry.AssetId)
+        return AssetService:LoadAssetAsync(entry.AssetId)
     end)
     if not ok then
         warn(
@@ -290,6 +290,7 @@ function StudioEnvironmentAssetService.Init()
         else
             local approved = entry.Status == "approved_for_sanitized_import"
                 or entry.Status == "approved_for_studio_sanitized_import"
+                or entry.Status == "approved_free_creator_store"
             local allowedHere = inStudio or entry.AllowRuntimeLoad == true
             if approved and allowedHere then
                 if entry.VariantPrefix then

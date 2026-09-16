@@ -66,7 +66,7 @@ do
 end
 
 assert(
-    string.find(worldConfig, "DesignVersion = 25", 1, true) ~= nil,
+    string.find(worldConfig, "DesignVersion = 26", 1, true) ~= nil,
     "architecture conversion must bump world design version"
 )
 
@@ -129,3 +129,8 @@ do
 end
 
 print("Lumenreach architecture rules tests passed")
+
+assert(
+    string.find(source, 'world:SetAttribute("CreatorStoreArchitecture", true)', 1, true),
+    "Lumenreach must advertise Creator Store architecture pass"
+)

@@ -12,11 +12,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 TARGETS = {
-    "architecture": [
-        ROOT / "assets/original/lumenreach_hero_architecture_v2",
-        ROOT / "assets/original/lumenreach_district_architecture_v2",
-        ROOT / "assets/original/brasshaven_architecture_v2",
-    ],
     "creature": [
         ROOT / "assets/original/starter_monsters",
         ROOT / "assets/original/lumenreach_elite_monsters",
@@ -194,12 +189,8 @@ def inspect(path: Path, kind: str):
         raise ValueError(f"triangle budget invalid: {triangles}")
     if mesh_node_count <= 0 or mesh_node_count > 128:
         raise ValueError(f"mesh-node budget invalid: {mesh_node_count}")
-    if kind == "architecture":
-        if longest < 5 or longest > 120:
-            raise ValueError(f"architecture scale suspicious: {dims}")
-    else:
-        if longest < 1 or longest > 30:
-            raise ValueError(f"character/creature scale suspicious: {dims}")
+    if longest < 1 or longest > 30:
+        raise ValueError(f"character/creature scale suspicious: {dims}")
     for image in doc.get("images", []):
         uri = image.get("uri")
         if isinstance(uri, str) and not uri.startswith("data:"):

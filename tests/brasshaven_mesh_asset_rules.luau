@@ -2,62 +2,78 @@ local fs = require("@lune/fs")
 
 local registry = fs.readFile("src/server/Content/EnvironmentAssetRegistry.luau")
 local world = fs.readFile("src/server/Services/BrasshavenWorldService.luau")
-local manifest = fs.readFile("assets/original/brasshaven_architecture_v2/manifest.json")
-local uploads = fs.readFile("assets/original/brasshaven_architecture_v2/upload_results.json")
-local generator = fs.readFile("scripts/generate_brasshaven_architecture_v2.py")
-
-assert(
-    fs.isFile("assets/original/brasshaven_architecture_v2/brass_v2_palette.png"),
-    "Brasshaven architecture palette is missing"
-)
-assert(
-    string.find(generator, "apply_atlas", 1, true),
-    "Brasshaven generator must bake the palette atlas"
-)
 
 local assets = {
-    { "BrassFoundryAdminHall", "124973222924746", "BrassFoundryAdminHallV2" },
-    { "BrassMachinistWorkshop", "138267838471833", "BrassMachinistWorkshopV2" },
-    { "BrassSmelterHouse", "120967242976120", "BrassSmelterHouseV2" },
-    { "BrassBoilerStation", "104828075505604", "BrassBoilerStationV2" },
-    { "BrassWorkerBarracks", "136478312344800", "BrassWorkerBarracksV2" },
-    { "BrassLoadingDepot", "80090386975748", "BrassLoadingDepotV2" },
-    { "BrassIndustrialGatehouse", "76713540788976", "BrassIndustrialGatehouseV2" },
-    { "BrassRefineryTower", "83172229593216", "BrassRefineryTowerV2" },
+    { "BrassFoundryAdminHall", "2195158233" },
+    { "BrassMachinistWorkshop", "4729280834" },
+    { "BrassSmelterHouse", "10694469551" },
+    { "BrassBoilerStation", "2195158233" },
+    { "BrassWorkerBarracks", "655063599" },
+    { "BrassLoadingDepot", "10694469551" },
+    { "BrassIndustrialGatehouse", "5037991647" },
+    { "BrassRefineryTower", "272953704" },
 }
+
 for _, spec in assets do
     local name = spec[1]
     local assetId = spec[2]
-    assert(string.find(registry, name .. " = {", 1, true), "registry missing " .. name)
+    local entryAt =
+        assert(string.find(registry, name .. " = {", 1, true), "registry missing " .. name)
+    local nextEntry = string.find(registry, "\n    },", entryAt, true) or #registry
+    local entry = string.sub(registry, entryAt, nextEntry)
     assert(
-        string.find(registry, "AssetId = " .. assetId, 1, true),
-        "wrong/missing asset ID for " .. name
+        string.find(entry, "AssetId = " .. assetId, 1, true),
+        "wrong Creator Store asset ID for " .. name
     )
-    local manifestName = spec[3] or name
-    assert(string.find(manifest, '"' .. manifestName .. '"', 1, true), "manifest missing " .. name)
     assert(
-        string.find(uploads, '"assetId": ' .. assetId, 1, true),
-        "upload results missing " .. name
+        string.find(entry, 'Status = "approved_free_creator_store"', 1, true),
+        name .. " must use approved free Creator Store status"
+    )
+    assert(
+        string.find(entry, "ThirdPartyFree = true", 1, true),
+        name .. " must explicitly declare free third-party provenance"
+    )
+    assert(
+        string.find(entry, "CreatorStoreUrl = ", 1, true),
+        name .. " must preserve its Creator Store source URL"
     )
     assert(
         string.find(world, '"' .. name .. '"', 1, true),
         "Brasshaven service does not reference " .. name
     )
 end
+
 assert(
     string.find(world, "placeIndustrialBuilding", 1, true),
-    "Brasshaven MeshPart placement helper missing"
+    "Brasshaven placement helper missing"
 )
 assert(
     string.find(world, "EnvironmentPrefabService.Place", 1, true),
-    "Brasshaven must place sanitized prefabs"
+    "Brasshaven must place sanitized Creator Store prefabs"
 )
 assert(
     string.find(world, "spec.Size * scale", 1, true),
-    "Brasshaven collision size must scale with mesh"
+    "Brasshaven collision size must scale with imported geometry"
 )
 assert(
     string.find(world, "spec.Offset * scale", 1, true),
-    "Brasshaven collision offset must scale with mesh"
+    "Brasshaven collision offset must scale with imported geometry"
 )
-print("Brasshaven MeshPart architecture asset rules tests passed")
+
+for _, propName in { "CreatorFactoryProps", "CreatorIndustrialPipes" } do
+    assert(
+        string.find(registry, propName .. " = {", 1, true),
+        "missing industrial Creator Store dressing source " .. propName
+    )
+end
+
+print("Brasshaven Creator Store architecture asset rules tests passed")
+
+assert(
+    string.find(world, '"CreatorStoreSmokestack"', 1, true),
+    "Brasshaven skyline forge towers must prefer the free Creator Store smokestack prefab"
+)
+assert(
+    string.find(world, 'world:SetAttribute("CreatorStoreArchitecture", true)', 1, true),
+    "Brasshaven must advertise Creator Store architecture pass"
+)

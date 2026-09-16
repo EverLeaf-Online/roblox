@@ -5584,6 +5584,7 @@ function LumenreachWorldService.Init()
     world:SetAttribute("WorldDesignVersion", WORLD_DESIGN_VERSION)
     world:SetAttribute("TerrainFirstMMOLayout", true)
     world:SetAttribute("BespokeLumenreachArchitecture", true)
+    world:SetAttribute("CreatorStoreArchitecture", true)
     world.Parent = Workspace
 
     makeZoneContent(world)

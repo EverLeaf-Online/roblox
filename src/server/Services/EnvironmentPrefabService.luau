@@ -14,8 +14,14 @@ local BLOCKED_CLASSES = {
     ClickDetector = true,
     ProximityPrompt = true,
     Sound = true,
-    Texture = true,
-    Decal = true,
+    Animation = true,
+    Dialog = true,
+    Tool = true,
+    Humanoid = true,
+    AnimationController = true,
+    Animator = true,
+    Seat = true,
+    VehicleSeat = true,
 }
 
 local function getFolder()
@@ -30,7 +36,13 @@ end
 
 local function sanitize(instance)
     for _, descendant in instance:GetDescendants() do
-        if BLOCKED_CLASSES[descendant.ClassName] then
+        local blocked = BLOCKED_CLASSES[descendant.ClassName]
+            or descendant:IsA("LuaSourceContainer")
+            or descendant:IsA("Constraint")
+            or descendant:IsA("JointInstance")
+            or descendant:IsA("WeldConstraint")
+            or descendant:IsA("PackageLink")
+        if blocked then
             descendant:Destroy()
         elseif descendant:IsA("BasePart") then
             descendant.Anchored = true
