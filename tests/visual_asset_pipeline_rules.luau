@@ -14,7 +14,7 @@ assert(
     "monster authored visuals require review state"
 )
 assert(
-    string.find(monsters, 'VisualSource", "authored"', 1, true),
+    string.find(monsters, 'VisualSource", "authored_serverstorage"', 1, true),
     "monster authored visuals must be tagged"
 )
 assert(
@@ -22,7 +22,7 @@ assert(
     "legacy monster visuals must be explicit fallback"
 )
 assert(
-    string.find(monsterRegistry, "Production monster visuals should be authored models", 1, true),
+    string.find(monsterRegistry, "Canonical production monster visual registry", 1, true),
     "monster visual registry policy missing"
 )
 
@@ -50,6 +50,34 @@ assert(
         true
     ),
     "NPC visual registry policy missing"
+)
+
+for _, token in
+    {
+        "111556426711525",
+        "139841213411079",
+        "123954746000436",
+        "89263541500191",
+        "80182968126504",
+    }
+do
+    assert(
+        string.find(monsterRegistry, token, 1, true),
+        "starter authored monster asset missing " .. token
+    )
+end
+assert(
+    string.find(monsters, "InsertService:LoadAsset", 1, true)
+        or string.find(monsters, "pcall(InsertService.LoadAsset", 1, true),
+    "reviewed monster assets must load through InsertService"
+)
+assert(
+    string.find(monsters, "sanitizeAuthoredAsset", 1, true),
+    "authored monster assets must be sanitized"
+)
+assert(
+    string.find(monsters, 'VisualSource", "authored_asset"', 1, true),
+    "runtime authored monster source tag missing"
 )
 
 print("production visual asset pipeline rules tests passed")

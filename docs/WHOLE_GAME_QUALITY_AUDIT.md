@@ -395,3 +395,5 @@ No future checklist item should use plain “complete” when only source implem
 ## Rebuild execution update — 2026-09-16
 
 The rebuild has moved beyond roadmap classification. Production monster and NPC factories now prefer explicitly reviewed authored templates and tag procedural/generated models as fallback-only. Quest progress is routed through a common objective bus supporting Defeat, Collect, Explore, Interact, Craft, Use, Reach, Escort, and Survive. Source-tree iterative `.bak` snapshots were removed and ignored so the repository reflects production source rather than editing debris. The next visual milestone is replacing fallback monster/NPC visuals with reviewed original assets and continuing district/hero-architecture replacement under player-height Studio QA.
+
+- Production monster visual rebuild batch 1: five original authored starter creatures (Lumen Mossling, Glowcap Slime, Suncrest Ridgebeak, Brambleback, Lumen Wisp) now have approved Roblox model assets and are loaded through a sanitized asset-to-Humanoid rig path. Their old code-built Part creatures remain fallback only. Studio visual/animation acceptance remains required.

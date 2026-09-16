@@ -1,0 +1,88 @@
+{
+  "LumenMossling": {
+    "file": "assets/original/starter_monsters/LumenMossling.glb",
+    "triangles": 612,
+    "vertices": 324,
+    "parts": [
+      "Body",
+      "Head",
+      "EyeL",
+      "EyeR",
+      "Leaf",
+      "Leaf.001",
+      "Leaf.002",
+      "FootL",
+      "FootR"
+    ]
+  },
+  "GlowcapSlime": {
+    "file": "assets/original/starter_monsters/GlowcapSlime.glb",
+    "triangles": 1012,
+    "vertices": 526,
+    "parts": [
+      "Body",
+      "Face",
+      "EyeL",
+      "EyeR",
+      "Cap",
+      "Spot",
+      "Spot.001",
+      "Spot.002",
+      "Spot.003",
+      "Spot.004"
+    ]
+  },
+  "SuncrestRidgebeak": {
+    "file": "assets/original/starter_monsters/SuncrestRidgebeak.glb",
+    "triangles": 768,
+    "vertices": 408,
+    "parts": [
+      "Body",
+      "Head",
+      "Beak",
+      "EyeL",
+      "EyeR",
+      "LeftWing",
+      "RightWing",
+      "LeftLeg",
+      "RightLeg",
+      "LeftFoot",
+      "RightFoot",
+      "Tail"
+    ]
+  },
+  "Brambleback": {
+    "file": "assets/original/starter_monsters/Brambleback.glb",
+    "triangles": 680,
+    "vertices": 368,
+    "parts": [
+      "Body",
+      "Head",
+      "Snout",
+      "Thorn",
+      "Thorn.001",
+      "Thorn.002",
+      "Thorn.003",
+      "Thorn.004",
+      "FrontLeftLeg",
+      "FrontRightLeg",
+      "BackLeftLeg",
+      "BackRightLeg",
+      "Tusk",
+      "Tusk.001"
+    ]
+  },
+  "LumenWisp": {
+    "file": "assets/original/starter_monsters/LumenWisp.glb",
+    "triangles": 424,
+    "vertices": 224,
+    "parts": [
+      "Body",
+      "Core",
+      "Shard1",
+      "Shard2",
+      "Shard3",
+      "Tail"
+    ]
+  }
+}
