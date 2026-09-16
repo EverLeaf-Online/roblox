@@ -51,12 +51,13 @@ end
 print("environment appearance security tests passed")
 
 local lumenreach = fs.readFile("src/server/Services/LumenreachWorldService.luau")
+local terrainBuilder = fs.readFile("src/server/Services/LumenreachTerrainBuilder.luau")
 assert(
     string.find(lumenreach, '"RockFace"', 1, true) == nil,
     "terrain-first Lumenreach must not place the paper-thin imported RockFace prefab"
 )
 assert(
-    string.find(lumenreach, "terrain:Clear()", 1, true) ~= nil
+    string.find(terrainBuilder, "terrain:Clear()", 1, true) ~= nil
         and string.find(
                 lumenreach,
                 'world:SetAttribute("TerrainFirstMMOLayout", true)',

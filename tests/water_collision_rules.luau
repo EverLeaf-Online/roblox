@@ -3,6 +3,7 @@ local fs = require("@lune/fs")
 local files = {
     "src/client/Controllers/CameraController.luau",
     "src/server/Services/LumenreachWorldService.luau",
+    "src/server/Services/LumenreachTerrainBuilder.luau",
     "src/server/Services/LumenreachGameplayService.luau",
     "src/server/Services/MonsterAttackHitboxService.luau",
     "src/server/Services/MonsterSpawnService.luau",
@@ -23,10 +24,11 @@ for _, path in files do
 end
 
 local world = fs.readFile("src/server/Services/LumenreachWorldService.luau")
+local terrainBuilder = fs.readFile("src/server/Services/LumenreachTerrainBuilder.luau")
 assert(
-    string.find(world, "Enum.Material.Water", 1, true) ~= nil
-        and string.find(world, "carveGorge", 1, true) ~= nil
-        and string.find(world, "Glowmere's wetland", 1, true) ~= nil,
+    string.find(terrainBuilder, "Enum.Material.Water", 1, true) ~= nil
+        and string.find(terrainBuilder, "carveGorge", 1, true) ~= nil
+        and string.find(terrainBuilder, "Glowmere's wetland", 1, true) ~= nil,
     "Lumenreach must retain real Terrain water in the gorge and Glowmere wetland"
 )
 assert(
@@ -49,10 +51,11 @@ assert(
     "current movement code must not disable or override Roblox swimming state"
 )
 
-local lumen = fs.readFile("src/server/Services/LumenreachWorldService.luau")
-local gorgeStart = assert(string.find(lumen, "local function carveGorge", 1, true))
-local gorgeEnd = assert(string.find(lumen, "\nlocal function ", gorgeStart + 1, true))
-local gorge = string.sub(lumen, gorgeStart, gorgeEnd - 1)
+local gorgeStart = assert(string.find(terrainBuilder, "local function carveGorge", 1, true))
+local gorgeEnd = assert(
+    string.find(terrainBuilder, "\nfunction LumenreachTerrainBuilder.Build", gorgeStart + 1, true)
+)
+local gorge = string.sub(terrainBuilder, gorgeStart, gorgeEnd - 1)
 local rockAt = assert(string.find(gorge, "Enum.Material.Rock", 1, true))
 local waterAt = assert(string.find(gorge, "Enum.Material.Water", 1, true))
 assert(rockAt < waterAt, "gorge rock lining must be completed before the final water pass")

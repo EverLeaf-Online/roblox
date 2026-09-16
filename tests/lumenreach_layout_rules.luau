@@ -1,6 +1,7 @@
 local fs = require("@lune/fs")
 
 local source = fs.readFile("src/server/Services/LumenreachWorldService.luau")
+local terrainBuilder = fs.readFile("src/server/Services/LumenreachTerrainBuilder.luau")
 
 for _, required in
     {
@@ -9,7 +10,7 @@ for _, required in
         "local WORLD_DESIGN_VERSION = 25",
         'world:SetAttribute("WorldDesignVersion", WORLD_DESIGN_VERSION)',
         'world:SetAttribute("TerrainFirstMMOLayout", true)',
-        "terrain:Clear()",
+        "LumenreachTerrainBuilder.Build({",
         "local ROUTES = table.freeze",
         'Id = "greenway"',
         'Id = "proving_road"',
@@ -135,9 +136,12 @@ do
     )
 end
 
+local initStart = assert(string.find(source, "function LumenreachWorldService.Init()", 1, true))
+local terrainBuildAt = assert(string.find(source, "    buildTerrain()", initStart, true))
+local zoneContentAt = assert(string.find(source, "    makeZoneContent(world)", initStart, true))
 assert(
-    string.find(source, "terrain:Clear()", 1, true)
-        < string.find(source, "makeZoneContent(world)", 1, true),
+    string.find(terrainBuilder, "terrain:Clear()", 1, true) ~= nil
+        and terrainBuildAt < zoneContentAt,
     "terrain must be rebuilt before authored world content is placed"
 )
 assert(
@@ -170,8 +174,8 @@ assert(
 )
 
 assert(
-    string.find(source, "local function fillMountainRidge", 1, true) ~= nil
-        and string.find(source, "local function fillMountainChain", 1, true) == nil,
+    string.find(terrainBuilder, "local function fillMountainRidge", 1, true) ~= nil
+        and string.find(terrainBuilder, "local function fillMountainChain", 1, true) == nil,
     "Lumenreach boundary terrain must use ridge massing rather than giant spherical mountain chains"
 )
 assert(
@@ -339,9 +343,9 @@ assert(
     "route-edge dressing must be frequent enough to avoid long barren road stretches"
 )
 
-local ridgeStart = assert(string.find(source, "local function fillMountainRidge", 1, true))
-local ridgeEnd = assert(string.find(source, "local function carveGorge", ridgeStart, true))
-local ridgeSource = string.sub(source, ridgeStart, ridgeEnd - 1)
+local ridgeStart = assert(string.find(terrainBuilder, "local function fillMountainRidge", 1, true))
+local ridgeEnd = assert(string.find(terrainBuilder, "local function carveGorge", ridgeStart, true))
+local ridgeSource = string.sub(terrainBuilder, ridgeStart, ridgeEnd - 1)
 assert(
     string.find(ridgeSource, "terrain:FillBlock", 1, true) == nil
         and string.find(ridgeSource, "terrain:FillBall", 1, true) ~= nil,
