@@ -119,4 +119,33 @@ assert(
     "elite monster assets must be approved"
 )
 
+for _, token in
+    {
+        "106620969880813",
+        "72467646496046",
+        "120296033309062",
+        "74873617387258",
+        "71702053408362",
+        "111953812075306",
+        "109433487392238",
+        "120365137194208",
+        "87049781819025",
+        "116143660020194",
+        "116327990771458",
+        "99866941784802",
+        "107603565473038",
+        "117267887089651",
+        "83906031250479",
+    }
+do
+    assert(string.find(npcRegistry, token, 1, true), "named authored NPC asset missing " .. token)
+end
+assert(fs.isFile("scripts/generate_world_npcs_wave2.py"), "NPC wave2 generator missing")
+assert(fs.isDir("assets/original/world_npcs_wave2"), "NPC wave2 source assets missing")
+local npcWave2Uploads = fs.readFile("assets/original/world_npcs_wave2/upload_results.json")
+assert(
+    string.find(npcWave2Uploads, '"moderation": "Approved"', 1, true),
+    "NPC wave2 assets must be approved"
+)
+
 print("production visual asset pipeline rules tests passed")
