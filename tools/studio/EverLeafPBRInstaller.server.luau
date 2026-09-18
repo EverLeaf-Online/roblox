@@ -1,4 +1,7 @@
 local MaterialService = game:GetService("MaterialService")
+
+local TARGET_GAME_ID = 10766525835
+
 local MATERIALS = {
     ForestGround = {
         BaseMaterial = Enum.Material.Grass,
@@ -40,7 +43,86 @@ local MATERIALS = {
     },
 }
 
+local function isTargetExperience()
+    return game.GameId == TARGET_GAME_ID
+end
+
+local function matchesDefinition(instance, definition)
+    if not instance:IsA("MaterialVariant") then
+        return false
+    end
+
+    return instance.BaseMaterial == definition.BaseMaterial
+        and instance.ColorMap == definition.ColorMap
+        and instance.NormalMap == definition.NormalMap
+        and instance.RoughnessMap == definition.RoughnessMap
+end
+
+local function clearOverride(name, definition)
+    if not definition.OverrideMaterial then
+        return
+    end
+
+    local ok, current = pcall(function()
+        return MaterialService:GetBaseMaterialOverride(definition.OverrideMaterial)
+    end)
+    if ok and current == name then
+        local cleared, err = pcall(function()
+            MaterialService:SetBaseMaterialOverride(definition.OverrideMaterial, "")
+        end)
+        if not cleared then
+            warn(
+                string.format(
+                    "[EverLeaf PBR] Failed to clear %s override in foreign experience: %s",
+                    name,
+                    tostring(err)
+                )
+            )
+        end
+    end
+end
+
+local function cleanupForeignExperience()
+    if isTargetExperience() then
+        return 0
+    end
+
+    local removed = 0
+    for name, definition in MATERIALS do
+        local existing = MaterialService:FindFirstChild(name)
+        if existing and matchesDefinition(existing, definition) then
+            clearOverride(name, definition)
+            existing:Destroy()
+            removed += 1
+        end
+    end
+
+    if removed > 0 then
+        print(
+            string.format(
+                "[EverLeaf PBR] Removed %d EverLeaf MaterialVariants from non-EverLeaf experience %d.",
+                removed,
+                game.GameId
+            )
+        )
+    end
+
+    return removed
+end
+
 local function install()
+    if not isTargetExperience() then
+        cleanupForeignExperience()
+        warn(
+            string.format(
+                "[EverLeaf PBR] Refusing to install materials outside EverLeaf Online (expected game %d, current game %d).",
+                TARGET_GAME_ID,
+                game.GameId
+            )
+        )
+        return false
+    end
+
     local installed = 0
 
     for name, definition in MATERIALS do
@@ -87,6 +169,12 @@ local button = toolbar:CreateButton(
 button.ClickableWhenViewportHidden = true
 button.Click:Connect(install)
 
--- Plugin capability is what the protected MaterialVariant properties require,
--- so author them immediately whenever the plugin loads.
-task.defer(install)
+-- Local Studio plugins are global. Never author EverLeaf materials into unrelated places.
+-- Clean only variants whose maps exactly match this plugin's known EverLeaf definitions.
+task.defer(function()
+    if isTargetExperience() then
+        install()
+    else
+        cleanupForeignExperience()
+    end
+end)
