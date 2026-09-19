@@ -1,0 +1,20 @@
+{
+  "name": "Industrial Scrap Shredder",
+  "category": "scrap_factory",
+  "source": "Blender 4.0.2 procedural rebuild",
+  "blend": "industrial_scrap_shredder.blend",
+  "roblox_glb": "industrial_scrap_shredder_roblox.glb",
+  "preview": "industrial_scrap_shredder_preview.png",
+  "triangle_count": 29852,
+  "vertex_count": 15212,
+  "mesh_object_count": 144,
+  "materials": [
+    "Worn_Galvanized",
+    "Charcoal_Steel",
+    "Industrial_Yellow",
+    "Hardened_Cutter_Steel",
+    "Conveyor_Rubber",
+    "Safety_Hazard"
+  ],
+  "notes": "Textures are embedded in the GLB. The .blend has all external images packed."
+}
