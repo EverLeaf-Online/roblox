@@ -1,0 +1,113 @@
+{
+  "ClassName": "Model",
+  "Children": [
+    {
+      "Name": "01_Leaves2",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          13.195072,
+          9.092207,
+          14.904667
+        ],
+        "CFrame": [
+          -0.998537,
+          19.691941,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "Color": [
+          0.15686275,
+          0.49803922,
+          0.27843137
+        ],
+        "MeshId": "rbxassetid://1278518815"
+      }
+    },
+    {
+      "Name": "02_Leaves1",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          13.195078,
+          10.100013,
+          13.12943
+        ],
+        "CFrame": [
+          0.998534,
+          17.164842,
+          0.473877,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "Color": [
+          0.20392157,
+          0.55686275,
+          0.25098039
+        ],
+        "MeshId": "rbxassetid://1278519390"
+      }
+    },
+    {
+      "Name": "03_Trunk",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          8.383193,
+          16.757174,
+          4.332059
+        ],
+        "CFrame": [
+          0.446532,
+          8.378587,
+          -0.510742,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "Color": [
+          0.48627451,
+          0.36078431,
+          0.2745098
+        ],
+        "MeshId": "rbxassetid://1278512125"
+      }
+    }
+  ]
+}

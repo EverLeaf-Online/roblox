@@ -1,0 +1,77 @@
+{
+  "ClassName": "Model",
+  "Children": [
+    {
+      "Name": "01_Tree_Sphere.001",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          15.319613,
+          14.800476,
+          16.955774
+        ],
+        "CFrame": [
+          0.0,
+          16.754992,
+          0.0,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "Color": [
+          0.44313725,
+          0.66666667,
+          0.0
+        ],
+        "MeshId": "rbxassetid://12660786909"
+      }
+    },
+    {
+      "Name": "02_Tree_Cylinder",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          3.429637,
+          16.214817,
+          3.429637
+        ],
+        "CFrame": [
+          0.065552,
+          8.107409,
+          -0.710693,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "Color": [
+          0.49411765,
+          0.26666667,
+          0.2
+        ],
+        "MeshId": "rbxassetid://12660786696"
+      }
+    }
+  ]
+}

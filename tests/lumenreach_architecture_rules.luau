@@ -66,7 +66,7 @@ do
 end
 
 assert(
-    string.find(worldConfig, "DesignVersion = 28", 1, true) ~= nil,
+    string.find(worldConfig, "DesignVersion = 29", 1, true) ~= nil,
     "architecture conversion must bump world design version"
 )
 

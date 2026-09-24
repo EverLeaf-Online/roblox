@@ -9,7 +9,7 @@ for _, token in
     {
         "WorldWidth = 2200",
         "WorldDepth = 1250",
-        "DesignVersion = 28",
+        "DesignVersion = 29",
         "Camp = Vector3.new(-950, 2, 0)",
         "Greenway = Vector3.new(-720, 1, 40)",
         "Crossroads = Vector3.new(-480, 4, 50)",

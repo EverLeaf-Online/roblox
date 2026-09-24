@@ -1,0 +1,365 @@
+{
+  "ClassName": "Model",
+  "Children": [
+    {
+      "Name": "01_Rock2",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          4.995602,
+          5.847834,
+          4.804825
+        ],
+        "CFrame": [
+          4.066531,
+          3.822469,
+          5.504926,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.58431373,
+          0.6,
+          0.6745098
+        ],
+        "MeshId": "rbxassetid://2128754279"
+      }
+    },
+    {
+      "Name": "02_Rock6",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          5.852936,
+          6.015552,
+          5.975486
+        ],
+        "CFrame": [
+          -2.929685,
+          3.074422,
+          12.891889,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.58431373,
+          0.6,
+          0.6745098
+        ],
+        "MeshId": "rbxassetid://2128760908"
+      }
+    },
+    {
+      "Name": "03_Rock10",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          5.400959,
+          4.398315,
+          5.332829
+        ],
+        "CFrame": [
+          -2.492551,
+          3.378621,
+          -13.117877,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.58431373,
+          0.6,
+          0.6745098
+        ],
+        "MeshId": "rbxassetid://2128764803"
+      }
+    },
+    {
+      "Name": "04_Rock9",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          5.697481,
+          6.314458,
+          6.590969
+        ],
+        "CFrame": [
+          -3.173459,
+          3.51534,
+          -7.109576,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.58431373,
+          0.6,
+          0.6745098
+        ],
+        "MeshId": "rbxassetid://2128764428"
+      }
+    },
+    {
+      "Name": "05_Rock3",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          6.874015,
+          7.143184,
+          3.829331
+        ],
+        "CFrame": [
+          3.84302,
+          4.028402,
+          -0.963092,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.58431373,
+          0.6,
+          0.6745098
+        ],
+        "MeshId": "rbxassetid://2128758133"
+      }
+    },
+    {
+      "Name": "06_Rock4",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          4.954318,
+          4.952692,
+          4.330127
+        ],
+        "CFrame": [
+          3.504519,
+          3.790609,
+          -7.691852,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.58431373,
+          0.6,
+          0.6745098
+        ],
+        "MeshId": "rbxassetid://2128758599"
+      }
+    },
+    {
+      "Name": "07_Rock8",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          5.641834,
+          3.914374,
+          6.11141
+        ],
+        "CFrame": [
+          -2.157956,
+          3.763387,
+          -0.458453,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.58431373,
+          0.6,
+          0.6745098
+        ],
+        "MeshId": "rbxassetid://2128764023"
+      }
+    },
+    {
+      "Name": "08_Rock5",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          4.431499,
+          4.919753,
+          4.601054
+        ],
+        "CFrame": [
+          3.633792,
+          3.858968,
+          -13.075397,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.58431373,
+          0.6,
+          0.6745098
+        ],
+        "MeshId": "rbxassetid://2128759273"
+      }
+    },
+    {
+      "Name": "09_Rock1",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          5.853135,
+          7.058268,
+          5.028466
+        ],
+        "CFrame": [
+          3.089847,
+          3.529134,
+          11.718549,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.58431373,
+          0.6,
+          0.6745098
+        ],
+        "MeshId": "rbxassetid://2128766734"
+      }
+    },
+    {
+      "Name": "10_Rock7",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          6.054396,
+          6.386454,
+          5.842122
+        ],
+        "CFrame": [
+          -2.250852,
+          3.439168,
+          6.138959,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.58431373,
+          0.6,
+          0.6745098
+        ],
+        "MeshId": "rbxassetid://2128761993"
+      }
+    }
+  ]
+}

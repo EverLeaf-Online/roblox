@@ -1,0 +1,437 @@
+{
+  "ClassName": "Model",
+  "Children": [
+    {
+      "Name": "01_mushroom_Cylinder.006",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          0.785593,
+          2.560266,
+          0.721839
+        ],
+        "CFrame": [
+          0.70779,
+          1.280133,
+          0.92255,
+          0.0,
+          0.0,
+          0.9999998,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.97254902,
+          0.97254902,
+          0.97254902
+        ],
+        "MeshId": "rbxassetid://12660687092"
+      }
+    },
+    {
+      "Name": "02_mushroom_Icosphere.002",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          1.584925,
+          1.254269,
+          1.775523
+        ],
+        "CFrame": [
+          1.139064,
+          2.797467,
+          1.330021,
+          0.0,
+          0.0,
+          0.9999998,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.97254902,
+          0.97254902,
+          0.97254902
+        ],
+        "MeshId": "rbxassetid://12660687716"
+      }
+    },
+    {
+      "Name": "03_mushroom_Cylinder.007",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          2.148829,
+          1.744212,
+          2.226732
+        ],
+        "CFrame": [
+          0.909084,
+          2.534283,
+          1.150822,
+          0.0,
+          0.0,
+          0.9999998,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.64705882,
+          0.21960784,
+          0.21960784
+        ],
+        "MeshId": "rbxassetid://12660687494"
+      }
+    },
+    {
+      "Name": "04_mushroom_Cylinder.008",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          1.498297,
+          0.837682,
+          1.577332
+        ],
+        "CFrame": [
+          0.896144,
+          2.355206,
+          1.126896,
+          0.0,
+          0.0,
+          0.9999998,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.97254902,
+          0.97254902,
+          0.97254902
+        ],
+        "MeshId": "rbxassetid://12660687943"
+      }
+    },
+    {
+      "Name": "05_mushroom_Cylinder.002",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          0.92922,
+          3.528181,
+          0.92922
+        ],
+        "CFrame": [
+          -0.419896,
+          1.767438,
+          -0.219784,
+          0.0,
+          0.0,
+          0.9999998,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.97254902,
+          0.97254902,
+          0.97254902
+        ],
+        "MeshId": "rbxassetid://12660686328"
+      }
+    },
+    {
+      "Name": "06_mushroom_Cylinder.001",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          2.346288,
+          0.001356,
+          2.346288
+        ],
+        "CFrame": [
+          -0.419896,
+          3.355817,
+          -0.219784,
+          0.0,
+          0.0,
+          0.9999998,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.97254902,
+          0.97254902,
+          0.97254902
+        ],
+        "MeshId": "rbxassetid://12660686111"
+      }
+    },
+    {
+      "Name": "07_mushroom_Cylinder",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          3.21386,
+          1.858738,
+          3.21386
+        ],
+        "CFrame": [
+          -0.419896,
+          3.942853,
+          -0.219784,
+          0.0,
+          0.0,
+          0.9999998,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.64705882,
+          0.21960784,
+          0.21960784
+        ],
+        "MeshId": "rbxassetid://12660685814"
+      }
+    },
+    {
+      "Name": "08_mushroom_Icosphere.004",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          2.950935,
+          1.284737,
+          2.360105
+        ],
+        "CFrame": [
+          -0.52512,
+          4.34129,
+          -0.206112,
+          0.0,
+          0.0,
+          0.9999998,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.97254902,
+          0.97254902,
+          0.97254902
+        ],
+        "MeshId": "rbxassetid://12660685954"
+      }
+    },
+    {
+      "Name": "09_mushroom_Icosphere.001",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          1.571174,
+          1.078904,
+          1.372931
+        ],
+        "CFrame": [
+          0.660426,
+          2.411481,
+          -1.418026,
+          0.0,
+          0.0,
+          0.9999998,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.97254902,
+          0.97254902,
+          0.97254902
+        ],
+        "MeshId": "rbxassetid://12660686660"
+      }
+    },
+    {
+      "Name": "10_mushroom_Cylinder.004",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          1.865398,
+          1.500345,
+          1.943764
+        ],
+        "CFrame": [
+          0.605861,
+          2.18504,
+          -1.292538,
+          0.0,
+          0.0,
+          0.9999998,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.64705882,
+          0.21960784,
+          0.21960784
+        ],
+        "MeshId": "rbxassetid://12660686558"
+      }
+    },
+    {
+      "Name": "11_mushroom_Cylinder.005",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          1.28621,
+          0.720562,
+          1.391864
+        ],
+        "CFrame": [
+          0.599635,
+          2.048566,
+          -1.265194,
+          0.0,
+          0.0,
+          0.9999998,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.97254902,
+          0.97254902,
+          0.97254902
+        ],
+        "MeshId": "rbxassetid://12660686841"
+      }
+    },
+    {
+      "Name": "12_mushroom_Cylinder.003",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          0.730283,
+          2.202302,
+          0.56859
+        ],
+        "CFrame": [
+          0.463039,
+          1.106183,
+          -1.077206,
+          0.0,
+          0.0,
+          0.9999998,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.97254902,
+          0.97254902,
+          0.97254902
+        ],
+        "MeshId": "rbxassetid://12660686470"
+      }
+    }
+  ]
+}

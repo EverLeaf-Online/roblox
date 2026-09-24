@@ -1,5 +1,6 @@
 local AssetService = game:GetService("AssetService")
 local RunService = game:GetService("RunService")
+local ServerStorage = game:GetService("ServerStorage")
 local Workspace = game:GetService("Workspace")
 
 local EnvironmentAssetRegistry = require(script.Parent.Parent.Content.EnvironmentAssetRegistry)
@@ -434,6 +435,46 @@ local function importVariantAsset(entry)
     return true
 end
 
+local function importAuthoredLowPolyPackAsset(entry)
+    if EnvironmentPrefabService.Get(entry.PrefabName) then
+        return true
+    end
+
+    local packFolder = ServerStorage:FindFirstChild("EverLeafLowPolyPack")
+    local sourceName = entry.AuthoredModelName or entry.PrefabName
+    local source = packFolder and packFolder:FindFirstChild(sourceName)
+    if not source or not (source:IsA("Model") or source:IsA("BasePart")) then
+        warn(
+            string.format(
+                "[StudioEnvironmentAssetService] Missing authored low-poly prefab %s",
+                tostring(sourceName)
+            )
+        )
+        return false
+    end
+
+    local visual = source:Clone()
+    local registered, reason =
+        EnvironmentPrefabService.Register(entry.PrefabName, visual, entry.AssetId or 0, {
+            AutoUpright = entry.AutoUpright == true,
+            GroundToPivot = entry.GroundToPivot == true,
+            Appearance = entry.Appearance,
+        })
+    if not registered then
+        visual:Destroy()
+        warn(
+            string.format(
+                "[StudioEnvironmentAssetService] Could not register authored low-poly prefab %s: %s",
+                tostring(entry.PrefabName),
+                tostring(reason)
+            )
+        )
+        return false
+    end
+
+    return true
+end
+
 local function importAsset(entry)
     if EnvironmentPrefabService.Get(entry.PrefabName) then
         return true
@@ -488,7 +529,9 @@ function StudioEnvironmentAssetService.Init()
     local inStudio = RunService:IsStudio()
 
     for _, entry in EnvironmentAssetRegistry do
-        if inStudio and entry.Status == "manual_studio_import" and entry.VariantPrefix then
+        if entry.Status == "authored_lowpoly_pack" and entry.PrefabName then
+            importAuthoredLowPolyPackAsset(entry)
+        elseif inStudio and entry.Status == "manual_studio_import" and entry.VariantPrefix then
             importManualVariantAsset(entry)
         else
             local approved = entry.Status == "approved_for_sanitized_import"

@@ -1,0 +1,41 @@
+{
+  "ClassName": "Model",
+  "Children": [
+    {
+      "Name": "01_log",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          8.732977,
+          3.011608,
+          3.208299
+        ],
+        "CFrame": [
+          0.0,
+          1.505804,
+          0.0,
+          0.9999962,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "Color": [
+          0.62745098,
+          0.37254902,
+          0.20784314
+        ],
+        "MeshId": "rbxassetid://6349136797"
+      }
+    }
+  ]
+}

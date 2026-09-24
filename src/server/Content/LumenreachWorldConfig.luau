@@ -207,7 +207,7 @@ local dressingExclusions = table.freeze({
 return table.freeze({
     WorldWidth = 2200,
     WorldDepth = 1250,
-    DesignVersion = 28,
+    DesignVersion = 29,
     Zones = zones,
     EastbridgeWest = eastbridgeWest,
     EastbridgeEast = eastbridgeEast,

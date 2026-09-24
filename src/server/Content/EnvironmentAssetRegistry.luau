@@ -1,3 +1,17 @@
+local function authoredLowPolyPackAsset(prefabName, notes)
+    return table.freeze({
+        AssetId = 0,
+        Name = prefabName,
+        Source = "User-provided LowPolyMegaPack400.rbxl",
+        Status = "authored_lowpoly_pack",
+        PrefabName = prefabName,
+        AuthoredModelName = prefabName,
+        GroundToPivot = true,
+        AllowRuntimeLoad = false,
+        Notes = notes,
+    })
+end
+
 local EnvironmentAssetRegistry = {
     TreePrimary = {
         AssetId = 124246481535142,
@@ -720,6 +734,51 @@ local EnvironmentAssetRegistry = {
         ThirdPartyFree = true,
         CreatorStoreUrl = "https://create.roblox.com/store/asset/14960685595/Pipes",
     },
+    LowPolyTreeRound = authoredLowPolyPackAsset(
+        "LowPolyTreeRound",
+        "Rounded low-poly tree used as a secondary Lumenreach forest silhouette."
+    ),
+    LowPolyTreeCanopy = authoredLowPolyPackAsset(
+        "LowPolyTreeCanopy",
+        "Broad-canopy low-poly tree used to break up repeated pine silhouettes."
+    ),
+    LowPolyMushroomCluster = authoredLowPolyPackAsset(
+        "LowPolyMushroomCluster",
+        "Red-and-white mushroom cluster for damp forest-floor dressing."
+    ),
+    LowPolyLog = authoredLowPolyPackAsset(
+        "LowPolyLog",
+        "Compact fallen log for roadside and forest-floor dressing."
+    ),
+    LowPolyBush = authoredLowPolyPackAsset(
+        "LowPolyBush",
+        "Small green shrub for low-profile vegetation variation."
+    ),
+    LowPolyRockCluster = authoredLowPolyPackAsset(
+        "LowPolyRockCluster",
+        "Ten-rock cluster used for trail edges and terrain breakup."
+    ),
+    LowPolyBench = authoredLowPolyPackAsset(
+        "LowPolyBench",
+        "Authored low-poly settlement bench replacing the primitive bench visual when available."
+    ),
+    LowPolyBarrel = authoredLowPolyPackAsset(
+        "LowPolyBarrel",
+        "Authored low-poly barrel for market, workshop, and storage dressing."
+    ),
+    LowPolyLantern = authoredLowPolyPackAsset(
+        "LowPolyLantern",
+        "Authored low-poly lantern post used with EverLeaf-owned lighting behavior."
+    ),
+    LowPolyCrate = authoredLowPolyPackAsset(
+        "LowPolyCrate",
+        "Authored low-poly cargo crate for service and market areas."
+    ),
+    LowPolyVillageWell = authoredLowPolyPackAsset(
+        "LowPolyVillageWell",
+        "Authored low-poly village well used as a settlement landmark."
+    ),
+
     ForestTreesPack = {
         AssetId = 13913287259,
         Name = "Forest Trees",

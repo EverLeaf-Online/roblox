@@ -5,7 +5,7 @@ local worldConfig = fs.readFile("src/server/Content/LumenreachWorldConfig.luau")
 local brass = fs.readFile("src/server/Services/BrasshavenWorldService.luau")
 
 assert(
-    string.find(worldConfig, "DesignVersion = 28", 1, true),
+    string.find(worldConfig, "DesignVersion = 29", 1, true),
     "Lumenreach building-layout pass must be V25"
 )
 assert(

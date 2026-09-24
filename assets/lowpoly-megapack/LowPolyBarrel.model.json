@@ -1,0 +1,329 @@
+{
+  "ClassName": "Model",
+  "Children": [
+    {
+      "Name": "01_1Barrel_Cylinder.001 (1)",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          2.689894,
+          3.978957,
+          2.689895
+        ],
+        "CFrame": [
+          0.0,
+          2.185886,
+          0.055142,
+          0.0,
+          0.0,
+          0.9999998,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.93333333,
+          0.49019608,
+          0.34509804
+        ],
+        "MeshId": "rbxassetid://12645359830"
+      }
+    },
+    {
+      "Name": "02_1Barrel_Cylinder.002 (1)",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          3.360623,
+          4.092239,
+          3.360622
+        ],
+        "CFrame": [
+          0.0,
+          2.185886,
+          0.055142,
+          0.0,
+          0.0,
+          0.9999998,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.78039216,
+          0.41176471,
+          0.28627451
+        ],
+        "MeshId": "rbxassetid://12645359965"
+      }
+    },
+    {
+      "Name": "03_1Barrel_Cylinder.005 (1)",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          4.077301,
+          2.777943,
+          4.077303
+        ],
+        "CFrame": [
+          0.0,
+          2.185886,
+          0.055142,
+          0.0,
+          0.0,
+          0.9999998,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.44313725,
+          0.45098039,
+          0.50980392
+        ],
+        "MeshId": "rbxassetid://12645360405"
+      }
+    },
+    {
+      "Name": "04_1Barrel_Cylinder",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          4.045908,
+          4.371772,
+          4.045907
+        ],
+        "CFrame": [
+          0.0,
+          2.185886,
+          0.055142,
+          0.0,
+          0.0,
+          0.9999998,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.78039216,
+          0.41176471,
+          0.28627451
+        ],
+        "MeshId": "rbxassetid://12645359754"
+      }
+    },
+    {
+      "Name": "05_1Barrel_Torus.001 (1)",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          0.247086,
+          0.774821,
+          0.783331
+        ],
+        "CFrame": [
+          0.0,
+          3.089939,
+          -1.970249,
+          0.0,
+          0.0,
+          0.9999998,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.44313725,
+          0.45098039,
+          0.50980392
+        ],
+        "MeshId": "rbxassetid://12645360609"
+      }
+    },
+    {
+      "Name": "06_1Barrel_Circle (1)",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          0.205763,
+          0.380051,
+          0.068607
+        ],
+        "CFrame": [
+          0.0,
+          3.43967,
+          -1.981968,
+          0.0,
+          0.0,
+          0.9999998,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.46666667,
+          0.48627451,
+          0.53333333
+        ],
+        "MeshId": "rbxassetid://12645360515"
+      }
+    },
+    {
+      "Name": "07_1Barrel_Cylinder.003 (1)",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          3.998218,
+          0.399822,
+          3.998218
+        ],
+        "CFrame": [
+          0.0,
+          0.93137,
+          0.055142,
+          0.0,
+          0.0,
+          0.9999998,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.44313725,
+          0.45098039,
+          0.50980392
+        ],
+        "MeshId": "rbxassetid://12645360103"
+      }
+    },
+    {
+      "Name": "08_1Barrel_Cylinder.004 (1)",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          3.998218,
+          0.399822,
+          3.998218
+        ],
+        "CFrame": [
+          0.0,
+          3.440403,
+          0.055142,
+          0.0,
+          0.0,
+          0.9999998,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.44313725,
+          0.45098039,
+          0.50980392
+        ],
+        "MeshId": "rbxassetid://12645360235"
+      }
+    },
+    {
+      "Name": "09_1Barrel_Cylinder.006 (1)",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          0.735561,
+          0.108283,
+          0.73556
+        ],
+        "CFrame": [
+          0.0,
+          4.202121,
+          0.771938,
+          0.0,
+          0.0,
+          0.9999998,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.78039216,
+          0.41176471,
+          0.28627451
+        ],
+        "MeshId": "rbxassetid://12645361424"
+      }
+    }
+  ]
+}

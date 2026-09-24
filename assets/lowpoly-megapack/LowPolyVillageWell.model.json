@@ -1,0 +1,1234 @@
+{
+  "ClassName": "Model",
+  "Children": [
+    {
+      "Name": "01_well_Plane (1)",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          5.905731,
+          2.090933,
+          5.206585
+        ],
+        "CFrame": [
+          0.0,
+          7.400192,
+          0.47811,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "Color": [
+          0.49411765,
+          0.26666667,
+          0.2
+        ],
+        "MeshId": "rbxassetid://12651238867"
+      }
+    },
+    {
+      "Name": "02_well_Cube.011 (1)",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          1.682254,
+          1.682255,
+          0.399908
+        ],
+        "CFrame": [
+          0.709229,
+          6.713059,
+          3.234214,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "Color": [
+          0.49411765,
+          0.26666667,
+          0.2
+        ],
+        "MeshId": "rbxassetid://12651237041"
+      }
+    },
+    {
+      "Name": "03_well_Cube (1)",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          5.426197,
+          1.044205,
+          5.533524
+        ],
+        "CFrame": [
+          0.07373,
+          0.522141,
+          0.463706,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "Color": [
+          0.44313725,
+          0.45882353,
+          0.50588235
+        ],
+        "MeshId": "rbxassetid://12651234829"
+      }
+    },
+    {
+      "Name": "04_well_Cube.001 (1)",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          4.750751,
+          0.898324,
+          4.71313
+        ],
+        "CFrame": [
+          0.00708,
+          1.358933,
+          0.500815,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "Color": [
+          0.57647059,
+          0.59607843,
+          0.65490196
+        ],
+        "MeshId": "rbxassetid://12651234958"
+      }
+    },
+    {
+      "Name": "05_well_Cube.003 (1)",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          4.760517,
+          0.898323,
+          4.66784
+        ],
+        "CFrame": [
+          0.011963,
+          2.195603,
+          0.514731,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "Color": [
+          0.42745098,
+          0.44313725,
+          0.49019608
+        ],
+        "MeshId": "rbxassetid://12651235264"
+      }
+    },
+    {
+      "Name": "06_well_Cube.002 (1)",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          5.535334,
+          1.044204,
+          5.432769
+        ],
+        "CFrame": [
+          0.013428,
+          3.027023,
+          0.422202,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "Color": [
+          0.44313725,
+          0.45882353,
+          0.50588235
+        ],
+        "MeshId": "rbxassetid://12651235133"
+      }
+    },
+    {
+      "Name": "07_well_Cube.007 (1)",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          0.621365,
+          0.621364,
+          1.863614
+        ],
+        "CFrame": [
+          0.0,
+          5.364182,
+          0.47811,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "Color": [
+          0.8745098,
+          0.54117647,
+          0.38431373
+        ],
+        "MeshId": "rbxassetid://12651236059"
+      }
+    },
+    {
+      "Name": "08_well_Cube.006 (1)",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          0.513119,
+          0.513119,
+          6.649239
+        ],
+        "CFrame": [
+          0.0,
+          5.364182,
+          -0.071939,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "Color": [
+          0.49411765,
+          0.26666667,
+          0.2
+        ],
+        "MeshId": "rbxassetid://12651235873"
+      }
+    },
+    {
+      "Name": "09_MeshPart",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          3.723711,
+          2.792784,
+          3.723712
+        ],
+        "CFrame": [
+          0.272949,
+          1.716721,
+          0.412925,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.97254902,
+          0.97254902,
+          0.97254902
+        ],
+        "MeshId": "rbxassetid://12651239031",
+        "Transparency": 0.15
+      }
+    },
+    {
+      "Name": "10_MeshPart",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          3.723711,
+          2.792784,
+          3.723712
+        ],
+        "CFrame": [
+          0.236084,
+          1.587326,
+          0.394614,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.23921569,
+          0.41960784,
+          0.58039216
+        ],
+        "MeshId": "rbxassetid://12651239031",
+        "Transparency": 0.5
+      }
+    },
+    {
+      "Name": "11_MeshPart",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          3.723711,
+          2.792784,
+          3.723712
+        ],
+        "CFrame": [
+          0.272949,
+          1.587326,
+          0.450034,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.10588235,
+          0.16470588,
+          0.20784314
+        ],
+        "MeshId": "rbxassetid://12651239031",
+        "Transparency": 0.7
+      }
+    },
+    {
+      "Name": "12_MeshPart",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          3.723711,
+          2.792784,
+          3.723712
+        ],
+        "CFrame": [
+          0.272949,
+          1.661301,
+          0.412925,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.23921569,
+          0.41960784,
+          0.58039216
+        ],
+        "MeshId": "rbxassetid://12651239031",
+        "Transparency": 0.5
+      }
+    },
+    {
+      "Name": "13_MeshPart",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          3.723711,
+          2.792784,
+          3.723712
+        ],
+        "CFrame": [
+          0.291504,
+          1.587326,
+          0.412925,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.18823529,
+          0.27058824,
+          0.38431373
+        ],
+        "MeshId": "rbxassetid://12651239031",
+        "Transparency": 0.5
+      }
+    },
+    {
+      "Name": "14_well_Cube.016",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          0.665357,
+          2.884773,
+          0.665358
+        ],
+        "CFrame": [
+          0.0,
+          3.165085,
+          -2.277749,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "Color": [
+          0.38823529,
+          0.37254902,
+          0.38431373
+        ],
+        "MeshId": "rbxassetid://12651237636"
+      }
+    },
+    {
+      "Name": "15_1Barrel_Sphere.002 (1)",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          2.024981,
+          1.913178,
+          2.024981
+        ],
+        "CFrame": [
+          -0.741943,
+          0.956589,
+          -1.849038,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "Color": [
+          0.38823529,
+          0.37254902,
+          0.38431373
+        ],
+        "MeshId": "rbxassetid://12645361806"
+      }
+    },
+    {
+      "Name": "16_1Barrel_Sphere.001 (1)",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          2.024981,
+          1.469146,
+          2.024981
+        ],
+        "CFrame": [
+          0.575439,
+          0.734665,
+          -1.747476,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "Color": [
+          0.44313725,
+          0.45882353,
+          0.50588235
+        ],
+        "MeshId": "rbxassetid://12645361626"
+      }
+    },
+    {
+      "Name": "17_1Barrel_Sphere (1)",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          2.026542,
+          1.013271,
+          2.026542
+        ],
+        "CFrame": [
+          0.068604,
+          0.506638,
+          -2.862222,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "Color": [
+          0.57647059,
+          0.59607843,
+          0.65490196
+        ],
+        "MeshId": "rbxassetid://12645361528"
+      }
+    },
+    {
+      "Name": "18_well_Cube.008 (1)",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          0.456928,
+          1.482533,
+          0.129045
+        ],
+        "CFrame": [
+          0.0,
+          4.783127,
+          -3.262124,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "Color": [
+          0.49411765,
+          0.26666667,
+          0.2
+        ],
+        "MeshId": "rbxassetid://12651236240"
+      }
+    },
+    {
+      "Name": "19_well_Cube.017 (1)",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          6.414598,
+          2.552337,
+          0.581139
+        ],
+        "CFrame": [
+          0.0,
+          7.616745,
+          3.234214,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "Color": [
+          0.49411765,
+          0.26666667,
+          0.2
+        ],
+        "MeshId": "rbxassetid://12651237151"
+      }
+    },
+    {
+      "Name": "20_well_Cube.010 (1)",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          1.682255,
+          1.682255,
+          0.399908
+        ],
+        "CFrame": [
+          -0.708984,
+          6.713059,
+          3.234214,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "Color": [
+          0.49411765,
+          0.26666667,
+          0.2
+        ],
+        "MeshId": "rbxassetid://12651236835"
+      }
+    },
+    {
+      "Name": "21_well_Cube.019",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          3.302822,
+          2.467097,
+          4.859107
+        ],
+        "CFrame": [
+          -1.451904,
+          7.636276,
+          0.156821,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "Color": [
+          0.0,
+          1.0,
+          1.0
+        ],
+        "MeshId": "rbxassetid://12651238013"
+      }
+    },
+    {
+      "Name": "22_well_Cube.033",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          3.302821,
+          2.467098,
+          4.88768
+        ],
+        "CFrame": [
+          -1.451904,
+          7.636276,
+          0.813804,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "Color": [
+          0.03529412,
+          0.5372549,
+          0.81176471
+        ],
+        "MeshId": "rbxassetid://12651238246"
+      }
+    },
+    {
+      "Name": "23_well_Cube.020",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          3.172019,
+          2.281418,
+          5.525548
+        ],
+        "CFrame": [
+          -1.386475,
+          7.72905,
+          0.487388,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "Color": [
+          0.05098039,
+          0.41176471,
+          0.6745098
+        ],
+        "MeshId": "rbxassetid://12651238154"
+      }
+    },
+    {
+      "Name": "24_well_Cube.014 (1)",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          6.414598,
+          2.552337,
+          0.581139
+        ],
+        "CFrame": [
+          0.0,
+          7.616745,
+          -2.277749,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "Color": [
+          0.49411765,
+          0.26666667,
+          0.2
+        ],
+        "MeshId": "rbxassetid://12651237323"
+      }
+    },
+    {
+      "Name": "25_well_Cube.005 (1)",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          0.554139,
+          8.847384,
+          0.55414
+        ],
+        "CFrame": [
+          0.0,
+          4.453659,
+          -2.277749,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "Color": [
+          0.49411765,
+          0.26666667,
+          0.2
+        ],
+        "MeshId": "rbxassetid://12651235660"
+      }
+    },
+    {
+      "Name": "26_well_Cube.021",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          3.302822,
+          2.467097,
+          4.859107
+        ],
+        "CFrame": [
+          1.445068,
+          7.681809,
+          0.680991,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "Color": [
+          0.03529412,
+          0.5372549,
+          0.81176471
+        ],
+        "MeshId": "rbxassetid://12651238385"
+      }
+    },
+    {
+      "Name": "27_well_Cube.022",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          3.17202,
+          2.281418,
+          5.525548
+        ],
+        "CFrame": [
+          1.379639,
+          7.72905,
+          0.350425,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "Color": [
+          0.05098039,
+          0.41176471,
+          0.6745098
+        ],
+        "MeshId": "rbxassetid://12651238573"
+      }
+    },
+    {
+      "Name": "28_well_Cube.023",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          3.302821,
+          2.467098,
+          4.88768
+        ],
+        "CFrame": [
+          1.445068,
+          7.636276,
+          0.024009,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "Color": [
+          0.0,
+          1.0,
+          1.0
+        ],
+        "MeshId": "rbxassetid://12651238703"
+      }
+    },
+    {
+      "Name": "29_well_Cube.013 (1)",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          1.682254,
+          1.682255,
+          0.399907
+        ],
+        "CFrame": [
+          0.708984,
+          6.713059,
+          -2.277749,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "Color": [
+          0.49411765,
+          0.26666667,
+          0.2
+        ],
+        "MeshId": "rbxassetid://12651236618"
+      }
+    },
+    {
+      "Name": "30_well_Cube.015 (1)",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          0.680889,
+          0.680889,
+          6.733727
+        ],
+        "CFrame": [
+          0.0,
+          8.661545,
+          0.534263,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "Color": [
+          0.49411765,
+          0.26666667,
+          0.2
+        ],
+        "MeshId": "rbxassetid://12651237483"
+      }
+    },
+    {
+      "Name": "31_well_Cube.012 (1)",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          1.682255,
+          1.682255,
+          0.399907
+        ],
+        "CFrame": [
+          -0.709229,
+          6.713059,
+          -2.277749,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "Color": [
+          0.49411765,
+          0.26666667,
+          0.2
+        ],
+        "MeshId": "rbxassetid://12651236479"
+      }
+    },
+    {
+      "Name": "32_well_Cube.004 (1)",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          0.554139,
+          8.847384,
+          0.55414
+        ],
+        "CFrame": [
+          0.0,
+          4.453659,
+          3.234214,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "Color": [
+          0.49411765,
+          0.26666667,
+          0.2
+        ],
+        "MeshId": "rbxassetid://12651235398"
+      }
+    },
+    {
+      "Name": "33_well_Cube.018",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          0.665357,
+          2.884773,
+          0.665358
+        ],
+        "CFrame": [
+          0.0,
+          3.165085,
+          3.234214,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "Color": [
+          0.38823529,
+          0.37254902,
+          0.38431373
+        ],
+        "MeshId": "rbxassetid://12651237824"
+      }
+    },
+    {
+      "Name": "34_well_Cube.009 (1)",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          0.108946,
+          0.108946,
+          0.614918
+        ],
+        "CFrame": [
+          0.0,
+          4.183029,
+          -3.593667,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "Color": [
+          0.49411765,
+          0.26666667,
+          0.2
+        ],
+        "MeshId": "rbxassetid://12651236351"
+      }
+    }
+  ]
+}

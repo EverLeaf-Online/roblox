@@ -1,0 +1,365 @@
+{
+  "ClassName": "Model",
+  "Children": [
+    {
+      "Name": "01_bench_Cube.006",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          0.240534,
+          0.536626,
+          5.995045
+        ],
+        "CFrame": [
+          0.0,
+          3.42372,
+          1.162102,
+          0.0,
+          0.0,
+          -0.9999965,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.70196078,
+          0.36862745,
+          0.25882353
+        ],
+        "MeshId": "rbxassetid://12758639810"
+      }
+    },
+    {
+      "Name": "02_bench_Cube.005",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          0.240534,
+          0.536626,
+          5.995045
+        ],
+        "CFrame": [
+          0.0,
+          2.813857,
+          1.013176,
+          0.0,
+          0.0,
+          -0.9999965,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.78039216,
+          0.41176471,
+          0.28627451
+        ],
+        "MeshId": "rbxassetid://12758639526"
+      }
+    },
+    {
+      "Name": "03_bench_Cube.004",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          0.523114,
+          0.119902,
+          5.995045
+        ],
+        "CFrame": [
+          0.0,
+          1.919204,
+          0.455559,
+          0.0,
+          0.0,
+          -0.9999965,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.78039216,
+          0.41176471,
+          0.28627451
+        ],
+        "MeshId": "rbxassetid://12758639260"
+      }
+    },
+    {
+      "Name": "04_bench_Cube.001",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          2.897618,
+          2.897619,
+          6.279043
+        ],
+        "CFrame": [
+          0.0,
+          3.141494,
+          0.164299,
+          0.0,
+          0.0,
+          -0.9999965,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.44313725,
+          0.45098039,
+          0.50980392
+        ],
+        "MeshId": "rbxassetid://12758638676"
+      }
+    },
+    {
+      "Name": "05_bench_Cube.011",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          2.896496,
+          1.859879,
+          6.236261
+        ],
+        "CFrame": [
+          0.0,
+          1.049941,
+          -0.082039,
+          0.0,
+          0.0,
+          -0.9999965,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.44313725,
+          0.45098039,
+          0.50980392
+        ],
+        "MeshId": "rbxassetid://12758640224"
+      }
+    },
+    {
+      "Name": "06_bench_Cube.016",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          2.297545,
+          0.191242,
+          6.14412
+        ],
+        "CFrame": [
+          0.0,
+          1.379653,
+          -0.038094,
+          0.0,
+          0.0,
+          -0.9999965,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.44313725,
+          0.45098039,
+          0.50980392
+        ],
+        "MeshId": "rbxassetid://12758640732"
+      }
+    },
+    {
+      "Name": "07_bench_Cube.015",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          3.062138,
+          0.119902,
+          6.359412
+        ],
+        "CFrame": [
+          0.0,
+          0.059951,
+          -0.082039,
+          0.0,
+          0.0,
+          -0.9999965,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.44313725,
+          0.45098039,
+          0.50980392
+        ],
+        "MeshId": "rbxassetid://12758640438"
+      }
+    },
+    {
+      "Name": "08_bench_Cube.003",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          0.523114,
+          0.119902,
+          5.995045
+        ],
+        "CFrame": [
+          0.0,
+          1.919204,
+          -0.171883,
+          0.0,
+          0.0,
+          -0.9999965,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.70196078,
+          0.36862745,
+          0.25882353
+        ],
+        "MeshId": "rbxassetid://12758639068"
+      }
+    },
+    {
+      "Name": "09_bench_Cube.002",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          0.523114,
+          0.119902,
+          5.995045
+        ],
+        "CFrame": [
+          0.0,
+          1.919204,
+          -0.799812,
+          0.0,
+          0.0,
+          -0.9999965,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.70196078,
+          0.36862745,
+          0.25882353
+        ],
+        "MeshId": "rbxassetid://12758638825"
+      }
+    },
+    {
+      "Name": "10_bench_Cube.007",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          0.240534,
+          0.536626,
+          5.995045
+        ],
+        "CFrame": [
+          0.0,
+          4.033461,
+          1.311027,
+          0.0,
+          0.0,
+          -0.9999965,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.78039216,
+          0.41176471,
+          0.28627451
+        ],
+        "MeshId": "rbxassetid://12758640044"
+      }
+    }
+  ]
+}

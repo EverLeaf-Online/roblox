@@ -454,14 +454,24 @@ local function placeDressingPrefab(parent, prefabName, position, yaw, targetLong
         -- Large scenery is physical, but imported mesh hulls are not trusted for
         -- gameplay collision. Use one predictable shrunken box per solid prop.
         local collisionScale = nil
-        if prefabName == "MossyRockSet" then
+        if prefabName == "MossyRockSet" or prefabName == "LowPolyRockCluster" then
             collisionScale = Vector3.new(0.72, 0.72, 0.72)
         elseif prefabName == "TreeStump" or prefabName == "TreeStump2" then
             collisionScale = Vector3.new(0.70, 0.82, 0.70)
-        elseif prefabName == "FallenTreeTrunk" or prefabName == "FallenTreeTrunk2" then
+        elseif
+            prefabName == "FallenTreeTrunk"
+            or prefabName == "FallenTreeTrunk2"
+            or prefabName == "LowPolyLog"
+        then
             collisionScale = Vector3.new(0.80, 0.62, 0.76)
         elseif prefabName == "PineRoots" then
             collisionScale = Vector3.new(0.74, 0.46, 0.74)
+        elseif prefabName == "LowPolyTreeRound" or prefabName == "LowPolyTreeCanopy" then
+            collisionScale = Vector3.new(0.22, 0.72, 0.22)
+        elseif prefabName == "LowPolyCrate" or prefabName == "LowPolyBarrel" then
+            collisionScale = Vector3.new(0.82, 0.90, 0.82)
+        elseif prefabName == "LowPolyVillageWell" then
+            collisionScale = Vector3.new(0.72, 0.56, 0.72)
         end
         if collisionScale then
             local collisionParent = if placed:IsA("Model") then placed else parent
@@ -563,8 +573,27 @@ local function placeGroundDetail(parent, position, seed, theme)
 
     local yaw = math.rad((seed * 71 + 19) % 360)
     local scale = 0.72 + ((seed * 17) % 28) / 100
-    local choice = seed % 6
+    local packChoice = seed % 13
 
+    if packChoice == 0 and theme ~= "dry" then
+        if placeDressingPrefab(parent, "LowPolyMushroomCluster", position, yaw, 4.6 * scale) then
+            return
+        end
+    elseif packChoice == 1 then
+        if placeDressingPrefab(parent, "LowPolyBush", position, yaw, 3.8 * scale) then
+            return
+        end
+    elseif packChoice == 2 then
+        if placeDressingPrefab(parent, "LowPolyRockCluster", position, yaw, 7.4 * scale) then
+            return
+        end
+    elseif packChoice == 3 then
+        if placeDressingPrefab(parent, "LowPolyLog", position, yaw, 9.5 * scale) then
+            return
+        end
+    end
+
+    local choice = seed % 6
     if theme == "dry" then
         if choice <= 1 then
             makeDryBranchesDressing(parent, position, yaw, scale)
@@ -611,7 +640,29 @@ local function scatterForestBand(parent, center, radiusX, radiusZ, count, seed, 
 
         if clearOfTravelLanes(position, 8) and clearOfDressingExclusions(position, 7) then
             local height = 21 + ((index * 11 + seed * 5) % 13)
-            placeTree(parent, position, height, math.rad((index * 47 + seed * 37) % 360))
+            local treeYaw = math.rad((index * 47 + seed * 37) % 360)
+            local packTreeChoice = (index + seed) % 6
+            local usedPackTree = false
+            if packTreeChoice == 0 then
+                usedPackTree = placeDressingPrefab(
+                    parent,
+                    "LowPolyTreeRound",
+                    position,
+                    treeYaw,
+                    height
+                ) ~= nil
+            elseif packTreeChoice == 1 then
+                usedPackTree = placeDressingPrefab(
+                    parent,
+                    "LowPolyTreeCanopy",
+                    position,
+                    treeYaw,
+                    height
+                ) ~= nil
+            end
+            if not usedPackTree then
+                placeTree(parent, position, height, treeYaw)
+            end
 
             if index % 2 == 0 then
                 local offsetAngle = angle + math.rad(35 + (index % 5) * 9)
@@ -774,6 +825,37 @@ local function makeWaystone(parent, position, yaw, scale)
 end
 
 local function makeLantern(parent, position, yaw)
+    local lowPolyLantern = placeDressingPrefab(parent, "LowPolyLantern", position, yaw, 9.2)
+    if lowPolyLantern then
+        lowPolyLantern.Name = "WayfarerLantern"
+        local ground = terrainSurfacePosition(position, 0)
+        local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
+        local collisionParent = if lowPolyLantern:IsA("Model") then lowPolyLantern else parent
+        makeCollisionProxy(
+            collisionParent,
+            "LanternCollision",
+            Vector3.new(0.9, 7.6, 0.9),
+            base * CFrame.new(0, 3.8, 0)
+        )
+        local lightAnchor = makePart(
+            collisionParent,
+            "LanternLightAnchor",
+            Vector3.new(0.2, 0.2, 0.2),
+            base * CFrame.new(0, 6.7, 0),
+            Enum.Material.SmoothPlastic,
+            Color3.new(1, 1, 1)
+        )
+        lightAnchor.Transparency = 1
+        lightAnchor.CastShadow = false
+        local light = Instance.new("PointLight")
+        light.Color = Color3.fromRGB(255, 185, 105)
+        light.Brightness = 1.65
+        light.Range = 21
+        light.Shadows = true
+        light.Parent = lightAnchor
+        return lowPolyLantern
+    end
+
     local ground = terrainSurfacePosition(position, 0)
     local model = Instance.new("Model")
     model.Name = "WayfarerLantern"
@@ -864,6 +946,19 @@ local function makeSign(parent, position, yaw, text)
 end
 
 local function makeBench(parent, position, yaw)
+    local lowPolyBench = placeDressingPrefab(parent, "LowPolyBench", position, yaw, 7.8)
+    if lowPolyBench then
+        lowPolyBench.Name = "WayfarerBench"
+        local collisionParent = if lowPolyBench:IsA("Model") then lowPolyBench else parent
+        makeBoundingCollisionProxy(
+            collisionParent,
+            lowPolyBench,
+            "BenchCollision",
+            Vector3.new(0.92, 0.56, 0.82)
+        )
+        return lowPolyBench
+    end
+
     local ground = terrainSurfacePosition(position, 0)
     local model = Instance.new("Model")
     model.Name = "WayfarerBench"
@@ -1358,6 +1453,46 @@ local function makeSupplyStack(parent, position, yaw, scale)
     model.Parent = parent
     local base = CFrame.new(ground) * CFrame.Angles(0, yaw or 0, 0)
     scale = scale or 1
+
+    if
+        EnvironmentPrefabService.Get("LowPolyCrate")
+        and EnvironmentPrefabService.Get("LowPolyBarrel")
+    then
+        for _, spec in
+            {
+                { Offset = Vector3.new(-2.1, 0, 0.0), Yaw = math.rad(-8), Size = 3.4 },
+                { Offset = Vector3.new(1.3, 0, 0.8), Yaw = math.rad(12), Size = 3.0 },
+                { Offset = Vector3.new(-0.4, 2.25, 0.35), Yaw = math.rad(18), Size = 2.7 },
+            }
+        do
+            local crate = EnvironmentPrefabService.Place(
+                "LowPolyCrate",
+                model,
+                base * CFrame.new(spec.Offset * scale) * CFrame.Angles(0, spec.Yaw, 0),
+                prefabScaleForLongest("LowPolyCrate", spec.Size * scale)
+            )
+            if crate then
+                setRenderOnly(crate)
+            end
+        end
+        local barrel = EnvironmentPrefabService.Place(
+            "LowPolyBarrel",
+            model,
+            base * CFrame.new(3.1 * scale, 0, -0.7 * scale),
+            prefabScaleForLongest("LowPolyBarrel", 3.7 * scale)
+        )
+        if barrel then
+            setRenderOnly(barrel)
+        end
+        makeCollisionProxy(
+            model,
+            "SupplyStackCollision",
+            Vector3.new(7.4, 4.4, 5.2) * scale,
+            base * CFrame.new(0.45 * scale, 2.2 * scale, 0.15 * scale)
+        )
+        return model
+    end
+
     local crateColor = Color3.fromRGB(106, 79, 50)
     for index, spec in
         {
@@ -1774,6 +1909,38 @@ end
 
 local function makeLumenWell(parent, name, position, accent)
     local ground = terrainSurfacePosition(position, 0)
+    if EnvironmentPrefabService.Get("LowPolyVillageWell") then
+        local model = Instance.new("Model")
+        model.Name = name
+        model.Parent = parent
+        local base = CFrame.new(ground)
+        local visual = EnvironmentPrefabService.Place(
+            "LowPolyVillageWell",
+            model,
+            base,
+            prefabScaleForLongest("LowPolyVillageWell", 10.8)
+        )
+        if visual then
+            visual.Name = "WellVisual"
+            setRenderOnly(visual)
+            makeSignatureCrystal(
+                model,
+                "WellHeart",
+                base * CFrame.new(0, 2.0, 0),
+                2.8,
+                accent or SIGNATURE.Lumen
+            )
+            makeCollisionProxy(
+                model,
+                "WellCollision",
+                Vector3.new(8.4, 3.2, 8.4),
+                base * CFrame.new(0, 1.6, 0)
+            )
+            return model
+        end
+        model:Destroy()
+    end
+
     local model = Instance.new("Model")
     model.Name = name
     model.Parent = parent

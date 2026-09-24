@@ -1,0 +1,41 @@
+{
+  "ClassName": "Model",
+  "Children": [
+    {
+      "Name": "01_arbusto",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          3.169525,
+          2.205171,
+          3.732748
+        ],
+        "CFrame": [
+          0.0,
+          1.102585,
+          0.0,
+          0.0,
+          0.0,
+          0.9999999,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "Color": [
+          0.35686275,
+          0.60392157,
+          0.29803922
+        ],
+        "MeshId": "rbxassetid://9299837325"
+      }
+    }
+  ]
+}

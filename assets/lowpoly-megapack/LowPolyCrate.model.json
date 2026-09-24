@@ -1,0 +1,293 @@
+{
+  "ClassName": "Model",
+  "Children": [
+    {
+      "Name": "01_Crate2_Cube.010",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          0.770057,
+          3.811579,
+          3.811579
+        ],
+        "CFrame": [
+          1.63623,
+          1.925138,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "Color": [
+          0.78039216,
+          0.41176471,
+          0.28627451
+        ],
+        "MeshId": "rbxassetid://13251801696"
+      }
+    },
+    {
+      "Name": "02_Crate2_Cube.007",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          3.811579,
+          3.811579,
+          0.770056
+        ],
+        "CFrame": [
+          0.0,
+          1.925138,
+          1.63623,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "Color": [
+          0.78039216,
+          0.41176471,
+          0.28627451
+        ],
+        "MeshId": "rbxassetid://13251801141"
+      }
+    },
+    {
+      "Name": "03_Crate2_Cube.012",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          2.813178,
+          3.516474,
+          2.813179
+        ],
+        "CFrame": [
+          0.0,
+          1.925138,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "Color": [
+          0.93333333,
+          0.49019608,
+          0.34509804
+        ],
+        "MeshId": "rbxassetid://13251802049"
+      }
+    },
+    {
+      "Name": "04_Crate2_Cube.006",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          3.700928,
+          1.18669,
+          3.700928
+        ],
+        "CFrame": [
+          0.0,
+          1.925138,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "Color": [
+          0.78039216,
+          0.41176471,
+          0.28627451
+        ],
+        "MeshId": "rbxassetid://13251800933"
+      }
+    },
+    {
+      "Name": "05_Crate2_Cube.011",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          3.813937,
+          2.818487,
+          3.813939
+        ],
+        "CFrame": [
+          0.0,
+          1.925138,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "Color": [
+          0.93333333,
+          0.49019608,
+          0.34509804
+        ],
+        "MeshId": "rbxassetid://13251801905"
+      }
+    },
+    {
+      "Name": "06_Crate2_Cube.005",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          4.175979,
+          3.850277,
+          4.175979
+        ],
+        "CFrame": [
+          0.0,
+          1.925138,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "Color": [
+          0.78039216,
+          0.41176471,
+          0.28627451
+        ],
+        "MeshId": "rbxassetid://13251800719"
+      }
+    },
+    {
+      "Name": "07_Crate2_Cube.008",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          3.811579,
+          3.811579,
+          0.770056
+        ],
+        "CFrame": [
+          0.0,
+          1.925138,
+          -1.63623,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "Color": [
+          0.78039216,
+          0.41176471,
+          0.28627451
+        ],
+        "MeshId": "rbxassetid://13251801314"
+      }
+    },
+    {
+      "Name": "08_Crate2_Cube.009",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          0.770056,
+          3.811579,
+          3.811579
+        ],
+        "CFrame": [
+          -1.63623,
+          1.925138,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "Color": [
+          0.78039216,
+          0.41176471,
+          0.28627451
+        ],
+        "MeshId": "rbxassetid://13251801476"
+      }
+    }
+  ]
+}

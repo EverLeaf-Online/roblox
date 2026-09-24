@@ -1,0 +1,365 @@
+{
+  "ClassName": "Model",
+  "Children": [
+    {
+      "Name": "01_Lantern_Cube.002",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          1.932813,
+          1.071166,
+          1.932813
+        ],
+        "CFrame": [
+          0.0,
+          5.360748,
+          -2.407227,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "Color": [
+          0.44313725,
+          0.45098039,
+          0.50980392
+        ],
+        "MeshId": "rbxassetid://13251777043"
+      }
+    },
+    {
+      "Name": "02_Lantern_Cube.002",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          2.622131,
+          2.622132,
+          2.622132
+        ],
+        "CFrame": [
+          0.0,
+          1.311066,
+          -2.407227,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "Color": [
+          0.44313725,
+          0.45098039,
+          0.50980392
+        ],
+        "MeshId": "rbxassetid://13251777043"
+      }
+    },
+    {
+      "Name": "03_Lantern_Torus.001",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          3.037248,
+          1.924713,
+          2.647962
+        ],
+        "CFrame": [
+          0.0,
+          13.110626,
+          -2.407227,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "Color": [
+          1.0,
+          0.54509804,
+          0.36470588
+        ],
+        "MeshId": "rbxassetid://13251776853"
+      }
+    },
+    {
+      "Name": "04_Lantern_Cube",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          1.879219,
+          11.799589,
+          1.879219
+        ],
+        "CFrame": [
+          0.0,
+          8.521881,
+          -2.407227,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "Color": [
+          0.78039216,
+          0.41176471,
+          0.28627451
+        ],
+        "MeshId": "rbxassetid://13251776320"
+      }
+    },
+    {
+      "Name": "05_Lantern_Cube.002",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          1.932813,
+          1.071166,
+          1.932813
+        ],
+        "CFrame": [
+          0.0,
+          11.047638,
+          -2.407227,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "Color": [
+          0.44313725,
+          0.45098039,
+          0.50980392
+        ],
+        "MeshId": "rbxassetid://13251777043"
+      }
+    },
+    {
+      "Name": "06_Lantern_Cube.001",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          1.470989,
+          1.470988,
+          8.874587
+        ],
+        "CFrame": [
+          0.0,
+          13.110626,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "Color": [
+          0.78039216,
+          0.41176471,
+          0.28627451
+        ],
+        "MeshId": "rbxassetid://13251776600"
+      }
+    },
+    {
+      "Name": "07_Lantern_Cube.003",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          2.212347,
+          1.885876,
+          2.212347
+        ],
+        "CFrame": [
+          0.0,
+          9.503449,
+          2.837158,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "Color": [
+          0.83529412,
+          0.45098039,
+          0.23921569
+        ],
+        "MeshId": "rbxassetid://13251777164"
+      }
+    },
+    {
+      "Name": "08_Lantern_Cube.004",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          2.231344,
+          2.545933,
+          2.231344
+        ],
+        "CFrame": [
+          0.0,
+          9.644928,
+          2.837158,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "Color": [
+          0.44313725,
+          0.45098039,
+          0.50980392
+        ],
+        "MeshId": "rbxassetid://13251777290"
+      }
+    },
+    {
+      "Name": "09_Lantern_Circle.001",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          0.484254,
+          0.775119,
+          0.084736
+        ],
+        "CFrame": [
+          0.018799,
+          11.262726,
+          2.837158,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "Color": [
+          0.61960784,
+          0.63529412,
+          0.71372549
+        ],
+        "MeshId": "rbxassetid://13251777610"
+      }
+    },
+    {
+      "Name": "10_Lantern_Circle",
+      "ClassName": "MeshPart",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": true,
+        "CastShadow": true,
+        "Size": [
+          0.053773,
+          1.540172,
+          0.482687
+        ],
+        "CFrame": [
+          0.0,
+          12.261749,
+          2.837158,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "Color": [
+          0.44313725,
+          0.45098039,
+          0.50980392
+        ],
+        "MeshId": "rbxassetid://13251777473"
+      }
+    }
+  ]
+}

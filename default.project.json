@@ -153,6 +153,12 @@
         }
       }
     },
+    "ServerStorage": {
+      "$className": "ServerStorage",
+      "EverLeafLowPolyPack": {
+        "$path": "assets/lowpoly-megapack"
+      }
+    },
     "ServerScriptService": {
       "Server": {
         "$path": "src/server"
